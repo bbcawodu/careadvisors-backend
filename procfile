@@ -1,0 +1,1 @@
+web: gunicorn picproject.wsgi --log-file -

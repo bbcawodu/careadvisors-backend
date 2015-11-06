@@ -1,0 +1,77 @@
+<!--
+This template is used by the assessment page.
+It loads the CSS from directly from our server.
+ -->
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+      <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <title>{{ title }}</title>
+            <link rel="stylesheet" type="text/css" href="/static/css/main.css" media="all" />
+      </head>
+      <body class="oneColElsCtr">
+            <div class="container assesstable">
+                  <b>Health Risk Assessment<br/><hr/></b>
+                  {% if form_one %}
+                        <h1>Assessment: Part 1</h1>
+                        {% if form_one.errors %}
+                              <p style="color: red;">
+                                    Please complete all fields{{ form_one.errors|pluralize }} below.
+                              </p><br/>
+                        {% endif %}
+                        <form name='assessmentone' action='' method=post>
+                              <table border="1" class = 'center'>
+                                    <tr>
+                                    <td> <b>Do you have heart disease?</b> </td>
+                                    <td>{{ form_one.has_heartdisease }}</td>
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>Do you have some form of mental illness?</b> </td>
+                                    <td>{{ form_one.has_mentalillness }}</td>
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>Do you have some form of disability?</b> </td>
+                                    <td>{{ form_one.has_disability}}</td>
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>Are you Obese?</b> </td>
+                                    <td>{{ form_one.has_obesity }}</td>
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>Do you smoke?</b> </td>
+                                    <td>{{ form_one.does_smoke }}</td>
+                                    </tr>
+                              </table>
+                              <br/>
+
+                              <table border="1" class = 'center'>
+                                    <tr>
+                                    <td> <b>Are you employed?</b> </td>
+                                    <td>{{ form_one.is_employed }}</td>
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>Do you have some form of health insurance?</b> </td>
+                                    <td>{{ form_one.has_insurance }}</td>
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>Do you have a primary physician?</b> </td>
+                                    <td>{{ form_one.has_primary_doctor}}</td>
+                                    </tr>
+                              </table>
+                              <input type=hidden name='part_two_questions' value="{{ form_one.part_two_questions }}">
+                              <br/><br/><hr/>
+                              {% csrf_token %}
+                              <button type=submit>Submit!</button>
+                        </form>
+                  {% endif %}
+            </div>
+      </body>
+</html>
