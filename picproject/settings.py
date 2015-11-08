@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'picmodels',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -115,7 +116,7 @@ and convert them to something Django can understand. dj-database-url must be in 
 """
 # Parse database configuration from $DATABASE_URL
 import dj_database_url
-DATABASES['default'] =  dj_database_url.config()
+DATABASES['default'] =  dj_database_url.config(default = 'postgres://qppbxjjhsjlhtg:hh2dLXQrk56VilWaKJpXaYsFqB@ec2-54-227-253-238.compute-1.amazonaws.com:5432/dacdbvq1mhlsgf')
 """"""
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
