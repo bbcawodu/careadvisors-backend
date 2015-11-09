@@ -33,15 +33,8 @@ urlpatterns = [
     # url(r'^admin/', include(admin.site.urls)),
     # urlconfig for homepage
     #url(r'^$', my_homepage_view),
+    
     url(r"^$", views.index),
-    url(r'^hello/$', views.hello),
-    url(r'^time/$', views.current_datetime),
-    #any numbuer of digits for plus argument
-    #url(r'^time/plus/(\d+)/$', hours_ahead),
-    #only 1 or 2 digits for plus argument
-    url(r'^time/plus/(\d{1,2})/$', views.hours_ahead),
-    url(r'^search-form/$', views.search_form),
-    url(r'^search/$', views.search),
     url(r'^registration/$', views.registration),
     url(r'^memberlist/$', views.memberlist),
     url(r"^riskassessment/$", views.risk_assessment),

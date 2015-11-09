@@ -1,3 +1,9 @@
+"""
+Defines views that are mapped to url configurations
+"""
+
+
+
 from django.template.loader import get_template
 from django.template import Context
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -9,45 +15,15 @@ from picproject.forms import AssessmentFormOne, AssessmentFormTwo, UserCreateFor
 from picmodels.models import PICUser
 import datetime
 
-def hello(request):
-    return HttpResponse("Hello world")
 
-def current_datetime(request):
-    now = datetime.datetime.now()
-    t = get_template('current_datetime.html')
-    html = t.render(Context({'current_date': now}))
-    return HttpResponse(html)
 
-def hours_ahead(request, offset):
-    try:
-        offset = int(offset)
-    except ValueError:
-        raise Http404()
-    dt = datetime.datetime.now() + datetime.timedelta(hours=offset)
-    html = "<html><body>In %s hour(s), it will be %s.</body></html>" % (offset, dt)
-    return HttpResponse(html)
-
-def search(request):
-    if 'q' in request.GET:
-        message = 'You searched for: %r' % request.GET['q']
-    else:
-        message = 'You submitted an empty form.'
-    return HttpResponse(message)
-
-def search_form(request):
-    return render(request, 'search_form.html')
-
+#defines view for home page
 def index(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            do_something_with(form.cleaned_data)
-            return redirect("create_user_success")
-    else:
-        form = UserCreationForm()
+    return render(request, "home_page.html")
 
-    return render_to_response("signup/form.html", {'form': form})
 
+
+#defines view for registration page
 def registration(request):
     if request.method == 'POST':
         form_data = request.POST.copy()
@@ -60,10 +36,16 @@ def registration(request):
         form = UserCreateForm()
     return render(request, "registration.html", {'form': form})
 
+
+
+#defines view for member list display page
 def memberlist(request):
     all_members = PICUser.objects.all()
     return render(request, "member_list.html", {'member_list': all_members})
 
+
+
+#defines view for part 1 of risk assessment page
 def risk_assessment(request):
     if request.method == 'POST':
         post_data = request.POST
@@ -76,6 +58,9 @@ def risk_assessment(request):
         form_one = AssessmentFormOne()
     return render(request, 'assessment.html', {'form_one': form_one})
 
+
+
+#defines view for part 2 of risk assessment page
 def risk_assessment_2(request):
     form_data = request.session.get('form_data')
     if form_data:

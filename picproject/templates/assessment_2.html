@@ -1,5 +1,5 @@
 <!--
-This template is used by the assessment page.
+This template is used by the risk_assessment_2 view.
 It loads the CSS from directly from our server.
  -->
 
@@ -8,22 +8,41 @@ It loads the CSS from directly from our server.
 <html xmlns="http://www.w3.org/1999/xhtml">
       <head>
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-            <title>Health Risk Assessment: Part 2</title>
+            <title>Health Risk Assessment</title>
             <link rel="stylesheet" type="text/css" href="/static/css/main.css" media="all" />
       </head>
       <body class="oneColElsCtr">
             <div class="container assesstable">
-                  <b>Health Risk Assessment: Part 2<br/><hr/></b>
+                  <b>Health Risk Assessment<br/><hr/></b>
                   {% if form_one %}
-                        <h1>Assessment: Part 2</h1>
-                        {% if form_one.errors %}
-                              <p style="color: red;">
-                                    {% for error in form_one.errors %}
-                                          <li><strong>{{ error|escape }}</strong></li>
-                                    {% endfor %}
-                                    Please complete all fields{{ form_one.errors|pluralize }} below.
-                              </p><br/>
+                        <h1>Health Risk Assessment: Part 2</h1>
+                        <p style="color: red;">
+                        {% if form_one.heartdisease_over_10.errors %}
+                              {% for error in form_one.heartdisease_over_10.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
                         {% endif %}
+                        {% if form_one.has_history_of_heartdisease.errors %}
+                              {% for error in form_one.has_history_of_heartdisease.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.mental_illness_over_1.errors %}
+                              {% for error in form_one.mental_illness_over_1.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.has_history_of_mentalillness.errors %}
+                              {% for error in form_one.has_history_of_mentalillness.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.smoke_atleast_a_pack_a_day.errors %}
+                              {% for error in form_one.smoke_atleast_a_pack_a_day.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        </p>
                         <form name='assessmentone' action='' method=post>
                               <table border="1" class = 'center'>
                                     {% if form_one.heartdisease_over_10 %}

@@ -1,5 +1,5 @@
 <!--
-This template is used by the assessment page.
+This template is used by the risk_assessment view.
 It loads the CSS from directly from our server.
  -->
 
@@ -15,12 +15,49 @@ It loads the CSS from directly from our server.
             <div class="container assesstable">
                   <b>Health Risk Assessment<br/><hr/></b>
                   {% if form_one %}
-                        <h1>Assessment: Part 1</h1>
-                        {% if form_one.errors %}
-                              <p style="color: red;">
-                                    Please complete all fields{{ form_one.errors|pluralize }} below.
-                              </p><br/>
+                        <h1>Health Risk Assessment: Part 1</h1>
+                        <p style="color: red;">
+                        {% if form_one.has_heartdisease.errors %}
+                              {% for error in form_one.has_heartdisease.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
                         {% endif %}
+                        {% if form_one.has_mentalillness.errors %}
+                              {% for error in form_one.has_mentalillness.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.has_disability.errors %}
+                              {% for error in form_one.has_disability.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.has_obesity.errors %}
+                              {% for error in form_one.has_obesity.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.does_smoke.errors %}
+                              {% for error in form_one.does_smoke.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.is_employed.errors %}
+                              {% for error in form_one.is_employed.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.has_insurance.errors %}
+                              {% for error in form_one.has_insurance.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.has_primary_doctor.errors %}
+                              {% for error in form_one.has_primary_doctor.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        </p>
                         <form name='assessmentone' action='' method=post>
                               <table border="1" class = 'center'>
                                     <tr>
