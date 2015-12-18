@@ -431,7 +431,7 @@ def appointment_submission_handler(request):
         response['Access-Control-Allow-Methods'] = "POST, OPTIONS"
         response['Access-Control-Allow-Headers'] = "X-Requested-With"
         response['Access-Control-Max-Age'] = "1800"
-        #return response
+        return response
 
     # if a GET request is made, add error message to response data
     else:
