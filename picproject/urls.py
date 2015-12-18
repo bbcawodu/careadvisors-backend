@@ -41,4 +41,5 @@ urlpatterns = [
     url(r"^riskassessment/next/$", views.risk_assessment_2),
     url(r"^submitappointment/$", views.appointment_submission_handler),
     url(r"^viewappointments/$", views.appointment_viewing_handler),
+    url(r"^submitmetrics/$", views.metrics_submission_handler),
 ]

@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="1990ad25-4822-4da6-815b-03692f3687bb" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picproject/urls.py" afterPath="$PROJECT_DIR$/picproject/urls.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picproject/views.py" afterPath="$PROJECT_DIR$/picproject/views.py" />
     </list>
     <ignored path="picproject.iws" />
@@ -39,7 +40,7 @@
         <entry file="file://$PROJECT_DIR$/picmodels/models.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="48" column="4" selection-start-line="48" selection-start-column="4" selection-end-line="48" selection-end-column="4" />
+              <caret line="94" column="24" selection-start-line="94" selection-start-column="24" selection-end-line="94" selection-end-column="24" />
               <folding>
                 <element signature="e#66#94#0" expanded="true" />
               </folding>
@@ -51,7 +52,7 @@
         <entry file="file://$PROJECT_DIR$/picproject/urls.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="38" column="27" selection-start-line="38" selection-start-column="27" selection-end-line="38" selection-end-column="27" />
+              <caret line="27" column="38" selection-start-line="27" selection-start-column="38" selection-end-line="27" selection-end-column="38" />
               <folding>
                 <element signature="e#619#670#0" expanded="true" />
               </folding>
@@ -62,10 +63,11 @@
       <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/picproject/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.53846157">
-              <caret line="94" column="0" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="12" />
+            <state vertical-scroll-proportion="0.8557692">
+              <caret line="440" column="35" selection-start-line="440" selection-start-column="35" selection-end-line="440" selection-end-column="35" />
               <folding>
                 <element signature="e#61#108#0" expanded="true" />
+                <element signature="e#25450#47097#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -122,10 +124,10 @@
         <option value="$USER_HOME$/Documents/PIC Work/Schedule_Backend_Test.py" />
         <option value="$PROJECT_DIR$/picproject/models.py" />
         <option value="$PROJECT_DIR$/picproject/settings.py" />
-        <option value="$PROJECT_DIR$/picproject/urls.py" />
         <option value="$PROJECT_DIR$/picmodels/models.py" />
         <option value="$PROJECT_DIR$/picproject/templates/appointment_list.html" />
         <option value="$PROJECT_DIR$/requirements.txt" />
+        <option value="$PROJECT_DIR$/picproject/urls.py" />
         <option value="$PROJECT_DIR$/picproject/views.py" />
       </list>
     </option>
@@ -137,7 +139,7 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="-1" />
-    <option name="width" value="1441" />
+    <option name="width" value="1027" />
     <option name="height" value="893" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -577,10 +579,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="0" width="1441" height="893" extended-state="6" />
+    <frame x="-1" y="0" width="1027" height="893" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18870622" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2680203" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298969" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -613,7 +615,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="1" />
+      <option name="time" value="2" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -697,6 +699,7 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#61#108#0" expanded="true" />
+            <element signature="e#25450#47097#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -749,6 +752,7 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#61#108#0" expanded="true" />
+            <element signature="e#25450#47097#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -783,6 +787,7 @@
           <caret line="21" column="36" selection-start-line="21" selection-start-column="36" selection-end-line="21" selection-end-column="36" />
           <folding>
             <element signature="e#61#108#0" expanded="true" />
+            <element signature="e#25450#47097#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -983,13 +988,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/picproject/urls.py">
+    <entry file="file://$PROJECT_DIR$/picproject/templates/appointment_list.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="38" column="27" selection-start-line="38" selection-start-column="27" selection-end-line="38" selection-end-column="27" />
-          <folding>
-            <element signature="e#619#670#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="-5.1666665">
+          <caret line="20" column="74" selection-start-line="20" selection-start-column="74" selection-end-line="20" selection-end-column="74" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1001,30 +1004,33 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/picproject/templates/appointment_list.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-5.1666665">
-          <caret line="20" column="74" selection-start-line="20" selection-start-column="74" selection-end-line="20" selection-end-column="74" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/picmodels/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="48" column="4" selection-start-line="48" selection-start-column="4" selection-end-line="48" selection-end-column="4" />
+          <caret line="94" column="24" selection-start-line="94" selection-start-column="24" selection-end-line="94" selection-end-column="24" />
           <folding>
             <element signature="e#66#94#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/picproject/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="27" column="38" selection-start-line="27" selection-start-column="38" selection-end-line="27" selection-end-column="38" />
+          <folding>
+            <element signature="e#619#670#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/picproject/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.53846157">
-          <caret line="94" column="0" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="12" />
+        <state vertical-scroll-proportion="0.8557692">
+          <caret line="440" column="35" selection-start-line="440" selection-start-column="35" selection-end-line="440" selection-end-column="35" />
           <folding>
             <element signature="e#61#108#0" expanded="true" />
+            <element signature="e#25450#47097#0" expanded="false" />
           </folding>
         </state>
       </provider>
