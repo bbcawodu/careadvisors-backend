@@ -38,5 +38,7 @@ urlpatterns = [
     url(r'^registration/$', views.registration),
     url(r'^memberlist/$', views.memberlist),
     url(r"^riskassessment/$", views.risk_assessment),
-    url(r"^riskassessment/next/$", views.risk_assessment_2)
+    url(r"^riskassessment/next/$", views.risk_assessment_2),
+    url(r"^submitappointment/$", views.appointment_submission_handler),
+    url(r"^viewappointments/$", views.appointment_viewing_handler),
 ]
