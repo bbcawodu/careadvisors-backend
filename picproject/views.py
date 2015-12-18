@@ -92,6 +92,7 @@ def risk_assessment_2(request):
 
 
 # defines view for saving scheduled appointments to the database
+@csrf_exempt
 def appointment_submission_handler(request):
     #initialize dictionary for response data, including parsing errors
     response_raw_data = {'status': {"Error Code": 0, "Version": 1.0}}
