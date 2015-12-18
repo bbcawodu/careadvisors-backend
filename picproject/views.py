@@ -399,6 +399,14 @@ def appointment_submission_handler(request):
             response_raw_data["status"]["Error Code"] = 1
             response_raw_data["status"]["Errors"] = post_errors
 
+            for message in post_errors:
+                print message
+            sys.stdout.flush()
+
+        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+        response['Access-Control-Allow-Origin'] = "*"
+        return response
+
             # Tests for Appointment instance creation
             # response_raw_data["Appointment Instance"] = {"Consumer Name": new_appointment.consumer_name}
             # response_raw_data["Appointment Instance"]['Consumer Email'] = new_appointment.consumer_email
@@ -417,21 +425,26 @@ def appointment_submission_handler(request):
             # response_raw_data["Appointment Instance"]['Point of Contact Type'] = new_appointment.appointment_poc_type
             # response_raw_data["Post Data"] = post_data
 
+    elif request.method == "OPTIONS":
+        response = HttpResponse("")
+        response['Access-Control-Allow-Origin'] = "*"
+        response['Access-Control-Allow-Methods'] = "POST, OPTIONS"
+        response['Access-Control-Allow-Headers'] = "X-Requested-With"
+        response['Access-Control-Max-Age'] = "1800"
+        #return response
+
     # if a GET request is made, add error message to response data
     else:
         response_raw_data["status"]["Error Code"] = 1
         post_errors.append("Request needs POST data")
         response_raw_data["status"]["Errors"] = post_errors
-
-    # if there are parsing errors, print them to stdout so they are logged in Heroku
-    if len(post_errors) > 0:
         for message in post_errors:
             print message
-    sys.stdout.flush()
+        sys.stdout.flush()
 
-    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json", mimetype='application/json')
-    response['Access-Control-Allow-Origin'] = "*"
-    return response
+        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+        response['Access-Control-Allow-Origin'] = "*"
+        return response
 
 
 # defines view for member list display page
