@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+      <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <title>Appointment List</title>
+            <link rel="stylesheet" type="text/css" href="/static/css/main.css" media="all" />
+      </head>
+      <body class="oneColElsCtr">
+            <div class="container assesstable">
+                  <b>Appointment List<br/><hr/></b>
+                  <h1>Current List of Appointments</h1></br>
+                  {% if appointment_list %}
+                        <table border="1" class = 'center'>
+                              <tr>
+                              <td> <b>Name</b> </td>
+                              <td> <b>Email</b> </td>
+                              <td> <b>Phone Number</b> </td>
+                              <td> <b>Preferred Language</b> </td>
+                              <td> <b>Best Contact Time</b> </td>
+                              <td> <b>Location</b> </td>
+                              <td> <b>Location Address and Phone</b> </td>
+                              <td> <b>Date and Time</b> </td>
+                              <td> <b>Point of Contact Info</b> </td>
+                              </tr>
+                              {% for appointment in appointment_list %}
+                                    <tr>
+                                    <td>{{ appointment.consumer.first_name }} {{ appointment.consumer.last_name }}</td>
+                                    <td>{{ appointment.consumer.email }}</td>
+                                    <td>{{ appointment.consumer.phone }} </td>
+                                    <td>{{ appointment.consumer.preferred_language }}</td>
+                                    <td>{{ appointment.consumer.best_contact_time }}</td>
+                                    <td>{{ appointment.location.name }}</td>
+                                    <td>{{ appointment.location.address }}<br>{{ appointment.location.location_phone }}<br></td>
+                                    <td>{{ appointment.date }}<br>{{ appointment.start_time }}-{{ appointment.end_time }}</td>
+                                    <td>{{ appointment.poc.name }}<br>{{ appointment.poc.email }}<br>{{ appointment.poc.type }}</td>
+                                    </tr>
+                              {% endfor %}
+                        </table>
+                        <br>
+                  {% else %}
+                        No Members
+                  {% endif %}
+            </div>
+      </body>
+</html>
