@@ -94,6 +94,7 @@ def risk_assessment_2(request):
 # defines view for saving scheduled appointments to the database
 @csrf_exempt
 def appointment_submission_handler(request):
+    #initialize dictionary for response data, including parsing errors
     response_raw_data = {'status': {"Error Code": 0, "Version": 1.0}}
     post_errors = []
 
@@ -101,6 +102,7 @@ def appointment_submission_handler(request):
         post_data = request.body
         post_json = json.loads(post_data)
 
+        #Code to parse POSTed json request
         if "Email" not in post_json:
             post_errors.append("\"Email\" key not found in root dictionary")
         elif post_json["Email"] == "":
@@ -363,6 +365,8 @@ def appointment_submission_handler(request):
                 else:
                     request_poc_type = str(appointment_poc_info["Type"])
 
+        # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
+        # create and save database entry for appointment
         if len(post_errors) == 0:
             consumer_request_values = {"first_name": request_consumer_first_name,
                                        "last_name": request_consumer_last_name,
@@ -389,6 +393,8 @@ def appointment_submission_handler(request):
                                           start_time=request_appointment_start_time,
                                           end_time=request_appointment_end_time)
             new_appointment.save()
+
+        # add parsing errors to response dictionary
         else:
             response_raw_data["status"]["Error Code"] = 1
             response_raw_data["status"]["Errors"] = post_errors
@@ -410,17 +416,21 @@ def appointment_submission_handler(request):
             # response_raw_data["Appointment Instance"]['Point of Contact Email'] = new_appointment.appointment_poc_email
             # response_raw_data["Appointment Instance"]['Point of Contact Type'] = new_appointment.appointment_poc_type
             # response_raw_data["Post Data"] = post_data
+
+    # if a GET request is made, add error message to response data
     else:
         response_raw_data["status"]["Error Code"] = 1
         post_errors.append("Request needs POST data")
         response_raw_data["status"]["Errors"] = post_errors
 
+    # if there are parsing errors, print them to stdout so they are logged in Heroku
     if len(post_errors) > 0:
         for message in post_errors:
             print message
     sys.stdout.flush()
 
-    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json", mimetype='application/json')
+    response['Access-Control-Allow-Origin'] = "*"
     return response
 
 
