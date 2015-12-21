@@ -62,11 +62,11 @@
       <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/picproject/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.66346157">
-              <caret line="178" column="61" selection-start-line="178" selection-start-column="61" selection-end-line="178" selection-end-column="61" />
+            <state vertical-scroll-proportion="0.5480769">
+              <caret line="104" column="8" selection-start-line="104" selection-start-column="8" selection-end-line="104" selection-end-column="40" />
               <folding>
                 <element signature="e#61#108#0" expanded="true" />
-                <element signature="e#26078#38136#0" expanded="false" />
+                <element signature="e#26076#38134#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -150,7 +150,8 @@
     <detection-done>true</detection-done>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="width" value="1027" />
+    <option name="x" value="34" />
+    <option name="width" value="1353" />
     <option name="height" value="893" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -518,10 +519,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1027" height="893" extended-state="0" />
+    <frame x="34" y="0" width="1353" height="893" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28324872" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21281464" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298969" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -630,7 +631,7 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#61#108#0" expanded="true" />
-            <element signature="e#26078#38136#0" expanded="false" />
+            <element signature="e#26076#38134#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -683,7 +684,7 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#61#108#0" expanded="true" />
-            <element signature="e#26078#38136#0" expanded="false" />
+            <element signature="e#26076#38134#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -718,7 +719,7 @@
           <caret line="21" column="36" selection-start-line="21" selection-start-column="36" selection-end-line="21" selection-end-column="36" />
           <folding>
             <element signature="e#61#108#0" expanded="true" />
-            <element signature="e#26078#38136#0" expanded="false" />
+            <element signature="e#26076#38134#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -965,11 +966,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/picproject/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.66346157">
-          <caret line="178" column="61" selection-start-line="178" selection-start-column="61" selection-end-line="178" selection-end-column="61" />
+        <state vertical-scroll-proportion="0.5480769">
+          <caret line="104" column="8" selection-start-line="104" selection-start-column="8" selection-end-line="104" selection-end-column="40" />
           <folding>
             <element signature="e#61#108#0" expanded="true" />
-            <element signature="e#26078#38136#0" expanded="false" />
+            <element signature="e#26076#38134#0" expanded="false" />
           </folding>
         </state>
       </provider>
