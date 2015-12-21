@@ -3,10 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="1990ad25-4822-4da6-815b-03692f3687bb" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picmodels/admin.py" afterPath="$PROJECT_DIR$/picmodels/admin.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picproject/settings.py" afterPath="$PROJECT_DIR$/picproject/settings.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picproject/urls.py" afterPath="$PROJECT_DIR$/picproject/urls.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picproject/views.py" afterPath="$PROJECT_DIR$/picproject/views.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picmodels/models.py" afterPath="$PROJECT_DIR$/picmodels/models.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picproject/templates/appointment_list.html" afterPath="$PROJECT_DIR$/picproject/templates/appointment_list.html" />
     </list>
     <ignored path="picproject.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -38,11 +36,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="models.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/picmodels/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="94" column="24" selection-start-line="94" selection-start-column="24" selection-end-line="94" selection-end-column="24" />
+            <state vertical-scroll-proportion="0.8942308">
+              <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
               <folding>
                 <element signature="e#66#94#0" expanded="true" />
               </folding>
@@ -97,17 +95,17 @@
       <file leaf-file-name="appointment_list.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/picproject/templates/appointment_list.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-11.291667">
-              <caret line="35" column="41" selection-start-line="35" selection-start-column="41" selection-end-line="35" selection-end-column="41" />
+            <state vertical-scroll-proportion="-11.916667">
+              <caret line="36" column="42" selection-start-line="36" selection-start-column="42" selection-end-line="36" selection-end-column="42" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="settings.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="settings.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/picproject/settings.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.625">
+            <state vertical-scroll-proportion="0.0">
               <caret line="45" column="61" selection-start-line="45" selection-start-column="61" selection-end-line="45" selection-end-column="61" />
               <folding />
             </state>
@@ -146,14 +144,14 @@
         <option value="$PROJECT_DIR$/picproject/static/javascript/scripts.js" />
         <option value="$USER_HOME$/Documents/PIC Work/Schedule_Backend_Test.py" />
         <option value="$PROJECT_DIR$/picproject/models.py" />
-        <option value="$PROJECT_DIR$/picmodels/models.py" />
         <option value="$PROJECT_DIR$/requirements.txt" />
         <option value="$PROJECT_DIR$/picproject/django-crossdomainxhr-middleware.py" />
-        <option value="$PROJECT_DIR$/picproject/templates/appointment_list.html" />
         <option value="$PROJECT_DIR$/picproject/views.py" />
         <option value="$PROJECT_DIR$/picproject/urls.py" />
         <option value="$PROJECT_DIR$/picmodels/admin.py" />
         <option value="$PROJECT_DIR$/picproject/settings.py" />
+        <option value="$PROJECT_DIR$/picproject/templates/appointment_list.html" />
+        <option value="$PROJECT_DIR$/picmodels/models.py" />
       </list>
     </option>
   </component>
@@ -938,14 +936,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/picproject/templates/appointment_list.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-11.291667">
-          <caret line="35" column="41" selection-start-line="35" selection-start-column="41" selection-end-line="35" selection-end-column="41" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/picproject/views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -964,16 +954,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/picmodels/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="94" column="24" selection-start-line="94" selection-start-column="24" selection-end-line="94" selection-end-column="24" />
-          <folding>
-            <element signature="e#66#94#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/picmodels/admin.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -986,9 +966,27 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/picproject/settings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.625">
+        <state vertical-scroll-proportion="0.0">
           <caret line="45" column="61" selection-start-line="45" selection-start-column="61" selection-end-line="45" selection-end-column="61" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/picproject/templates/appointment_list.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-11.916667">
+          <caret line="36" column="42" selection-start-line="36" selection-start-column="42" selection-end-line="36" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/picmodels/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.8942308">
+          <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
+          <folding>
+            <element signature="e#66#94#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
