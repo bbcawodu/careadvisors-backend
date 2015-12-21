@@ -166,14 +166,14 @@ def appointment_submission_handler(request):
             request_consumer_best_contact_time = str(post_json["Best Contact Time"])
             response_raw_data["Appointment Instance"]["Contact Time"] = request_consumer_best_contact_time
 
-        if "Appointment Information" not in post_json:
-            post_errors.append("\"Appointment Information\" key not found in root dictionary")
-        elif post_json["Appointment Information"] is None:
-            post_errors.append("Value for \"Appointment Information\" is Null")
-        elif post_json["Appointment Information"] == {}:
-            post_errors.append("Value for \"Appointment Information\" is an empty dictionary")
+        if "Appointment" not in post_json:
+            post_errors.append("\"Appointment\" key not found in root dictionary")
+        elif post_json["Appointment"] is None:
+            post_errors.append("Value for \"Appointment\" is Null")
+        elif post_json["Appointment"] == {}:
+            post_errors.append("Value for \"Appointment\" is an empty dictionary")
         else:
-            appointment_information = post_json["Appointment Information"]
+            appointment_information = post_json["Appointment"]
 
             if "Name" not in appointment_information:
                 post_errors.append("\"Name\" key not found in \"Appointment Information\" dictionary")
