@@ -104,6 +104,7 @@ def appointment_submission_handler(request):
         post_json = request.POST
         # post_json = json.load(post_data)
 
+        response_raw_data["Appointment Instance"] = {}
         #Code to parse POSTed json request
         if "Email" not in post_json:
             post_errors.append("\"Email\" key not found in root dictionary")
@@ -113,6 +114,7 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"Email\" is Null")
         else:
             request_consumer_email = str(post_json["Email"])
+            response_raw_data["Appointment Instance"]["Email"] = request_consumer_email
 
         if "First Name" not in post_json:
             post_errors.append("\"First Name\" key not found in root dictionary")
@@ -122,6 +124,7 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"First Name\" is Null")
         else:
             request_consumer_first_name = str(post_json["First Name"])
+            response_raw_data["Appointment Instance"]["First Name"] = request_consumer_first_name
 
         if "Last Name" not in post_json:
             post_errors.append("\"Last Name\" key not found in root dictionary")
@@ -131,6 +134,7 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"Last Name\" is Null")
         else:
             request_consumer_last_name = str(post_json["Last Name"])
+            response_raw_data["Appointment Instance"]["Last Name"] = request_consumer_last_name
 
         if "Phone Number" not in post_json:
             post_errors.append("\"Phone Number\" key not found in root dictionary")
@@ -140,6 +144,7 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"Phone Number\" is Null")
         else:
             request_consumer_phone = str(post_json["Phone Number"])
+            response_raw_data["Appointment Instance"]["Phone"] = request_consumer_phone
 
         if "Preferred Language" not in post_json:
             post_errors.append("\"Preferred Language\" key not found in root dictionary")
@@ -149,6 +154,7 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"Preferred Language\" is Null")
         else:
             request_consumer_preferred_language = str(post_json["Preferred Language"])
+            response_raw_data["Appointment Instance"]["Pref Language"] = request_consumer_preferred_language
 
         if "Best Contact Time" not in post_json:
             post_errors.append("\"Best Contact Time\" key not found in root dictionary")
@@ -158,6 +164,7 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"Best Contact Time\" is Null")
         else:
             request_consumer_best_contact_time = str(post_json["Best Contact Time"])
+            response_raw_data["Appointment Instance"]["Contact Time"] = request_consumer_best_contact_time
 
         if "Appointment Information" not in post_json:
             post_errors.append("\"Appointment Information\" key not found in root dictionary")
