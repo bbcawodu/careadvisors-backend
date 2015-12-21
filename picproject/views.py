@@ -148,8 +148,6 @@ def appointment_submission_handler(request):
 
         if "Preferred Language" not in post_json:
             post_errors.append("\"Preferred Language\" key not found in root dictionary")
-        elif post_json["Preferred Language"] == "":
-            post_errors.append("Value for \"Preferred Language\" is an empty string")
         elif post_json["Preferred Language"] is None:
             post_errors.append("Value for \"Preferred Language\" is Null")
         else:
@@ -158,8 +156,6 @@ def appointment_submission_handler(request):
 
         if "Best Contact Time" not in post_json:
             post_errors.append("\"Best Contact Time\" key not found in root dictionary")
-        elif post_json["Best Contact Time"] == "":
-            post_errors.append("Value for \"Best Contact Time\" is an empty string")
         elif post_json["Best Contact Time"] is None:
             post_errors.append("Value for \"Best Contact Time\" is Null")
         else:
