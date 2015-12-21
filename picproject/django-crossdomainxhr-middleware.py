@@ -22,7 +22,7 @@ class XsSharing(object):
 
         if 'HTTP_ACCESS_CONTROL_REQUEST_METHOD' in request.META:
             response = http.HttpResponse()
-            response['Access-Control-Allow-Origin']  = XS_SHARING_ALLOWED_ORIGINS 
+            response['Access-Control-Allow-Origin'] = XS_SHARING_ALLOWED_ORIGINS
             response['Access-Control-Allow-Methods'] = ",".join( XS_SHARING_ALLOWED_METHODS ) 
             
             return response
@@ -34,7 +34,7 @@ class XsSharing(object):
         if response.has_header('Access-Control-Allow-Origin'):
             return response
 
-        response['Access-Control-Allow-Origin']  = XS_SHARING_ALLOWED_ORIGINS 
+        response['Access-Control-Allow-Origin'] = XS_SHARING_ALLOWED_ORIGINS
         response['Access-Control-Allow-Methods'] = ",".join( XS_SHARING_ALLOWED_METHODS )
 
         return response
