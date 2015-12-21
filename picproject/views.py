@@ -102,7 +102,7 @@ def appointment_submission_handler(request):
         # post_data = request.body
         post_data = request.POST
         # post_json = request.POST
-        post_json = json.loads(post_data)
+        post_json = json.load(post_data)
 
         #Code to parse POSTed json request
         if "Email" not in post_json:
