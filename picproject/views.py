@@ -99,7 +99,8 @@ def appointment_submission_handler(request):
     post_errors = []
 
     if request.method == 'POST':
-        post_data = request.body
+        # post_data = request.body
+        post_data = request.POST
         post_json = json.loads(post_data)
 
         #Code to parse POSTed json request
