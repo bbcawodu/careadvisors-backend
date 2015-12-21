@@ -464,7 +464,7 @@ def metrics_submission_handler(request):
     response_raw_data = {'status': {"Error Code": 0, "Version": 1.0}}
     post_errors = []
 
-    if request.method == 'POST':
+    if request.method == 'POST' or request.is_ajax():
         post_data = request.body
         post_json = json.loads(post_data)
 

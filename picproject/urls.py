@@ -18,7 +18,7 @@ from django.contrib import admin
 from picproject import views
 
 #enables admin
-# admin.autodiscover()
+admin.autodiscover()
 
 urlpatterns = [
 	# Examples:
@@ -42,4 +42,5 @@ urlpatterns = [
     url(r"^submitappointment/$", views.appointment_submission_handler),
     url(r"^viewappointments/$", views.appointment_viewing_handler),
     url(r"^submitmetrics/$", views.metrics_submission_handler),
+    url(r'^admin/', include(admin.site.urls)),
 ]
