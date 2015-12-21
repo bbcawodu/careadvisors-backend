@@ -100,8 +100,9 @@ def appointment_submission_handler(request):
 
     if request.method == 'POST':
         # post_data = request.body
-        post_json = request.POST
-        # post_json = json.loads(post_data)
+        post_data = request.POST
+        # post_json = request.POST
+        post_json = json.loads(post_data)
 
         #Code to parse POSTed json request
         if "Email" not in post_json:
