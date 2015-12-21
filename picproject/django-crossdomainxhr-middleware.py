@@ -5,13 +5,9 @@ from django.utils.cache import patch_vary_headers
 
 from django import http
 
-try:
-    import settings 
-    XS_SHARING_ALLOWED_ORIGINS = settings.XS_SHARING_ALLOWED_ORIGINS
-    XS_SHARING_ALLOWED_METHODS = settings.XS_SHARING_ALLOWED_METHODS
-except:
-    XS_SHARING_ALLOWED_ORIGINS = '*'
-    XS_SHARING_ALLOWED_METHODS = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
+
+XS_SHARING_ALLOWED_ORIGINS = '*'
+XS_SHARING_ALLOWED_METHODS = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
 
 
 class XsSharing(object):

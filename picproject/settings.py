@@ -40,7 +40,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django-crossdomainxhr-middleware.XsSharing',
+    'picproject.django-crossdomainxhr-middleware.XsSharing',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
