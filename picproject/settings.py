@@ -114,6 +114,7 @@ import dj_database_url
 
 DATABASES['default'] = dj_database_url.config(
     default='postgres://ngklalieajpptd:Day5uAny5L-cI0OB3L2nUmfHhh@ec2-54-197-224-173.compute-1.amazonaws.com:5432/dehaud8hlr9iqq')
+# DATABASES['default'] = dj_database_url.config()
 """"""
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()

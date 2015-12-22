@@ -10,7 +10,7 @@ from django import forms
 from django.db import models, IntegrityError
 from django.contrib.auth.models import User
 from picproject.forms import AssessmentFormOne, AssessmentFormTwo, UserCreateForm
-from picmodels.models import PICUser, PICAppointment, Appointment, Location, PICConsumer, PICStaff
+from picmodels.models import PICUser, PICAppointment, Appointment, Location, PICConsumer, PICStaff, MetricsSubmission
 import datetime, json
 from django.views.decorators.csrf import csrf_exempt
 import sys
@@ -99,9 +99,7 @@ def appointment_submission_handler(request):
     post_errors = []
 
     if request.method == 'POST' or request.is_ajax():
-        # post_data = request.body
         post_data = request.body
-        # post_json = request.POST
         post_json = json.loads(post_data)
 
         response_raw_data["Appointment Instance"] = {}
@@ -114,7 +112,6 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"Email\" is Null")
         else:
             request_consumer_email = str(post_json["Email"])
-            response_raw_data["Appointment Instance"]["Email"] = request_consumer_email
 
         if "First Name" not in post_json:
             post_errors.append("\"First Name\" key not found in root dictionary")
@@ -124,7 +121,6 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"First Name\" is Null")
         else:
             request_consumer_first_name = str(post_json["First Name"])
-            response_raw_data["Appointment Instance"]["First Name"] = request_consumer_first_name
 
         if "Last Name" not in post_json:
             post_errors.append("\"Last Name\" key not found in root dictionary")
@@ -134,7 +130,6 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"Last Name\" is Null")
         else:
             request_consumer_last_name = str(post_json["Last Name"])
-            response_raw_data["Appointment Instance"]["Last Name"] = request_consumer_last_name
 
         if "Phone Number" not in post_json:
             post_errors.append("\"Phone Number\" key not found in root dictionary")
@@ -144,7 +139,6 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"Phone Number\" is Null")
         else:
             request_consumer_phone = str(post_json["Phone Number"])
-            response_raw_data["Appointment Instance"]["Phone"] = request_consumer_phone
 
         if "Preferred Language" not in post_json:
             post_errors.append("\"Preferred Language\" key not found in root dictionary")
@@ -152,7 +146,6 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"Preferred Language\" is Null")
         else:
             request_consumer_preferred_language = str(post_json["Preferred Language"])
-            response_raw_data["Appointment Instance"]["Pref Language"] = request_consumer_preferred_language
 
         if "Best Contact Time" not in post_json:
             post_errors.append("\"Best Contact Time\" key not found in root dictionary")
@@ -160,7 +153,6 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"Best Contact Time\" is Null")
         else:
             request_consumer_best_contact_time = str(post_json["Best Contact Time"])
-            response_raw_data["Appointment Instance"]["Contact Time"] = request_consumer_best_contact_time
 
         if "Appointment" not in post_json:
             post_errors.append("\"Appointment\" key not found in root dictionary")
@@ -406,29 +398,11 @@ def appointment_submission_handler(request):
 
             for message in post_errors:
                 print message
-            sys.stdout.flush()
+                sys.stdout.flush()
 
         response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
         response['Access-Control-Allow-Origin'] = "*"
         return response
-
-        # Tests for Appointment instance creation
-        # response_raw_data["Appointment Instance"] = {"Consumer Name": new_appointment.consumer_name}
-        # response_raw_data["Appointment Instance"]['Consumer Email'] = new_appointment.consumer_email
-        # response_raw_data["Appointment Instance"]['Consumer Phone'] = new_appointment.consumer_phone
-        # response_raw_data["Appointment Instance"]['Consumer Language'] = new_appointment.consumer_preferred_language
-        # response_raw_data["Appointment Instance"]['Consumer Contact Time'] = new_appointment.consumer_best_contact_time
-        # response_raw_data["Appointment Instance"]['Consumer Email'] = new_appointment.consumer_email
-        # response_raw_data["Appointment Instance"]['Appointment Address'] = new_appointment.appointment_address
-        # response_raw_data["Appointment Instance"]['Appointment Location Name'] = new_appointment.appointment_location_name
-        # response_raw_data["Appointment Instance"]['Appointment Date'] = new_appointment.appointment_date
-        # response_raw_data["Appointment Instance"]['Appointment Phone'] = new_appointment.appointment_location_phone
-        # response_raw_data["Appointment Instance"]['Appointment Start'] = new_appointment.appointment_start_time
-        # response_raw_data["Appointment Instance"]['Appointment End'] = new_appointment.appointment_end_time
-        # response_raw_data["Appointment Instance"]['Point of Contact Name'] = new_appointment.appointment_poc_name
-        # response_raw_data["Appointment Instance"]['Point of Contact Email'] = new_appointment.appointment_poc_email
-        # response_raw_data["Appointment Instance"]['Point of Contact Type'] = new_appointment.appointment_poc_type
-        # response_raw_data["Post Data"] = post_data
 
     elif request.method == "OPTIONS":
         response = HttpResponse("")
@@ -445,7 +419,7 @@ def appointment_submission_handler(request):
         response_raw_data["status"]["Errors"] = post_errors
         for message in post_errors:
             print message
-        sys.stdout.flush()
+            sys.stdout.flush()
 
         response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
         response['Access-Control-Allow-Origin'] = "*"
@@ -469,32 +443,42 @@ def metrics_submission_handler(request):
         post_json = json.loads(post_data)
 
         #Code to parse POSTed json request
-        if "Navigator Email" not in post_json:
-            post_errors.append("\"Navigator Email\" key not found in root dictionary")
-        elif post_json["Navigator Email"] == "":
-            post_errors.append("Value for \"Navigator Email\" is an empty string")
-        elif post_json["Navigator Email"] is None:
-            post_errors.append("Value for \"Navigator Email\" is Null")
+        if "Email" not in post_json:
+            post_errors.append("\"Email\" key not found in root dictionary")
+        elif post_json["Email"] == "":
+            post_errors.append("Value for \"Email\" is an empty string")
+        elif post_json["Email"] is None:
+            post_errors.append("Value for \"Email\" is Null")
         else:
-            rqst_navigator_email = str(post_json["Navigator Email"])
+            rqst_usr_email = str(post_json["Email"])
 
-        if "Navigator First Name" not in post_json:
-            post_errors.append("\"Navigator First Name\" key not found in root dictionary")
-        elif post_json["Navigator First Name"] == "":
-            post_errors.append("Value for \"Navigator First Name\" is an empty string")
-        elif post_json["Navigator First Name"] is None:
-            post_errors.append("Value for \"Navigator First Name\" is Null")
+        if "First Name" not in post_json:
+            post_errors.append("\"First Name\" key not found in root dictionary")
+        elif post_json["First Name"] == "":
+            post_errors.append("Value for \"First Name\" is an empty string")
+        elif post_json["First Name"] is None:
+            post_errors.append("Value for \"First Name\" is Null")
         else:
-            rqst_navigator_f_name = str(post_json["Navigator First Name"])
+            rqst_usr_f_name = str(post_json["First Name"])
 
-        if "Navigator Last Name" not in post_json:
-            post_errors.append("\"Navigator Last Name\" key not found in root dictionary")
-        elif post_json["Navigator Last Name"] == "":
-            post_errors.append("Value for \"Navigator Last Name\" is an empty string")
-        elif post_json["Navigator Last Name"] is None:
-            post_errors.append("Value for \"Navigator Last Name\" is Null")
+        if "Last Name" not in post_json:
+            post_errors.append("\"Last Name\" key not found in root dictionary")
+        elif post_json["Last Name"] == "":
+            post_errors.append("Value for \"Last Name\" is an empty string")
+        elif post_json["Last Name"] is None:
+            post_errors.append("Value for \"Last Name\" is Null")
         else:
-            rqst_navigator_l_name = str(post_json["Navigator Last Name"])
+            rqst_usr_l_name = str(post_json["Last Name"])
+
+        rqst_usr_type = None
+        if "User Type" not in post_json:
+            post_errors.append("\"User Type\" key not found in root dictionary")
+        elif post_json["User Type"] == "":
+            post_errors.append("Value for \"User Type\" is an empty string")
+        elif post_json["User Type"] is None:
+            post_errors.append("Value for \"User Type\" is Null")
+        else:
+            rqst_usr_type = str(post_json["User Type"])
 
         if "Consumer Metrics" not in post_json:
             post_errors.append("\"Consumer Metrics\" key not found in root dictionary")
@@ -517,7 +501,7 @@ def metrics_submission_handler(request):
             elif consumer_metrics["Applied Medicaid"] is None:
                 post_errors.append("Value for \"Applied Medicaid\" in \"Consumer Metrics\" dict is Null")
             else:
-                rqst_cons_app_medicaid = int(consumer_metrics["Applied Medicaid"])
+                rqst_cons_app_maid = int(consumer_metrics["Applied Medicaid"])
 
             if "Selected QHP" not in consumer_metrics:
                 post_errors.append("\"Selected QHP\" key not found in \"Consumer Metrics\" dictionary")
@@ -538,14 +522,7 @@ def metrics_submission_handler(request):
             elif consumer_metrics["Referred Medicaid or CHIP"] is None:
                 post_errors.append("Value for \"Referred Medicaid or CHIP\" in \"Consumer Metrics\" dict is Null")
             else:
-                rqst_cons_ref_mediorchip = int(consumer_metrics["Referred Medicaid or CHIP"])
-
-            if "Referred Medicaid or CHIP" not in consumer_metrics:
-                post_errors.append("\"Referred Medicaid or CHIP\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Referred Medicaid or CHIP"] is None:
-                post_errors.append("Value for \"Referred Medicaid or CHIP\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_ref_medi_or_chip = int(consumer_metrics["Referred Medicaid or CHIP"])
+                rqst_cons_ref_maidorchip = int(consumer_metrics["Referred Medicaid or CHIP"])
 
             if "Referred SHOP" not in consumer_metrics:
                 post_errors.append("\"Referred SHOP\" key not found in \"Consumer Metrics\" dictionary")
@@ -598,17 +575,105 @@ def metrics_submission_handler(request):
             if "Comments" not in consumer_metrics:
                 post_errors.append("\"Comments\" key not found in \"Consumer Metrics\" dictionary")
             else:
-                rqst_nav_comments = str(consumer_metrics["Comments"])
+                rqst_usr_comments = str(consumer_metrics["Comments"])
 
             if "Outreach and Stakeholder Activities" not in consumer_metrics:
                 post_errors.append("\"Outreach and Stakeholder Activities\" key not found in \"Consumer Metrics\" dictionary")
             else:
-                rqst_nav_outr_stkehol_act = str(consumer_metrics["Outreach and Stakeholder Activities"])
+                rqst_usr_outr_stkehol_act = str(consumer_metrics["Outreach and Stakeholder Activities"])
+
+            if rqst_usr_type == "IPC":
+                if "Appointments Scheduled" not in consumer_metrics:
+                    post_errors.append("\"Appointments Scheduled\" key not found in \"Consumer Metrics\" dictionary")
+                elif consumer_metrics["Appointments Scheduled"] is None:
+                    post_errors.append("Value for \"Appointments Scheduled\" in \"Consumer Metrics\" dict is Null")
+                else:
+                    rqst_cons_apts_sched = int(consumer_metrics["Appointments Scheduled"])
+
+                if "Confirmation Calls" not in consumer_metrics:
+                    post_errors.append("\"Confirmation Calls\" key not found in \"Consumer Metrics\" dictionary")
+                elif consumer_metrics["Confirmation Calls"] is None:
+                    post_errors.append("Value for \"Confirmation Calls\" in \"Consumer Metrics\" dict is Null")
+                else:
+                    rqst_cons_confirm_calls = int(consumer_metrics["Confirmation Calls"])
+
+                if "Appointments Held" not in consumer_metrics:
+                    post_errors.append("\"Appointments Held\" key not found in \"Consumer Metrics\" dictionary")
+                elif consumer_metrics["Appointments Held"] is None:
+                    post_errors.append("Value for \"Appointments Held\" in \"Consumer Metrics\" dict is Null")
+                else:
+                    rqst_cons_apts_held = int(consumer_metrics["Appointments Held"])
+
+                if "Appointments Over Hour" not in consumer_metrics:
+                    post_errors.append("\"Appointments Over Hour\" key not found in \"Consumer Metrics\" dictionary")
+                elif consumer_metrics["Appointments Over Hour"] is None:
+                    post_errors.append("Value for \"Appointments Over Hour\" in \"Consumer Metrics\" dict is Null")
+                else:
+                    rqst_cons_apts_over_hour = int(consumer_metrics["Appointments Over Hour"])
+
+                if "Appointments Complex Market" not in consumer_metrics:
+                    post_errors.append("\"Appointments Complex Market\" key not found in \"Consumer Metrics\" dictionary")
+                elif consumer_metrics["Appointments Complex Market"] is None:
+                    post_errors.append("Value for \"Appointments Complex Market\" in \"Consumer Metrics\" dict is Null")
+                else:
+                    rqst_cons_apts_cplx_market = int(consumer_metrics["Appointments Complex Market"])
+
+                if "Appointments Complex Medicaid" not in consumer_metrics:
+                    post_errors.append("\"Appointments Complex Medicaid\" key not found in \"Consumer Metrics\" dictionary")
+                elif consumer_metrics["Appointments Complex Medicaid"] is None:
+                    post_errors.append("Value for \"Appointments Complex Medicaid\" in \"Consumer Metrics\" dict is Null")
+                else:
+                    rqst_cons_apts_cplx_maid = int(consumer_metrics["Appointments Complex Medicaid"])
+
+                if "Appointments Post-Enrollment Assistance" not in consumer_metrics:
+                    post_errors.append("\"Appointments Post-Enrollment Assistance\" key not found in \"Consumer Metrics\" dictionary")
+                elif consumer_metrics["Appointments Post-Enrollment Assistance"] is None:
+                    post_errors.append("Value for \"Appointments Post-Enrollment Assistance\" in \"Consumer Metrics\" dict is Null")
+                else:
+                    rqst_cons_apts_postenr_assis = int(consumer_metrics["Appointments Complex Medicaid"])
+
+                if "Appointments Over 3 Hours" not in consumer_metrics:
+                    post_errors.append("\"Appointments Over 3 Hours\" key not found in \"Consumer Metrics\" dictionary")
+                elif consumer_metrics["Appointments Over 3 Hours"] is None:
+                    post_errors.append("Value for \"Appointments Over 3 Hours\" in \"Consumer Metrics\" dict is Null")
+                else:
+                    rqst_cons_apts_over_3_hours = int(consumer_metrics["Appointments Over 3 Hours"])
 
         # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
         # create and save database entry for appointment
         if len(post_errors) == 0:
-            pass
+            usr_rqst_values = {"first_name": rqst_usr_f_name,
+                               "last_name": rqst_usr_l_name,
+                               "type": rqst_usr_type}
+            user_instance, user_instance_created = PICStaff.objects.get_or_create(email=rqst_usr_email,
+                                                                                  defaults=usr_rqst_values)
+
+            new_metrics_instance = MetricsSubmission(staff_member=user_instance,
+                                                     received_education=rqst_cons_rec_edu,
+                                                     applied_medicaid=rqst_cons_app_maid,
+                                                     selected_qhp=rqst_cons_sel_qhp,
+                                                     enrolled_shop=rqst_cons_enr_shop,
+                                                     ref_medicaid_or_chip=rqst_cons_ref_maidorchip,
+                                                     ref_shop=rqst_cons_ref_shop,
+                                                     filed_exemptions=rqst_cons_filed_exemptions,
+                                                     rec_postenroll_support=rqst_cons_rec_postenr_support,
+                                                     trends=rqst_cons_trends,
+                                                     success_story=rqst_cons_success_story,
+                                                     hardship_or_difficulty=rqst_cons_hard_or_diff,
+                                                     comments=rqst_usr_comments,
+                                                     outreach_stakeholder_activity=rqst_usr_outr_stkehol_act)
+
+            if rqst_usr_type == "IPC":
+                new_metrics_instance.appointments_scheduled = rqst_cons_apts_sched
+                new_metrics_instance.confirmation_calls = rqst_cons_confirm_calls
+                new_metrics_instance.appointments_held = rqst_cons_apts_held
+                new_metrics_instance.appointments_over_hour = rqst_cons_apts_over_hour
+                new_metrics_instance.appointments_over_three_hours = rqst_cons_apts_over_3_hours
+                new_metrics_instance.appointments_cmplx_market = rqst_cons_apts_cplx_market
+                new_metrics_instance.appointments_cmplx_medicaid = rqst_cons_apts_cplx_maid
+                new_metrics_instance.appointments_postenroll_assistance =rqst_cons_apts_postenr_assis
+
+            new_metrics_instance.save()
 
         # add parsing errors to response dictionary
         else:
@@ -617,29 +682,11 @@ def metrics_submission_handler(request):
 
             for message in post_errors:
                 print message
-            sys.stdout.flush()
+                sys.stdout.flush()
 
         response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
         response['Access-Control-Allow-Origin'] = "*"
         return response
-
-        # Tests for Appointment instance creation
-        # response_raw_data["Appointment Instance"] = {"Consumer Name": new_appointment.consumer_name}
-        # response_raw_data["Appointment Instance"]['Consumer Email'] = new_appointment.consumer_email
-        # response_raw_data["Appointment Instance"]['Consumer Phone'] = new_appointment.consumer_phone
-        # response_raw_data["Appointment Instance"]['Consumer Language'] = new_appointment.consumer_preferred_language
-        # response_raw_data["Appointment Instance"]['Consumer Contact Time'] = new_appointment.consumer_best_contact_time
-        # response_raw_data["Appointment Instance"]['Consumer Email'] = new_appointment.consumer_email
-        # response_raw_data["Appointment Instance"]['Appointment Address'] = new_appointment.appointment_address
-        # response_raw_data["Appointment Instance"]['Appointment Location Name'] = new_appointment.appointment_location_name
-        # response_raw_data["Appointment Instance"]['Appointment Date'] = new_appointment.appointment_date
-        # response_raw_data["Appointment Instance"]['Appointment Phone'] = new_appointment.appointment_location_phone
-        # response_raw_data["Appointment Instance"]['Appointment Start'] = new_appointment.appointment_start_time
-        # response_raw_data["Appointment Instance"]['Appointment End'] = new_appointment.appointment_end_time
-        # response_raw_data["Appointment Instance"]['Point of Contact Name'] = new_appointment.appointment_poc_name
-        # response_raw_data["Appointment Instance"]['Point of Contact Email'] = new_appointment.appointment_poc_email
-        # response_raw_data["Appointment Instance"]['Point of Contact Type'] = new_appointment.appointment_poc_type
-        # response_raw_data["Post Data"] = post_data
 
     elif request.method == "OPTIONS":
         response = HttpResponse("")
@@ -656,7 +703,7 @@ def metrics_submission_handler(request):
         response_raw_data["status"]["Errors"] = post_errors
         for message in post_errors:
             print message
-        sys.stdout.flush()
+            sys.stdout.flush()
 
         response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
         response['Access-Control-Allow-Origin'] = "*"

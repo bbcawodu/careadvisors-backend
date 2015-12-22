@@ -121,3 +121,33 @@ class PICAppointment(models.Model):
                            "poc_l_name",
                            "poc_email",
                            "poc_type")
+
+
+class MetricsSubmission(models.Model):
+    # fields for PICStaff model
+    staff_member = models.ForeignKey(PICStaff, on_delete=models.CASCADE)
+    received_education = models.IntegerField()
+    applied_medicaid = models.IntegerField()
+    selected_qhp = models.IntegerField()
+    enrolled_shop = models.IntegerField()
+    ref_medicaid_or_chip = models.IntegerField()
+    ref_shop = models.IntegerField()
+    filed_exemptions = models.IntegerField()
+    rec_postenroll_support = models.IntegerField()
+    trends = models.CharField(max_length=5000)
+    success_story = models.CharField(max_length=5000)
+    hardship_or_difficulty = models.CharField(max_length=5000)
+    comments = models.CharField(max_length=5000, blank=True, null=True)
+    outreach_stakeholder_activity = models.CharField(max_length=5000, blank=True, null=True)
+    appointments_scheduled = models.IntegerField(null=True)
+    confirmation_calls = models.IntegerField(null=True)
+    appointments_held = models.IntegerField(null=True)
+    appointments_over_hour = models.IntegerField(null=True)
+    appointments_cmplx_market = models.IntegerField(null=True)
+    appointments_cmplx_medicaid = models.IntegerField(null=True)
+    appointments_postenroll_assistance = models.IntegerField(null=True)
+    appointments_over_three_hours = models.IntegerField(null=True)
+
+    class Meta:
+        # maps model to the picmodels module
+        app_label = 'picmodels'
