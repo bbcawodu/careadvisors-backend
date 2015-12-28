@@ -93,7 +93,7 @@ def risk_assessment_2(request):
 
 def clean_json_string_input(json_dict, dict_name, dict_key, post_errors):
     if dict_key not in json_dict:
-        post_errors.append("\"" + dict_key + "\" key not found in" + dict_name + "dictionary")
+        post_errors.append("\"" + dict_key + "\" key not found in " + dict_name + " dictionary")
     elif json_dict[dict_key] == "":
         post_errors.append("Value for \"" + dict_key + "\" in " + dict_name + " dict is an empty string")
     elif json_dict[dict_key] is None:
@@ -105,7 +105,7 @@ def clean_json_string_input(json_dict, dict_name, dict_key, post_errors):
 
 def clean_json_int_input(json_dict, dict_name, dict_key, post_errors):
     if dict_key not in json_dict:
-        post_errors.append("\"" + dict_key + "\" key not found in" + dict_name + "dictionary")
+        post_errors.append("\"" + dict_key + "\" key not found in " + dict_name + " dictionary")
     elif json_dict[dict_key] is None:
         post_errors.append("Value for \"" + dict_key + "\" in " + dict_name + " dict is Null")
     else:
@@ -268,9 +268,9 @@ def appointment_submission_handler(request):
                 print message
                 sys.stdout.flush()
 
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        # response['Access-Control-Allow-Origin'] = "*"
-        return response
+        # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+        # # response['Access-Control-Allow-Origin'] = "*"
+        # return response
 
     # elif request.method == "OPTIONS":
     #     response = HttpResponse("")
@@ -289,9 +289,12 @@ def appointment_submission_handler(request):
             print message
             sys.stdout.flush()
 
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        # response['Access-Control-Allow-Origin'] = "*"
-        return response
+        # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+        # # response['Access-Control-Allow-Origin'] = "*"
+        # return response
+
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
 
 
 # defines view for member list display page
@@ -402,17 +405,17 @@ def metrics_submission_handler(request):
                 print message
                 sys.stdout.flush()
 
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        response['Access-Control-Allow-Origin'] = "*"
-        return response
+        # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+        # response['Access-Control-Allow-Origin'] = "*"
+        # return response
 
-    elif request.method == "OPTIONS":
-        response = HttpResponse("")
-        response['Access-Control-Allow-Origin'] = "*"
-        response['Access-Control-Allow-Methods'] = "POST, OPTIONS, GET"
-        response['Access-Control-Allow-Headers'] = "X-Requested-With"
-        response['Access-Control-Max-Age'] = "1800"
-        return response
+    # elif request.method == "OPTIONS":
+    #     response = HttpResponse("")
+    #     response['Access-Control-Allow-Origin'] = "*"
+    #     response['Access-Control-Allow-Methods'] = "POST, OPTIONS, GET"
+    #     response['Access-Control-Allow-Headers'] = "X-Requested-With"
+    #     response['Access-Control-Max-Age'] = "1800"
+    #     return response
 
     # if a GET request is made, add error message to response data
     else:
@@ -423,6 +426,9 @@ def metrics_submission_handler(request):
             print message
             sys.stdout.flush()
 
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        response['Access-Control-Allow-Origin'] = "*"
-        return response
+        # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+        # response['Access-Control-Allow-Origin'] = "*"
+        # return response
+
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response

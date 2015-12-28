@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1990ad25-4822-4da6-815b-03692f3687bb" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picproject/views.py" afterPath="$PROJECT_DIR$/picproject/views.py" />
     </list>
     <ignored path="picproject.iws" />
@@ -73,8 +74,8 @@
       <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/picproject/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.7692308">
-              <caret line="293" column="23" selection-start-line="293" selection-start-column="23" selection-end-line="293" selection-end-column="23" />
+            <state vertical-scroll-proportion="1.2884616">
+              <caret line="428" column="97" selection-start-line="428" selection-start-column="97" selection-end-line="428" selection-end-column="97" />
               <folding>
                 <element signature="e#61#108#0" expanded="true" />
                 <element signature="e#734#774#0" expanded="false" />
@@ -1006,8 +1007,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/picproject/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7692308">
-          <caret line="293" column="23" selection-start-line="293" selection-start-column="23" selection-end-line="293" selection-end-column="23" />
+        <state vertical-scroll-proportion="1.2884616">
+          <caret line="428" column="97" selection-start-line="428" selection-start-column="97" selection-end-line="428" selection-end-column="97" />
           <folding>
             <element signature="e#61#108#0" expanded="true" />
             <element signature="e#734#774#0" expanded="false" />
