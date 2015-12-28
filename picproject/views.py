@@ -91,6 +91,28 @@ def risk_assessment_2(request):
     return render(request, 'assessment_2.html', {'form_one': form_one})
 
 
+def clean_json_string_input(json_dict, dict_name, dict_key, post_errors):
+    if dict_key not in json_dict:
+        post_errors.append("\"" + dict_key + "\" key not found in" + dict_name + "dictionary")
+    elif json_dict[dict_key] == "":
+        post_errors.append("Value for \"" + dict_key + "\" in " + dict_name + " dict is an empty string")
+    elif json_dict[dict_key] is None:
+        post_errors.append("Value for \"" + dict_key + "\" in " + dict_name + " dict is Null")
+    else:
+        return str(json_dict[dict_key])
+    return None
+
+
+def clean_json_int_input(json_dict, dict_name, dict_key, post_errors):
+    if dict_key not in json_dict:
+        post_errors.append("\"" + dict_key + "\" key not found in" + dict_name + "dictionary")
+    elif json_dict[dict_key] is None:
+        post_errors.append("Value for \"" + dict_key + "\" in " + dict_name + " dict is Null")
+    else:
+        return int(json_dict[dict_key])
+    return None
+
+
 # defines view for saving scheduled appointments to the database
 @csrf_exempt
 def appointment_submission_handler(request):
@@ -103,42 +125,10 @@ def appointment_submission_handler(request):
         post_json = json.loads(post_data)
 
         response_raw_data["Appointment Instance"] = {}
-        #Code to parse POSTed json request
-        if "Email" not in post_json:
-            post_errors.append("\"Email\" key not found in root dictionary")
-        elif post_json["Email"] == "":
-            post_errors.append("Value for \"Email\" is an empty string")
-        elif post_json["Email"] is None:
-            post_errors.append("Value for \"Email\" is Null")
-        else:
-            request_consumer_email = str(post_json["Email"])
-
-        if "First Name" not in post_json:
-            post_errors.append("\"First Name\" key not found in root dictionary")
-        elif post_json["First Name"] == "":
-            post_errors.append("Value for \"First Name\" is an empty string")
-        elif post_json["First Name"] is None:
-            post_errors.append("Value for \"First Name\" is Null")
-        else:
-            request_consumer_first_name = str(post_json["First Name"])
-
-        if "Last Name" not in post_json:
-            post_errors.append("\"Last Name\" key not found in root dictionary")
-        elif post_json["Last Name"] == "":
-            post_errors.append("Value for \"Last Name\" is an empty string")
-        elif post_json["Last Name"] is None:
-            post_errors.append("Value for \"Last Name\" is Null")
-        else:
-            request_consumer_last_name = str(post_json["Last Name"])
-
-        if "Phone Number" not in post_json:
-            post_errors.append("\"Phone Number\" key not found in root dictionary")
-        elif post_json["Phone Number"] == "":
-            post_errors.append("Value for \"Phone Number\" is an empty string")
-        elif post_json["Phone Number"] is None:
-            post_errors.append("Value for \"Phone Number\" is Null")
-        else:
-            request_consumer_phone = str(post_json["Phone Number"])
+        request_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+        request_consumer_first_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
+        request_consumer_last_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+        request_consumer_phone = clean_json_string_input(post_json, "root", "Phone Number", post_errors)
 
         if "Preferred Language" not in post_json:
             post_errors.append("\"Preferred Language\" key not found in root dictionary")
@@ -162,62 +152,12 @@ def appointment_submission_handler(request):
             post_errors.append("Value for \"Appointment\" is an empty dictionary")
         else:
             appointment_information = post_json["Appointment"]
-
-            if "Name" not in appointment_information:
-                post_errors.append("\"Name\" key not found in \"Appointment Information\" dictionary")
-            elif appointment_information["Name"] == "":
-                post_errors.append("Value for \"Name\" in \"Appointment Information\" dict is an empty string")
-            elif appointment_information["Name"] is None:
-                post_errors.append("Value for \"Name\" in \"Appointment Information\" dict is Null")
-            else:
-                request_location_name = str(appointment_information["Name"])
-
-            request_appointment_address = ""
-
-            if "Street Address" not in appointment_information:
-                post_errors.append("\"Street Address\" key not found in \"Appointment Information\" dictionary")
-            elif appointment_information["Street Address"] == "":
-                post_errors.append("Value for \"Street Address\" in \"Appointment Information\" dict is an empty string")
-            elif appointment_information["Street Address"] is None:
-                post_errors.append("Value for \"Street Address\" in \"Appointment Information\" dict is Null")
-            else:
-                request_appointment_address = str(appointment_information["Street Address"])
-
-            if "City" not in appointment_information:
-                post_errors.append("\"City\" key not found in \"Appointment Information\" dictionary")
-            elif appointment_information["City"] == "":
-                post_errors.append("Value for \"City\" in \"Appointment Information\" dict is an empty string")
-            elif appointment_information["City"] is None:
-                post_errors.append("Value for \"City\" in \"Appointment Information\" dict is Null")
-            else:
-                request_appointment_address = request_appointment_address + ", " + str(appointment_information["City"])
-
-            if "State" not in appointment_information:
-                post_errors.append("\"State\" key not found in \"Appointment Information\" dictionary")
-            elif appointment_information["State"] == "":
-                post_errors.append("Value for \"State\" in \"Appointment Information\" dict is an empty string")
-            elif appointment_information["State"] is None:
-                post_errors.append("Value for \"State\" in \"Appointment Information\" dict is Null")
-            else:
-                request_appointment_address = request_appointment_address + " " + str(appointment_information["State"])
-
-            if "Zip Code" not in appointment_information:
-                post_errors.append("\"Zip Code\" key not found in \"Appointment Information\" dictionary")
-            elif appointment_information["Zip Code"] == "":
-                post_errors.append("Value for \"Zip Code\" in \"Appointment Information\" dict is an empty string")
-            elif appointment_information["Zip Code"] is None:
-                post_errors.append("Value for \"Zip Code\" in \"Appointment Information\" dict is Null")
-            else:
-                request_appointment_address = request_appointment_address + ", " + str(appointment_information["Zip Code"])
-
-            if "Phone Number" not in appointment_information:
-                post_errors.append("\"Phone Number\" key not found in \"Appointment Information\" dictionary")
-            elif appointment_information["Phone Number"] == "":
-                post_errors.append("Value for \"Phone Number\" in \"Appointment Information\" dict is an empty string")
-            elif appointment_information["Phone Number"] is None:
-                post_errors.append("Value for \"Phone Number\" in \"Appointment Information\" dict is Null")
-            else:
-                request_appointment_location_phone = str(appointment_information["Phone Number"])
+            request_location_name = clean_json_string_input(appointment_information, "Appointment Information", "Name", post_errors)
+            request_appointment_address = clean_json_string_input(appointment_information, "Appointment Information", "Street Address", post_errors)
+            request_appointment_address = request_appointment_address + ", " + clean_json_string_input(appointment_information,  "Appointment Information", "City", post_errors)
+            request_appointment_address = request_appointment_address + " " + clean_json_string_input(appointment_information, "Appointment Information", "State", post_errors)
+            request_appointment_address = request_appointment_address + ", " + clean_json_string_input(appointment_information, "Appointment Information", "Zip Code", post_errors)
+            request_appointment_location_phone = clean_json_string_input(appointment_information, "Appointment Information", "Phone Number", post_errors)
 
             if "Appointment Slot" not in appointment_information:
                 post_errors.append("\"Appointment Slot\" key not found in 'Appointment Information' dictionary")
@@ -236,27 +176,9 @@ def appointment_submission_handler(request):
                     post_errors.append("Value for \"Date\" in \"Appointment Slot\" dict is Null")
                 else:
                     datedict = appointment_slot_info["Date"]
-                    month = day = year = None
-                    if "Month" not in datedict:
-                        post_errors.append("\"Month\" key not found in \"Date\" dictionary")
-                    if datedict["Month"] is None:
-                        post_errors.append("Value for \"Month\" in \"Date\" dictionary is Null")
-                    else:
-                        month = int(datedict["Month"])
-
-                    if "Day" not in datedict:
-                        post_errors.append("\"Day\" key not found in \"Date\" dictionary")
-                    if datedict["Day"] is None:
-                        post_errors.append("Value for \"Day\" in \"Date\" dictionary is Null")
-                    else:
-                        day = int(datedict["Day"])
-
-                    if "Year" not in datedict:
-                        post_errors.append("\"Year\" key not found in \"Date\" dictionary")
-                    if datedict["Year"] is None:
-                        post_errors.append("Value for \"Year\" in \"Date\" dictionary is Null")
-                    else:
-                        year = int(datedict["Year"])
+                    month = clean_json_int_input(datedict, "Date", "Month", post_errors)
+                    day = clean_json_int_input(datedict, "Date", "Day", post_errors)
+                    year = clean_json_int_input(datedict, "Date", "Year", post_errors)
 
                     datetuple = (year, month, day)
                     if None not in datetuple:
@@ -271,21 +193,8 @@ def appointment_submission_handler(request):
                     post_errors.append("Value for \"Start Time\" in \"Appointment Slot\" dict is Null")
                 else:
                     starttimedict = appointment_slot_info["Start Time"]
-                    hour = minutes = None
-
-                    if "Hour" not in starttimedict:
-                        post_errors.append("\"Hour\" key not found in \"Start Time\" dictionary")
-                    if starttimedict["Hour"] is None:
-                        post_errors.append("Value for \"Hour\" in \"Start Time\" dictionary is Null")
-                    else:
-                        hour = int(starttimedict["Hour"])
-
-                    if "Minutes" not in starttimedict:
-                        post_errors.append("\"Minutes\" key not found in \"Start Time\" dictionary")
-                    if starttimedict["Minutes"] is None:
-                        post_errors.append("Value for \"Minutes\" in \"Start Time\" dictionary is Null")
-                    else:
-                        minutes = int(starttimedict["Minutes"])
+                    hour = clean_json_int_input(starttimedict, "Start Time", "Hour", post_errors)
+                    minutes = clean_json_int_input(starttimedict, "Start Time", "Minutes", post_errors)
 
                     if hour is not None and minutes is not None:
                         request_appointment_start_time = str(datetime.time(hour=hour, minute=minutes).isoformat())
@@ -298,21 +207,8 @@ def appointment_submission_handler(request):
                     post_errors.append("Value for \"End Time\" in \"Appointment Slot\" dict is Null")
                 else:
                     endtimedict = appointment_slot_info["End Time"]
-                    hour = minutes = None
-
-                    if "Hour" not in endtimedict:
-                        post_errors.append("\"Hour\" key not found in \"End Time\" dictionary")
-                    if endtimedict["Hour"] is None:
-                        post_errors.append("Value for \"Hour\" in \"End Time\" dictionary is Null")
-                    else:
-                        hour = int(endtimedict["Hour"])
-
-                    if "Minutes" not in endtimedict:
-                        post_errors.append("\"Minutes\" key not found in \"End Time\" dictionary")
-                    if endtimedict["Minutes"] is None:
-                        post_errors.append("Value for \"Minutes\" in \"End Time\" dictionary is Null")
-                    else:
-                        minutes = int(endtimedict["Minutes"])
+                    hour = clean_json_int_input(endtimedict, "End Time", "Hour", post_errors)
+                    minutes = clean_json_int_input(endtimedict, "End Time", "Minutes", post_errors)
 
                     if hour is not None and minutes is not None:
                         request_appointment_end_time = str(datetime.time(hour=hour, minute=minutes).isoformat())
@@ -325,42 +221,10 @@ def appointment_submission_handler(request):
                 post_errors.append("Value for \"Point of Contact\" in 'Appointment Information' dict is an empty dict")
             else:
                 appointment_poc_info = appointment_information["Point of Contact"]
-
-                if "First Name" not in appointment_poc_info:
-                    post_errors.append("\"First Name\" key not found in \"Point of Contact\" dictionary")
-                elif appointment_poc_info["First Name"] == "":
-                    post_errors.append("Value for \"First Name\" in \"Point of Contact\" dict is an empty string")
-                elif appointment_poc_info["First Name"] is None:
-                    post_errors.append("Value for \"First Name\" in \"Point of Contact\" dict is Null")
-                else:
-                    request_poc_first_name = str(appointment_poc_info["First Name"])
-
-                if "Last Name" not in appointment_poc_info:
-                    post_errors.append("\"Last Name\" key not found in \"Point of Contact\" dictionary")
-                elif appointment_poc_info["Last Name"] == "":
-                    post_errors.append("Value for \"Last Name\" in \"Point of Contact\" dict is an empty string")
-                elif appointment_poc_info["Last Name"] is None:
-                    post_errors.append("Value for \"Last Name\" in \"Point of Contact\" dict is Null")
-                else:
-                    request_poc_last_name = str(appointment_poc_info["First Name"])
-
-                if "Email" not in appointment_poc_info:
-                    post_errors.append("\"Email\" key not found in \"Point of Contact\" dictionary")
-                elif appointment_poc_info["Email"] == "":
-                    post_errors.append("Value for \"Email\" in \"Point of Contact\" dict is an empty string")
-                elif appointment_poc_info["Email"] is None:
-                    post_errors.append("Value for \"Email\" in \"Point of Contact\" dict is Null")
-                else:
-                    request_poc_email = str(appointment_poc_info["Email"])
-
-                if "Type" not in appointment_poc_info:
-                    post_errors.append("\"Type\" key not found in \"Point of Contact\" dictionary")
-                elif appointment_poc_info["Type"] == "":
-                    post_errors.append("Value for \"Type\" in \"Point of Contact\" dict is an empty string")
-                elif appointment_poc_info["Type"] is None:
-                    post_errors.append("Value for \"Type\" in \"Point of Contact\" dict is Null")
-                else:
-                    request_poc_type = str(appointment_poc_info["Type"])
+                request_poc_first_name = clean_json_string_input(appointment_poc_info, "Point of Contact", "First Name", post_errors)
+                request_poc_last_name = clean_json_string_input(appointment_poc_info, "Point of Contact", "Last Name", post_errors)
+                request_poc_email = clean_json_string_input(appointment_poc_info, "Point of Contact", "Email", post_errors)
+                request_poc_type = clean_json_string_input(appointment_poc_info, "Point of Contact", "Type", post_errors)
 
         # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
         # create and save database entry for appointment
@@ -390,6 +254,10 @@ def appointment_submission_handler(request):
                                           start_time=request_appointment_start_time,
                                           end_time=request_appointment_end_time)
             new_appointment.save()
+
+            response_raw_data["consumer info"] = consumer_request_values
+            response_raw_data["location"] = location_request_values
+            response_raw_data["poc info"] = poc_request_values
 
         # add parsing errors to response dictionary
         else:
@@ -443,42 +311,10 @@ def metrics_submission_handler(request):
         post_json = json.loads(post_data)
 
         #Code to parse POSTed json request
-        if "Email" not in post_json:
-            post_errors.append("\"Email\" key not found in root dictionary")
-        elif post_json["Email"] == "":
-            post_errors.append("Value for \"Email\" is an empty string")
-        elif post_json["Email"] is None:
-            post_errors.append("Value for \"Email\" is Null")
-        else:
-            rqst_usr_email = str(post_json["Email"])
-
-        if "First Name" not in post_json:
-            post_errors.append("\"First Name\" key not found in root dictionary")
-        elif post_json["First Name"] == "":
-            post_errors.append("Value for \"First Name\" is an empty string")
-        elif post_json["First Name"] is None:
-            post_errors.append("Value for \"First Name\" is Null")
-        else:
-            rqst_usr_f_name = str(post_json["First Name"])
-
-        if "Last Name" not in post_json:
-            post_errors.append("\"Last Name\" key not found in root dictionary")
-        elif post_json["Last Name"] == "":
-            post_errors.append("Value for \"Last Name\" is an empty string")
-        elif post_json["Last Name"] is None:
-            post_errors.append("Value for \"Last Name\" is Null")
-        else:
-            rqst_usr_l_name = str(post_json["Last Name"])
-
-        rqst_usr_type = None
-        if "User Type" not in post_json:
-            post_errors.append("\"User Type\" key not found in root dictionary")
-        elif post_json["User Type"] == "":
-            post_errors.append("Value for \"User Type\" is an empty string")
-        elif post_json["User Type"] is None:
-            post_errors.append("Value for \"User Type\" is Null")
-        else:
-            rqst_usr_type = str(post_json["User Type"])
+        rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+        rqst_usr_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
+        rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+        rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
 
         if "Consumer Metrics" not in post_json:
             post_errors.append("\"Consumer Metrics\" key not found in root dictionary")
@@ -489,88 +325,17 @@ def metrics_submission_handler(request):
         else:
             consumer_metrics = post_json["Consumer Metrics"]
 
-            if "Received Education" not in consumer_metrics:
-                post_errors.append("\"Received Education\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Received Education"] is None:
-                post_errors.append("Value for \"Received Education\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_rec_edu = int(consumer_metrics["Received Education"])
-
-            if "Applied Medicaid" not in consumer_metrics:
-                post_errors.append("\"Applied Medicaid\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Applied Medicaid"] is None:
-                post_errors.append("Value for \"Applied Medicaid\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_app_maid = int(consumer_metrics["Applied Medicaid"])
-
-            if "Selected QHP" not in consumer_metrics:
-                post_errors.append("\"Selected QHP\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Selected QHP"] is None:
-                post_errors.append("Value for \"Selected QHP\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_sel_qhp = int(consumer_metrics["Selected QHP"])
-
-            if "Enrolled SHOP" not in consumer_metrics:
-                post_errors.append("\"Enrolled SHOP\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Enrolled SHOP"] is None:
-                post_errors.append("Value for \"Enrolled SHOP\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_enr_shop = int(consumer_metrics["Enrolled SHOP"])
-
-            if "Referred Medicaid or CHIP" not in consumer_metrics:
-                post_errors.append("\"Referred Medicaid or CHIP\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Referred Medicaid or CHIP"] is None:
-                post_errors.append("Value for \"Referred Medicaid or CHIP\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_ref_maidorchip = int(consumer_metrics["Referred Medicaid or CHIP"])
-
-            if "Referred SHOP" not in consumer_metrics:
-                post_errors.append("\"Referred SHOP\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Referred SHOP"] is None:
-                post_errors.append("Value for \"Referred Medicaid or SHOP\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_ref_shop = int(consumer_metrics["Referred SHOP"])
-
-            if "Filed Exemptions" not in consumer_metrics:
-                post_errors.append("\"Filed Exemptions\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Filed Exemptions"] is None:
-                post_errors.append("Value for \"Filed Exemptions\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_filed_exemptions = int(consumer_metrics["Filed Exemptions"])
-
-            if "Received Post-Enrollment Support" not in consumer_metrics:
-                post_errors.append("\"Received Post-Enrollment Support\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Received Post-Enrollment Support"] is None:
-                post_errors.append("Value for \"Received Post-Enrollment Support\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_rec_postenr_support = int(consumer_metrics["Received Post-Enrollment Support"])
-
-            if "Trends" not in consumer_metrics:
-                post_errors.append("\"Trends\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Trends"] == "":
-                post_errors.append("Value for \"Trends\" in \"Consumer Metrics\" dict is an empty string")
-            elif consumer_metrics["Trends"] is None:
-                post_errors.append("Value for \"Trends\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_trends = str(consumer_metrics["Trends"])
-
-            if "Success Story" not in consumer_metrics:
-                post_errors.append("\"Success Story\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Success Story"] == "":
-                post_errors.append("Value for \"Success Story\" in \"Consumer Metrics\" dict is an empty string")
-            elif consumer_metrics["Success Story"] is None:
-                post_errors.append("Value for \"Success Story\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_success_story = str(consumer_metrics["Success Story"])
-
-            if "Hardship or Difficulty" not in consumer_metrics:
-                post_errors.append("\"Hardship or Difficulty\" key not found in \"Consumer Metrics\" dictionary")
-            elif consumer_metrics["Hardship or Difficulty"] == "":
-                post_errors.append("Value for \"Hardship or Difficulty\" in \"Consumer Metrics\" dict is an empty string")
-            elif consumer_metrics["Hardship or Difficulty"] is None:
-                post_errors.append("Value for \"Hardship or Difficulty\" in \"Consumer Metrics\" dict is Null")
-            else:
-                rqst_cons_hard_or_diff = str(consumer_metrics["Hardship or Difficulty"])
+            rqst_cons_rec_edu = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Received Education", post_errors)
+            rqst_cons_app_maid = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Applied Medicaid", post_errors)
+            rqst_cons_sel_qhp = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Selected QHP", post_errors)
+            rqst_cons_enr_shop = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Enrolled SHOP", post_errors)
+            rqst_cons_ref_maidorchip = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Referred Medicaid or CHIP", post_errors)
+            rqst_cons_ref_shop = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Referred SHOP", post_errors)
+            rqst_cons_filed_exemptions = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Filed Exemptions", post_errors)
+            rqst_cons_rec_postenr_support = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Received Post-Enrollment Support", post_errors)
+            rqst_cons_trends = clean_json_string_input(consumer_metrics, "Consumer Metrics", "Trends", post_errors)
+            rqst_cons_success_story = clean_json_string_input(consumer_metrics, "Consumer Metrics", "Success Story", post_errors)
+            rqst_cons_hard_or_diff = clean_json_string_input(consumer_metrics, "Consumer Metrics", "Hardship or Difficulty", post_errors)
 
             if "Comments" not in consumer_metrics:
                 post_errors.append("\"Comments\" key not found in \"Consumer Metrics\" dictionary")
@@ -583,61 +348,14 @@ def metrics_submission_handler(request):
                 rqst_usr_outr_stkehol_act = str(consumer_metrics["Outreach and Stakeholder Activities"])
 
             if rqst_usr_type == "IPC":
-                if "Appointments Scheduled" not in consumer_metrics:
-                    post_errors.append("\"Appointments Scheduled\" key not found in \"Consumer Metrics\" dictionary")
-                elif consumer_metrics["Appointments Scheduled"] is None:
-                    post_errors.append("Value for \"Appointments Scheduled\" in \"Consumer Metrics\" dict is Null")
-                else:
-                    rqst_cons_apts_sched = int(consumer_metrics["Appointments Scheduled"])
-
-                if "Confirmation Calls" not in consumer_metrics:
-                    post_errors.append("\"Confirmation Calls\" key not found in \"Consumer Metrics\" dictionary")
-                elif consumer_metrics["Confirmation Calls"] is None:
-                    post_errors.append("Value for \"Confirmation Calls\" in \"Consumer Metrics\" dict is Null")
-                else:
-                    rqst_cons_confirm_calls = int(consumer_metrics["Confirmation Calls"])
-
-                if "Appointments Held" not in consumer_metrics:
-                    post_errors.append("\"Appointments Held\" key not found in \"Consumer Metrics\" dictionary")
-                elif consumer_metrics["Appointments Held"] is None:
-                    post_errors.append("Value for \"Appointments Held\" in \"Consumer Metrics\" dict is Null")
-                else:
-                    rqst_cons_apts_held = int(consumer_metrics["Appointments Held"])
-
-                if "Appointments Over Hour" not in consumer_metrics:
-                    post_errors.append("\"Appointments Over Hour\" key not found in \"Consumer Metrics\" dictionary")
-                elif consumer_metrics["Appointments Over Hour"] is None:
-                    post_errors.append("Value for \"Appointments Over Hour\" in \"Consumer Metrics\" dict is Null")
-                else:
-                    rqst_cons_apts_over_hour = int(consumer_metrics["Appointments Over Hour"])
-
-                if "Appointments Complex Market" not in consumer_metrics:
-                    post_errors.append("\"Appointments Complex Market\" key not found in \"Consumer Metrics\" dictionary")
-                elif consumer_metrics["Appointments Complex Market"] is None:
-                    post_errors.append("Value for \"Appointments Complex Market\" in \"Consumer Metrics\" dict is Null")
-                else:
-                    rqst_cons_apts_cplx_market = int(consumer_metrics["Appointments Complex Market"])
-
-                if "Appointments Complex Medicaid" not in consumer_metrics:
-                    post_errors.append("\"Appointments Complex Medicaid\" key not found in \"Consumer Metrics\" dictionary")
-                elif consumer_metrics["Appointments Complex Medicaid"] is None:
-                    post_errors.append("Value for \"Appointments Complex Medicaid\" in \"Consumer Metrics\" dict is Null")
-                else:
-                    rqst_cons_apts_cplx_maid = int(consumer_metrics["Appointments Complex Medicaid"])
-
-                if "Appointments Post-Enrollment Assistance" not in consumer_metrics:
-                    post_errors.append("\"Appointments Post-Enrollment Assistance\" key not found in \"Consumer Metrics\" dictionary")
-                elif consumer_metrics["Appointments Post-Enrollment Assistance"] is None:
-                    post_errors.append("Value for \"Appointments Post-Enrollment Assistance\" in \"Consumer Metrics\" dict is Null")
-                else:
-                    rqst_cons_apts_postenr_assis = int(consumer_metrics["Appointments Complex Medicaid"])
-
-                if "Appointments Over 3 Hours" not in consumer_metrics:
-                    post_errors.append("\"Appointments Over 3 Hours\" key not found in \"Consumer Metrics\" dictionary")
-                elif consumer_metrics["Appointments Over 3 Hours"] is None:
-                    post_errors.append("Value for \"Appointments Over 3 Hours\" in \"Consumer Metrics\" dict is Null")
-                else:
-                    rqst_cons_apts_over_3_hours = int(consumer_metrics["Appointments Over 3 Hours"])
+                rqst_cons_apts_sched = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Appointments Scheduled", post_errors)
+                rqst_cons_confirm_calls = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Confirmation Calls", post_errors)
+                rqst_cons_apts_held = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Appointments Held", post_errors)
+                rqst_cons_apts_over_hour = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Appointments Over Hour", post_errors)
+                rqst_cons_apts_cplx_market = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Appointments Complex Market", post_errors)
+                rqst_cons_apts_cplx_maid = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Appointments Complex Medicaid", post_errors)
+                rqst_cons_apts_postenr_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Appointments Post-Enrollment Assistance", post_errors)
+                rqst_cons_apts_over_3_hours = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Appointments Over 3 Hours", post_errors)
 
         # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
         # create and save database entry for appointment

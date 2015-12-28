@@ -32,7 +32,7 @@
                                     <td>{{ appointment.location.name }}</td>
                                     <td>{{ appointment.location.address }}<br>{{ appointment.location.phone }}<br></td>
                                     <td>{{ appointment.date }}<br>{{ appointment.start_time }}-{{ appointment.end_time }}</td>
-                                    <td>{{ appointment.poc.first_name }} {{ appointment.poc.first_name }}<br>{{ appointment.poc.email }}<br>{{ appointment.poc.type }}</td>
+                                    <td>{{ appointment.poc.first_name }} {{ appointment.poc.last_name }}<br>{{ appointment.poc.email }}<br>{{ appointment.poc.type }}</td>
                                     </tr>
                               {% endfor %}
                         </table>
