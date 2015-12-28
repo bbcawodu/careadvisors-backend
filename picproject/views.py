@@ -316,7 +316,7 @@ def metrics_submission_handler(request):
         rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
         rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
 
-        if "Consumer Metrics" not in post_json:
+        if "Consumer Metrics"  not in post_json:
             post_errors.append("\"Consumer Metrics\" key not found in root dictionary")
         elif post_json["Consumer Metrics"] is None:
             post_errors.append("Value for \"Consumer Metrics\" is Null")
