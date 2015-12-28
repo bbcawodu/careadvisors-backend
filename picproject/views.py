@@ -269,16 +269,16 @@ def appointment_submission_handler(request):
                 sys.stdout.flush()
 
         response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        response['Access-Control-Allow-Origin'] = "*"
+        # response['Access-Control-Allow-Origin'] = "*"
         return response
 
-    elif request.method == "OPTIONS":
-        response = HttpResponse("")
-        response['Access-Control-Allow-Origin'] = "*"
-        response['Access-Control-Allow-Methods'] = "POST, OPTIONS, GET"
-        response['Access-Control-Allow-Headers'] = "X-Requested-With"
-        response['Access-Control-Max-Age'] = "1800"
-        return response
+    # elif request.method == "OPTIONS":
+    #     response = HttpResponse("")
+    #     response['Access-Control-Allow-Origin'] = "*"
+    #     response['Access-Control-Allow-Methods'] = "POST, OPTIONS, GET"
+    #     response['Access-Control-Allow-Headers'] = "X-Requested-With"
+    #     response['Access-Control-Max-Age'] = "1800"
+    #     return response
 
     # if a GET request is made, add error message to response data
     else:
@@ -290,7 +290,7 @@ def appointment_submission_handler(request):
             sys.stdout.flush()
 
         response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        response['Access-Control-Allow-Origin'] = "*"
+        # response['Access-Control-Allow-Origin'] = "*"
         return response
 
 
