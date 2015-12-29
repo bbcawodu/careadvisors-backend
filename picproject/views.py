@@ -10,7 +10,7 @@ from django import forms
 from django.db import models, IntegrityError
 from django.contrib.auth.models import User
 from picproject.forms import AssessmentFormOne, AssessmentFormTwo, UserCreateForm
-from picmodels.models import PICUser, PICAppointment, Appointment, Location, PICConsumer, PICStaff, MetricsSubmission
+from picmodels.models import PICUser, Appointment, Location, PICConsumer, PICStaff, MetricsSubmission
 import datetime, json
 from django.views.decorators.csrf import csrf_exempt
 import sys
@@ -430,5 +430,86 @@ def metrics_submission_handler(request):
         # response['Access-Control-Allow-Origin'] = "*"
         # return response
 
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
+
+
+# defines view for returning staff data from api requests
+def staff_api_handler(request):
+    rqst_params = request.GET
+
+    response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
+    rqst_errors = []
+
+    if 'fname' in rqst_params:
+        rqst_first_name = rqst_params['fname']
+        staff_objects = PICStaff.objects.filter(first_name__iexact=rqst_first_name)
+        if len(staff_objects) > 0:
+            staff_member_dict = {}
+            for staff_member in staff_objects:
+                staff_dict_entry = {'First Name': staff_member.first_name,
+                                    'Last Name': staff_member.last_name,
+                                    'Email': staff_member.email,
+                                    'Type': staff_member.type,
+                                    'Database ID': staff_member.id}
+                staff_member_dict[staff_dict_entry['Database ID']] = staff_dict_entry
+
+            response_raw_data["Data"] = staff_member_dict
+        else:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('Staff Member with first name: ' + rqst_first_name + ' not found in database')
+
+    elif 'lname' in rqst_params:
+        rqst_last_name = rqst_params['lname']
+        staff_objects = PICStaff.objects.filter(last_name__iexact=rqst_last_name)
+        if len(staff_objects) > 0:
+            staff_member_dict = {}
+            for staff_member in staff_objects:
+                staff_dict_entry = {'First Name': staff_member.first_name,
+                                    'Last Name': staff_member.last_name,
+                                    'Email': staff_member.email,
+                                    'Type': staff_member.type,
+                                    'Database ID': staff_member.id}
+                staff_member_dict[staff_dict_entry['Database ID']] = staff_dict_entry
+
+            response_raw_data["Data"] = staff_member_dict
+        else:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('Staff Member with first name: ' + rqst_last_name + ' not found in database')
+
+    elif 'id' in rqst_params:
+        rqst_staff_id = rqst_params['id']
+
+        if rqst_staff_id == "all":
+            all_staff_members = PICStaff.objects.all()
+            staff_member_dict = {}
+            for staff_member in all_staff_members:
+                staff_dict_entry = {'First Name': staff_member.first_name,
+                                    'Last Name': staff_member.last_name,
+                                    'Email': staff_member.email,
+                                    'Type': staff_member.type,
+                                    'Database ID': staff_member.id}
+                staff_member_dict[staff_dict_entry['Database ID']] = staff_dict_entry
+
+            response_raw_data["Data"] = staff_member_dict
+        else:
+            rqst_staff_id = int(rqst_staff_id)
+            try:
+                staff_member = PICStaff.objects.get(id=rqst_staff_id)
+                staff_dict_entry = {'First Name': staff_member.first_name,
+                                    'Last Name': staff_member.last_name,
+                                    'Email': staff_member.email,
+                                    'Type': staff_member.type,
+                                    'Database ID': staff_member.id}
+                response_raw_data["Data"] = {staff_dict_entry["Database ID"]: staff_dict_entry}
+            except PICStaff.DoesNotExist:
+                response_raw_data['Status']['Error Code'] = 1
+                rqst_errors.append('Staff Member with id = ' + str(rqst_staff_id) + ' not found in database')
+
+    else:
+        response_raw_data['Status']['Error Code'] = 1
+        rqst_errors.append('No Params')
+
+    response_raw_data["Status"]["Errors"] = rqst_errors
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
