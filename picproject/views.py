@@ -441,7 +441,26 @@ def staff_api_handler(request):
     response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
     rqst_errors = []
 
-    if 'fname' in rqst_params:
+    if 'lname' in rqst_params and 'fname' in rqst_params:
+        rqst_first_name = rqst_params['fname']
+        rqst_last_name = rqst_params['lname']
+        staff_objects = PICStaff.objects.filter(first_name__iexact=rqst_first_name, last_name__iexact=rqst_last_name)
+        if len(staff_objects) > 0:
+            staff_member_dict = {}
+            for staff_member in staff_objects:
+                staff_dict_entry = {'First Name': staff_member.first_name,
+                                    'Last Name': staff_member.last_name,
+                                    'Email': staff_member.email,
+                                    'Type': staff_member.type,
+                                    'Database ID': staff_member.id}
+                staff_member_dict[staff_dict_entry['Database ID']] = staff_dict_entry
+
+            response_raw_data["Data"] = staff_member_dict
+        else:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('Staff Member with name: ' + rqst_first_name + ' ' + rqst_last_name + ' not found in database')
+
+    elif 'fname' in rqst_params:
         rqst_first_name = rqst_params['fname']
         staff_objects = PICStaff.objects.filter(first_name__iexact=rqst_first_name)
         if len(staff_objects) > 0:
@@ -475,7 +494,7 @@ def staff_api_handler(request):
             response_raw_data["Data"] = staff_member_dict
         else:
             response_raw_data['Status']['Error Code'] = 1
-            rqst_errors.append('Staff Member with first name: ' + rqst_last_name + ' not found in database')
+            rqst_errors.append('Staff Member with last name: ' + rqst_last_name + ' not found in database')
 
     elif 'id' in rqst_params:
         rqst_staff_id = rqst_params['id']
@@ -505,6 +524,44 @@ def staff_api_handler(request):
             except PICStaff.DoesNotExist:
                 response_raw_data['Status']['Error Code'] = 1
                 rqst_errors.append('Staff Member with id = ' + str(rqst_staff_id) + ' not found in database')
+
+    else:
+        response_raw_data['Status']['Error Code'] = 1
+        rqst_errors.append('No Params')
+
+    response_raw_data["Status"]["Errors"] = rqst_errors
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
+
+
+# defines view for returning metrics data from api requests
+def metrics_api_handler(request):
+    rqst_params = request.GET
+
+    response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
+    rqst_errors = []
+
+    if 'id' in rqst_params:
+        rqst_staff_id = rqst_params['id']
+
+        if rqst_staff_id == "all":
+            all_metrics_submissions = MetricsSubmission.objects.all()
+            metrics_list = []
+            for metrics_submission in all_metrics_submissions:
+                metrics_list.append(metrics_submission.return_values_dict())
+
+            response_raw_data["Data"] = metrics_list
+        else:
+            rqst_staff_id = int(rqst_staff_id)
+            metrics_submissions = MetricsSubmission.objects.filter(id=rqst_staff_id)
+            if len(metrics_submissions) > 0:
+                metrics_list = []
+                for metrics_submission in metrics_submissions:
+                    metrics_list.append(metrics_submission.return_values_dict())
+                response_raw_data["Data"] = metrics_list
+            else:
+                response_raw_data['Status']['Error Code'] = 1
+                rqst_errors.append('No metrics entries for staff ID: ' + rqst_staff_id + ' not found in database')
 
     else:
         response_raw_data['Status']['Error Code'] = 1

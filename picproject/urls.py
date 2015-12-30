@@ -43,5 +43,6 @@ urlpatterns = [
     url(r"^viewappointments/$", views.appointment_viewing_handler),
     url(r"^submitmetrics/$", views.metrics_submission_handler),
     url(r"^v1/staff$", views.staff_api_handler),
+    url(r"^v1/metrics$", views.metrics_api_handler),
     url(r'^admin/', include(admin.site.urls)),
 ]

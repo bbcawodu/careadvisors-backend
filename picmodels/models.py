@@ -103,6 +103,34 @@ class MetricsSubmission(models.Model):
     appointments_cmplx_medicaid = models.IntegerField(null=True)
     appointments_postenroll_assistance = models.IntegerField(null=True)
     appointments_over_three_hours = models.IntegerField(null=True)
+    date_created = models.DateTimeField(null=True, auto_now_add=True)
+
+    def return_values_dict(self):
+        valuesdict = {"Received Education": self.received_education,
+                      "Applied Medicaid": self.applied_medicaid,
+                      "Selected QHP": self.selected_qhp,
+                      "Enrolled SHOP": self.enrolled_shop,
+                      "Referred Medicaid or CHIP": self.ref_medicaid_or_chip,
+                      "Referred SHOP": self.ref_shop,
+                      "Filed Exemptions": self.filed_exemptions,
+                      "Received Post-Enrollment Support": self.rec_postenroll_support,
+                      "Trends": self.trends,
+                      "Success Story": self.success_story,
+                      "Hardship or Difficulty": self.hardship_or_difficulty,
+                      "Comments": self.comments,
+                      "Outreach and Stakeholder Activities": self.outreach_stakeholder_activity,
+                      "Appointments Scheduled": self.appointments_scheduled,
+                      "Confirmation Calls": self.confirmation_calls,
+                      "Appointments Held": self.appointments_held,
+                      "Appointments Over Hour": self.appointments_over_hour,
+                      "Appointments Complex Market": self.appointments_cmplx_market,
+                      "Appointments Complex Medicaid": self.appointments_cmplx_medicaid,
+                      "Appointments Post-Enrollment Assistance": self.appointments_postenroll_assistance,
+                      "Appointments Over 3 Hours": self.appointments_over_three_hours,
+                      "Date Created": self.date_created.isoformat()
+                      }
+
+        return valuesdict
 
     class Meta:
         # maps model to the picmodels module
