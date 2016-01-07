@@ -59,6 +59,15 @@ class PICStaff(models.Model):
     last_name = models.CharField(default="", max_length=1000)
     email = models.EmailField()
     type = models.CharField(max_length=1000)
+    county = models.CharField(null=True, max_length=1000)
+
+    def return_values_dict(self):
+        valuesdict = {"First Name": self.first_name,
+                      "Last Name": self.last_name,
+                      "Email": self.email,
+                      "Type": self.type,
+                      "Database ID": self.id}
+        return valuesdict
 
     class Meta:
         # maps model to the picmodels module
@@ -90,7 +99,7 @@ class MetricsSubmission(models.Model):
     ref_shop = models.IntegerField()
     filed_exemptions = models.IntegerField()
     rec_postenroll_support = models.IntegerField()
-    trends = models.CharField(max_length=5000)
+    trends = models.CharField(max_length=5000, blank=True, null=True)
     success_story = models.CharField(max_length=5000)
     hardship_or_difficulty = models.CharField(max_length=5000)
     comments = models.CharField(max_length=5000, blank=True, null=True)
@@ -103,6 +112,8 @@ class MetricsSubmission(models.Model):
     appointments_cmplx_medicaid = models.IntegerField(null=True)
     appointments_postenroll_assistance = models.IntegerField(null=True)
     appointments_over_three_hours = models.IntegerField(null=True)
+    submission_date = models.DateField(null=True)
+    county = models.CharField(null=True, max_length=1000)
     date_created = models.DateTimeField(null=True, auto_now_add=True)
 
     def return_values_dict(self):
@@ -127,7 +138,9 @@ class MetricsSubmission(models.Model):
                       "Appointments Complex Medicaid": self.appointments_cmplx_medicaid,
                       "Appointments Post-Enrollment Assistance": self.appointments_postenroll_assistance,
                       "Appointments Over 3 Hours": self.appointments_over_three_hours,
-                      "Date Created": self.date_created.isoformat()
+                      "Staff Member ID": self.staff_member_id,
+                      "Date Created": self.date_created.isoformat(),
+                      "Submission Date": self.submission_date.isoformat(),
                       }
 
         return valuesdict
