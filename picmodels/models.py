@@ -113,7 +113,7 @@ class MetricsSubmission(models.Model):
     appointments_postenroll_assistance = models.IntegerField(blank=True, null=True)
     appointments_over_three_hours = models.IntegerField(blank=True, null=True)
     submission_date = models.DateField(blank=True, null=True)
-    county = models.CharField(blank=True, max_length=1000, default="")
+    county = models.CharField(max_length=1000, default="")
     date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
 
     def return_values_dict(self):
