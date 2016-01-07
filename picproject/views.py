@@ -327,7 +327,6 @@ def metrics_submission_handler(request):
         rqst_usr_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
         rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
         rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
-        rqst_usr_county = clean_json_string_input(post_json, "root", "User County", post_errors)
 
         consumer_metrics = clean_dict_input(post_json, "root", "Consumer Metrics", post_errors)
         if consumer_metrics is not None:
@@ -402,8 +401,7 @@ def metrics_submission_handler(request):
         if len(post_errors) == 0:
             usr_rqst_values = {"first_name": rqst_usr_f_name,
                                "last_name": rqst_usr_l_name,
-                               "type": rqst_usr_type,
-                               "county": rqst_usr_county}
+                               "type": rqst_usr_type,}
             user_instance, user_instance_created = PICStaff.objects.get_or_create(email=rqst_usr_email,
                                                                                   defaults=usr_rqst_values)
 
