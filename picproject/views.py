@@ -359,8 +359,7 @@ def metrics_submission_handler(request):
             rqst_usr_outr_stkehol_act = clean_json_string_input(consumer_metrics, "Consumer Metrics",
                                                                 "Outreach and Stakeholder Activities", post_errors,
                                                                 empty_string_allowed=True, none_allowed=True)
-            rqst_metrics_county = clean_json_string_input(consumer_metrics, "Consumer Metrics", "County", post_errors,
-                                                          empty_string_allowed=True, none_allowed=True)
+            rqst_metrics_county = clean_json_string_input(consumer_metrics, "Consumer Metrics", "County", post_errors)
 
             metrics_date_dict = clean_dict_input(consumer_metrics, "Consumer Metrics", "Metrics Date", post_errors)
             if metrics_date_dict is not None:
