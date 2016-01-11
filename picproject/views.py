@@ -686,7 +686,7 @@ def staff_api_handler(request):
                     for staff_member in staff_members:
                         staff_dict[staff_member.id] = staff_member.return_values_dict()
                     staff_list = []
-                    for staff_key, staff_entry in staff_member_dict.iteritems():
+                    for staff_key, staff_entry in staff_dict.iteritems():
                         staff_list.append(staff_entry)
                     response_raw_data["Data"] = staff_list
                     # response_raw_data["Data"] = staff_dict
