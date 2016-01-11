@@ -574,7 +574,12 @@ def staff_api_handler(request):
                     staff_member_dict[rqst_full_name] = [staff_member.return_values_dict()]
                 else:
                     staff_member_dict[rqst_full_name].append(staff_member.return_values_dict())
-            response_raw_data["Data"] = staff_member_dict
+
+            staff_member_list = []
+            for staff_key, staff_entry in staff_member_dict.iteritems():
+                staff_member_list.append(staff_entry)
+            response_raw_data["Data"] = staff_member_list
+            # response_raw_data["Data"] = staff_member_dict
         else:
             response_raw_data['Status']['Error Code'] = 1
             rqst_errors.append('Staff Member with name: {!s} {!s} not found in database'.format(rqst_first_name,
@@ -591,7 +596,11 @@ def staff_api_handler(request):
                 else:
                     staff_dict[email].append(staff_member.return_values_dict())
         if len(staff_dict) > 0:
-            response_raw_data["Data"] = staff_dict
+            staff_list = []
+            for staff_key, staff_entry in staff_dict.iteritems():
+                staff_list.append(staff_entry)
+            response_raw_data["Data"] = staff_list
+            # response_raw_data["Data"] = staff_dict
             for email in list_of_emails:
                 if email not in staff_dict:
                     if response_raw_data['Status']['Error Code'] != 2:
@@ -613,7 +622,11 @@ def staff_api_handler(request):
                 else:
                     staff_dict[first_name].append(staff_member.return_values_dict())
         if len(staff_dict) > 0:
-            response_raw_data["Data"] = staff_dict
+            staff_list = []
+            for staff_key, staff_entry in staff_dict.iteritems():
+                staff_list.append(staff_entry)
+            response_raw_data["Data"] = staff_list
+            # response_raw_data["Data"] = staff_dict
             for name in list_of_first_names:
                 if name not in staff_dict:
                     if response_raw_data['Status']['Error Code'] != 2:
@@ -635,7 +648,11 @@ def staff_api_handler(request):
                 else:
                     staff_dict[last_name].append(staff_member.return_values_dict())
         if len(staff_dict) > 0:
-            response_raw_data["Data"] = staff_dict
+            staff_list = []
+            for staff_key, staff_entry in staff_dict.iteritems():
+                staff_list.append(staff_entry)
+            response_raw_data["Data"] = staff_list
+            # response_raw_data["Data"] = staff_dict
             for name in list_of_last_names:
                 if name not in staff_dict:
                     if response_raw_data['Status']['Error Code'] != 2:
@@ -653,7 +670,11 @@ def staff_api_handler(request):
             staff_member_dict = {}
             for staff_member in all_staff_members:
                 staff_member_dict[staff_member.id] = staff_member.return_values_dict()
-            response_raw_data["Data"] = staff_member_dict
+            staff_list = []
+            for staff_key, staff_entry in staff_member_dict.iteritems():
+                staff_list.append(staff_entry)
+            response_raw_data["Data"] = staff_list
+            # response_raw_data["Data"] = staff_member_dict
         else:
             list_of_ids = re.findall("\d+", rqst_staff_id)
             if len(list_of_ids) > 0:
@@ -664,7 +685,11 @@ def staff_api_handler(request):
                     staff_dict = {}
                     for staff_member in staff_members:
                         staff_dict[staff_member.id] = staff_member.return_values_dict()
-                    response_raw_data["Data"] = staff_dict
+                    staff_list = []
+                    for staff_key, staff_entry in staff_member_dict.iteritems():
+                        staff_list.append(staff_entry)
+                    response_raw_data["Data"] = staff_list
+                    # response_raw_data["Data"] = staff_dict
 
                     for staff_id in list_of_ids:
                         if staff_id not in staff_dict:
