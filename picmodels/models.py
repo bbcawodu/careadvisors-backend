@@ -141,6 +141,7 @@ class MetricsSubmission(models.Model):
                       "Staff Member ID": self.staff_member_id,
                       "Date Created": self.date_created.isoformat(),
                       "Submission Date": self.submission_date.isoformat(),
+                      "County": self.county,
                       }
 
         return valuesdict

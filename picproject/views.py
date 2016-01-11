@@ -496,6 +496,27 @@ def staff_api_handler(request):
             response_raw_data['Status']['Error Code'] = 1
             rqst_errors.append('Staff Member with name: {!s} {!s} not found in database'.format(rqst_first_name,
                                                                                                 rqst_last_name))
+    elif 'email' in rqst_params:
+        rqst_email = rqst_params['email']
+        list_of_emails = re.findall("[\w.'-@]+", rqst_email)
+        staff_dict = {}
+        for email in list_of_emails:
+            staff_members = PICStaff.objects.filter(email__iexact=email)
+            for staff_member in staff_members:
+                if email not in staff_dict:
+                    staff_dict[email] = [staff_member.return_values_dict()]
+                else:
+                    staff_dict[email].append(staff_member.return_values_dict())
+        if len(staff_dict) > 0:
+            response_raw_data["Data"] = staff_dict
+            for email in list_of_emails:
+                if email not in staff_dict:
+                    if response_raw_data['Status']['Error Code'] != 2:
+                        response_raw_data['Status']['Error Code'] = 2
+                    rqst_errors.append('Staff Member with email: {!s} not found in database'.format(email))
+        else:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('Staff Member with emails(s): {!s} not found in database'.format(rqst_email))
 
     elif 'fname' in rqst_params:
         rqst_first_name = rqst_params['fname']
@@ -583,27 +604,63 @@ def staff_api_handler(request):
     return response
 
 
+# defines function to group metrics by given parameter
+def group_metrics(metrics_dict, grouping_parameter):
+    return_dict = {}
+    if grouping_parameter == "County":
+        for staff_key, staff_dict in metrics_dict.iteritems():
+            for metrics_entry in staff_dict["Metrics Data"]:
+                if metrics_entry[grouping_parameter] not in return_dict:
+                    return_dict[metrics_entry[grouping_parameter]] = {staff_key: {"Metrics Data": [metrics_entry],
+                                                                      "Staff Information": staff_dict["Staff Information"]}}
+                else:
+                    if staff_key not in return_dict[metrics_entry[grouping_parameter]]:
+                        return_dict[metrics_entry[grouping_parameter]][staff_key] = {"Metrics Data": [metrics_entry],
+                                                                                     "Staff Information": staff_dict["Staff Information"]}
+                    else:
+                        return_dict[metrics_entry[grouping_parameter]][staff_key]["Metrics Data"].append(metrics_entry)
+    return return_dict
+
+
 # defines view for returning metrics data from api requests
 def metrics_api_handler(request):
     rqst_params = request.GET
+    if "county" in rqst_params:
+        rqst_counties = rqst_params["county"]
+        list_of_counties = re.findall("[\w. '-]+", rqst_counties)
+    else:
+        list_of_counties = None
 
     response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
     rqst_errors = []
 
     if 'id' in rqst_params:
         rqst_staff_id = str(rqst_params["id"])
-
         if rqst_staff_id == "all":
-            all_metrics_submissions = MetricsSubmission.objects.all()
-            if len(all_metrics_submissions) > 0:
+            if list_of_counties is not None:
+                metrics_submissions = []
+                for county in list_of_counties:
+                    county_metrics = MetricsSubmission.objects.filter(county__iexact=county)
+                    for metrics_entry in county_metrics:
+                        metrics_submissions.append(metrics_entry)
+            else:
+                metrics_submissions = MetricsSubmission.objects.all()
+
+            if len(metrics_submissions) > 0:
                 metrics_dict = {}
-                for metrics_submission in all_metrics_submissions:
+                for metrics_submission in metrics_submissions:
                     if metrics_submission.staff_member_id not in metrics_dict:
                         metrics_dict[metrics_submission.staff_member_id] = {"Metrics Data": [metrics_submission.return_values_dict()]}
                         metrics_dict[metrics_submission.staff_member_id]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
                     else:
                         metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(metrics_submission.return_values_dict())
-                response_raw_data["Data"] = metrics_dict
+                if "groupby" in rqst_params:
+                    if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
+                        response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                    else:
+                        response_raw_data["Data"] = metrics_dict
+                else:
+                    response_raw_data["Data"] = metrics_dict
             else:
                 response_raw_data['Status']['Error Code'] = 1
                 rqst_errors.append('No metrics entries found in database')
@@ -612,7 +669,15 @@ def metrics_api_handler(request):
             if len(list_of_ids) > 0:
                 for indx, element in enumerate(list_of_ids):
                     list_of_ids[indx] = int(element)
-                metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+                if list_of_counties is not None:
+                    metrics_submissions = []
+                    for county in list_of_counties:
+                        county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                        for metrics_entry in county_metrics:
+                            metrics_submissions.append(metrics_entry)
+                else:
+                    metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+
                 if len(metrics_submissions) > 0:
                     metrics_dict = {}
                     for metrics_submission in metrics_submissions:
@@ -622,7 +687,14 @@ def metrics_api_handler(request):
                         else:
                             metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(
                                     metrics_submission.return_values_dict())
-                    response_raw_data["Data"] = metrics_dict
+                    if "groupby" in rqst_params:
+                        if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
+                            response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                        else:
+                            response_raw_data["Data"] = metrics_dict
+                    else:
+                        response_raw_data["Data"] = metrics_dict
+
                     for staff_id in list_of_ids:
                         if staff_id not in metrics_dict:
                             if response_raw_data['Status']['Error Code'] != 2:
@@ -634,16 +706,140 @@ def metrics_api_handler(request):
             else:
                 response_raw_data['Status']['Error Code'] = 1
                 rqst_errors.append('No staff IDs provided in request')
+
+    elif 'fname' in rqst_params and 'lname' in rqst_params:
+        list_of_first_names = re.findall("[\w. '-]+", rqst_params['fname'])
+        list_of_last_names = re.findall("[\w. '-]+", rqst_params['lname'])
+
+        if len(list_of_first_names) == len(list_of_last_names):
+            list_of_ids = []
+            for i, first_name in enumerate(list_of_first_names):
+                last_name = list_of_last_names[i]
+                name_ids = PICStaff.objects.filter(first_name__iexact=first_name, last_name__iexact=last_name).values_list('id', flat=True)
+                if len(name_ids) > 0:
+                    list_of_ids.append(name_ids)
+                else:
+                    if response_raw_data['Status']['Error Code'] != 2:
+                        response_raw_data['Status']['Error Code'] = 2
+                    rqst_errors.append('Metrics for staff member with name: {!s} {!s} not found in database'.format(first_name, last_name))
+            list_of_ids = list(set().union(*list_of_ids))
+            if len(list_of_ids) > 0:
+                for indx, element in enumerate(list_of_ids):
+                    list_of_ids[indx] = int(element)
+                if list_of_counties is not None:
+                    metrics_submissions = []
+                    for county in list_of_counties:
+                        county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                        for metrics_entry in county_metrics:
+                            metrics_submissions.append(metrics_entry)
+                else:
+                    metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+
+                if len(metrics_submissions) > 0:
+                    metrics_dict = {}
+                    for metrics_submission in metrics_submissions:
+                        name = '{!s} {!s}'.format(metrics_submission.staff_member.first_name, metrics_submission.staff_member.last_name)
+                        if name not in metrics_dict:
+                            metrics_dict[name] = {"Metrics Data": [metrics_submission.return_values_dict()]}
+                            metrics_dict[name]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+                        else:
+                            metrics_dict[name]["Metrics Data"].append(metrics_submission.return_values_dict())
+                    if "groupby" in rqst_params:
+                        if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
+                            response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                        else:
+                            response_raw_data["Data"] = metrics_dict
+                    else:
+                        response_raw_data["Data"] = metrics_dict
+
+                else:
+                    if response_raw_data['Status']['Error Code'] != 2:
+                        rqst_errors.append('No metrics entries for first: {!s} and last name(s): {!s} not found in database'.format(rqst_params['fname'],
+                                                                                                                                    rqst_params['lname']))
+                    response_raw_data['Status']['Error Code'] = 1
+            else:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    rqst_errors.append('No staff entries for first: {!s} and last name(s): {!s} not found in database'.format(rqst_params['fname'],
+                                                                                                                              rqst_params['lname']))
+                response_raw_data['Status']['Error Code'] = 1
+        else:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('Length of first name list must be equal to length of last name list')
+
+    elif 'email' in rqst_params:
+        list_of_emails = re.findall("[\w. '-@]+", rqst_params['email'])
+        response_raw_data['Data'] = list_of_emails
+        # list_of_ids = []
+        # for email in list_of_emails:
+        #     email_ids = PICStaff.objects.filter(email__iexact=email).values_list('id', flat=True)
+        #     if len(email_ids) > 0:
+        #         list_of_ids.append(email_ids)
+        #     else:
+        #         if response_raw_data['Status']['Error Code'] != 2:
+        #             response_raw_data['Status']['Error Code'] = 2
+        #         rqst_errors.append('Staff member with email: {!s} not found in database'.format(email))
+        # list_of_ids = list(set().union(*list_of_ids))
+        # if len(list_of_ids) > 0:
+        #     for indx, element in enumerate(list_of_ids):
+        #         list_of_ids[indx] = int(element)
+        #     if list_of_counties is not None:
+        #         metrics_submissions = []
+        #         for county in list_of_counties:
+        #             county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+        #             for metrics_entry in county_metrics:
+        #                 metrics_submissions.append(metrics_entry)
+        #     else:
+        #         metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+        #
+        #     if len(metrics_submissions) > 0:
+        #         metrics_dict = {}
+        #         for metrics_submission in metrics_submissions:
+        #             if metrics_submission.staff_member.email not in metrics_dict:
+        #                 metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [metrics_submission.return_values_dict()]}
+        #                 metrics_dict[metrics_submission.staff_member.email]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+        #             else:
+        #                 metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(metrics_submission.return_values_dict())
+        #         if "groupby" in rqst_params:
+        #             if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
+        #                 response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+        #             else:
+        #                 response_raw_data["Data"] = metrics_dict
+        #         else:
+        #             response_raw_data["Data"] = metrics_dict
+        #
+        #     else:
+        #         if response_raw_data['Status']['Error Code'] != 2:
+        #             rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_params['email']))
+        #         response_raw_data['Status']['Error Code'] = 1
+        # else:
+        #     if response_raw_data['Status']['Error Code'] != 2:
+        #         rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_params['email']))
+        #     response_raw_data['Status']['Error Code'] = 1
+
     elif 'fname' in rqst_params:
-        list_of_first_names = re.findall("[\w.'-]+", rqst_params['fname'])
+        list_of_first_names = re.findall("[\w. '-]+", rqst_params['fname'])
         list_of_ids = []
         for first_name in list_of_first_names:
-            list_of_ids.append(PICStaff.objects.filter(first_name__iexact=first_name).values_list('id', flat=True))
+            first_name_ids = PICStaff.objects.filter(first_name__iexact=first_name).values_list('id', flat=True)
+            if len(first_name_ids) > 0:
+                list_of_ids.append(first_name_ids)
+            else:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    response_raw_data['Status']['Error Code'] = 2
+                rqst_errors.append('Metrics for staff member with first name: {!s} not found in database'.format(first_name))
         list_of_ids = list(set().union(*list_of_ids))
         if len(list_of_ids) > 0:
             for indx, element in enumerate(list_of_ids):
                 list_of_ids[indx] = int(element)
-            metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+            if list_of_counties is not None:
+                metrics_submissions = []
+                for county in list_of_counties:
+                    county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                    for metrics_entry in county_metrics:
+                        metrics_submissions.append(metrics_entry)
+            else:
+                metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
                 for metrics_submission in metrics_submissions:
@@ -652,30 +848,47 @@ def metrics_api_handler(request):
                         metrics_dict[metrics_submission.staff_member.first_name]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
                     else:
                         metrics_dict[metrics_submission.staff_member.first_name]["Metrics Data"].append(metrics_submission.return_values_dict())
-                response_raw_data["Data"] = metrics_dict
+                if "groupby" in rqst_params:
+                    if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
+                        response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                    else:
+                        response_raw_data["Data"] = metrics_dict
+                else:
+                    response_raw_data["Data"] = metrics_dict
 
-                for name in list_of_first_names:
-                    if name not in metrics_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('Metrics for staff Member with first name: {!s} not found in database'.format(name))
             else:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_params['fname']))
                 response_raw_data['Status']['Error Code'] = 1
-                rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_params['fname']))
         else:
+            if response_raw_data['Status']['Error Code'] != 2:
+                rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_params['fname']))
             response_raw_data['Status']['Error Code'] = 1
-            rqst_errors.append('No staff entries for first name(s): {!s} not found in database'.format(rqst_params['fname']))
 
     elif 'lname' in rqst_params:
-        list_of_last_names = re.findall("[\w.'-]+", rqst_params['lname'])
+        list_of_last_names = re.findall("[\w. '-]+", rqst_params['lname'])
         list_of_ids = []
         for last_name in list_of_last_names:
-            list_of_ids.append(PICStaff.objects.filter(last_name__iexact=last_name).values_list('id', flat=True))
+            last_name_ids = PICStaff.objects.filter(last_name__iexact=last_name).values_list('id', flat=True)
+            if len(last_name_ids) > 0:
+                list_of_ids.append(last_name_ids)
+            else:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    response_raw_data['Status']['Error Code'] = 2
+                rqst_errors.append('Metrics for staff member with last name: {!s} not found in database'.format(last_name))
         list_of_ids = list(set().union(*list_of_ids))
         if len(list_of_ids) > 0:
             for indx, element in enumerate(list_of_ids):
                 list_of_ids[indx] = int(element)
-            metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+            if list_of_counties is not None:
+                metrics_submissions = []
+                for county in list_of_counties:
+                    county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                    for metrics_entry in county_metrics:
+                        metrics_submissions.append(metrics_entry)
+            else:
+                metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
                 for metrics_submission in metrics_submissions:
@@ -684,19 +897,49 @@ def metrics_api_handler(request):
                         metrics_dict[metrics_submission.staff_member.last_name]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
                     else:
                         metrics_dict[metrics_submission.staff_member.last_name]["Metrics Data"].append(metrics_submission.return_values_dict())
+                if "groupby" in rqst_params:
+                    if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
+                        response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                    else:
+                        response_raw_data["Data"] = metrics_dict
+                else:
+                    response_raw_data["Data"] = metrics_dict
+
+            else:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_params['lname']))
+                response_raw_data['Status']['Error Code'] = 1
+        else:
+            if response_raw_data['Status']['Error Code'] != 2:
+                rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_params['lname']))
+            response_raw_data['Status']['Error Code'] = 1
+
+    elif list_of_counties is not None:
+        metrics_submissions = []
+        for county in list_of_counties:
+            county_metrics = MetricsSubmission.objects.filter(county__iexact=county)
+            for metrics_entry in county_metrics:
+                metrics_submissions.append(metrics_entry)
+
+        if len(metrics_submissions) > 0:
+            metrics_dict = {}
+            for metrics_submission in metrics_submissions:
+                if metrics_submission.staff_member_id not in metrics_dict:
+                    metrics_dict[metrics_submission.staff_member_id] = {"Metrics Data": [metrics_submission.return_values_dict()]}
+                    metrics_dict[metrics_submission.staff_member_id]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+                else:
+                    metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(metrics_submission.return_values_dict())
+            if "groupby" in rqst_params:
+                if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
+                    response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                else:
+                    response_raw_data["Data"] = metrics_dict
+            else:
                 response_raw_data["Data"] = metrics_dict
 
-                for name in list_of_last_names:
-                    if name not in metrics_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('Metrics for staff Member with last name: {!s} not found in database'.format(name))
-            else:
-                response_raw_data['Status']['Error Code'] = 1
-                rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_params['lname']))
         else:
             response_raw_data['Status']['Error Code'] = 1
-            rqst_errors.append('No staff entries for last name(s): {!s} not found in database'.format(rqst_params['lname']))
+            rqst_errors.append('No metrics entries found in database for counties: {!s}'.format(rqst_counties))
     else:
         response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('No Params')
