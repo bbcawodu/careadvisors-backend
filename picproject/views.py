@@ -656,11 +656,24 @@ def metrics_api_handler(request):
                         metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(metrics_submission.return_values_dict())
                 if "groupby" in rqst_params:
                     if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                        response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                        metrics_dict = group_metrics(metrics_dict, "County")
+                        metrics_list = []
+                        for metrics_key, metrics_entry in metrics_dict.iteritems():
+                            metrics_list.append(metrics_entry)
+                        response_raw_data["Data"] = metrics_list
+                        # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
                     else:
+                        metrics_list = []
+                        for metrics_key, metrics_entry in metrics_dict.iteritems():
+                            metrics_list.append(metrics_entry)
+                        response_raw_data["Data"] = metrics_list
                         response_raw_data["Data"] = metrics_dict
                 else:
-                    response_raw_data["Data"] = metrics_dict
+                    metrics_list = []
+                    for metrics_key, metrics_entry in metrics_dict.iteritems():
+                        metrics_list.append(metrics_entry)
+                    response_raw_data["Data"] = metrics_list
+                    # response_raw_data["Data"] = metrics_dict
             else:
                 response_raw_data['Status']['Error Code'] = 1
                 rqst_errors.append('No metrics entries found in database')
@@ -689,11 +702,24 @@ def metrics_api_handler(request):
                                     metrics_submission.return_values_dict())
                     if "groupby" in rqst_params:
                         if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                            response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                            metrics_dict = group_metrics(metrics_dict, "County")
+                            metrics_list = []
+                            for metrics_key, metrics_entry in metrics_dict.iteritems():
+                                metrics_list.append(metrics_entry)
+                            response_raw_data["Data"] = metrics_list
+                            # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
                         else:
-                            response_raw_data["Data"] = metrics_dict
+                            metrics_list = []
+                            for metrics_key, metrics_entry in metrics_dict.iteritems():
+                                metrics_list.append(metrics_entry)
+                            response_raw_data["Data"] = metrics_list
+                            # response_raw_data["Data"] = metrics_dict
                     else:
-                        response_raw_data["Data"] = metrics_dict
+                        metrics_list = []
+                        for metrics_key, metrics_entry in metrics_dict.iteritems():
+                            metrics_list.append(metrics_entry)
+                        response_raw_data["Data"] = metrics_list
+                        # response_raw_data["Data"] = metrics_dict
 
                     for staff_id in list_of_ids:
                         if staff_id not in metrics_dict:
@@ -746,11 +772,24 @@ def metrics_api_handler(request):
                             metrics_dict[name]["Metrics Data"].append(metrics_submission.return_values_dict())
                     if "groupby" in rqst_params:
                         if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                            response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                            metrics_dict = group_metrics(metrics_dict, "County")
+                            metrics_list = []
+                            for metrics_key, metrics_entry in metrics_dict.iteritems():
+                                metrics_list.append(metrics_entry)
+                            response_raw_data["Data"] = metrics_list
+                            # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
                         else:
-                            response_raw_data["Data"] = metrics_dict
+                            metrics_list = []
+                            for metrics_key, metrics_entry in metrics_dict.iteritems():
+                                metrics_list.append(metrics_entry)
+                            response_raw_data["Data"] = metrics_list
+                            # response_raw_data["Data"] = metrics_dict
                     else:
-                        response_raw_data["Data"] = metrics_dict
+                        metrics_list = []
+                        for metrics_key, metrics_entry in metrics_dict.iteritems():
+                            metrics_list.append(metrics_entry)
+                        response_raw_data["Data"] = metrics_list
+                        # response_raw_data["Data"] = metrics_dict
 
                 else:
                     if response_raw_data['Status']['Error Code'] != 2:
@@ -767,7 +806,7 @@ def metrics_api_handler(request):
             rqst_errors.append('Length of first name list must be equal to length of last name list')
 
     elif 'email' in rqst_params:
-        list_of_emails = re.findall("[\w. '-@]+", rqst_params['email'])
+        list_of_emails = re.findall(r"[\w. '-@]+", rqst_params['email'])
         response_raw_data['Data'] = list_of_emails
         # list_of_ids = []
         # for email in list_of_emails:
@@ -801,11 +840,24 @@ def metrics_api_handler(request):
         #                 metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(metrics_submission.return_values_dict())
         #         if "groupby" in rqst_params:
         #             if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-        #                 response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+        #                 metrics_dict = group_metrics(metrics_dict, "County")
+        #                 metrics_list = []
+        #                 for metrics_key, metrics_entry in metrics_dict.iteritems():
+        #                     metrics_list.append(metrics_entry)
+        #                 response_raw_data["Data"] = metrics_list
+        #                 # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
         #             else:
-        #                 response_raw_data["Data"] = metrics_dict
+        #                 metrics_list = []
+        #                 for metrics_key, metrics_entry in metrics_dict.iteritems():
+        #                     metrics_list.append(metrics_entry)
+        #                 response_raw_data["Data"] = metrics_list
+        #                 # response_raw_data["Data"] = metrics_dict
         #         else:
-        #             response_raw_data["Data"] = metrics_dict
+        #             metrics_list = []
+        #             for metrics_key, metrics_entry in metrics_dict.iteritems():
+        #                 metrics_list.append(metrics_entry)
+        #             response_raw_data["Data"] = metrics_list
+        #             # response_raw_data["Data"] = metrics_dict
         #
         #     else:
         #         if response_raw_data['Status']['Error Code'] != 2:
@@ -850,11 +902,24 @@ def metrics_api_handler(request):
                         metrics_dict[metrics_submission.staff_member.first_name]["Metrics Data"].append(metrics_submission.return_values_dict())
                 if "groupby" in rqst_params:
                     if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                        response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                        metrics_dict = group_metrics(metrics_dict, "County")
+                        metrics_list = []
+                        for metrics_key, metrics_entry in metrics_dict.iteritems():
+                            metrics_list.append(metrics_entry)
+                        response_raw_data["Data"] = metrics_list
+                        # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
                     else:
-                        response_raw_data["Data"] = metrics_dict
+                        metrics_list = []
+                        for metrics_key, metrics_entry in metrics_dict.iteritems():
+                            metrics_list.append(metrics_entry)
+                        response_raw_data["Data"] = metrics_list
+                        # response_raw_data["Data"] = metrics_dict
                 else:
-                    response_raw_data["Data"] = metrics_dict
+                    metrics_list = []
+                    for metrics_key, metrics_entry in metrics_dict.iteritems():
+                        metrics_list.append(metrics_entry)
+                    response_raw_data["Data"] = metrics_list
+                    # response_raw_data["Data"] = metrics_dict
 
             else:
                 if response_raw_data['Status']['Error Code'] != 2:
@@ -899,11 +964,24 @@ def metrics_api_handler(request):
                         metrics_dict[metrics_submission.staff_member.last_name]["Metrics Data"].append(metrics_submission.return_values_dict())
                 if "groupby" in rqst_params:
                     if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                        response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                        metrics_dict = group_metrics(metrics_dict, "County")
+                        metrics_list = []
+                        for metrics_key, metrics_entry in metrics_dict.iteritems():
+                            metrics_list.append(metrics_entry)
+                        response_raw_data["Data"] = metrics_list
+                        # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
                     else:
-                        response_raw_data["Data"] = metrics_dict
+                        metrics_list = []
+                        for metrics_key, metrics_entry in metrics_dict.iteritems():
+                            metrics_list.append(metrics_entry)
+                        response_raw_data["Data"] = metrics_list
+                        # response_raw_data["Data"] = metrics_dict
                 else:
-                    response_raw_data["Data"] = metrics_dict
+                    metrics_list = []
+                    for metrics_key, metrics_entry in metrics_dict.iteritems():
+                        metrics_list.append(metrics_entry)
+                    response_raw_data["Data"] = metrics_list
+                    # response_raw_data["Data"] = metrics_dict
 
             else:
                 if response_raw_data['Status']['Error Code'] != 2:
@@ -931,11 +1009,24 @@ def metrics_api_handler(request):
                     metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(metrics_submission.return_values_dict())
             if "groupby" in rqst_params:
                 if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                    response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                    metrics_dict = group_metrics(metrics_dict, "County")
+                    metrics_list = []
+                    for metrics_key, metrics_entry in metrics_dict.iteritems():
+                        metrics_list.append(metrics_entry)
+                    response_raw_data["Data"] = metrics_list
+                    # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
                 else:
-                    response_raw_data["Data"] = metrics_dict
+                    metrics_list = []
+                    for metrics_key, metrics_entry in metrics_dict.iteritems():
+                        metrics_list.append(metrics_entry)
+                    response_raw_data["Data"] = metrics_list
+                    # response_raw_data["Data"] = metrics_dict
             else:
-                response_raw_data["Data"] = metrics_dict
+                metrics_list = []
+                for metrics_key, metrics_entry in metrics_dict.iteritems():
+                    metrics_list.append(metrics_entry)
+                response_raw_data["Data"] = metrics_list
+                # response_raw_data["Data"] = metrics_dict
 
         else:
             response_raw_data['Status']['Error Code'] = 1
