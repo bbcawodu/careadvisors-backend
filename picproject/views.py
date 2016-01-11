@@ -313,7 +313,7 @@ def appointment_viewing_handler(request):
 
 # defines view for saving scheduled appointments to the database
 @csrf_exempt
-def metrics_submission_handler(request):
+def staff_submission_handler(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data = {'status': {"Error Code": 0, "Version": 1.0}}
     post_errors = []
@@ -326,6 +326,80 @@ def metrics_submission_handler(request):
         rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
         rqst_usr_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
         rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+        rqst_county = clean_json_string_input(post_json, "root", "User County", post_errors)
+        rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
+
+        # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
+        # create and save database entry for appointment
+        if len(post_errors) == 0:
+            usr_rqst_values = {"first_name": rqst_usr_f_name,
+                               "last_name": rqst_usr_l_name,
+                               "type": rqst_usr_type,
+                               "county": rqst_county,}
+            user_instance, user_instance_created = PICStaff.objects.get_or_create(email=rqst_usr_email,
+                                                                                  defaults=usr_rqst_values)
+            if not user_instance_created:
+                post_errors.append('Staff database entry already exists for the email: {!s}'.format(rqst_usr_email))
+                response_raw_data["status"]["Error Code"] = 1
+                response_raw_data["status"]["Errors"] = post_errors
+
+                for message in post_errors:
+                    print message
+                sys.stdout.flush()
+            else:
+                response_raw_data['Data'] = {"Database ID": user_instance.id}
+
+        # add parsing errors to response dictionary
+        else:
+            response_raw_data["status"]["Error Code"] = 1
+            response_raw_data["status"]["Errors"] = post_errors
+
+            for message in post_errors:
+                print message
+                sys.stdout.flush()
+
+                # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+                # response['Access-Control-Allow-Origin'] = "*"
+                # return response
+
+    # elif request.method == "OPTIONS":
+    #     response = HttpResponse("")
+    #     response['Access-Control-Allow-Origin'] = "*"
+    #     response['Access-Control-Allow-Methods'] = "POST, OPTIONS, GET"
+    #     response['Access-Control-Allow-Headers'] = "X-Requested-With"
+    #     response['Access-Control-Max-Age'] = "1800"
+    #     return response
+
+    # if a GET request is made, add error message to response data
+    else:
+        response_raw_data["status"]["Error Code"] = 1
+        post_errors.append("Request needs POST data")
+        response_raw_data["status"]["Errors"] = post_errors
+        for message in post_errors:
+            print message
+        sys.stdout.flush()
+
+            # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+            # response['Access-Control-Allow-Origin'] = "*"
+            # return response
+
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
+
+
+# defines view for saving scheduled appointments to the database
+@csrf_exempt
+def metrics_submission_handler(request):
+    # initialize dictionary for response data, including parsing errors
+    response_raw_data = {'status': {"Error Code": 0, "Version": 1.0}}
+    post_errors = []
+
+    if request.method == 'POST' or request.is_ajax():
+        post_data = request.body
+        post_json = json.loads(post_data)
+
+        # Code to parse POSTed json request
+        rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
         rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
 
         consumer_metrics = clean_dict_input(post_json, "root", "Consumer Metrics", post_errors)
@@ -399,40 +473,49 @@ def metrics_submission_handler(request):
         # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
         # create and save database entry for appointment
         if len(post_errors) == 0:
-            usr_rqst_values = {"first_name": rqst_usr_f_name,
-                               "last_name": rqst_usr_l_name,
-                               "type": rqst_usr_type,}
-            user_instance, user_instance_created = PICStaff.objects.get_or_create(email=rqst_usr_email,
-                                                                                  defaults=usr_rqst_values)
+            # usr_rqst_values = {"first_name": rqst_usr_f_name,
+            #                    "last_name": rqst_usr_l_name,
+            #                    "type": rqst_usr_type,}
+            # user_instance, user_instance_created = PICStaff.objects.get_or_create(email=rqst_usr_email,
+            #                                                                       defaults=usr_rqst_values)
+            try:
+                user_instance = PICStaff.objects.get(email__iexact=rqst_usr_email)
 
-            new_metrics_instance = MetricsSubmission(staff_member=user_instance,
-                                                     received_education=rqst_cons_rec_edu,
-                                                     applied_medicaid=rqst_cons_app_maid,
-                                                     selected_qhp=rqst_cons_sel_qhp,
-                                                     enrolled_shop=rqst_cons_enr_shop,
-                                                     ref_medicaid_or_chip=rqst_cons_ref_maidorchip,
-                                                     ref_shop=rqst_cons_ref_shop,
-                                                     filed_exemptions=rqst_cons_filed_exemptions,
-                                                     rec_postenroll_support=rqst_cons_rec_postenr_support,
-                                                     trends=rqst_cons_trends,
-                                                     success_story=rqst_cons_success_story,
-                                                     hardship_or_difficulty=rqst_cons_hard_or_diff,
-                                                     comments=rqst_usr_comments,
-                                                     outreach_stakeholder_activity=rqst_usr_outr_stkehol_act,
-                                                     county=rqst_metrics_county,
-                                                     submission_date=metrics_date,)
+                new_metrics_instance = MetricsSubmission(staff_member=user_instance,
+                                                         received_education=rqst_cons_rec_edu,
+                                                         applied_medicaid=rqst_cons_app_maid,
+                                                         selected_qhp=rqst_cons_sel_qhp,
+                                                         enrolled_shop=rqst_cons_enr_shop,
+                                                         ref_medicaid_or_chip=rqst_cons_ref_maidorchip,
+                                                         ref_shop=rqst_cons_ref_shop,
+                                                         filed_exemptions=rqst_cons_filed_exemptions,
+                                                         rec_postenroll_support=rqst_cons_rec_postenr_support,
+                                                         trends=rqst_cons_trends,
+                                                         success_story=rqst_cons_success_story,
+                                                         hardship_or_difficulty=rqst_cons_hard_or_diff,
+                                                         comments=rqst_usr_comments,
+                                                         outreach_stakeholder_activity=rqst_usr_outr_stkehol_act,
+                                                         county=rqst_metrics_county,
+                                                         submission_date=metrics_date,)
 
-            if rqst_usr_type == "IPC":
-                new_metrics_instance.appointments_scheduled = rqst_cons_apts_sched
-                new_metrics_instance.confirmation_calls = rqst_cons_confirm_calls
-                new_metrics_instance.appointments_held = rqst_cons_apts_held
-                new_metrics_instance.appointments_over_hour = rqst_cons_apts_over_hour
-                new_metrics_instance.appointments_over_three_hours = rqst_cons_apts_over_3_hours
-                new_metrics_instance.appointments_cmplx_market = rqst_cons_apts_cplx_market
-                new_metrics_instance.appointments_cmplx_medicaid = rqst_cons_apts_cplx_maid
-                new_metrics_instance.appointments_postenroll_assistance = rqst_cons_apts_postenr_assis
+                if rqst_usr_type == "IPC":
+                    new_metrics_instance.appointments_scheduled = rqst_cons_apts_sched
+                    new_metrics_instance.confirmation_calls = rqst_cons_confirm_calls
+                    new_metrics_instance.appointments_held = rqst_cons_apts_held
+                    new_metrics_instance.appointments_over_hour = rqst_cons_apts_over_hour
+                    new_metrics_instance.appointments_over_three_hours = rqst_cons_apts_over_3_hours
+                    new_metrics_instance.appointments_cmplx_market = rqst_cons_apts_cplx_market
+                    new_metrics_instance.appointments_cmplx_medicaid = rqst_cons_apts_cplx_maid
+                    new_metrics_instance.appointments_postenroll_assistance = rqst_cons_apts_postenr_assis
 
-            new_metrics_instance.save()
+                new_metrics_instance.save()
+            except models.ObjectDoesNotExist:
+                response_raw_data["status"]["Error Code"] = 1
+                post_errors.append("Staff database entry does not exist for email: {!s}".format(rqst_usr_email))
+                response_raw_data["status"]["Errors"] = post_errors
+                for message in post_errors:
+                    print message
+                sys.stdout.flush()
 
         # add parsing errors to response dictionary
         else:
@@ -807,66 +890,66 @@ def metrics_api_handler(request):
 
     elif 'email' in rqst_params:
         list_of_emails = re.findall(r"[\w. '-@]+", rqst_params['email'])
-        response_raw_data['Data'] = list_of_emails
-        # list_of_ids = []
-        # for email in list_of_emails:
-        #     email_ids = PICStaff.objects.filter(email__iexact=email).values_list('id', flat=True)
-        #     if len(email_ids) > 0:
-        #         list_of_ids.append(email_ids)
-        #     else:
-        #         if response_raw_data['Status']['Error Code'] != 2:
-        #             response_raw_data['Status']['Error Code'] = 2
-        #         rqst_errors.append('Staff member with email: {!s} not found in database'.format(email))
-        # list_of_ids = list(set().union(*list_of_ids))
-        # if len(list_of_ids) > 0:
-        #     for indx, element in enumerate(list_of_ids):
-        #         list_of_ids[indx] = int(element)
-        #     if list_of_counties is not None:
-        #         metrics_submissions = []
-        #         for county in list_of_counties:
-        #             county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
-        #             for metrics_entry in county_metrics:
-        #                 metrics_submissions.append(metrics_entry)
-        #     else:
-        #         metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
-        #
-        #     if len(metrics_submissions) > 0:
-        #         metrics_dict = {}
-        #         for metrics_submission in metrics_submissions:
-        #             if metrics_submission.staff_member.email not in metrics_dict:
-        #                 metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [metrics_submission.return_values_dict()]}
-        #                 metrics_dict[metrics_submission.staff_member.email]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
-        #             else:
-        #                 metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(metrics_submission.return_values_dict())
-        #         if "groupby" in rqst_params:
-        #             if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-        #                 metrics_dict = group_metrics(metrics_dict, "County")
-        #                 metrics_list = []
-        #                 for metrics_key, metrics_entry in metrics_dict.iteritems():
-        #                     metrics_list.append(metrics_entry)
-        #                 response_raw_data["Data"] = metrics_list
-        #                 # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
-        #             else:
-        #                 metrics_list = []
-        #                 for metrics_key, metrics_entry in metrics_dict.iteritems():
-        #                     metrics_list.append(metrics_entry)
-        #                 response_raw_data["Data"] = metrics_list
-        #                 # response_raw_data["Data"] = metrics_dict
-        #         else:
-        #             metrics_list = []
-        #             for metrics_key, metrics_entry in metrics_dict.iteritems():
-        #                 metrics_list.append(metrics_entry)
-        #             response_raw_data["Data"] = metrics_list
-        #             # response_raw_data["Data"] = metrics_dict
-        #
-        #     else:
-        #         if response_raw_data['Status']['Error Code'] != 2:
-        #             rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_params['email']))
-        #         response_raw_data['Status']['Error Code'] = 1
-        # else:
-        #     if response_raw_data['Status']['Error Code'] != 2:
-        #         rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_params['email']))
-        #     response_raw_data['Status']['Error Code'] = 1
+        # response_raw_data['Data'] = list_of_emails
+        list_of_ids = []
+        for email in list_of_emails:
+            email_ids = PICStaff.objects.filter(email__iexact=email).values_list('id', flat=True)
+            if len(email_ids) > 0:
+                list_of_ids.append(email_ids)
+            else:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    response_raw_data['Status']['Error Code'] = 2
+                rqst_errors.append('Staff member with email: {!s} not found in database'.format(email))
+        list_of_ids = list(set().union(*list_of_ids))
+        if len(list_of_ids) > 0:
+            for indx, element in enumerate(list_of_ids):
+                list_of_ids[indx] = int(element)
+            if list_of_counties is not None:
+                metrics_submissions = []
+                for county in list_of_counties:
+                    county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                    for metrics_entry in county_metrics:
+                        metrics_submissions.append(metrics_entry)
+            else:
+                metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+
+            if len(metrics_submissions) > 0:
+                metrics_dict = {}
+                for metrics_submission in metrics_submissions:
+                    if metrics_submission.staff_member.email not in metrics_dict:
+                        metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [metrics_submission.return_values_dict()]}
+                        metrics_dict[metrics_submission.staff_member.email]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+                    else:
+                        metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(metrics_submission.return_values_dict())
+                if "groupby" in rqst_params:
+                    if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
+                        metrics_dict = group_metrics(metrics_dict, "County")
+                        metrics_list = []
+                        for metrics_key, metrics_entry in metrics_dict.iteritems():
+                            metrics_list.append(metrics_entry)
+                        response_raw_data["Data"] = metrics_list
+                        # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
+                    else:
+                        metrics_list = []
+                        for metrics_key, metrics_entry in metrics_dict.iteritems():
+                            metrics_list.append(metrics_entry)
+                        response_raw_data["Data"] = metrics_list
+                        # response_raw_data["Data"] = metrics_dict
+                else:
+                    metrics_list = []
+                    for metrics_key, metrics_entry in metrics_dict.iteritems():
+                        metrics_list.append(metrics_entry)
+                    response_raw_data["Data"] = metrics_list
+                    # response_raw_data["Data"] = metrics_dict
+
+            else:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_params['email']))
+                response_raw_data['Status']['Error Code'] = 1
+        else:
+            if response_raw_data['Status']['Error Code'] != 2:
+                rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_params['email']))
+            response_raw_data['Status']['Error Code'] = 1
 
     elif 'fname' in rqst_params:
         list_of_first_names = re.findall("[\w. '-]+", rqst_params['fname'])
