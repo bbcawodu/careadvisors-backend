@@ -481,34 +481,47 @@ def metrics_submission_handler(request):
             try:
                 user_instance = PICStaff.objects.get(email__iexact=rqst_usr_email)
 
-                new_metrics_instance = MetricsSubmission(staff_member=user_instance,
-                                                         received_education=rqst_cons_rec_edu,
-                                                         applied_medicaid=rqst_cons_app_maid,
-                                                         selected_qhp=rqst_cons_sel_qhp,
-                                                         enrolled_shop=rqst_cons_enr_shop,
-                                                         ref_medicaid_or_chip=rqst_cons_ref_maidorchip,
-                                                         ref_shop=rqst_cons_ref_shop,
-                                                         filed_exemptions=rqst_cons_filed_exemptions,
-                                                         rec_postenroll_support=rqst_cons_rec_postenr_support,
-                                                         trends=rqst_cons_trends,
-                                                         success_story=rqst_cons_success_story,
-                                                         hardship_or_difficulty=rqst_cons_hard_or_diff,
-                                                         comments=rqst_usr_comments,
-                                                         outreach_stakeholder_activity=rqst_usr_outr_stkehol_act,
-                                                         county=rqst_metrics_county,
-                                                         submission_date=metrics_date,)
+                try:
+                    metrics_instance = MetricsSubmission.objects.get(staff_member=user_instance, submission_date=metrics_date)
+                    response_raw_data["status"]["Message"] = ['Metrics Entry Updated']
+                except models.ObjectDoesNotExist:
+                    metrics_instance = MetricsSubmission(staff_member=user_instance, submission_date=metrics_date)
+                    response_raw_data["status"]["Message"] = ['Metrics Entry Created']
+                except MetricsSubmission.MultipleObjectsReturned:
+                    response_raw_data["status"]["Error Code"] = 1
+                    post_errors.append("Multiple metrics entries exist for this date")
+                    response_raw_data["status"]["Errors"] = post_errors
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+                    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+                    return response
+                metrics_instance.received_education = rqst_cons_rec_edu
+                metrics_instance.applied_medicaid = rqst_cons_app_maid
+                metrics_instance.selected_qhp = rqst_cons_sel_qhp
+                metrics_instance.enrolled_shop = rqst_cons_enr_shop
+                metrics_instance.ref_medicaid_or_chip = rqst_cons_ref_maidorchip
+                metrics_instance.ref_shop = rqst_cons_ref_shop
+                metrics_instance.filed_exemptions = rqst_cons_filed_exemptions
+                metrics_instance.rec_postenroll_support = rqst_cons_rec_postenr_support
+                metrics_instance.trends = rqst_cons_trends
+                metrics_instance.success_story = rqst_cons_success_story
+                metrics_instance.hardship_or_difficulty = rqst_cons_hard_or_diff
+                metrics_instance.comments = rqst_usr_comments
+                metrics_instance.outreach_stakeholder_activity = rqst_usr_outr_stkehol_act
+                metrics_instance.county = rqst_metrics_county
 
                 if rqst_usr_type == "IPC":
-                    new_metrics_instance.appointments_scheduled = rqst_cons_apts_sched
-                    new_metrics_instance.confirmation_calls = rqst_cons_confirm_calls
-                    new_metrics_instance.appointments_held = rqst_cons_apts_held
-                    new_metrics_instance.appointments_over_hour = rqst_cons_apts_over_hour
-                    new_metrics_instance.appointments_over_three_hours = rqst_cons_apts_over_3_hours
-                    new_metrics_instance.appointments_cmplx_market = rqst_cons_apts_cplx_market
-                    new_metrics_instance.appointments_cmplx_medicaid = rqst_cons_apts_cplx_maid
-                    new_metrics_instance.appointments_postenroll_assistance = rqst_cons_apts_postenr_assis
+                    metrics_instance.appointments_scheduled = rqst_cons_apts_sched
+                    metrics_instance.confirmation_calls = rqst_cons_confirm_calls
+                    metrics_instance.appointments_held = rqst_cons_apts_held
+                    metrics_instance.appointments_over_hour = rqst_cons_apts_over_hour
+                    metrics_instance.appointments_over_three_hours = rqst_cons_apts_over_3_hours
+                    metrics_instance.appointments_cmplx_market = rqst_cons_apts_cplx_market
+                    metrics_instance.appointments_cmplx_medicaid = rqst_cons_apts_cplx_maid
+                    metrics_instance.appointments_postenroll_assistance = rqst_cons_apts_postenr_assis
 
-                new_metrics_instance.save()
+                metrics_instance.save()
             except models.ObjectDoesNotExist:
                 response_raw_data["status"]["Error Code"] = 1
                 post_errors.append("Staff database entry does not exist for email: {!s}".format(rqst_usr_email))
@@ -739,6 +752,12 @@ def metrics_api_handler(request):
     else:
         list_of_counties = None
 
+    if "time" in rqst_params:
+        rqst_time = int(rqst_params["time"])
+        look_up_date = datetime.date.today() - datetime.timedelta(days=rqst_time)
+    else:
+        rqst_time = None
+
     response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
     rqst_errors = []
 
@@ -748,11 +767,17 @@ def metrics_api_handler(request):
             if list_of_counties is not None:
                 metrics_submissions = []
                 for county in list_of_counties:
-                    county_metrics = MetricsSubmission.objects.filter(county__iexact=county)
+                    if look_up_date:
+                        county_metrics = MetricsSubmission.objects.filter(county__iexact=county).filter(submission_date__gte=look_up_date)
+                    else:
+                        county_metrics = MetricsSubmission.objects.filter(county__iexact=county)
                     for metrics_entry in county_metrics:
                         metrics_submissions.append(metrics_entry)
             else:
-                metrics_submissions = MetricsSubmission.objects.all()
+                if look_up_date:
+                    metrics_submissions = MetricsSubmission.objects.filter(submission_date__gte=look_up_date)
+                else:
+                    metrics_submissions = MetricsSubmission.objects.all()
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}

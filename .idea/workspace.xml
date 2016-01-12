@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1990ad25-4822-4da6-815b-03692f3687bb" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picproject/views.py" afterPath="$PROJECT_DIR$/picproject/views.py" />
     </list>
     <ignored path="picproject.iws" />
@@ -38,7 +39,7 @@
         <entry file="file://$PROJECT_DIR$/picmodels/models.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="137" column="71" selection-start-line="137" selection-start-column="71" selection-end-line="137" selection-end-column="71" />
+              <caret line="123" column="77" selection-start-line="123" selection-start-column="77" selection-end-line="123" selection-end-column="77" />
               <folding>
                 <element signature="e#66#94#0" expanded="true" />
               </folding>
@@ -73,8 +74,8 @@
       <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/picproject/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.423387">
-              <caret line="690" column="46" selection-start-line="690" selection-start-column="46" selection-end-line="690" selection-end-column="46" />
+            <state vertical-scroll-proportion="0.43785852">
+              <caret line="494" column="37" selection-start-line="494" selection-start-column="37" selection-end-line="494" selection-end-column="37" />
               <folding>
                 <element signature="e#61#108#0" expanded="true" />
                 <element signature="e#1294#1406#0" expanded="false" />
@@ -110,7 +111,7 @@
         <entry file="file://$PROJECT_DIR$/picproject/settings.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="139" column="1" selection-start-line="139" selection-start-column="1" selection-end-line="139" selection-end-column="1" />
+              <caret line="114" column="48" selection-start-line="114" selection-start-column="48" selection-end-line="114" selection-end-column="48" />
               <folding />
             </state>
           </provider>
@@ -967,14 +968,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/picproject/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="139" column="1" selection-start-line="139" selection-start-column="1" selection-end-line="139" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/picproject/wsgi.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1006,17 +999,25 @@
     <entry file="file://$PROJECT_DIR$/picmodels/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="137" column="71" selection-start-line="137" selection-start-column="71" selection-end-line="137" selection-end-column="71" />
+          <caret line="123" column="77" selection-start-line="123" selection-start-column="77" selection-end-line="123" selection-end-column="77" />
           <folding>
             <element signature="e#66#94#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/picproject/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="114" column="48" selection-start-line="114" selection-start-column="48" selection-end-line="114" selection-end-column="48" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/picproject/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.423387">
-          <caret line="690" column="46" selection-start-line="690" selection-start-column="46" selection-end-line="690" selection-end-column="46" />
+        <state vertical-scroll-proportion="0.43785852">
+          <caret line="494" column="37" selection-start-line="494" selection-start-column="37" selection-end-line="494" selection-end-column="37" />
           <folding>
             <element signature="e#61#108#0" expanded="true" />
             <element signature="e#1294#1406#0" expanded="false" />
