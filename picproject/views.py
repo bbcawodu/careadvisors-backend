@@ -599,7 +599,7 @@ def staff_api_handler(request):
                                                                                                 rqst_last_name))
     elif 'email' in rqst_params:
         rqst_email = rqst_params['email']
-        list_of_emails = re.findall("[\w.'-@]+", rqst_email)
+        list_of_emails = re.findall(r"[@\w. '-]+", rqst_email)
         staff_dict = {}
         for email in list_of_emails:
             staff_members = PICStaff.objects.filter(email__iexact=email)
@@ -746,6 +746,9 @@ def group_metrics(metrics_dict, grouping_parameter):
 # defines view for returning metrics data from api requests
 def metrics_api_handler(request):
     rqst_params = request.GET
+    response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
+    rqst_errors = []
+
     if "county" in rqst_params:
         rqst_counties = rqst_params["county"]
         list_of_counties = re.findall("[\w. '-]+", rqst_counties)
@@ -753,13 +756,15 @@ def metrics_api_handler(request):
         list_of_counties = None
 
     if "time" in rqst_params:
-        rqst_time = int(rqst_params["time"])
-        look_up_date = datetime.date.today() - datetime.timedelta(days=rqst_time)
+        try:
+            rqst_time = int(rqst_params["time"])
+            look_up_date = datetime.date.today() - datetime.timedelta(days=rqst_time)
+        except ValueError:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('time parameter must be a valid integer. Metrics returned without time parameter.')
+            look_up_date = None
     else:
-        rqst_time = None
-
-    response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
-    rqst_errors = []
+        look_up_date = None
 
     if 'id' in rqst_params:
         rqst_staff_id = str(rqst_params["id"])
@@ -767,17 +772,15 @@ def metrics_api_handler(request):
             if list_of_counties is not None:
                 metrics_submissions = []
                 for county in list_of_counties:
+                    county_metrics = MetricsSubmission.objects.filter(county__iexact=county)
                     if look_up_date:
-                        county_metrics = MetricsSubmission.objects.filter(county__iexact=county).filter(submission_date__gte=look_up_date)
-                    else:
-                        county_metrics = MetricsSubmission.objects.filter(county__iexact=county)
+                        county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
                     for metrics_entry in county_metrics:
                         metrics_submissions.append(metrics_entry)
             else:
+                metrics_submissions = MetricsSubmission.objects.all()
                 if look_up_date:
-                    metrics_submissions = MetricsSubmission.objects.filter(submission_date__gte=look_up_date)
-                else:
-                    metrics_submissions = MetricsSubmission.objects.all()
+                    metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
@@ -819,10 +822,14 @@ def metrics_api_handler(request):
                     metrics_submissions = []
                     for county in list_of_counties:
                         county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                        if look_up_date:
+                            county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
                         for metrics_entry in county_metrics:
                             metrics_submissions.append(metrics_entry)
                 else:
                     metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+                    if look_up_date:
+                        metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
 
                 if len(metrics_submissions) > 0:
                     metrics_dict = {}
@@ -889,10 +896,14 @@ def metrics_api_handler(request):
                     metrics_submissions = []
                     for county in list_of_counties:
                         county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                        if look_up_date:
+                            county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
                         for metrics_entry in county_metrics:
                             metrics_submissions.append(metrics_entry)
                 else:
                     metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+                    if look_up_date:
+                        metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
 
                 if len(metrics_submissions) > 0:
                     metrics_dict = {}
@@ -939,8 +950,7 @@ def metrics_api_handler(request):
             rqst_errors.append('Length of first name list must be equal to length of last name list')
 
     elif 'email' in rqst_params:
-        list_of_emails = re.findall(r"[\w. '-@]+", rqst_params['email'])
-        # response_raw_data['Data'] = list_of_emails
+        list_of_emails = re.findall(r"[@\w. '-]+", rqst_params['email'])
         list_of_ids = []
         for email in list_of_emails:
             email_ids = PICStaff.objects.filter(email__iexact=email).values_list('id', flat=True)
@@ -958,10 +968,14 @@ def metrics_api_handler(request):
                 metrics_submissions = []
                 for county in list_of_counties:
                     county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                    if look_up_date:
+                        county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
                     for metrics_entry in county_metrics:
                         metrics_submissions.append(metrics_entry)
             else:
                 metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+                if look_up_date:
+                    metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
@@ -1020,10 +1034,14 @@ def metrics_api_handler(request):
                 metrics_submissions = []
                 for county in list_of_counties:
                     county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                    if look_up_date:
+                        county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
                     for metrics_entry in county_metrics:
                         metrics_submissions.append(metrics_entry)
             else:
                 metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+                if look_up_date:
+                    metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
@@ -1082,10 +1100,14 @@ def metrics_api_handler(request):
                 metrics_submissions = []
                 for county in list_of_counties:
                     county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                    if look_up_date:
+                        county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
                     for metrics_entry in county_metrics:
                         metrics_submissions.append(metrics_entry)
             else:
                 metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
+                if look_up_date:
+                    metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
@@ -1129,6 +1151,8 @@ def metrics_api_handler(request):
         metrics_submissions = []
         for county in list_of_counties:
             county_metrics = MetricsSubmission.objects.filter(county__iexact=county)
+            if look_up_date:
+                county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
             for metrics_entry in county_metrics:
                 metrics_submissions.append(metrics_entry)
 
