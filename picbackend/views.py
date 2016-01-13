@@ -273,20 +273,6 @@ def appointment_submission_handler(request):
                 error_message = error_message + message + ", "
             print error_message
             sys.stdout.flush()
-            # for message in post_errors:
-            #     sys.stdout.write(message + sys.argv[1].decode("string_escape"))
-
-            # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-            # # response['Access-Control-Allow-Origin'] = "*"
-            # return response
-
-    # elif request.method == "OPTIONS":
-    #     response = HttpResponse("")
-    #     response['Access-Control-Allow-Origin'] = "*"
-    #     response['Access-Control-Allow-Methods'] = "POST, OPTIONS, GET"
-    #     response['Access-Control-Allow-Headers'] = "X-Requested-With"
-    #     response['Access-Control-Max-Age'] = "1800"
-    #     return response
 
     # if a GET request is made, add error message to response data
     else:
@@ -296,10 +282,6 @@ def appointment_submission_handler(request):
         for message in post_errors:
             print message
         sys.stdout.flush()
-
-            # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-            # # response['Access-Control-Allow-Origin'] = "*"
-            # return response
 
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
@@ -358,18 +340,6 @@ def staff_submission_handler(request):
                 print message
                 sys.stdout.flush()
 
-                # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-                # response['Access-Control-Allow-Origin'] = "*"
-                # return response
-
-    # elif request.method == "OPTIONS":
-    #     response = HttpResponse("")
-    #     response['Access-Control-Allow-Origin'] = "*"
-    #     response['Access-Control-Allow-Methods'] = "POST, OPTIONS, GET"
-    #     response['Access-Control-Allow-Headers'] = "X-Requested-With"
-    #     response['Access-Control-Max-Age'] = "1800"
-    #     return response
-
     # if a GET request is made, add error message to response data
     else:
         response_raw_data["status"]["Error Code"] = 1
@@ -378,10 +348,6 @@ def staff_submission_handler(request):
         for message in post_errors:
             print message
         sys.stdout.flush()
-
-            # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-            # response['Access-Control-Allow-Origin'] = "*"
-            # return response
 
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
@@ -539,18 +505,6 @@ def metrics_submission_handler(request):
                 print message
                 sys.stdout.flush()
 
-                # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-                # response['Access-Control-Allow-Origin'] = "*"
-                # return response
-
-    # elif request.method == "OPTIONS":
-    #     response = HttpResponse("")
-    #     response['Access-Control-Allow-Origin'] = "*"
-    #     response['Access-Control-Allow-Methods'] = "POST, OPTIONS, GET"
-    #     response['Access-Control-Allow-Headers'] = "X-Requested-With"
-    #     response['Access-Control-Max-Age'] = "1800"
-    #     return response
-
     # if a GET request is made, add error message to response data
     else:
         response_raw_data["status"]["Error Code"] = 1
@@ -559,10 +513,6 @@ def metrics_submission_handler(request):
         for message in post_errors:
             print message
         sys.stdout.flush()
-
-            # response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-            # response['Access-Control-Allow-Origin'] = "*"
-            # return response
 
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
@@ -746,7 +696,7 @@ def group_metrics(metrics_dict, grouping_parameter):
 # defines view for returning metrics data from api requests
 def metrics_api_handler(request):
     rqst_params = request.GET
-    response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
+    response_raw_data = {"New": "New", 'Status': {"Error Code": 0, "Version": 1.0}}
     rqst_errors = []
 
     if "county" in rqst_params:
