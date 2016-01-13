@@ -39,7 +39,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'picproject.django-crossdomainxhr-middleware.XsSharing',
+    'picbackend.django-crossdomainxhr-middleware.XsSharing',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -50,7 +50,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'picproject.urls'
+ROOT_URLCONF = 'picbackend.urls'
 
 # sets template directoru to root/templates
 PROJECT_DIR = os.path.dirname(__file__)
@@ -74,7 +74,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'picproject.wsgi.application'
+WSGI_APPLICATION = 'picbackend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases

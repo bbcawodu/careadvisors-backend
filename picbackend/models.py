@@ -8,4 +8,4 @@ class PICUser(models.Model):
     phone_number = models.CharField(max_length=1000)
 
     class Meta:
-        app_label = 'picproject'
+        app_label = 'picbackend'

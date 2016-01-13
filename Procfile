@@ -1,1 +1,1 @@
-web: gunicorn picproject.wsgi --log-file -
+web: gunicorn picbackend.wsgi --log-file -
