@@ -66,7 +66,8 @@ class PICStaff(models.Model):
                       "Last Name": self.last_name,
                       "Email": self.email,
                       "Type": self.type,
-                      "Database ID": self.id}
+                      "Database ID": self.id,
+                      "County": self.county}
         return valuesdict
 
     class Meta:

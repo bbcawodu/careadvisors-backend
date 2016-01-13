@@ -696,7 +696,7 @@ def group_metrics(metrics_dict, grouping_parameter):
 # defines view for returning metrics data from api requests
 def metrics_api_handler(request):
     rqst_params = request.GET
-    response_raw_data = {"New": "New", 'Status': {"Error Code": 0, "Version": 1.0}}
+    response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
     rqst_errors = []
 
     if "county" in rqst_params:
