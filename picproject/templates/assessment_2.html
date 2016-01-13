@@ -1,0 +1,86 @@
+<!--
+This template is used by the risk_assessment_2 view.
+It loads the CSS from directly from our server.
+ -->
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+      <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <title>Health Risk Assessment</title>
+            <link rel="stylesheet" type="text/css" href="/static/css/main.css" media="all" />
+      </head>
+      <body class="oneColElsCtr">
+            <div class="container assesstable">
+                  <b>Health Risk Assessment<br/><hr/></b>
+                  {% if form_one %}
+                        <h1>Health Risk Assessment: Part 2</h1>
+                        <p style="color: red;">
+                        {% if form_one.heartdisease_over_10.errors %}
+                              {% for error in form_one.heartdisease_over_10.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.has_history_of_heartdisease.errors %}
+                              {% for error in form_one.has_history_of_heartdisease.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.mental_illness_over_1.errors %}
+                              {% for error in form_one.mental_illness_over_1.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.has_history_of_mentalillness.errors %}
+                              {% for error in form_one.has_history_of_mentalillness.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        {% if form_one.smoke_atleast_a_pack_a_day.errors %}
+                              {% for error in form_one.smoke_atleast_a_pack_a_day.errors %}
+                                    <b>{{ error|escape }}</b><br/>
+                              {% endfor %}
+                        {% endif %}
+                        </p>
+                        <form name='assessmentone' action='' method=post>
+                              <table border="1" class = 'center'>
+                                    {% if form_one.heartdisease_over_10 %}
+                                          <tr>
+                                          <td> <b>Have you had heart disease for over 10 years?</b> </td>
+                                          <td>{{ form_one.heartdisease_over_10 }}</td>
+                                          </tr>
+                                    {% else %}
+                                          <tr>
+                                          <td> <b>Does your family have a history of heart disease?</b> </td>
+                                          <td>{{ form_one.has_history_of_heartdisease }}</td>
+                                          </tr>
+                                    {% endif %}
+
+                                    {% if form_one.mental_illness_over_1 %}
+                                          <tr>
+                                          <td> <b>Have you had a mental illness for over 1 year?</b> </td>
+                                          <td>{{ form_one.mental_illness_over_1 }}</td>
+                                          </tr>
+                                    {% else %}
+                                          <tr>
+                                          <td> <b>Does your family have a history of mental illness?</b> </td>
+                                          <td>{{ form_one.has_history_of_mentalillness }}</td>
+                                          </tr>
+                                    {% endif %}
+
+                                    {% if form_one.smoke_atleast_a_pack_a_day %}
+                                          <tr>
+                                          <td> <b>Do you smoke at least a pack of cigarettes a day?</b> </td>
+                                          <td>{{ form_one.smoke_atleast_a_pack_a_day }}</td>
+                                          </tr>
+                                    {% endif %}
+                              </table>
+                              <br/><br/><hr/>
+                              {% csrf_token %}
+                              <button type=submit>Submit!</button>
+                        </form>
+                  {% endif %}
+            </div>
+      </body>
+</html>

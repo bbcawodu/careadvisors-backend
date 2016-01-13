@@ -1,0 +1,128 @@
+<!--
+This template is used by the registration view.
+It loads the CSS from directly from our server.
+ -->
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+      <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <title>Registration</title>
+            <link rel="stylesheet" type="text/css" href="/static/css/main.css" media="all" />
+      </head>
+      <body class="oneColElsCtr">
+            <div class="container assesstable">
+                  <b>Registration<br/><hr/></b>
+                  {% if form %}
+                        <h1>Register an Account with Us</h1>
+                        <form name='registration' action='' method=post>
+                              <table border="1" class = 'center'>
+                                    <tr>
+                                    <td> <b>{{ form.username.label }}</b> </td>
+                                    <td>{{ form.username }}</td>
+                                    {% if form.username.errors %}
+                                          <td>
+                                          {% for error in form.username.errors %}
+                                                <b style="color: red;">{{ error|escape }} </b>
+                                          {% endfor %}
+                                          </td>
+                                    {% endif %}
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>{{ form.first_name.label }}</b> </td>
+                                    <td>{{ form.first_name }}</td>
+                                    {% if form.first_name.errors %}
+                                          <td>
+                                          {% for error in form.first_name.errors %}
+                                                <b style="color: red;">{{ error|escape }} </b>
+                                          {% endfor %}
+                                          </td>
+                                    {% endif %}
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>{{ form.last_name.label }}</b> </td>
+                                    <td>{{ form.last_name }}</td>
+                                    {% if form.last_name.errors %}
+                                          <td>
+                                          {% for error in form.last_name.errors %}
+                                                <b style="color: red;">{{ error|escape }} </b>
+                                          {% endfor %}
+                                          </td>
+                                    {% endif %}
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>{{ form.address.label }}</b> </td>
+                                    <td>{{ form.address }}</td>
+                                    {% if form.address.errors %}
+                                          <td>
+                                          {% for error in form.address.errors %}
+                                                <b style="color: red;">{{ error|escape }} </b>
+                                          {% endfor %}
+                                          </td>
+                                    {% endif %}
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>{{ form.phone_number.label }}</b> </td>
+                                    <td>{{ form.phone_number }}</td>
+                                    {% if form.phone_number.errors %}
+                                          <td>
+                                          {% for error in form.phone_number.errors %}
+                                                <b style="color: red;">{{ error|escape }} </b>
+                                          {% endfor %}
+                                          </td>
+                                    {% endif %}
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>{{ form.email.label }}</b> </td>
+                                    <td>{{ form.email }}</td>
+                                    {% if form.email.errors %}
+                                          <td>
+                                          {% for error in form.email.errors %}
+                                                <b style="color: red;">{{ error|escape }} </b>
+                                          {% endfor %}
+                                          </td>
+                                    {% endif %}
+                                    </tr>
+
+                                     <tr>
+                                    <td> <b>{{ form.password1.label }}</b> </td>
+                                    <td>{{ form.password1 }}</td>
+                                    {% if form.password1.errors %}
+                                          <td>
+                                          {% for error in form.password1.errors %}
+                                                <b style="color: red;">{{ error|escape }} </b>
+                                          {% endfor %}
+                                          </td>
+                                    {% endif %}
+                                    </tr>
+
+                                    <tr>
+                                    <td> <b>{{ form.password2.label }}</b> </td>
+                                    <td>{{ form.password2 }}</td>
+                                    {% if form.password2.errors %}
+                                          <td>
+                                          {% for error in form.password2.errors %}
+                                                <b style="color: red;">{{ error|escape }} </b>
+                                          {% endfor %}
+                                          </td>
+                                    {% endif %}
+                                    </tr>
+
+
+                              </table>
+                              <br/>
+                              <br/><br/><hr/>
+                              {% csrf_token %}
+                              <button type=submit>Register!</button>
+                        </form>
+                  {% endif %}
+            </div>
+      </body>
+</html>
