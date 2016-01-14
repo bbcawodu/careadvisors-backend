@@ -295,7 +295,7 @@ def appointment_viewing_handler(request):
 
 # defines view for saving scheduled appointments to the database
 @csrf_exempt
-def staff_submission_handler(request):
+def staff_edit_handler(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data = {'status': {"Error Code": 0, "Version": 1.0}}
     post_errors = []
@@ -305,31 +305,126 @@ def staff_submission_handler(request):
         post_json = json.loads(post_data)
 
         # Code to parse POSTed json request
-        rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
-        rqst_usr_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
-        rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
-        rqst_county = clean_json_string_input(post_json, "root", "User County", post_errors)
-        rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
+        rqst_action = clean_json_string_input(post_json, "root", "Database Action", post_errors)
 
         # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
         # create and save database entry for appointment
-        if len(post_errors) == 0:
-            usr_rqst_values = {"first_name": rqst_usr_f_name,
-                               "last_name": rqst_usr_l_name,
-                               "type": rqst_usr_type,
-                               "county": rqst_county,}
-            user_instance, user_instance_created = PICStaff.objects.get_or_create(email=rqst_usr_email,
-                                                                                  defaults=usr_rqst_values)
-            if not user_instance_created:
-                post_errors.append('Staff database entry already exists for the email: {!s}'.format(rqst_usr_email))
+        if len(post_errors) == 0 and rqst_action == "Staff Addition":
+            rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+            rqst_usr_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
+            rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+            rqst_county = clean_json_string_input(post_json, "root", "User County", post_errors)
+            rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
+
+            if len(post_errors) == 0:
+                usr_rqst_values = {"first_name": rqst_usr_f_name,
+                                   "last_name": rqst_usr_l_name,
+                                   "type": rqst_usr_type,
+                                   "county": rqst_county,}
+                user_instance, user_instance_created = PICStaff.objects.get_or_create(email=rqst_usr_email,
+                                                                                      defaults=usr_rqst_values)
+                if not user_instance_created:
+                    post_errors.append('Staff database entry already exists for the email: {!s}'.format(rqst_usr_email))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+                else:
+                    response_raw_data['Data'] = {"Database ID": user_instance.id}
+            else:
                 response_raw_data["status"]["Error Code"] = 1
                 response_raw_data["status"]["Errors"] = post_errors
 
                 for message in post_errors:
                     print message
-                sys.stdout.flush()
+                    sys.stdout.flush()
+
+        elif len(post_errors) == 0 and rqst_action == "Staff Modification":
+            rqst_usr_id = clean_json_int_input(post_json, "root", "Database ID", post_errors)
+            rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+            rqst_usr_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
+            rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+            rqst_county = clean_json_string_input(post_json, "root", "User County", post_errors)
+            rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
+
+            if len(post_errors) == 0:
+                try:
+                    staff_instance = PICStaff.objects.get(id=rqst_usr_id)
+                    staff_instance.first_name = rqst_usr_f_name
+                    staff_instance.last_name = rqst_usr_l_name
+                    staff_instance.type = rqst_usr_type
+                    staff_instance.county = rqst_county
+                    staff_instance.email = rqst_usr_email
+                    staff_instance.save()
+                    response_raw_data['Data'] = {"Database ID": staff_instance.id}
+                except PICStaff.DoesNotExist:
+                    post_errors.append('Staff database entry does not exist for the id: {!s}'.format(str(rqst_usr_id)))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+                except PICStaff.MultipleObjectsReturned:
+                    post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+                except IntegrityError:
+                    post_errors.append('Database entry already exists for the email: {!s}'.format(rqst_usr_email))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+
             else:
-                response_raw_data['Data'] = {"Database ID": user_instance.id}
+                response_raw_data["status"]["Error Code"] = 1
+                response_raw_data["status"]["Errors"] = post_errors
+
+                for message in post_errors:
+                    print message
+                    sys.stdout.flush()
+
+        elif len(post_errors) == 0 and rqst_action == "Staff Deletion":
+            rqst_usr_id = clean_json_int_input(post_json, "root", "Database ID", post_errors)
+
+            if len(post_errors) == 0:
+                try:
+                    staff_instance = PICStaff.objects.get(id=rqst_usr_id)
+                    staff_instance.delete()
+                    response_raw_data['Data'] = {"Database ID": "Deleted"}
+                except PICStaff.DoesNotExist:
+                    post_errors.append('Staff database entry does not exist for the id: {!s}'.format(str(rqst_usr_id)))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+                except PICStaff.MultipleObjectsReturned:
+                    post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+
+            else:
+                response_raw_data["status"]["Error Code"] = 1
+                response_raw_data["status"]["Errors"] = post_errors
+
+                for message in post_errors:
+                    print message
+                    sys.stdout.flush()
+
 
         # add parsing errors to response dictionary
         else:

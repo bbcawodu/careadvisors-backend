@@ -57,7 +57,7 @@ class PICStaff(models.Model):
     # fields for PICStaff model
     first_name = models.CharField(max_length=1000)
     last_name = models.CharField(default="", max_length=1000)
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     type = models.CharField(max_length=1000)
     county = models.CharField(blank=True, max_length=1000, default="")
 
