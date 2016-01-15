@@ -616,11 +616,40 @@ def metrics_submission_handler(request):
 # defines view for returning staff data from api requests
 def staff_api_handler(request):
     rqst_params = request.GET
+    if 'fname' in rqst_params:
+        rqst_first_name = rqst_params['fname']
+        list_of_first_names = re.findall(r"[\w. '-]+", rqst_first_name)
+    else:
+        rqst_first_name = None
+        list_of_first_names = None
+    if 'lname' in rqst_params:
+        rqst_last_name = rqst_params['lname']
+        list_of_last_names = re.findall(r"[\w. '-]+", rqst_last_name)
+    else:
+        rqst_last_name = None
+        list_of_last_names = None
+    if 'email' in rqst_params:
+        rqst_email = rqst_params['email']
+        list_of_emails = re.findall(r"[@\w. '-]+", rqst_email)
+    else:
+        rqst_email = None
+        list_of_emails = None
+    if 'id' in rqst_params:
+        rqst_staff_id = rqst_params['id']
+        if rqst_staff_id != "all":
+            list_of_ids = re.findall("\d+", rqst_staff_id)
+            for indx, element in enumerate(list_of_ids):
+                list_of_ids[indx] = int(element)
+        else:
+            list_of_ids = None
+    else:
+        rqst_staff_id = None
+        list_of_ids = None
 
     response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
     rqst_errors = []
 
-    if 'lname' in rqst_params and 'fname' in rqst_params:
+    if rqst_first_name and rqst_last_name:
         rqst_first_name = rqst_params['fname']
         rqst_last_name = rqst_params['lname']
         staff_objects = PICStaff.objects.filter(first_name__iexact=rqst_first_name, last_name__iexact=rqst_last_name)
@@ -637,14 +666,11 @@ def staff_api_handler(request):
             for staff_key, staff_entry in staff_member_dict.iteritems():
                 staff_member_list.append(staff_entry)
             response_raw_data["Data"] = staff_member_list
-            # response_raw_data["Data"] = staff_member_dict
         else:
             response_raw_data['Status']['Error Code'] = 1
             rqst_errors.append('Staff Member with name: {!s} {!s} not found in database'.format(rqst_first_name,
                                                                                                 rqst_last_name))
-    elif 'email' in rqst_params:
-        rqst_email = rqst_params['email']
-        list_of_emails = re.findall(r"[@\w. '-]+", rqst_email)
+    elif list_of_emails and rqst_email:
         staff_dict = {}
         for email in list_of_emails:
             staff_members = PICStaff.objects.filter(email__iexact=email)
@@ -658,7 +684,6 @@ def staff_api_handler(request):
             for staff_key, staff_entry in staff_dict.iteritems():
                 staff_list.append(staff_entry)
             response_raw_data["Data"] = staff_list
-            # response_raw_data["Data"] = staff_dict
             for email in list_of_emails:
                 if email not in staff_dict:
                     if response_raw_data['Status']['Error Code'] != 2:
@@ -668,9 +693,7 @@ def staff_api_handler(request):
             response_raw_data['Status']['Error Code'] = 1
             rqst_errors.append('Staff Member with emails(s): {!s} not found in database'.format(rqst_email))
 
-    elif 'fname' in rqst_params:
-        rqst_first_name = rqst_params['fname']
-        list_of_first_names = re.findall("[\w.'-]+", rqst_first_name)
+    elif rqst_first_name and list_of_first_names:
         staff_dict = {}
         for first_name in list_of_first_names:
             staff_members = PICStaff.objects.filter(first_name__iexact=first_name)
@@ -684,7 +707,6 @@ def staff_api_handler(request):
             for staff_key, staff_entry in staff_dict.iteritems():
                 staff_list.append(staff_entry)
             response_raw_data["Data"] = staff_list
-            # response_raw_data["Data"] = staff_dict
             for name in list_of_first_names:
                 if name not in staff_dict:
                     if response_raw_data['Status']['Error Code'] != 2:
@@ -694,9 +716,7 @@ def staff_api_handler(request):
             response_raw_data['Status']['Error Code'] = 1
             rqst_errors.append('Staff Member with first name(s): {!s} not found in database'.format(rqst_first_name))
 
-    elif 'lname' in rqst_params:
-        rqst_last_name = rqst_params['lname']
-        list_of_last_names = re.findall("[\w.'-]+", rqst_last_name)
+    elif rqst_last_name and list_of_last_names:
         staff_dict = {}
         for last_name in list_of_last_names:
             staff_members = PICStaff.objects.filter(last_name__iexact=last_name)
@@ -710,7 +730,6 @@ def staff_api_handler(request):
             for staff_key, staff_entry in staff_dict.iteritems():
                 staff_list.append(staff_entry)
             response_raw_data["Data"] = staff_list
-            # response_raw_data["Data"] = staff_dict
             for name in list_of_last_names:
                 if name not in staff_dict:
                     if response_raw_data['Status']['Error Code'] != 2:
@@ -720,9 +739,7 @@ def staff_api_handler(request):
             response_raw_data['Status']['Error Code'] = 1
             rqst_errors.append('Staff Member with last name(s): {!s} not found in database'.format(rqst_last_name))
 
-    elif 'id' in rqst_params:
-        rqst_staff_id = rqst_params['id']
-
+    elif rqst_staff_id:
         if rqst_staff_id == "all":
             all_staff_members = PICStaff.objects.all()
             staff_member_dict = {}
@@ -732,9 +749,7 @@ def staff_api_handler(request):
             for staff_key, staff_entry in staff_member_dict.iteritems():
                 staff_list.append(staff_entry)
             response_raw_data["Data"] = staff_list
-            # response_raw_data["Data"] = staff_member_dict
-        else:
-            list_of_ids = re.findall("\d+", rqst_staff_id)
+        elif list_of_ids:
             if len(list_of_ids) > 0:
                 for indx, element in enumerate(list_of_ids):
                     list_of_ids[indx] = int(element)
