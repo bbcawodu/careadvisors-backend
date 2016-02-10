@@ -3,15 +3,55 @@
 This is the code for the backend component of our metrics and appointments apps.
 It enables the API that transmits data between the frontend and the backend.
 
-TODO: Write a project description
-
 ## Installation
 
-This app uses a django installation hosted on Heroku. To install, go to: https://devcenter.heroku.com/articles/getting-started-with-python#introduction and follow the instructions for your particular operating system.
+This app uses a django installation hosted on Heroku. To install, go to:
+https://devcenter.heroku.com/articles/getting-started-with-python#introduction and follow the instructions
+for your particular operating system.
 
 ## Usage
 
-TODO: Write usage instructions
+To add an appointment to the database using our appointments API, submit a POST request to:
+obscure-harbor-6074.herokuapp.com/submitappointment/. The POST data should be a JSON document which has the following
+format:
+```
+{"First Name": String,
+"Last Name": String,
+"Email": String,
+"Phone Number": String,
+"Preferred Language": String,
+"Best Contact Time": String,
+"Appointment": {
+                "Name": String,
+                "Street Address": String,
+                "City": String,
+                "State": String,
+                "Zip Code": String,
+                "Phone Number": String,
+                "Appointment Slot": {
+                                     "Date": {
+                                              "Month": Integer,
+                                              "Day": Integer,
+                                              "Year": Integer
+                                             },
+                                     "Start Time": {
+                                                    "Hour": Integer,
+                                                    "Minutes": Integer
+                                                   },
+                                     "End Time": {
+                                                  "Hour": Integer,
+                                                  "Minutes": Integer
+                                                 }
+                                    },
+                "Point of Contact": {
+                                     "First Name": String,
+                                     "Last Name": String,
+                                     "Email": String,
+                                     "Type": String
+                                    }
+               }
+}
+```
 
 ## Contributing
 
