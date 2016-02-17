@@ -41,7 +41,7 @@
       <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/picmodels/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-15.0">
+            <state vertical-scroll-proportion="0.0">
               <caret line="75" column="0" selection-start-line="75" selection-start-column="0" selection-end-line="75" selection-end-column="0" />
               <folding>
                 <element signature="e#66#94#0" expanded="true" />
@@ -53,7 +53,7 @@
       <file leaf-file-name="urls.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/picbackend/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-22.148148">
+            <state vertical-scroll-proportion="0.0">
               <caret line="43" column="63" selection-start-line="43" selection-start-column="63" selection-end-line="43" selection-end-column="63" />
               <folding />
             </state>
@@ -63,8 +63,8 @@
       <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/picbackend/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-41.148148">
-              <caret line="616" column="31" selection-start-line="616" selection-start-column="31" selection-end-line="616" selection-end-column="31" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="616" column="0" selection-start-line="616" selection-start-column="0" selection-end-line="616" selection-end-column="0" />
               <folding>
                 <element signature="e#61#108#0" expanded="true" />
                 <element signature="e#716#756#0" expanded="false" />
@@ -75,12 +75,12 @@
                 <element signature="e#3477#4013#0" expanded="false" />
                 <element signature="e#4091#4420#0" expanded="false" />
                 <element signature="e#4494#5133#0" expanded="false" />
+                <element signature="e#5263#15635#0" expanded="false" />
                 <element signature="e#15728#15864#0" expanded="false" />
                 <element signature="e#15982#23517#0" expanded="false" />
                 <element signature="e#23643#34514#0" expanded="false" />
                 <element signature="e#34611#42924#0" expanded="false" />
                 <element signature="e#43039#44067#0" expanded="false" />
-                <element signature="e#44168#71666#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -90,8 +90,8 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;MultiMarkdownPreviewEditor]">
             <state split_layout="FIRST">
-              <first_editor vertical-scroll-proportion="0.80912864">
-                <caret line="77" column="89" selection-start-line="77" selection-start-column="89" selection-end-line="77" selection-end-column="89" />
+              <first_editor vertical-scroll-proportion="3.3817427">
+                <caret line="163" column="15" selection-start-line="163" selection-start-column="15" selection-end-line="163" selection-end-column="15" />
                 <folding />
               </first_editor>
               <second_editor />
@@ -486,7 +486,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1440" height="896" extended-state="0" />
+    <frame x="0" y="0" width="1440" height="896" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22174536" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -522,7 +522,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="5" />
+      <option name="time" value="7" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -572,12 +572,12 @@
             <element signature="e#3477#4013#0" expanded="false" />
             <element signature="e#4091#4420#0" expanded="false" />
             <element signature="e#4494#5133#0" expanded="false" />
+            <element signature="e#5263#15635#0" expanded="false" />
             <element signature="e#15728#15864#0" expanded="false" />
             <element signature="e#15982#23517#0" expanded="false" />
             <element signature="e#23643#34514#0" expanded="false" />
             <element signature="e#34611#42924#0" expanded="false" />
             <element signature="e#43039#44067#0" expanded="false" />
-            <element signature="e#44168#71666#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -641,12 +641,12 @@
             <element signature="e#3477#4013#0" expanded="false" />
             <element signature="e#4091#4420#0" expanded="false" />
             <element signature="e#4494#5133#0" expanded="false" />
+            <element signature="e#5263#15635#0" expanded="false" />
             <element signature="e#15728#15864#0" expanded="false" />
             <element signature="e#15982#23517#0" expanded="false" />
             <element signature="e#23643#34514#0" expanded="false" />
             <element signature="e#34611#42924#0" expanded="false" />
             <element signature="e#43039#44067#0" expanded="false" />
-            <element signature="e#44168#71666#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -703,12 +703,12 @@
             <element signature="e#3477#4013#0" expanded="false" />
             <element signature="e#4091#4420#0" expanded="false" />
             <element signature="e#4494#5133#0" expanded="false" />
+            <element signature="e#5263#15635#0" expanded="false" />
             <element signature="e#15728#15864#0" expanded="false" />
             <element signature="e#15982#23517#0" expanded="false" />
             <element signature="e#23643#34514#0" expanded="false" />
             <element signature="e#34611#42924#0" expanded="false" />
             <element signature="e#43039#44067#0" expanded="false" />
-            <element signature="e#44168#71666#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -758,12 +758,12 @@
             <element signature="e#3477#4013#0" expanded="false" />
             <element signature="e#4091#4420#0" expanded="false" />
             <element signature="e#4494#5133#0" expanded="false" />
+            <element signature="e#5263#15635#0" expanded="false" />
             <element signature="e#15728#15864#0" expanded="false" />
             <element signature="e#15982#23517#0" expanded="false" />
             <element signature="e#23643#34514#0" expanded="false" />
             <element signature="e#34611#42924#0" expanded="false" />
             <element signature="e#43039#44067#0" expanded="false" />
-            <element signature="e#44168#71666#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -813,12 +813,12 @@
             <element signature="e#3477#4013#0" expanded="false" />
             <element signature="e#4091#4420#0" expanded="false" />
             <element signature="e#4494#5133#0" expanded="false" />
+            <element signature="e#5263#15635#0" expanded="false" />
             <element signature="e#15728#15864#0" expanded="false" />
             <element signature="e#15982#23517#0" expanded="false" />
             <element signature="e#23643#34514#0" expanded="false" />
             <element signature="e#34611#42924#0" expanded="false" />
             <element signature="e#43039#44067#0" expanded="false" />
-            <element signature="e#44168#71666#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -977,9 +977,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/picbackend/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="43" column="63" selection-start-line="43" selection-start-column="63" selection-end-line="43" selection-end-column="63" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/picmodels/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-15.0">
+        <state vertical-scroll-proportion="0.0">
           <caret line="75" column="0" selection-start-line="75" selection-start-column="0" selection-end-line="75" selection-end-column="0" />
           <folding>
             <element signature="e#66#94#0" expanded="true" />
@@ -987,18 +995,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/picbackend/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-22.148148">
-          <caret line="43" column="63" selection-start-line="43" selection-start-column="63" selection-end-line="43" selection-end-column="63" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/picbackend/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-41.148148">
-          <caret line="616" column="31" selection-start-line="616" selection-start-column="31" selection-end-line="616" selection-end-column="31" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="616" column="0" selection-start-line="616" selection-start-column="0" selection-end-line="616" selection-end-column="0" />
           <folding>
             <element signature="e#61#108#0" expanded="true" />
             <element signature="e#716#756#0" expanded="false" />
@@ -1009,30 +1009,30 @@
             <element signature="e#3477#4013#0" expanded="false" />
             <element signature="e#4091#4420#0" expanded="false" />
             <element signature="e#4494#5133#0" expanded="false" />
+            <element signature="e#5263#15635#0" expanded="false" />
             <element signature="e#15728#15864#0" expanded="false" />
             <element signature="e#15982#23517#0" expanded="false" />
             <element signature="e#23643#34514#0" expanded="false" />
             <element signature="e#34611#42924#0" expanded="false" />
             <element signature="e#43039#44067#0" expanded="false" />
-            <element signature="e#44168#71666#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;MultiMarkdownPreviewEditor]">
+        <state split_layout="FIRST">
+          <first_editor vertical-scroll-proportion="3.3817427">
+            <caret line="163" column="15" selection-start-line="163" selection-start-column="15" selection-end-line="163" selection-end-column="15" />
+            <folding />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
       <provider editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.48300537">
           <caret line="19" column="22" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
           <folding />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="split-provider[text-editor;MultiMarkdownPreviewEditor]">
-        <state split_layout="FIRST">
-          <first_editor vertical-scroll-proportion="0.80912864">
-            <caret line="77" column="89" selection-start-line="77" selection-start-column="89" selection-end-line="77" selection-end-column="89" />
-            <folding />
-          </first_editor>
-          <second_editor />
         </state>
       </provider>
       <provider editor-type-id="MultiMarkdownFxPreviewEditor">
