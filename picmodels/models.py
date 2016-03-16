@@ -115,6 +115,7 @@ class MetricsSubmission(models.Model):
     appointments_over_three_hours = models.IntegerField(blank=True, null=True)
     submission_date = models.DateField(blank=True, null=True)
     county = models.CharField(max_length=1000, default="")
+    zipcode = models.CharField(max_length=1000, default="")
     date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
 
     def return_values_dict(self):
@@ -143,6 +144,7 @@ class MetricsSubmission(models.Model):
                       "Date Created": self.date_created.isoformat(),
                       "Submission Date": self.submission_date.isoformat(),
                       "County": self.county,
+                      "Zipcode": self.county,
                       }
 
         return valuesdict
