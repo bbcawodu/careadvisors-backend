@@ -144,7 +144,7 @@ class MetricsSubmission(models.Model):
                       "Date Created": self.date_created.isoformat(),
                       "Submission Date": self.submission_date.isoformat(),
                       "County": self.county,
-                      "Zipcode": self.county,
+                      "Zipcode": self.zipcode,
                       }
 
         return valuesdict
