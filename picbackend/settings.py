@@ -15,6 +15,16 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Use 12factor inspired environment variables or from a file
+import environ
+env = environ.Env(DEBUG=(bool, True),)
+
+# Ideally move env file should be outside the git repo
+# i.e. BASE_DIR.parent.parent
+env_file = os.path.join(os.path.dirname(__file__), 'local.env')
+if os.path.exists(env_file):
+    environ.Env.read_env(str(env_file))
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
