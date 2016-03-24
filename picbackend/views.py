@@ -802,6 +802,19 @@ def group_metrics(metrics_dict, grouping_parameter):
                                                                                      "Staff Information": staff_dict["Staff Information"]}
                     else:
                         return_dict[metrics_entry[grouping_parameter]][staff_key]["Metrics Data"].append(metrics_entry)
+
+    elif grouping_parameter == "Zipcode":
+        for staff_key, staff_dict in metrics_dict.iteritems():
+            for metrics_entry in staff_dict["Metrics Data"]:
+                if metrics_entry[grouping_parameter] not in return_dict:
+                    return_dict[metrics_entry[grouping_parameter]] = {staff_key: {"Metrics Data": [metrics_entry],
+                                                                      "Staff Information": staff_dict["Staff Information"]}}
+                else:
+                    if staff_key not in return_dict[metrics_entry[grouping_parameter]]:
+                        return_dict[metrics_entry[grouping_parameter]][staff_key] = {"Metrics Data": [metrics_entry],
+                                                                                     "Staff Information": staff_dict["Staff Information"]}
+                    else:
+                        return_dict[metrics_entry[grouping_parameter]][staff_key]["Metrics Data"].append(metrics_entry)
     return return_dict
 
 
@@ -817,6 +830,12 @@ def metrics_api_handler(request):
     else:
         list_of_counties = None
 
+    if "zipcode" in rqst_params:
+        rqst_zipcodes = rqst_params["zipcode"]
+        list_of_zipcodes = re.findall("\d+", rqst_zipcodes)
+    else:
+        list_of_zipcodes= None
+
     if "time" in rqst_params:
         try:
             rqst_time = int(rqst_params["time"])
@@ -831,14 +850,14 @@ def metrics_api_handler(request):
     if 'id' in rqst_params:
         rqst_staff_id = str(rqst_params["id"])
         if rqst_staff_id == "all":
-            if list_of_counties is not None:
+            if list_of_zipcodes is not None:
                 metrics_submissions = []
-                for county in list_of_counties:
-                    county_metrics = MetricsSubmission.objects.filter(county__iexact=county)
+                for zipcode in list_of_zipcodes:
+                    zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode)
                     if look_up_date:
-                        county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
-                    for metrics_entry in county_metrics:
-                        metrics_submissions.append(metrics_entry)
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                    for zipcode_entry in zipcode_metrics:
+                        metrics_submissions.append(zipcode_entry)
             else:
                 metrics_submissions = MetricsSubmission.objects.all()
                 if look_up_date:
@@ -853,13 +872,12 @@ def metrics_api_handler(request):
                     else:
                         metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(metrics_submission.return_values_dict())
                 if "groupby" in rqst_params:
-                    if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                        metrics_dict = group_metrics(metrics_dict, "County")
+                    if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
+                        metrics_dict = group_metrics(metrics_dict, "Zipcode")
                         metrics_list = []
                         for metrics_key, metrics_entry in metrics_dict.iteritems():
                             metrics_list.append(metrics_entry)
                         response_raw_data["Data"] = metrics_list
-                        # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
                     else:
                         metrics_list = []
                         for metrics_key, metrics_entry in metrics_dict.iteritems():
@@ -880,13 +898,13 @@ def metrics_api_handler(request):
             if len(list_of_ids) > 0:
                 for indx, element in enumerate(list_of_ids):
                     list_of_ids[indx] = int(element)
-                if list_of_counties is not None:
+                if list_of_zipcodes is not None:
                     metrics_submissions = []
-                    for county in list_of_counties:
-                        county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                    for zipcode in list_of_zipcodes:
+                        zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
                         if look_up_date:
-                            county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
-                        for metrics_entry in county_metrics:
+                            zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                        for metrics_entry in zipcode_metrics:
                             metrics_submissions.append(metrics_entry)
                 else:
                     metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
@@ -903,13 +921,12 @@ def metrics_api_handler(request):
                             metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(
                                     metrics_submission.return_values_dict())
                     if "groupby" in rqst_params:
-                        if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                            metrics_dict = group_metrics(metrics_dict, "County")
+                        if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
+                            metrics_dict = group_metrics(metrics_dict, "Zipcode")
                             metrics_list = []
                             for metrics_key, metrics_entry in metrics_dict.iteritems():
                                 metrics_list.append(metrics_entry)
                             response_raw_data["Data"] = metrics_list
-                            # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
                         else:
                             metrics_list = []
                             for metrics_key, metrics_entry in metrics_dict.iteritems():
@@ -954,14 +971,14 @@ def metrics_api_handler(request):
             if len(list_of_ids) > 0:
                 for indx, element in enumerate(list_of_ids):
                     list_of_ids[indx] = int(element)
-                if list_of_counties is not None:
+                if list_of_zipcodes is not None:
                     metrics_submissions = []
-                    for county in list_of_counties:
-                        county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                    for zipcode in list_of_zipcodes:
+                        zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
                         if look_up_date:
-                            county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
-                        for metrics_entry in county_metrics:
-                            metrics_submissions.append(metrics_entry)
+                            zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                        for zipcode_entry in zipcode_metrics:
+                            metrics_submissions.append(zipcode_entry)
                 else:
                     metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
                     if look_up_date:
@@ -977,8 +994,8 @@ def metrics_api_handler(request):
                         else:
                             metrics_dict[name]["Metrics Data"].append(metrics_submission.return_values_dict())
                     if "groupby" in rqst_params:
-                        if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                            metrics_dict = group_metrics(metrics_dict, "County")
+                        if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
+                            metrics_dict = group_metrics(metrics_dict, "Zipcode")
                             metrics_list = []
                             for metrics_key, metrics_entry in metrics_dict.iteritems():
                                 metrics_list.append(metrics_entry)
@@ -1026,14 +1043,14 @@ def metrics_api_handler(request):
         if len(list_of_ids) > 0:
             for indx, element in enumerate(list_of_ids):
                 list_of_ids[indx] = int(element)
-            if list_of_counties is not None:
+            if list_of_zipcodes is not None:
                 metrics_submissions = []
-                for county in list_of_counties:
-                    county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                for zipcode in list_of_zipcodes:
+                    zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
                     if look_up_date:
-                        county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
-                    for metrics_entry in county_metrics:
-                        metrics_submissions.append(metrics_entry)
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                    for zipcode_entry in zipcode_metrics:
+                        metrics_submissions.append(zipcode_entry)
             else:
                 metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
                 if look_up_date:
@@ -1048,8 +1065,8 @@ def metrics_api_handler(request):
                     else:
                         metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(metrics_submission.return_values_dict())
                 if "groupby" in rqst_params:
-                    if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                        metrics_dict = group_metrics(metrics_dict, "County")
+                    if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
+                        metrics_dict = group_metrics(metrics_dict, "Zipcode")
                         metrics_list = []
                         for metrics_key, metrics_entry in metrics_dict.iteritems():
                             metrics_list.append(metrics_entry)
@@ -1092,14 +1109,14 @@ def metrics_api_handler(request):
         if len(list_of_ids) > 0:
             for indx, element in enumerate(list_of_ids):
                 list_of_ids[indx] = int(element)
-            if list_of_counties is not None:
+            if list_of_zipcodes is not None:
                 metrics_submissions = []
-                for county in list_of_counties:
-                    county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                for zipcode in list_of_zipcodes:
+                    zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
                     if look_up_date:
-                        county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
-                    for metrics_entry in county_metrics:
-                        metrics_submissions.append(metrics_entry)
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                    for zipcode_entry in zipcode_metrics:
+                        metrics_submissions.append(zipcode_entry)
             else:
                 metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
                 if look_up_date:
@@ -1114,8 +1131,8 @@ def metrics_api_handler(request):
                     else:
                         metrics_dict[metrics_submission.staff_member.first_name]["Metrics Data"].append(metrics_submission.return_values_dict())
                 if "groupby" in rqst_params:
-                    if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                        metrics_dict = group_metrics(metrics_dict, "County")
+                    if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
+                        metrics_dict = group_metrics(metrics_dict, "Zipcode")
                         metrics_list = []
                         for metrics_key, metrics_entry in metrics_dict.iteritems():
                             metrics_list.append(metrics_entry)
@@ -1158,14 +1175,14 @@ def metrics_api_handler(request):
         if len(list_of_ids) > 0:
             for indx, element in enumerate(list_of_ids):
                 list_of_ids[indx] = int(element)
-            if list_of_counties is not None:
+            if list_of_zipcodes is not None:
                 metrics_submissions = []
-                for county in list_of_counties:
-                    county_metrics = MetricsSubmission.objects.filter(county__iexact=county, staff_member__in=list_of_ids)
+                for zipcode in list_of_zipcodes:
+                    zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
                     if look_up_date:
-                        county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
-                    for metrics_entry in county_metrics:
-                        metrics_submissions.append(metrics_entry)
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                    for zipcode_entry in zipcode_metrics:
+                        metrics_submissions.append(zipcode_entry)
             else:
                 metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
                 if look_up_date:
@@ -1180,8 +1197,8 @@ def metrics_api_handler(request):
                     else:
                         metrics_dict[metrics_submission.staff_member.last_name]["Metrics Data"].append(metrics_submission.return_values_dict())
                 if "groupby" in rqst_params:
-                    if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                        metrics_dict = group_metrics(metrics_dict, "County")
+                    if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
+                        metrics_dict = group_metrics(metrics_dict, "Zipcode")
                         metrics_list = []
                         for metrics_key, metrics_entry in metrics_dict.iteritems():
                             metrics_list.append(metrics_entry)
@@ -1209,14 +1226,14 @@ def metrics_api_handler(request):
                 rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_params['lname']))
             response_raw_data['Status']['Error Code'] = 1
 
-    elif list_of_counties is not None:
+    elif list_of_zipcodes is not None:
         metrics_submissions = []
-        for county in list_of_counties:
-            county_metrics = MetricsSubmission.objects.filter(county__iexact=county)
+        for zipcode in list_of_zipcodes:
+            zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode)
             if look_up_date:
-                county_metrics = county_metrics.filter(submission_date__gte=look_up_date)
-            for metrics_entry in county_metrics:
-                metrics_submissions.append(metrics_entry)
+                zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+            for zipcode_entry in zipcode_metrics:
+                metrics_submissions.append(zipcode_entry)
 
         if len(metrics_submissions) > 0:
             metrics_dict = {}
@@ -1227,8 +1244,8 @@ def metrics_api_handler(request):
                 else:
                     metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(metrics_submission.return_values_dict())
             if "groupby" in rqst_params:
-                if rqst_params["groupby"] == "county" or rqst_params["groupby"] == "County":
-                    metrics_dict = group_metrics(metrics_dict, "County")
+                if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
+                    metrics_dict = group_metrics(metrics_dict, "Zipcode")
                     metrics_list = []
                     for metrics_key, metrics_entry in metrics_dict.iteritems():
                         metrics_list.append(metrics_entry)
