@@ -117,6 +117,7 @@ class MetricsSubmission(models.Model):
     county = models.CharField(max_length=1000, default="")
     zipcode = models.CharField(max_length=1000, default="")
     date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
+    coverage_stats = models.TextField(default="")
 
     def return_values_dict(self):
         valuesdict = {"Received Education": self.received_education,

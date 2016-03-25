@@ -1266,7 +1266,7 @@ def metrics_api_handler(request):
 
         else:
             response_raw_data['Status']['Error Code'] = 1
-            rqst_errors.append('No metrics entries found in database for counties: {!s}'.format(rqst_counties))
+            rqst_errors.append('No metrics entries found in database for zipcodes: {!s}'.format(rqst_zipcodes))
     else:
         response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('No Params')
