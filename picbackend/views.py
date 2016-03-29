@@ -870,6 +870,28 @@ def metrics_api_handler(request):
     else:
         look_up_date = None
 
+    if "startdate" in rqst_params:
+        try:
+            rqst_start_date = rqst_params["startdate"]
+            # look_up_date = datetime.date.today() - datetime.timedelta(days=rqst_time)
+        except ValueError:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('time parameter must be a valid integer. Metrics returned without time parameter.')
+            # look_up_date = None
+    else:
+        rqst_start_date = None
+
+    if "enddate" in rqst_params:
+        try:
+            rqst_end_date = rqst_params["enddate"]
+            # look_up_date = datetime.date.today() - datetime.timedelta(days=rqst_time)
+        except ValueError:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('time parameter must be a valid integer. Metrics returned without time parameter.')
+            # look_up_date = None
+    else:
+        rqst_end_date = None
+
     if 'id' in rqst_params:
         rqst_staff_id = str(rqst_params["id"])
         if rqst_staff_id == "all":
@@ -879,12 +901,20 @@ def metrics_api_handler(request):
                     zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode)
                     if look_up_date:
                         zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                    if rqst_start_date:
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
+                    if rqst_end_date:
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
                     for zipcode_entry in zipcode_metrics:
                         metrics_submissions.append(zipcode_entry)
             else:
                 metrics_submissions = MetricsSubmission.objects.all()
                 if look_up_date:
                     metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
+                if rqst_start_date:
+                    metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
+                if rqst_end_date:
+                    metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
@@ -927,12 +957,20 @@ def metrics_api_handler(request):
                         zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
                         if look_up_date:
                             zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                        if rqst_start_date:
+                            zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
+                        if rqst_end_date:
+                            zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
                         for metrics_entry in zipcode_metrics:
                             metrics_submissions.append(metrics_entry)
                 else:
                     metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
                     if look_up_date:
                         metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
+                    if rqst_start_date:
+                        metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
+                    if rqst_end_date:
+                        metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
 
                 if len(metrics_submissions) > 0:
                     metrics_dict = {}
@@ -1000,12 +1038,20 @@ def metrics_api_handler(request):
                         zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
                         if look_up_date:
                             zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                        if rqst_start_date:
+                            zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
+                        if rqst_end_date:
+                            zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
                         for zipcode_entry in zipcode_metrics:
                             metrics_submissions.append(zipcode_entry)
                 else:
                     metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
                     if look_up_date:
                         metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
+                    if rqst_start_date:
+                        metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
+                    if rqst_end_date:
+                        metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
 
                 if len(metrics_submissions) > 0:
                     metrics_dict = {}
@@ -1072,12 +1118,20 @@ def metrics_api_handler(request):
                     zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
                     if look_up_date:
                         zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                    if rqst_start_date:
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
+                    if rqst_end_date:
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
                     for zipcode_entry in zipcode_metrics:
                         metrics_submissions.append(zipcode_entry)
             else:
                 metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
                 if look_up_date:
                     metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
+                if rqst_start_date:
+                    metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
+                if rqst_end_date:
+                    metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
@@ -1138,12 +1192,20 @@ def metrics_api_handler(request):
                     zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
                     if look_up_date:
                         zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                    if rqst_start_date:
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
+                    if rqst_end_date:
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
                     for zipcode_entry in zipcode_metrics:
                         metrics_submissions.append(zipcode_entry)
             else:
                 metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
                 if look_up_date:
                     metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
+                if rqst_start_date:
+                    metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
+                if rqst_end_date:
+                    metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
@@ -1204,12 +1266,20 @@ def metrics_api_handler(request):
                     zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
                     if look_up_date:
                         zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+                    if rqst_start_date:
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
+                    if rqst_end_date:
+                        zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
                     for zipcode_entry in zipcode_metrics:
                         metrics_submissions.append(zipcode_entry)
             else:
                 metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
                 if look_up_date:
                     metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
+                if rqst_start_date:
+                    metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
+                if rqst_end_date:
+                    metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
@@ -1255,6 +1325,10 @@ def metrics_api_handler(request):
             zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode)
             if look_up_date:
                 zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
+            if rqst_start_date:
+                zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
+            if rqst_end_date:
+                zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
             for zipcode_entry in zipcode_metrics:
                 metrics_submissions.append(zipcode_entry)
 
