@@ -10,7 +10,7 @@ from django import forms
 from django.db import models, IntegrityError
 from django.contrib.auth.models import User
 from picbackend.forms import AssessmentFormOne, AssessmentFormTwo, UserCreateForm
-from picmodels.models import PICUser, Appointment, Location, PICConsumer, PICStaff, MetricsSubmission
+from picmodels.models import PICUser, Appointment, Location, PICConsumer, PICStaff, MetricsSubmission, PlanStat
 import datetime, json, sys, re
 from django.views.decorators.csrf import csrf_exempt
 
@@ -585,6 +585,29 @@ def metrics_submission_handler(request):
                     metrics_instance.appointments_postenroll_assistance = rqst_cons_apts_postenr_assis
 
                 metrics_instance.save()
+
+                rqst_plan_stats = clean_dict_input(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors)
+                if rqst_plan_stats is not None:
+                    for plan, enrollments in rqst_plan_stats.iteritems():
+                        planstatobject = PlanStat()
+                        if planstatobject.check_plan_choices(plan_input=plan):
+                            rqst_plan_enrollments = clean_json_int_input(rqst_plan_stats, "Plan Stats", plan, post_errors)
+                            if rqst_plan_enrollments is not None:
+                                planstatobject.plan_name = plan
+                                planstatobject.enrollments = rqst_plan_enrollments
+                                planstatobject.save()
+                                metrics_instance.plan_stats.add(planstatobject)
+                        else:
+                            post_errors.append("Plan: {!s} is not part of member plans".format(plan))
+
+                    if len(post_errors) > 0:
+                        response_raw_data["status"]["Error Code"] = 1
+                        response_raw_data["status"]["Errors"] = post_errors
+
+                        for message in post_errors:
+                            print message
+                            sys.stdout.flush()
+
             except models.ObjectDoesNotExist:
                 response_raw_data["status"]["Error Code"] = 1
                 post_errors.append("Staff database entry does not exist for email: {!s}".format(rqst_usr_email))

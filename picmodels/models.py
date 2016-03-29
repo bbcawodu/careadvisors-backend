@@ -2,7 +2,7 @@
 This file defines the data models for the picproject app
 """
 
-from django.db import models
+from django.db import models, IntegrityError
 from django.contrib.auth.models import User
 import datetime
 
@@ -89,9 +89,43 @@ class Appointment(models.Model):
         app_label = 'picmodels'
 
 
+class PlanStat(models.Model):
+    BLUE_CROSS_BLUES_SHIELD = "Blue Cross Blue Shield"
+    HARKEN_HEALTH = "Harken Health"
+    LAND_OF_LINCOLN = "Land of Lincoln"
+    MISCELLANEOUS = "Miscellaneous"
+    PLAN_CHOICES = ((BLUE_CROSS_BLUES_SHIELD, "Blue Cross Blue Shield"),
+                    (HARKEN_HEALTH, "Harken Health"),
+                    (LAND_OF_LINCOLN, "Land of Lincoln"),
+                    (MISCELLANEOUS, "Miscellaneous"))
+    plan_name = models.CharField(max_length=1000,
+                                 choices=PLAN_CHOICES,
+                                 default=MISCELLANEOUS)
+    enrollments = models.IntegerField()
+
+    def check_plan_choices(self, plan_input):
+        plan_input = plan_input.lower()
+        for plan_tuple in self.PLAN_CHOICES:
+            if plan_tuple[1].lower() == plan_input:
+                return True
+        return False
+
+    def check_plan_choices(self,):
+        for plan_tuple in self.PLAN_CHOICES:
+            if plan_tuple[1].lower() == self.plan_name.lower():
+                return True
+        return False
+
+    def save(self, *args, **kwargs):
+        if self.check_plan_choices() is False:
+            raise IntegrityError
+        super(PlanStat, self).save(*args, **kwargs)
+
+
 class MetricsSubmission(models.Model):
     # fields for PICStaff model
     staff_member = models.ForeignKey(PICStaff, on_delete=models.CASCADE)
+    plan_stats = models.ManyToManyField(PlanStat)
     received_education = models.IntegerField()
     applied_medicaid = models.IntegerField()
     selected_qhp = models.IntegerField()
@@ -117,7 +151,6 @@ class MetricsSubmission(models.Model):
     county = models.CharField(max_length=1000, default="")
     zipcode = models.CharField(max_length=1000, default="")
     date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
-    coverage_stats = models.TextField(default="")
 
     def return_values_dict(self):
         valuesdict = {"Received Education": self.received_education,
@@ -146,7 +179,12 @@ class MetricsSubmission(models.Model):
                       "Submission Date": self.submission_date.isoformat(),
                       "County": self.county,
                       "Zipcode": self.zipcode,
+                      "Plan Stats": {},
                       }
+        plan_stats = self.plan_stats.all()
+        if len(plan_stats) > 0:
+            for plan_stat_object in plan_stats:
+                valuesdict["Plan Stats"][plan_stat_object.plan_name] = plan_stat_object.enrollments
 
         return valuesdict
 
