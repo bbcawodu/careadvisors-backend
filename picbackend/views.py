@@ -847,6 +847,37 @@ def metrics_api_handler(request):
     response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
     rqst_errors = []
 
+    if "id" in rqst_params:
+        rqst_staff_id = rqst_params["id"]
+        list_of_ids = re.findall("\d+", rqst_staff_id)
+        if len(list_of_ids) > 0:
+            for indx, element in enumerate(list_of_ids):
+                list_of_ids[indx] = int(element)
+    else:
+        rqst_staff_id = None
+        list_of_ids = None
+
+    if "fname" in rqst_params:
+        rqst_fname = rqst_params["fname"]
+        list_of_first_names = re.findall("[\w. '-]+", rqst_params['fname'])
+    else:
+        rqst_fname = None
+        list_of_first_names = None
+
+    if "lname" in rqst_params:
+        rqst_lname = rqst_params["lname"]
+        list_of_last_names = re.findall("[\w. '-]+", rqst_params['lname'])
+    else:
+        rqst_lname = None
+        list_of_last_names = None
+
+    if "email" in rqst_params:
+        rqst_staff_email = rqst_params["email"]
+        list_of_emails = re.findall(r"[@\w. '-]+", rqst_params['email'])
+    else:
+        rqst_staff_email = None
+        list_of_emails = None
+
     if "county" in rqst_params:
         rqst_counties = rqst_params["county"]
         list_of_counties = re.findall("[\w. '-]+", rqst_counties)
@@ -892,131 +923,41 @@ def metrics_api_handler(request):
     else:
         rqst_end_date = None
 
-    if 'id' in rqst_params:
-        rqst_staff_id = str(rqst_params["id"])
-        if rqst_staff_id == "all":
-            if list_of_zipcodes is not None:
-                metrics_submissions = []
-                for zipcode in list_of_zipcodes:
-                    zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode)
-                    if look_up_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
-                    if rqst_start_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
-                    if rqst_end_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
-                    for zipcode_entry in zipcode_metrics:
-                        metrics_submissions.append(zipcode_entry)
-            else:
-                metrics_submissions = MetricsSubmission.objects.all()
-                if look_up_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
-                if rqst_start_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
-                if rqst_end_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
+    # Start with this query for all and then evaluate down from request params
+    # Queries arent evaluated until you need the data
+    metrics_submissions = MetricsSubmission.objects.all()
+    if list_of_zipcodes:
+        metrics_submissions = metrics_submissions.filter(zipcode__in=list_of_zipcodes)
+    if look_up_date:
+        metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
+    if rqst_start_date:
+        metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
+    if rqst_end_date:
+        metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
 
-            if len(metrics_submissions) > 0:
-                metrics_dict = {}
-                for metrics_submission in metrics_submissions:
-                    if metrics_submission.staff_member_id not in metrics_dict:
-                        metrics_dict[metrics_submission.staff_member_id] = {"Metrics Data": [metrics_submission.return_values_dict()]}
-                        metrics_dict[metrics_submission.staff_member_id]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
-                    else:
-                        metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(metrics_submission.return_values_dict())
-                if "groupby" in rqst_params:
-                    if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
-                        metrics_dict = group_metrics(metrics_dict, "Zipcode")
-                        metrics_list = []
-                        for metrics_key, metrics_entry in metrics_dict.iteritems():
-                            metrics_list.append(metrics_entry)
-                        response_raw_data["Data"] = metrics_list
-                    else:
-                        metrics_list = []
-                        for metrics_key, metrics_entry in metrics_dict.iteritems():
-                            metrics_list.append(metrics_entry)
-                        response_raw_data["Data"] = metrics_list
-                        response_raw_data["Data"] = metrics_dict
+    if rqst_staff_id:
+        if rqst_staff_id.lower() != "all":
+            metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
+
+        if len(metrics_submissions) > 0:
+            metrics_dict = {}
+            for metrics_submission in metrics_submissions:
+                if metrics_submission.staff_member_id not in metrics_dict:
+                    metrics_dict[metrics_submission.staff_member_id] = {"Metrics Data": [metrics_submission.return_values_dict()]}
+                    metrics_dict[metrics_submission.staff_member_id]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
                 else:
-                    metrics_list = []
-                    for metrics_key, metrics_entry in metrics_dict.iteritems():
-                        metrics_list.append(metrics_entry)
-                    response_raw_data["Data"] = metrics_list
-                    # response_raw_data["Data"] = metrics_dict
-            else:
-                response_raw_data['Status']['Error Code'] = 1
-                rqst_errors.append('No metrics entries found in database')
+                    metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(metrics_submission.return_values_dict())
+
+            if rqst_staff_id.lower() != "all":
+                for staff_id in list_of_ids:
+                    if staff_id not in metrics_dict:
+                        if response_raw_data['Status']['Error Code'] != 2:
+                            response_raw_data['Status']['Error Code'] = 2
+                        rqst_errors.append('Metrics for staff Member with id: {!s} not found in database'.format(str(staff_id)))
         else:
-            list_of_ids = re.findall("\d+", rqst_staff_id)
-            if len(list_of_ids) > 0:
-                for indx, element in enumerate(list_of_ids):
-                    list_of_ids[indx] = int(element)
-                if list_of_zipcodes is not None:
-                    metrics_submissions = []
-                    for zipcode in list_of_zipcodes:
-                        zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
-                        if look_up_date:
-                            zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
-                        if rqst_start_date:
-                            zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
-                        if rqst_end_date:
-                            zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
-                        for metrics_entry in zipcode_metrics:
-                            metrics_submissions.append(metrics_entry)
-                else:
-                    metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
-                    if look_up_date:
-                        metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
-                    if rqst_start_date:
-                        metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
-                    if rqst_end_date:
-                        metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
-
-                if len(metrics_submissions) > 0:
-                    metrics_dict = {}
-                    for metrics_submission in metrics_submissions:
-                        if metrics_submission.staff_member_id not in metrics_dict:
-                            metrics_dict[metrics_submission.staff_member_id] = {"Metrics Data": [metrics_submission.return_values_dict()]}
-                            metrics_dict[metrics_submission.staff_member_id]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
-                        else:
-                            metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(
-                                    metrics_submission.return_values_dict())
-                    if "groupby" in rqst_params:
-                        if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
-                            metrics_dict = group_metrics(metrics_dict, "Zipcode")
-                            metrics_list = []
-                            for metrics_key, metrics_entry in metrics_dict.iteritems():
-                                metrics_list.append(metrics_entry)
-                            response_raw_data["Data"] = metrics_list
-                        else:
-                            metrics_list = []
-                            for metrics_key, metrics_entry in metrics_dict.iteritems():
-                                metrics_list.append(metrics_entry)
-                            response_raw_data["Data"] = metrics_list
-                            # response_raw_data["Data"] = metrics_dict
-                    else:
-                        metrics_list = []
-                        for metrics_key, metrics_entry in metrics_dict.iteritems():
-                            metrics_list.append(metrics_entry)
-                        response_raw_data["Data"] = metrics_list
-                        # response_raw_data["Data"] = metrics_dict
-
-                    for staff_id in list_of_ids:
-                        if staff_id not in metrics_dict:
-                            if response_raw_data['Status']['Error Code'] != 2:
-                                response_raw_data['Status']['Error Code'] = 2
-                            rqst_errors.append('Metrics for staff Member with id: {!s} not found in database'.format(str(staff_id)))
-                else:
-                    response_raw_data['Status']['Error Code'] = 1
-                    rqst_errors.append('No metrics entries for staff ID(s): {!s} not found in database'.format(rqst_staff_id))
-            else:
-                response_raw_data['Status']['Error Code'] = 1
-                rqst_errors.append('No staff IDs provided in request')
-
-    elif 'fname' in rqst_params and 'lname' in rqst_params:
-        list_of_first_names = re.findall("[\w. '-]+", rqst_params['fname'])
-        list_of_last_names = re.findall("[\w. '-]+", rqst_params['lname'])
-
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('No metrics entries for staff ID(s): {!s} not found in database'.format(rqst_staff_id))
+    elif rqst_fname and rqst_lname:
         if len(list_of_first_names) == len(list_of_last_names):
             list_of_ids = []
             for i, first_name in enumerate(list_of_first_names):
@@ -1032,147 +973,28 @@ def metrics_api_handler(request):
             if len(list_of_ids) > 0:
                 for indx, element in enumerate(list_of_ids):
                     list_of_ids[indx] = int(element)
-                if list_of_zipcodes is not None:
-                    metrics_submissions = []
-                    for zipcode in list_of_zipcodes:
-                        zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
-                        if look_up_date:
-                            zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
-                        if rqst_start_date:
-                            zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
-                        if rqst_end_date:
-                            zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
-                        for zipcode_entry in zipcode_metrics:
-                            metrics_submissions.append(zipcode_entry)
-                else:
-                    metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
-                    if look_up_date:
-                        metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
-                    if rqst_start_date:
-                        metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
-                    if rqst_end_date:
-                        metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
-
-                if len(metrics_submissions) > 0:
-                    metrics_dict = {}
-                    for metrics_submission in metrics_submissions:
-                        name = '{!s} {!s}'.format(metrics_submission.staff_member.first_name, metrics_submission.staff_member.last_name)
-                        if name not in metrics_dict:
-                            metrics_dict[name] = {"Metrics Data": [metrics_submission.return_values_dict()]}
-                            metrics_dict[name]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
-                        else:
-                            metrics_dict[name]["Metrics Data"].append(metrics_submission.return_values_dict())
-                    if "groupby" in rqst_params:
-                        if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
-                            metrics_dict = group_metrics(metrics_dict, "Zipcode")
-                            metrics_list = []
-                            for metrics_key, metrics_entry in metrics_dict.iteritems():
-                                metrics_list.append(metrics_entry)
-                            response_raw_data["Data"] = metrics_list
-                            # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
-                        else:
-                            metrics_list = []
-                            for metrics_key, metrics_entry in metrics_dict.iteritems():
-                                metrics_list.append(metrics_entry)
-                            response_raw_data["Data"] = metrics_list
-                            # response_raw_data["Data"] = metrics_dict
-                    else:
-                        metrics_list = []
-                        for metrics_key, metrics_entry in metrics_dict.iteritems():
-                            metrics_list.append(metrics_entry)
-                        response_raw_data["Data"] = metrics_list
-                        # response_raw_data["Data"] = metrics_dict
-
-                else:
-                    if response_raw_data['Status']['Error Code'] != 2:
-                        rqst_errors.append('No metrics entries for first: {!s} and last name(s): {!s} not found in database'.format(rqst_params['fname'],
-                                                                                                                                    rqst_params['lname']))
-                    response_raw_data['Status']['Error Code'] = 1
+                metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
             else:
                 if response_raw_data['Status']['Error Code'] != 2:
-                    rqst_errors.append('No staff entries for first: {!s} and last name(s): {!s} not found in database'.format(rqst_params['fname'],
-                                                                                                                              rqst_params['lname']))
+                    rqst_errors.append('No metrics entries for first names(s): {!s}; and last names(s): {!s} not found in database'.format(rqst_fname, rqst_lname))
                 response_raw_data['Status']['Error Code'] = 1
-        else:
-            response_raw_data['Status']['Error Code'] = 1
-            rqst_errors.append('Length of first name list must be equal to length of last name list')
-
-    elif 'email' in rqst_params:
-        list_of_emails = re.findall(r"[@\w. '-]+", rqst_params['email'])
-        list_of_ids = []
-        for email in list_of_emails:
-            email_ids = PICStaff.objects.filter(email__iexact=email).values_list('id', flat=True)
-            if len(email_ids) > 0:
-                list_of_ids.append(email_ids)
-            else:
-                if response_raw_data['Status']['Error Code'] != 2:
-                    response_raw_data['Status']['Error Code'] = 2
-                rqst_errors.append('Staff member with email: {!s} not found in database'.format(email))
-        list_of_ids = list(set().union(*list_of_ids))
-        if len(list_of_ids) > 0:
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            if list_of_zipcodes is not None:
-                metrics_submissions = []
-                for zipcode in list_of_zipcodes:
-                    zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
-                    if look_up_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
-                    if rqst_start_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
-                    if rqst_end_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
-                    for zipcode_entry in zipcode_metrics:
-                        metrics_submissions.append(zipcode_entry)
-            else:
-                metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
-                if look_up_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
-                if rqst_start_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
-                if rqst_end_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
                 for metrics_submission in metrics_submissions:
-                    if metrics_submission.staff_member.email not in metrics_dict:
-                        metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [metrics_submission.return_values_dict()]}
-                        metrics_dict[metrics_submission.staff_member.email]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+                    name = '{!s} {!s}'.format(metrics_submission.staff_member.first_name, metrics_submission.staff_member.last_name)
+                    if name not in metrics_dict:
+                        metrics_dict[name] = {"Metrics Data": [metrics_submission.return_values_dict()]}
+                        metrics_dict[name]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
                     else:
-                        metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(metrics_submission.return_values_dict())
-                if "groupby" in rqst_params:
-                    if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
-                        metrics_dict = group_metrics(metrics_dict, "Zipcode")
-                        metrics_list = []
-                        for metrics_key, metrics_entry in metrics_dict.iteritems():
-                            metrics_list.append(metrics_entry)
-                        response_raw_data["Data"] = metrics_list
-                        # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
-                    else:
-                        metrics_list = []
-                        for metrics_key, metrics_entry in metrics_dict.iteritems():
-                            metrics_list.append(metrics_entry)
-                        response_raw_data["Data"] = metrics_list
-                        # response_raw_data["Data"] = metrics_dict
-                else:
-                    metrics_list = []
-                    for metrics_key, metrics_entry in metrics_dict.iteritems():
-                        metrics_list.append(metrics_entry)
-                    response_raw_data["Data"] = metrics_list
-                    # response_raw_data["Data"] = metrics_dict
-
+                        metrics_dict[name]["Metrics Data"].append(metrics_submission.return_values_dict())
             else:
                 if response_raw_data['Status']['Error Code'] != 2:
-                    rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_params['email']))
-                response_raw_data['Status']['Error Code'] = 1
+                    rqst_errors.append('No metrics entries for first names(s): {!s}; and last names(s): {!s} not found in database'.format(rqst_fname, rqst_lname))
         else:
-            if response_raw_data['Status']['Error Code'] != 2:
-                rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_params['email']))
             response_raw_data['Status']['Error Code'] = 1
-
-    elif 'fname' in rqst_params:
-        list_of_first_names = re.findall("[\w. '-]+", rqst_params['fname'])
+            rqst_errors.append('Length of first name list must be equal to length of last name list')
+    elif rqst_fname:
         list_of_ids = []
         for first_name in list_of_first_names:
             first_name_ids = PICStaff.objects.filter(first_name__iexact=first_name).values_list('id', flat=True)
@@ -1186,26 +1008,7 @@ def metrics_api_handler(request):
         if len(list_of_ids) > 0:
             for indx, element in enumerate(list_of_ids):
                 list_of_ids[indx] = int(element)
-            if list_of_zipcodes is not None:
-                metrics_submissions = []
-                for zipcode in list_of_zipcodes:
-                    zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
-                    if look_up_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
-                    if rqst_start_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
-                    if rqst_end_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
-                    for zipcode_entry in zipcode_metrics:
-                        metrics_submissions.append(zipcode_entry)
-            else:
-                metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
-                if look_up_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
-                if rqst_start_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
-                if rqst_end_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
+            metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
@@ -1215,38 +1018,15 @@ def metrics_api_handler(request):
                         metrics_dict[metrics_submission.staff_member.first_name]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
                     else:
                         metrics_dict[metrics_submission.staff_member.first_name]["Metrics Data"].append(metrics_submission.return_values_dict())
-                if "groupby" in rqst_params:
-                    if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
-                        metrics_dict = group_metrics(metrics_dict, "Zipcode")
-                        metrics_list = []
-                        for metrics_key, metrics_entry in metrics_dict.iteritems():
-                            metrics_list.append(metrics_entry)
-                        response_raw_data["Data"] = metrics_list
-                        # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
-                    else:
-                        metrics_list = []
-                        for metrics_key, metrics_entry in metrics_dict.iteritems():
-                            metrics_list.append(metrics_entry)
-                        response_raw_data["Data"] = metrics_list
-                        # response_raw_data["Data"] = metrics_dict
-                else:
-                    metrics_list = []
-                    for metrics_key, metrics_entry in metrics_dict.iteritems():
-                        metrics_list.append(metrics_entry)
-                    response_raw_data["Data"] = metrics_list
-                    # response_raw_data["Data"] = metrics_dict
-
             else:
                 if response_raw_data['Status']['Error Code'] != 2:
-                    rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_params['fname']))
+                    rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_fname))
                 response_raw_data['Status']['Error Code'] = 1
         else:
             if response_raw_data['Status']['Error Code'] != 2:
-                rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_params['fname']))
+                rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_fname))
             response_raw_data['Status']['Error Code'] = 1
-
-    elif 'lname' in rqst_params:
-        list_of_last_names = re.findall("[\w. '-]+", rqst_params['lname'])
+    elif rqst_lname:
         list_of_ids = []
         for last_name in list_of_last_names:
             last_name_ids = PICStaff.objects.filter(last_name__iexact=last_name).values_list('id', flat=True)
@@ -1260,26 +1040,7 @@ def metrics_api_handler(request):
         if len(list_of_ids) > 0:
             for indx, element in enumerate(list_of_ids):
                 list_of_ids[indx] = int(element)
-            if list_of_zipcodes is not None:
-                metrics_submissions = []
-                for zipcode in list_of_zipcodes:
-                    zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode, staff_member__in=list_of_ids)
-                    if look_up_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
-                    if rqst_start_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
-                    if rqst_end_date:
-                        zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
-                    for zipcode_entry in zipcode_metrics:
-                        metrics_submissions.append(zipcode_entry)
-            else:
-                metrics_submissions = MetricsSubmission.objects.filter(staff_member__in=list_of_ids)
-                if look_up_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
-                if rqst_start_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__gte=rqst_start_date)
-                if rqst_end_date:
-                    metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
+            metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
 
             if len(metrics_submissions) > 0:
                 metrics_dict = {}
@@ -1289,84 +1050,66 @@ def metrics_api_handler(request):
                         metrics_dict[metrics_submission.staff_member.last_name]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
                     else:
                         metrics_dict[metrics_submission.staff_member.last_name]["Metrics Data"].append(metrics_submission.return_values_dict())
-                if "groupby" in rqst_params:
-                    if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
-                        metrics_dict = group_metrics(metrics_dict, "Zipcode")
-                        metrics_list = []
-                        for metrics_key, metrics_entry in metrics_dict.iteritems():
-                            metrics_list.append(metrics_entry)
-                        response_raw_data["Data"] = metrics_list
-                        # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
-                    else:
-                        metrics_list = []
-                        for metrics_key, metrics_entry in metrics_dict.iteritems():
-                            metrics_list.append(metrics_entry)
-                        response_raw_data["Data"] = metrics_list
-                        # response_raw_data["Data"] = metrics_dict
-                else:
-                    metrics_list = []
-                    for metrics_key, metrics_entry in metrics_dict.iteritems():
-                        metrics_list.append(metrics_entry)
-                    response_raw_data["Data"] = metrics_list
-                    # response_raw_data["Data"] = metrics_dict
-
             else:
                 if response_raw_data['Status']['Error Code'] != 2:
-                    rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_params['lname']))
+                    rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_lname))
                 response_raw_data['Status']['Error Code'] = 1
         else:
             if response_raw_data['Status']['Error Code'] != 2:
-                rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_params['lname']))
+                rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_lname))
             response_raw_data['Status']['Error Code'] = 1
-
-    elif list_of_zipcodes is not None:
-        metrics_submissions = []
-        for zipcode in list_of_zipcodes:
-            zipcode_metrics = MetricsSubmission.objects.filter(zipcode__iexact=zipcode)
-            if look_up_date:
-                zipcode_metrics = zipcode_metrics.filter(submission_date__gte=look_up_date)
-            if rqst_start_date:
-                zipcode_metrics = zipcode_metrics.filter(submission_date__gte=rqst_start_date)
-            if rqst_end_date:
-                zipcode_metrics = zipcode_metrics.filter(submission_date__lte=rqst_end_date)
-            for zipcode_entry in zipcode_metrics:
-                metrics_submissions.append(zipcode_entry)
-
-        if len(metrics_submissions) > 0:
-            metrics_dict = {}
-            for metrics_submission in metrics_submissions:
-                if metrics_submission.staff_member_id not in metrics_dict:
-                    metrics_dict[metrics_submission.staff_member_id] = {"Metrics Data": [metrics_submission.return_values_dict()]}
-                    metrics_dict[metrics_submission.staff_member_id]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
-                else:
-                    metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(metrics_submission.return_values_dict())
-            if "groupby" in rqst_params:
-                if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
-                    metrics_dict = group_metrics(metrics_dict, "Zipcode")
-                    metrics_list = []
-                    for metrics_key, metrics_entry in metrics_dict.iteritems():
-                        metrics_list.append(metrics_entry)
-                    response_raw_data["Data"] = metrics_list
-                    # response_raw_data["Data"] = group_metrics(metrics_dict, "County")
-                else:
-                    metrics_list = []
-                    for metrics_key, metrics_entry in metrics_dict.iteritems():
-                        metrics_list.append(metrics_entry)
-                    response_raw_data["Data"] = metrics_list
-                    # response_raw_data["Data"] = metrics_dict
+    elif rqst_staff_email:
+        list_of_ids = []
+        for email in list_of_emails:
+            email_ids = PICStaff.objects.filter(email__iexact=email).values_list('id', flat=True)
+            if len(email_ids) > 0:
+                list_of_ids.append(email_ids)
             else:
-                metrics_list = []
-                for metrics_key, metrics_entry in metrics_dict.iteritems():
-                    metrics_list.append(metrics_entry)
-                response_raw_data["Data"] = metrics_list
-                # response_raw_data["Data"] = metrics_dict
+                if response_raw_data['Status']['Error Code'] != 2:
+                    response_raw_data['Status']['Error Code'] = 2
+                rqst_errors.append('Staff member with email: {!s} not found in database'.format(email))
+        list_of_ids = list(set().union(*list_of_ids))
+        if len(list_of_ids) > 0:
+            for indx, element in enumerate(list_of_ids):
+                list_of_ids[indx] = int(element)
+            metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
 
+            if len(metrics_submissions) > 0:
+                metrics_dict = {}
+                for metrics_submission in metrics_submissions:
+                    if metrics_submission.staff_member.email not in metrics_dict:
+                        metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [metrics_submission.return_values_dict()]}
+                        metrics_dict[metrics_submission.staff_member.email]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+                    else:
+                        metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(metrics_submission.return_values_dict())
+            else:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_staff_email))
+                response_raw_data['Status']['Error Code'] = 1
         else:
+            if response_raw_data['Status']['Error Code'] != 2:
+                rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_staff_email))
             response_raw_data['Status']['Error Code'] = 1
-            rqst_errors.append('No metrics entries found in database for zipcodes: {!s}'.format(rqst_zipcodes))
+
+    if "groupby" in rqst_params:
+        if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
+            metrics_dict = group_metrics(metrics_dict, "Zipcode")
+            metrics_list = []
+            for metrics_key, metrics_entry in metrics_dict.iteritems():
+                metrics_list.append(metrics_entry)
+            response_raw_data["Data"] = metrics_list
+        else:
+            metrics_list = []
+            for metrics_key, metrics_entry in metrics_dict.iteritems():
+                metrics_list.append(metrics_entry)
+            response_raw_data["Data"] = metrics_list
+            # response_raw_data["Data"] = metrics_dict
     else:
-        response_raw_data['Status']['Error Code'] = 1
-        rqst_errors.append('No Params')
+        metrics_list = []
+        for metrics_key, metrics_entry in metrics_dict.iteritems():
+            metrics_list.append(metrics_entry)
+        response_raw_data["Data"] = metrics_list
+        # response_raw_data["Data"] = metrics_dict
 
     response_raw_data["Status"]["Errors"] = rqst_errors
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
