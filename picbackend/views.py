@@ -2,15 +2,10 @@
 Defines views that are mapped to url configurations
 """
 
-from django.template.loader import get_template
-from django.template import Context
-from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.shortcuts import redirect, render_to_response, render
-from django import forms
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.db import models, IntegrityError
-from django.contrib.auth.models import User
-from picbackend.forms import AssessmentFormOne, AssessmentFormTwo, UserCreateForm
-from picmodels.models import PICUser, Appointment, Location, PICConsumer, PICStaff, MetricsSubmission, PlanStat
+from picmodels.models import PICStaff, MetricsSubmission, PlanStat
 import datetime, json, sys, re
 from django.views.decorators.csrf import csrf_exempt
 
@@ -18,76 +13,6 @@ from django.views.decorators.csrf import csrf_exempt
 # defines view for home page
 def index(request):
     return render(request, "home_page.html")
-
-
-# defines view for registration page
-def registration(request):
-    if request.method == 'POST':
-        form_data = request.POST.copy()
-        form_data['date_joined'] = datetime.date.today()
-        form = UserCreateForm(form_data)
-        if form.is_valid():
-            new_user = form.save()
-            return HttpResponseRedirect("/memberlist/")
-    else:
-        form = UserCreateForm()
-    return render(request, "registration.html", {'form': form})
-
-
-# defines view for member list display page
-def memberlist(request):
-    all_members = PICUser.objects.all()
-    return render(request, "member_list.html", {'member_list': all_members})
-
-
-# defines view for part 1 of risk assessment page
-def risk_assessment(request):
-    if request.method == 'POST':
-        post_data = request.POST
-        form_one = AssessmentFormOne(post_data)
-        if form_one.is_valid():
-            cd = form_one.cleaned_data
-            request.session['form_data'] = cd
-            return HttpResponseRedirect('/riskassessment/next/')
-    else:
-        form_one = AssessmentFormOne()
-    return render(request, 'assessment.html', {'form_one': form_one})
-
-
-# defines view for part 2 of risk assessment page
-def risk_assessment_2(request):
-    form_data = request.session.get('form_data')
-    if form_data:
-        for key in form_data:
-            form_data[key] = int(form_data[key])
-    else:
-        raise Http404('need old post data')
-
-    if request.method == 'POST':
-        current_post_data = request.POST
-        form_one = AssessmentFormTwo(form_data, current_post_data)
-        if form_one.is_valid():
-            cd = form_one.cleaned_data
-            health_risk = 0
-            for key in form_data:
-                answer = form_data[key]
-                if key == 'is_employed' or key == 'has_insurance' or key == 'has_primary_doctor':
-                    if answer == 0:
-                        health_risk += 1
-                else:
-                    if answer == 1:
-                        health_risk += 1
-            for key in cd:
-                if int(cd[key]) == 1:
-                    health_risk += 1
-            health_risk_score = (float(health_risk) / 11) * 100
-            health_risk_string = str(int(health_risk_score))
-            return render(request, 'assessment_score.html', {'score': health_risk_string})
-    else:
-        form_one = AssessmentFormTwo(previous_form_data=form_data)
-        return render(request, 'assessment_2.html', {'form_one': form_one})
-
-    return render(request, 'assessment_2.html', {'form_one': form_one})
 
 
 def clean_json_string_input(json_dict, dict_name, dict_key, post_errors, empty_string_allowed=False,
@@ -125,172 +50,6 @@ def clean_dict_input(json_dict, dict_name, dict_key, post_errors):
     else:
         return json_dict[dict_key]
     return None
-
-
-# defines view for saving scheduled appointments to the database
-@csrf_exempt
-def appointment_submission_handler(request):
-    # initialize dictionary for response data, including parsing errors
-    response_raw_data = {'status': {"Error Code": 0, "Version": 1.0}}
-    post_errors = []
-
-    if request.method == 'POST' or request.is_ajax():
-        post_data = request.body
-        post_json = json.loads(post_data)
-
-        response_raw_data["Appointment Instance"] = {}
-        request_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors)
-        request_consumer_first_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
-        request_consumer_last_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
-        request_consumer_phone = clean_json_string_input(post_json, "root", "Phone Number", post_errors)
-        request_consumer_preferred_language = clean_json_string_input(post_json, "root", "Preferred Language",
-                                                                      post_errors, empty_string_allowed=True)
-        request_consumer_best_contact_time = clean_json_string_input(post_json, "root", "Best Contact Time",
-                                                                     post_errors, empty_string_allowed=True)
-
-        appointment_information = clean_dict_input(post_json, "root", "Appointment", post_errors)
-        if appointment_information is not None:
-            request_location_name = clean_json_string_input(appointment_information, "Appointment Information", "Name",
-                                                            post_errors)
-            request_appointment_street_address = clean_json_string_input(appointment_information,
-                                                                         "Appointment Information","Street Address",
-                                                                         post_errors)
-            request_appointment_city = clean_json_string_input(appointment_information, "Appointment Information",
-                                                               "City", post_errors)
-            request_appointment_state = clean_json_string_input(appointment_information, "Appointment Information",
-                                                                "State", post_errors)
-            request_appointment_zip = clean_json_string_input(appointment_information, "Appointment Information",
-                                                              "Zip Code", post_errors)
-            if len(post_errors) == 0:
-                request_appointment_address = "{!s}, {!s} {!s}, {!s}".format(request_appointment_street_address,
-                                                                             request_appointment_city,
-                                                                             request_appointment_state,
-                                                                             request_appointment_zip)
-            request_appointment_location_phone = clean_json_string_input(appointment_information,
-                                                                         "Appointment Information", "Phone Number",
-                                                                         post_errors)
-
-            appointment_slot_info = clean_dict_input(appointment_information, "Appointment Information",
-                                                     "Appointment Slot", post_errors)
-            if appointment_slot_info is not None:
-                date_dictionary = clean_dict_input(appointment_slot_info, "Appointment Slot", "Date", post_errors)
-                if date_dictionary is not None:
-                    month = clean_json_int_input(date_dictionary, "Date", "Month", post_errors)
-                    if month < 1 or month > 12:
-                        post_errors.append("Month must be between 1 and 12 inclusive")
-
-                    day = clean_json_int_input(date_dictionary, "Date", "Day", post_errors)
-                    if day < 1 or day > 31:
-                        post_errors.append("Day must be between 1 and 31 inclusive")
-
-                    year = clean_json_int_input(date_dictionary, "Date", "Year", post_errors)
-                    if year < 1 or year > 9999:
-                        post_errors.append("Year must be between 1 and 9999 inclusive")
-
-                    if len(post_errors) == 0:
-                        apt_date = datetime.date(year, month, day).isoformat()
-                        request_appointment_date = str(apt_date)
-
-                start_dictionary = clean_dict_input(appointment_slot_info, "Appointment Slot", "Start Time",
-                                                    post_errors)
-                if start_dictionary is not None:
-                    hour = clean_json_int_input(start_dictionary, "Start Time", "Hour", post_errors)
-                    if hour not in range(24):
-                        post_errors.append("Hour must be between 0 and 23 inclusive")
-
-                    minutes = clean_json_int_input(start_dictionary, "Start Time", "Minutes", post_errors)
-                    if minutes not in range(60):
-                        post_errors.append("Minute must be between 0 and 59 inclusive")
-
-                    if len(post_errors) == 0:
-                        request_appointment_start_time = str(datetime.time(hour=hour, minute=minutes).isoformat())
-
-                end_dictionary = clean_dict_input(appointment_slot_info, "Appointment Slot", "End Time", post_errors)
-                if end_dictionary is not None:
-                    hour = clean_json_int_input(end_dictionary, "End Time", "Hour", post_errors)
-                    if hour not in range(24):
-                        post_errors.append("Hour must be between 0 and 23 inclusive")
-
-                    minutes = clean_json_int_input(end_dictionary, "End Time", "Minutes", post_errors)
-                    if minutes not in range(60):
-                        post_errors.append("Minute must be between 0 and 59 inclusive")
-
-                    if len(post_errors) == 0:
-                        request_appointment_end_time = str(datetime.time(hour=hour, minute=minutes).isoformat())
-
-            appointment_poc_info = clean_dict_input(appointment_information, "Appointment Information",
-                                                    "Point of Contact", post_errors)
-            if appointment_poc_info is not None:
-                request_poc_first_name = clean_json_string_input(appointment_poc_info, "Point of Contact", "First Name",
-                                                                 post_errors)
-                request_poc_last_name = clean_json_string_input(appointment_poc_info, "Point of Contact", "Last Name",
-                                                                post_errors)
-                request_poc_email = clean_json_string_input(appointment_poc_info, "Point of Contact", "Email",
-                                                            post_errors)
-                request_poc_type = clean_json_string_input(appointment_poc_info, "Point of Contact", "Type",
-                                                           post_errors)
-
-        # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
-        # create and save database entry for appointment
-        if len(post_errors) == 0:
-            consumer_request_values = {"first_name": request_consumer_first_name,
-                                       "last_name": request_consumer_last_name,
-                                       "phone": request_consumer_phone,
-                                       "preferred_language": request_consumer_preferred_language,
-                                       "best_contact_time": request_consumer_best_contact_time}
-            pic_consumer, pic_consumer_created = PICConsumer.objects.get_or_create(email=request_consumer_email,
-                                                                                   defaults=consumer_request_values)
-
-            location_request_values = {"address": request_appointment_address,
-                                       "phone": request_appointment_location_phone}
-            appointment_location, appointment_location_created = Location.objects.get_or_create(name=request_location_name,
-                                                                                                defaults=location_request_values)
-
-            poc_request_values = {"first_name": request_poc_first_name,
-                                  "last_name": request_poc_last_name,
-                                  "type": request_poc_type}
-            appointment_poc, appointment_poc_created = PICStaff.objects.get_or_create(email=request_poc_email,
-                                                                                      defaults=poc_request_values)
-            new_appointment = Appointment(consumer=pic_consumer,
-                                          location=appointment_location,
-                                          poc=appointment_poc,
-                                          date=request_appointment_date,
-                                          start_time=request_appointment_start_time,
-                                          end_time=request_appointment_end_time)
-            new_appointment.save()
-
-            response_raw_data["consumer info"] = consumer_request_values
-            response_raw_data["location"] = location_request_values
-            response_raw_data["poc info"] = poc_request_values
-
-        # add parsing errors to response dictionary
-        else:
-            response_raw_data["status"]["Error Code"] = 1
-            response_raw_data["status"]["Errors"] = post_errors
-
-            error_message = ""
-            for message in post_errors:
-                error_message = error_message + message + ", "
-            print error_message
-            sys.stdout.flush()
-
-    # if a GET request is made, add error message to response data
-    else:
-        response_raw_data["status"]["Error Code"] = 1
-        post_errors.append("Request needs POST data")
-        response_raw_data["status"]["Errors"] = post_errors
-        for message in post_errors:
-            print message
-        sys.stdout.flush()
-
-    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-    return response
-
-
-# defines view for member list display page
-def appointment_viewing_handler(request):
-    all_appointments = Appointment.objects.all()
-    return render(request, 'appointment_list.html', {'appointment_list': all_appointments})
 
 
 # defines view for saving scheduled appointments to the database
@@ -674,14 +433,13 @@ def staff_api_handler(request):
     response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
     rqst_errors = []
 
+    staff_members = PICStaff.objects.all()
     if rqst_first_name and rqst_last_name:
-        rqst_first_name = rqst_params['fname']
-        rqst_last_name = rqst_params['lname']
-        staff_objects = PICStaff.objects.filter(first_name__iexact=rqst_first_name, last_name__iexact=rqst_last_name)
-        if len(staff_objects) > 0:
+        staff_members = staff_members.filter(first_name__iexact=rqst_first_name, last_name__iexact=rqst_last_name)
+        if len(staff_members) > 0:
             staff_member_dict = {}
             rqst_full_name = rqst_first_name + " " + rqst_last_name
-            for staff_member in staff_objects:
+            for staff_member in staff_members:
                 if rqst_full_name not in staff_member_dict:
                     staff_member_dict[rqst_full_name] = [staff_member.return_values_dict()]
                 else:
@@ -924,7 +682,7 @@ def metrics_api_handler(request):
         rqst_end_date = None
 
     # Start with this query for all and then evaluate down from request params
-    # Queries arent evaluated until you need the data
+    # Queries arent evaluated until you read the data
     metrics_submissions = MetricsSubmission.objects.all()
     if list_of_zipcodes:
         metrics_submissions = metrics_submissions.filter(zipcode__in=list_of_zipcodes)

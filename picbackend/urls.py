@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from picbackend import views
+from presencescheduler import urls as scheduler_urls
 
 #enables admin
 admin.autodiscover()
@@ -33,14 +34,9 @@ urlpatterns = [
     # url(r'^admin/', include(admin.site.urls)),
     # urlconfig for homepage
     #url(r'^$', my_homepage_view),
-    
+
+    url(r'^', include(scheduler_urls)),
     url(r"^$", views.index),
-    url(r'^registration/$', views.registration),
-    url(r'^memberlist/$', views.memberlist),
-    url(r"^riskassessment/$", views.risk_assessment),
-    url(r"^riskassessment/next/$", views.risk_assessment_2),
-    url(r"^submitappointment/$", views.appointment_submission_handler),
-    url(r"^viewappointments/$", views.appointment_viewing_handler),
     url(r"^submitmetrics/$", views.metrics_submission_handler),
     url(r"^editstaff/$", views.staff_edit_handler),
     url(r"^v1/staff$", views.staff_api_handler),
