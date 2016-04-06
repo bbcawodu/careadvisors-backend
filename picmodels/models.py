@@ -103,13 +103,6 @@ class PlanStat(models.Model):
                                  default=MISCELLANEOUS)
     enrollments = models.IntegerField()
 
-    def check_plan_choices(self, plan_input):
-        plan_input = plan_input.lower()
-        for plan_tuple in self.PLAN_CHOICES:
-            if plan_tuple[1].lower() == plan_input:
-                return True
-        return False
-
     def check_plan_choices(self,):
         for plan_tuple in self.PLAN_CHOICES:
             if plan_tuple[1].lower() == self.plan_name.lower():

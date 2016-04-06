@@ -346,13 +346,16 @@ def metrics_submission_handler(request):
                 metrics_instance.save()
 
                 rqst_plan_stats = clean_dict_input(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors)
+                metrics_instance_plan_stats = metrics_instance.plan_stats.all()
+                for instance_plan_stat in metrics_instance_plan_stats:
+                    instance_plan_stat.delete()
                 if rqst_plan_stats is not None:
                     for plan, enrollments in rqst_plan_stats.iteritems():
                         planstatobject = PlanStat()
-                        if planstatobject.check_plan_choices(plan_input=plan):
+                        planstatobject.plan_name = plan
+                        if planstatobject.check_plan_choices():
                             rqst_plan_enrollments = clean_json_int_input(rqst_plan_stats, "Plan Stats", plan, post_errors)
                             if rqst_plan_enrollments is not None:
-                                planstatobject.plan_name = plan
                                 planstatobject.enrollments = rqst_plan_enrollments
                                 planstatobject.save()
                                 metrics_instance.plan_stats.add(planstatobject)
