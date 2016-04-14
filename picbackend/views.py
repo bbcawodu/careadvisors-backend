@@ -648,6 +648,8 @@ def metrics_api_handler(request):
     if "zipcode" in rqst_params:
         rqst_zipcodes = rqst_params["zipcode"]
         list_of_zipcodes = re.findall("\d+", rqst_zipcodes)
+        print list_of_zipcodes
+        sys.stdout.flush()
     else:
         list_of_zipcodes= None
 
@@ -687,7 +689,7 @@ def metrics_api_handler(request):
     # Start with this query for all and then evaluate down from request params
     # Queries arent evaluated until you read the data
     metrics_submissions = MetricsSubmission.objects.all()
-    if list_of_zipcodes:
+    if list_of_zipcodes is not None:
         metrics_submissions = metrics_submissions.filter(zipcode__in=list_of_zipcodes)
     if look_up_date:
         metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
@@ -700,8 +702,8 @@ def metrics_api_handler(request):
         if rqst_staff_id.lower() != "all":
             metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
 
+        metrics_dict = {}
         if len(metrics_submissions) > 0:
-            metrics_dict = {}
             for metrics_submission in metrics_submissions:
                 if metrics_submission.staff_member_id not in metrics_dict:
                     metrics_dict[metrics_submission.staff_member_id] = {"Metrics Data": [metrics_submission.return_values_dict()]}
@@ -740,8 +742,8 @@ def metrics_api_handler(request):
                     rqst_errors.append('No metrics entries for first names(s): {!s}; and last names(s): {!s} not found in database'.format(rqst_fname, rqst_lname))
                 response_raw_data['Status']['Error Code'] = 1
 
+            metrics_dict = {}
             if len(metrics_submissions) > 0:
-                metrics_dict = {}
                 for metrics_submission in metrics_submissions:
                     name = '{!s} {!s}'.format(metrics_submission.staff_member.first_name, metrics_submission.staff_member.last_name)
                     if name not in metrics_dict:
@@ -771,8 +773,8 @@ def metrics_api_handler(request):
                 list_of_ids[indx] = int(element)
             metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
 
+            metrics_dict = {}
             if len(metrics_submissions) > 0:
-                metrics_dict = {}
                 for metrics_submission in metrics_submissions:
                     if metrics_submission.staff_member.first_name not in metrics_dict:
                         metrics_dict[metrics_submission.staff_member.first_name] = {"Metrics Data": [metrics_submission.return_values_dict()]}
@@ -803,8 +805,8 @@ def metrics_api_handler(request):
                 list_of_ids[indx] = int(element)
             metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
 
+            metrics_dict = {}
             if len(metrics_submissions) > 0:
-                metrics_dict = {}
                 for metrics_submission in metrics_submissions:
                     if metrics_submission.staff_member.last_name not in metrics_dict:
                         metrics_dict[metrics_submission.staff_member.last_name] = {"Metrics Data": [metrics_submission.return_values_dict()]}
@@ -835,8 +837,8 @@ def metrics_api_handler(request):
                 list_of_ids[indx] = int(element)
             metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
 
+            metrics_dict = {}
             if len(metrics_submissions) > 0:
-                metrics_dict = {}
                 for metrics_submission in metrics_submissions:
                     if metrics_submission.staff_member.email not in metrics_dict:
                         metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [metrics_submission.return_values_dict()]}

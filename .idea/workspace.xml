@@ -2,30 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1990ad25-4822-4da6-815b-03692f3687bb" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0001_initial.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0002_auto_20151217_1802.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0003_auto_20151217_1825.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0004_auto_20151217_1852.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0005_auto_20151217_2156.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0006_auto_20151218_1533.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0007_auto_20151221_2318.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0008_auto_20151222_1552.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0009_metricssubmission.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0010_auto_20151229_2102.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0011_metricssubmission_date_created.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0012_auto_20160104_1957.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0013_metricssubmission_submission_date.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0014_auto_20160107_1608.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0015_auto_20160107_2110.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0016_auto_20160107_2114.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0017_auto_20160114_2048.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0018_metricssubmission_zipcode.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0019_metricssubmission_coverage_stats.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0020_auto_20160328_1700.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/__init__.py" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picbackend/views.py" afterPath="$PROJECT_DIR$/picbackend/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picmodels/models.py" afterPath="$PROJECT_DIR$/picmodels/models.py" />
     </list>
     <ignored path="picproject.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -62,6 +40,9 @@
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/README.md">
+          <provider editor-type-id="MultiMarkdownFxPreviewEditor">
+            <state />
+          </provider>
           <provider selected="true" editor-type-id="split-provider[text-editor;MultiMarkdownPreviewEditor]">
             <state split_layout="FIRST">
               <first_editor vertical-scroll-proportion="0.0">
@@ -70,9 +51,6 @@
               </first_editor>
               <second_editor />
             </state>
-          </provider>
-          <provider editor-type-id="MultiMarkdownFxPreviewEditor">
-            <state />
           </provider>
         </entry>
       </file>
@@ -113,17 +91,17 @@
       <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/picbackend/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.49197862">
-              <caret line="353" column="51" selection-start-line="353" selection-start-column="51" selection-end-line="353" selection-end-column="51" />
+            <state vertical-scroll-proportion="0.5187166">
+              <caret line="695" column="23" selection-start-line="695" selection-start-column="23" selection-end-line="695" selection-end-column="23" />
               <folding>
                 <element signature="e#61#97#0" expanded="true" />
                 <element signature="e#582#1118#0" expanded="false" />
                 <element signature="e#1196#1525#0" expanded="false" />
                 <element signature="e#1599#2238#0" expanded="false" />
                 <element signature="e#2356#9891#0" expanded="false" />
+                <element signature="e#10017#22556#0" expanded="false" />
                 <element signature="e#22653#30913#0" expanded="false" />
                 <element signature="e#31028#33049#0" expanded="false" />
-                <element signature="e#33150#47831#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -613,7 +591,7 @@
     <frame x="0" y="0" width="1440" height="896" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3190272" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32761088" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298969" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -647,7 +625,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="13" />
+      <option name="time" value="14" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -949,6 +927,14 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
+      <provider editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.48300537">
+          <caret line="19" column="22" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
+        </state>
+      </provider>
+      <provider editor-type-id="MultiMarkdownFxPreviewEditor">
+        <state />
+      </provider>
       <provider selected="true" editor-type-id="split-provider[text-editor;MultiMarkdownPreviewEditor]">
         <state split_layout="FIRST">
           <first_editor vertical-scroll-proportion="0.0">
@@ -956,14 +942,6 @@
             <folding />
           </first_editor>
           <second_editor />
-        </state>
-      </provider>
-      <provider editor-type-id="MultiMarkdownFxPreviewEditor">
-        <state />
-      </provider>
-      <provider editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.48300537">
-          <caret line="19" column="22" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
         </state>
       </provider>
     </entry>
@@ -1036,17 +1014,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/picbackend/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.49197862">
-          <caret line="353" column="51" selection-start-line="353" selection-start-column="51" selection-end-line="353" selection-end-column="51" />
+        <state vertical-scroll-proportion="0.5187166">
+          <caret line="695" column="23" selection-start-line="695" selection-start-column="23" selection-end-line="695" selection-end-column="23" />
           <folding>
             <element signature="e#61#97#0" expanded="true" />
             <element signature="e#582#1118#0" expanded="false" />
             <element signature="e#1196#1525#0" expanded="false" />
             <element signature="e#1599#2238#0" expanded="false" />
             <element signature="e#2356#9891#0" expanded="false" />
+            <element signature="e#10017#22556#0" expanded="false" />
             <element signature="e#22653#30913#0" expanded="false" />
             <element signature="e#31028#33049#0" expanded="false" />
-            <element signature="e#33150#47831#0" expanded="false" />
           </folding>
         </state>
       </provider>
