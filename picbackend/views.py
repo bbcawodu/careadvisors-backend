@@ -648,8 +648,6 @@ def metrics_api_handler(request):
     if "zipcode" in rqst_params:
         rqst_zipcodes = rqst_params["zipcode"]
         list_of_zipcodes = re.findall("\d+", rqst_zipcodes)
-        print list_of_zipcodes
-        sys.stdout.flush()
     else:
         list_of_zipcodes= None
 
