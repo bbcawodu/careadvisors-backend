@@ -52,6 +52,20 @@ def clean_dict_input(json_dict, dict_name, dict_key, post_errors):
     return None
 
 
+def clean_list_input(json_dict, dict_name, dict_key, post_errors):
+    if dict_key not in json_dict:
+        post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
+    elif json_dict[dict_key] is None:
+        post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
+    elif not isinstance(json_dict[dict_key], list):
+        post_errors.append("Value for {!r} in {!r} dictionary is not a list".format(dict_key, dict_name))
+    elif json_dict[dict_key] == []:
+        post_errors.append("Value for {!r} in {!r} dictionary is an empty list".format(dict_key, dict_name))
+    else:
+        return json_dict[dict_key]
+    return None
+
+
 # defines view for saving scheduled appointments to the database
 @csrf_exempt
 def staff_edit_handler(request):
@@ -345,19 +359,42 @@ def metrics_submission_handler(request):
 
                 metrics_instance.save()
 
-                rqst_plan_stats = clean_dict_input(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors)
+                rqst_plan_stats = clean_list_input(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors)
+                metrics_instance_plan_stats = metrics_instance.plan_stats.all()
+                for instance_plan_stat in metrics_instance_plan_stats:
+                    instance_plan_stat.delete()
                 if rqst_plan_stats is not None:
-                    for plan, enrollments in rqst_plan_stats.iteritems():
+                    for rqst_plan_stat_dict in rqst_plan_stats:
                         planstatobject = PlanStat()
-                        if planstatobject.check_plan_choices(plan_input=plan):
-                            rqst_plan_enrollments = clean_json_int_input(rqst_plan_stats, "Plan Stats", plan, post_errors)
-                            if rqst_plan_enrollments is not None:
-                                planstatobject.plan_name = plan
-                                planstatobject.enrollments = rqst_plan_enrollments
-                                planstatobject.save()
-                                metrics_instance.plan_stats.add(planstatobject)
-                        else:
-                            post_errors.append("Plan: {!s} is not part of member plans".format(plan))
+                        planstatobject.plan_name = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Issuer Name", post_errors)
+                        planstatobject.premium_type = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Premium Type", post_errors)
+                        planstatobject.metal_level = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Metal Level", post_errors)
+                        planstatobject.enrollments = clean_json_int_input(rqst_plan_stat_dict, "Plans Dict", "Enrollments", post_errors)
+
+                        plan_name_valid = planstatobject.check_plan_choices()
+                        premium_type_valid = planstatobject.check_premium_choices()
+                        metal_level_valid = planstatobject.check_metal_choices()
+                        if not plan_name_valid:
+                            post_errors.append("Plan: {!s} is not part of member plans".format(planstatobject.plan_name))
+                        if not premium_type_valid:
+                            post_errors.append("Premium Type: {!s} is not a valid premium type".format(planstatobject.premium_type))
+                        if not metal_level_valid:
+                            post_errors.append("Metal: {!s} is not a valid metal level".format(planstatobject.metal_level))
+                        if plan_name_valid and premium_type_valid and metal_level_valid:
+                            planstatobject.save()
+                            metrics_instance.plan_stats.add(planstatobject)
+                    metrics_instance.save()
+                    # for plan, enrollments in rqst_plan_stats.iteritems():
+                    #     planstatobject = PlanStat()
+                    #     planstatobject.plan_name = plan
+                    #     if planstatobject.check_plan_choices():
+                    #         rqst_plan_enrollments = clean_json_int_input(rqst_plan_stats, "Plan Stats", plan, post_errors)
+                    #         if rqst_plan_enrollments is not None:
+                    #             planstatobject.enrollments = rqst_plan_enrollments
+                    #             planstatobject.save()
+                    #             metrics_instance.plan_stats.add(planstatobject)
+                    #     else:
+                    #         post_errors.append("Plan: {!s} is not part of member plans".format(plan))
 
                     if len(post_errors) > 0:
                         response_raw_data["status"]["Error Code"] = 1
@@ -684,7 +721,7 @@ def metrics_api_handler(request):
     # Start with this query for all and then evaluate down from request params
     # Queries arent evaluated until you read the data
     metrics_submissions = MetricsSubmission.objects.all()
-    if list_of_zipcodes:
+    if list_of_zipcodes is not None:
         metrics_submissions = metrics_submissions.filter(zipcode__in=list_of_zipcodes)
     if look_up_date:
         metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
@@ -697,8 +734,8 @@ def metrics_api_handler(request):
         if rqst_staff_id.lower() != "all":
             metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
 
+        metrics_dict = {}
         if len(metrics_submissions) > 0:
-            metrics_dict = {}
             for metrics_submission in metrics_submissions:
                 if metrics_submission.staff_member_id not in metrics_dict:
                     metrics_dict[metrics_submission.staff_member_id] = {"Metrics Data": [metrics_submission.return_values_dict()]}
@@ -737,8 +774,8 @@ def metrics_api_handler(request):
                     rqst_errors.append('No metrics entries for first names(s): {!s}; and last names(s): {!s} not found in database'.format(rqst_fname, rqst_lname))
                 response_raw_data['Status']['Error Code'] = 1
 
+            metrics_dict = {}
             if len(metrics_submissions) > 0:
-                metrics_dict = {}
                 for metrics_submission in metrics_submissions:
                     name = '{!s} {!s}'.format(metrics_submission.staff_member.first_name, metrics_submission.staff_member.last_name)
                     if name not in metrics_dict:
@@ -768,8 +805,8 @@ def metrics_api_handler(request):
                 list_of_ids[indx] = int(element)
             metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
 
+            metrics_dict = {}
             if len(metrics_submissions) > 0:
-                metrics_dict = {}
                 for metrics_submission in metrics_submissions:
                     if metrics_submission.staff_member.first_name not in metrics_dict:
                         metrics_dict[metrics_submission.staff_member.first_name] = {"Metrics Data": [metrics_submission.return_values_dict()]}
@@ -800,8 +837,8 @@ def metrics_api_handler(request):
                 list_of_ids[indx] = int(element)
             metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
 
+            metrics_dict = {}
             if len(metrics_submissions) > 0:
-                metrics_dict = {}
                 for metrics_submission in metrics_submissions:
                     if metrics_submission.staff_member.last_name not in metrics_dict:
                         metrics_dict[metrics_submission.staff_member.last_name] = {"Metrics Data": [metrics_submission.return_values_dict()]}
@@ -832,8 +869,8 @@ def metrics_api_handler(request):
                 list_of_ids[indx] = int(element)
             metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
 
+            metrics_dict = {}
             if len(metrics_submissions) > 0:
-                metrics_dict = {}
                 for metrics_submission in metrics_submissions:
                     if metrics_submission.staff_member.email not in metrics_dict:
                         metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [metrics_submission.return_values_dict()]}

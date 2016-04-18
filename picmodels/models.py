@@ -90,25 +90,64 @@ class Appointment(models.Model):
 
 
 class PlanStat(models.Model):
-    BLUE_CROSS_BLUES_SHIELD = "Blue Cross Blue Shield"
-    HARKEN_HEALTH = "Harken Health"
-    LAND_OF_LINCOLN = "Land of Lincoln"
+    ALL_SAVERS = "All Savers Insurance Company"
+    CARESOURCE_INDIANA = "CareSource Indiana, Inc."
+    HUMANA_HEALTH = "Humana Health Plan, Inc."
+    H_A_M_P = "Health Alliance Medical Plans, Inc."
+    BLUE_CROSS_BLUES_SHIELD = "Blue Cross Blue Shield of Illinois"
+    COVENTRY_HEALTH_IL = "Coventry Health Care of Illinois, Inc."
+    COVENTRY = "Coventry Health & Life Co."
+    UNITED_HEALTHCARE_MIDWEST = "United Healthcare of the Midwest, Inc."
+    CELTIC_INSURANCE = "Celtic Insurance Company"
+    HARKEN_HEALTH = "Harken Health Insurance Company"
+    AETNA = "Aetna Health Inc."
+    SE_IN_HEALTH_ORG = "Southeastern Indiana Health Organization"
+    ANTHEM = "Anthem Ins Companies Inc(Anthem BCBS)"
+    PHYSICIANS_HEALTH_N_IN = "Physicians Health Plan of Northern Indiana, Inc."
+    MDWISE_MARKETPLACE = "MDwise Marketplace, Inc."
+    IU_HEALTH_PLANS = "Indiana University Health Plans, Inc."
     MISCELLANEOUS = "Miscellaneous"
-    PLAN_CHOICES = ((BLUE_CROSS_BLUES_SHIELD, "Blue Cross Blue Shield"),
-                    (HARKEN_HEALTH, "Harken Health"),
-                    (LAND_OF_LINCOLN, "Land of Lincoln"),
+    PLAN_CHOICES = ((ALL_SAVERS, "All Savers Insurance Company"),
+                    (CARESOURCE_INDIANA, "CareSource Indiana, Inc."),
+                    (HUMANA_HEALTH, "Humana Health Plan, Inc."),
+                    (H_A_M_P, "Health Alliance Medical Plans, Inc."),
+                    (BLUE_CROSS_BLUES_SHIELD, "Blue Cross Blue Shield of Illinois"),
+                    (COVENTRY_HEALTH_IL, "Coventry Health Care of Illinois, Inc."),
+                    (COVENTRY, "Coventry Health & Life Co."),
+                    (UNITED_HEALTHCARE_MIDWEST, "United Healthcare of the Midwest, Inc."),
+                    (CELTIC_INSURANCE, "Celtic Insurance Company"),
+                    (HARKEN_HEALTH, "Harken Health Insurance Company"),
+                    (AETNA, "Aetna Health Inc."),
+                    (SE_IN_HEALTH_ORG, "Southeastern Indiana Health Organization"),
+                    (ANTHEM, "Anthem Ins Companies Inc(Anthem BCBS)"),
+                    (PHYSICIANS_HEALTH_N_IN, "Physicians Health Plan of Northern Indiana, Inc."),
+                    (MDWISE_MARKETPLACE, "MDwise Marketplace, Inc."),
+                    (IU_HEALTH_PLANS, "Indiana University Health Plans, Inc."),
                     (MISCELLANEOUS, "Miscellaneous"))
+
+    HMO = "HMO"
+    PPO = "PPO"
+    N_A = "Not Available"
+    PREMIUM_CHOICES = ((HMO, "HMO"),
+                       (PPO, "PPO"),
+                       (N_A, "Not Available"))
+
+    BRONZE = "Bronze"
+    SILVER = "Silver"
+    GOLD = "Gold"
+    CATASTROPHIC = "Catastrophic"
+    METAL_CHOICES = ((BRONZE, "Bronze"),
+                     (SILVER, "Silver"),
+                     (GOLD, "Gold"),
+                     (CATASTROPHIC, "Catastrophic"),
+                     (N_A, "Not Available"))
+
     plan_name = models.CharField(max_length=1000,
                                  choices=PLAN_CHOICES,
                                  default=MISCELLANEOUS)
+    premium_type = models.CharField(max_length=1000, blank=True, choices=PREMIUM_CHOICES, default=N_A)
+    metal_level = models.CharField(max_length=1000, blank=True, choices=METAL_CHOICES, default=N_A)
     enrollments = models.IntegerField()
-
-    def check_plan_choices(self, plan_input):
-        plan_input = plan_input.lower()
-        for plan_tuple in self.PLAN_CHOICES:
-            if plan_tuple[1].lower() == plan_input:
-                return True
-        return False
 
     def check_plan_choices(self,):
         for plan_tuple in self.PLAN_CHOICES:
@@ -116,9 +155,19 @@ class PlanStat(models.Model):
                 return True
         return False
 
+    def check_premium_choices(self,):
+        for premium_tuple in self.PREMIUM_CHOICES:
+            if premium_tuple[1].lower() == self.premium_type.lower():
+                return True
+        return False
+
+    def check_metal_choices(self,):
+        for metal_tuple in self.METAL_CHOICES:
+            if metal_tuple[1].lower() == self.metal_level.lower():
+                return True
+        return False
+
     def save(self, *args, **kwargs):
-        if self.check_plan_choices() is False:
-            raise IntegrityError
         super(PlanStat, self).save(*args, **kwargs)
 
 
@@ -179,12 +228,16 @@ class MetricsSubmission(models.Model):
                       "Submission Date": self.submission_date.isoformat(),
                       "County": self.county,
                       "Zipcode": self.zipcode,
-                      "Plan Stats": {},
+                      "Plan Stats": [],
                       }
         plan_stats = self.plan_stats.all()
         if len(plan_stats) > 0:
             for plan_stat_object in plan_stats:
-                valuesdict["Plan Stats"][plan_stat_object.plan_name] = plan_stat_object.enrollments
+                plan_stat_dict = {"Issuer Name": plan_stat_object.plan_name,
+                                  "Enrollments": plan_stat_object.enrollments,
+                                  "Metal Level": plan_stat_object.metal_level,
+                                  "Premium Type": plan_stat_object.premium_type}
+                valuesdict["Plan Stats"].append(plan_stat_dict)
 
         return valuesdict
 
