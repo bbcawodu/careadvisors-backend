@@ -234,7 +234,6 @@ def metrics_submission_handler(request):
 
         # Code to parse POSTed json request
         rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
-        rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
 
         consumer_metrics = clean_dict_input(post_json, "root", "Consumer Metrics", post_errors)
         if consumer_metrics is not None:
