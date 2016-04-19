@@ -245,12 +245,8 @@ def metrics_submission_handler(request):
             rqst_cons_app_maid = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Applied Medicaid",
                                                       post_errors)
             rqst_cons_sel_qhp = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Selected QHP", post_errors)
-            rqst_cons_enr_shop = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Enrolled SHOP",
-                                                      post_errors)
             rqst_cons_ref_maidorchip = clean_json_int_input(consumer_metrics, "Consumer Metrics",
                                                             "Referred Medicaid or CHIP", post_errors)
-            rqst_cons_ref_shop = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Referred SHOP",
-                                                      post_errors)
             rqst_cons_filed_exemptions = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Filed Exemptions",
                                                               post_errors)
             rqst_cons_rec_postenr_support = clean_json_int_input(consumer_metrics, "Consumer Metrics",
@@ -261,10 +257,8 @@ def metrics_submission_handler(request):
                                                               post_errors)
             rqst_cons_hard_or_diff = clean_json_string_input(consumer_metrics, "Consumer Metrics",
                                                              "Hardship or Difficulty", post_errors)
-            rqst_usr_comments = clean_json_string_input(consumer_metrics, "Consumer Metrics", "Comments", post_errors,
-                                                        empty_string_allowed=True, none_allowed=True)
-            rqst_usr_outr_stkehol_act = clean_json_string_input(consumer_metrics, "Consumer Metrics",
-                                                                "Outreach and Stakeholder Activities", post_errors,
+            rqst_usr_outr_act = clean_json_string_input(consumer_metrics, "Consumer Metrics",
+                                                                "Outreach Activities", post_errors,
                                                                 empty_string_allowed=True, none_allowed=True)
             rqst_metrics_county = clean_json_string_input(consumer_metrics, "Consumer Metrics", "County", post_errors)
             rqst_metrics_zipcode = clean_json_string_input(consumer_metrics, "Consumer Metrics", "Zipcode", post_errors)
@@ -285,25 +279,6 @@ def metrics_submission_handler(request):
 
                 if len(post_errors) == 0:
                     metrics_date = datetime.date(year, month, day)
-
-            if rqst_usr_type == "IPC":
-                rqst_cons_apts_sched = clean_json_int_input(consumer_metrics, "Consumer Metrics",
-                                                            "Appointments Scheduled", post_errors)
-                rqst_cons_confirm_calls = clean_json_int_input(consumer_metrics, "Consumer Metrics",
-                                                               "Confirmation Calls", post_errors)
-                rqst_cons_apts_held = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Appointments Held",
-                                                           post_errors)
-                rqst_cons_apts_over_hour = clean_json_int_input(consumer_metrics, "Consumer Metrics",
-                                                                "Appointments Over Hour", post_errors)
-                rqst_cons_apts_cplx_market = clean_json_int_input(consumer_metrics, "Consumer Metrics",
-                                                                  "Appointments Complex Market", post_errors)
-                rqst_cons_apts_cplx_maid = clean_json_int_input(consumer_metrics, "Consumer Metrics",
-                                                                "Appointments Complex Medicaid", post_errors)
-                rqst_cons_apts_postenr_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics",
-                                                                    "Appointments Post-Enrollment Assistance",
-                                                                    post_errors)
-                rqst_cons_apts_over_3_hours = clean_json_int_input(consumer_metrics, "Consumer Metrics",
-                                                                   "Appointments Over 3 Hours", post_errors)
 
         # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
         # create and save database entry for appointment
@@ -334,28 +309,15 @@ def metrics_submission_handler(request):
                 metrics_instance.received_education = rqst_cons_rec_edu
                 metrics_instance.applied_medicaid = rqst_cons_app_maid
                 metrics_instance.selected_qhp = rqst_cons_sel_qhp
-                metrics_instance.enrolled_shop = rqst_cons_enr_shop
                 metrics_instance.ref_medicaid_or_chip = rqst_cons_ref_maidorchip
-                metrics_instance.ref_shop = rqst_cons_ref_shop
                 metrics_instance.filed_exemptions = rqst_cons_filed_exemptions
                 metrics_instance.rec_postenroll_support = rqst_cons_rec_postenr_support
                 metrics_instance.trends = rqst_cons_trends
                 metrics_instance.success_story = rqst_cons_success_story
                 metrics_instance.hardship_or_difficulty = rqst_cons_hard_or_diff
-                metrics_instance.comments = rqst_usr_comments
-                metrics_instance.outreach_stakeholder_activity = rqst_usr_outr_stkehol_act
+                metrics_instance.outreach_activity = rqst_usr_outr_act
                 metrics_instance.county = rqst_metrics_county
                 metrics_instance.zipcode = rqst_metrics_zipcode
-
-                if rqst_usr_type == "IPC":
-                    metrics_instance.appointments_scheduled = rqst_cons_apts_sched
-                    metrics_instance.confirmation_calls = rqst_cons_confirm_calls
-                    metrics_instance.appointments_held = rqst_cons_apts_held
-                    metrics_instance.appointments_over_hour = rqst_cons_apts_over_hour
-                    metrics_instance.appointments_over_three_hours = rqst_cons_apts_over_3_hours
-                    metrics_instance.appointments_cmplx_market = rqst_cons_apts_cplx_market
-                    metrics_instance.appointments_cmplx_medicaid = rqst_cons_apts_cplx_maid
-                    metrics_instance.appointments_postenroll_assistance = rqst_cons_apts_postenr_assis
 
                 metrics_instance.save()
 
