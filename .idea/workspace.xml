@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1990ad25-4822-4da6-815b-03692f3687bb" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0001_initial.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/0002_auto_20160419_2205.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/picmodels/migrations/__init__.py" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picmodels/models.py" afterPath="$PROJECT_DIR$/picmodels/models.py" />
     </list>
@@ -44,8 +41,8 @@
       <file leaf-file-name="models.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/picmodels/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.62566847">
-              <caret line="239" column="31" selection-start-line="239" selection-start-column="31" selection-end-line="239" selection-end-column="31" />
+            <state vertical-scroll-proportion="0.8395722">
+              <caret line="224" column="31" selection-start-line="224" selection-start-column="31" selection-end-line="224" selection-end-column="31" />
               <folding>
                 <element signature="e#66#110#0" expanded="true" />
                 <element signature="e#1640#2373#0" expanded="false" />
@@ -517,7 +514,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1440" height="896" extended-state="0" />
+    <frame x="0" y="0" width="1440" height="896" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3190272" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -927,8 +924,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/picmodels/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.62566847">
-          <caret line="239" column="31" selection-start-line="239" selection-start-column="31" selection-end-line="239" selection-end-column="31" />
+        <state vertical-scroll-proportion="0.8395722">
+          <caret line="224" column="31" selection-start-line="224" selection-start-column="31" selection-end-line="224" selection-end-column="31" />
           <folding>
             <element signature="e#66#110#0" expanded="true" />
             <element signature="e#1640#2373#0" expanded="false" />

@@ -129,7 +129,7 @@ class PlanStat(models.Model):
     PPO = "PPO"
     N_A = "Not Available"
     PREMIUM_CHOICES = ((HMO, "HMO"),
-                       (PPO, "PP0"),
+                       (PPO, "PPO"),
                        (N_A, "Not Available"))
 
     BRONZE = "Bronze"
@@ -163,18 +163,13 @@ class PlanStat(models.Model):
 
     def check_metal_choices(self,):
         for metal_tuple in self.METAL_CHOICES:
-            if metal_tuple[1].lower() == self.METAL_CHOICES.lower():
+            if metal_tuple[1].lower() == self.metal_level.lower():
                 return True
         return False
 
-    def save(self, *args, **kwargs):
-        if self.check_plan_choices() is False:
-            raise IntegrityError
-        if self.check_premium_choices() is False:
-            raise IntegrityError
-        if self.check_metal_choices() is False:
-            raise IntegrityError
-        super(PlanStat, self).save(*args, **kwargs)
+    class Meta:
+        # maps model to the picmodels module
+        app_label = 'picmodels'
 
 
 class MetricsSubmission(models.Model):
@@ -184,24 +179,13 @@ class MetricsSubmission(models.Model):
     received_education = models.IntegerField()
     applied_medicaid = models.IntegerField()
     selected_qhp = models.IntegerField()
-    enrolled_shop = models.IntegerField()
     ref_medicaid_or_chip = models.IntegerField()
-    ref_shop = models.IntegerField()
     filed_exemptions = models.IntegerField()
     rec_postenroll_support = models.IntegerField()
     trends = models.CharField(max_length=5000, blank=True, default="")
     success_story = models.CharField(max_length=5000)
     hardship_or_difficulty = models.CharField(max_length=5000)
-    comments = models.CharField(max_length=5000, blank=True, default="")
-    outreach_stakeholder_activity = models.CharField(max_length=5000, blank=True, default="")
-    appointments_scheduled = models.IntegerField(blank=True, null=True)
-    confirmation_calls = models.IntegerField(blank=True, null=True)
-    appointments_held = models.IntegerField(blank=True, null=True)
-    appointments_over_hour = models.IntegerField(blank=True, null=True)
-    appointments_cmplx_market = models.IntegerField(blank=True, null=True)
-    appointments_cmplx_medicaid = models.IntegerField(blank=True, null=True)
-    appointments_postenroll_assistance = models.IntegerField(blank=True, null=True)
-    appointments_over_three_hours = models.IntegerField(blank=True, null=True)
+    outreach_activity = models.CharField(max_length=5000, blank=True, default="")
     submission_date = models.DateField(blank=True, null=True)
     county = models.CharField(max_length=1000, default="")
     zipcode = models.CharField(max_length=1000, default="")
@@ -211,35 +195,28 @@ class MetricsSubmission(models.Model):
         valuesdict = {"Received Education": self.received_education,
                       "Applied Medicaid": self.applied_medicaid,
                       "Selected QHP": self.selected_qhp,
-                      "Enrolled SHOP": self.enrolled_shop,
                       "Referred Medicaid or CHIP": self.ref_medicaid_or_chip,
-                      "Referred SHOP": self.ref_shop,
                       "Filed Exemptions": self.filed_exemptions,
                       "Received Post-Enrollment Support": self.rec_postenroll_support,
                       "Trends": self.trends,
                       "Success Story": self.success_story,
                       "Hardship or Difficulty": self.hardship_or_difficulty,
-                      "Comments": self.comments,
-                      "Outreach and Stakeholder Activities": self.outreach_stakeholder_activity,
-                      "Appointments Scheduled": self.appointments_scheduled,
-                      "Confirmation Calls": self.confirmation_calls,
-                      "Appointments Held": self.appointments_held,
-                      "Appointments Over Hour": self.appointments_over_hour,
-                      "Appointments Complex Market": self.appointments_cmplx_market,
-                      "Appointments Complex Medicaid": self.appointments_cmplx_medicaid,
-                      "Appointments Post-Enrollment Assistance": self.appointments_postenroll_assistance,
-                      "Appointments Over 3 Hours": self.appointments_over_three_hours,
+                      "Outreach Activities": self.outreach_activity,
                       "Staff Member ID": self.staff_member_id,
                       "Date Created": self.date_created.isoformat(),
                       "Submission Date": self.submission_date.isoformat(),
                       "County": self.county,
                       "Zipcode": self.zipcode,
-                      "Plan Stats": {},
+                      "Plan Stats": [],
                       }
         plan_stats = self.plan_stats.all()
         if len(plan_stats) > 0:
             for plan_stat_object in plan_stats:
-                valuesdict["Plan Stats"][plan_stat_object.plan_name] = plan_stat_object.enrollments
+                plan_stat_dict = {"Issuer Name": plan_stat_object.plan_name,
+                                  "Enrollments": plan_stat_object.enrollments,
+                                  "Metal Level": plan_stat_object.metal_level,
+                                  "Premium Type": plan_stat_object.premium_type}
+                valuesdict["Plan Stats"].append(plan_stat_dict)
 
         return valuesdict
 
