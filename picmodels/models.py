@@ -21,14 +21,42 @@ class PICUser(models.Model):
         app_label = 'picmodels'
 
 
+class PICStaff(models.Model):
+    # fields for PICStaff model
+    first_name = models.CharField(max_length=1000)
+    last_name = models.CharField(default="", max_length=1000)
+    email = models.EmailField(unique=True)
+    type = models.CharField(max_length=1000)
+    county = models.CharField(blank=True, null=True, max_length=1000, default="")
+
+    def return_values_dict(self):
+        consumers = PICConsumer.objects.filter(navigator=self.id)
+        consumer_list = []
+        for consumer in consumers:
+            consumer_list.append(consumer.return_values_dict())
+        valuesdict = {"First Name": self.first_name,
+                      "Last Name": self.last_name,
+                      "Email": self.email,
+                      "Type": self.type,
+                      "Database ID": self.id,
+                      "County": self.county,
+                      "Consumers": consumer_list}
+        return valuesdict
+
+    class Meta:
+        # maps model to the picmodels module
+        app_label = 'picmodels'
+
+
 class PICConsumer(models.Model):
     # fields for PICConsumer model
     first_name = models.CharField(max_length=1000)
     last_name = models.CharField(default="", max_length=1000)
     email = models.EmailField()
-    phone = models.CharField(max_length=1000)
-    preferred_language = models.CharField(max_length=1000)
-    best_contact_time = models.CharField(max_length=1000)
+    phone = models.CharField(max_length=1000, blank=True, null=True)
+    preferred_language = models.CharField(max_length=1000, blank=True, null=True)
+    best_contact_time = models.CharField(max_length=1000, blank=True, null=True)
+    navigator = models.ForeignKey(PICStaff, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         # maps model to the picmodels module
@@ -41,34 +69,23 @@ class PICConsumer(models.Model):
                            "preferred_language",
                            "best_contact_time")
 
+    def return_values_dict(self):
+        valuesdict = {"First Name": self.first_name,
+                      "Last Name": self.last_name,
+                      "Email": self.email,
+                      "Phone Number": self.phone,
+                      "Preferred Language": self.preferred_language,
+                      "Best Contact Time": self.best_contact_time,
+                      "Navigator": "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name),
+                      "Database ID": self.id}
+        return valuesdict
+
 
 class Location(models.Model):
     # fields for Location model
     name = models.CharField(max_length=1000)
     address = models.CharField(max_length=2000)
     phone = models.CharField(max_length=1000)
-
-    class Meta:
-        # maps model to the picmodels module
-        app_label = 'picmodels'
-
-
-class PICStaff(models.Model):
-    # fields for PICStaff model
-    first_name = models.CharField(max_length=1000)
-    last_name = models.CharField(default="", max_length=1000)
-    email = models.EmailField(unique=True)
-    type = models.CharField(max_length=1000)
-    county = models.CharField(blank=True, max_length=1000, default="")
-
-    def return_values_dict(self):
-        valuesdict = {"First Name": self.first_name,
-                      "Last Name": self.last_name,
-                      "Email": self.email,
-                      "Type": self.type,
-                      "Database ID": self.id,
-                      "County": self.county}
-        return valuesdict
 
     class Meta:
         # maps model to the picmodels module
@@ -145,8 +162,8 @@ class PlanStat(models.Model):
     plan_name = models.CharField(max_length=1000,
                                  choices=PLAN_CHOICES,
                                  default=MISCELLANEOUS)
-    premium_type = models.CharField(max_length=1000, blank=True, choices=PREMIUM_CHOICES, default=N_A)
-    metal_level = models.CharField(max_length=1000, blank=True, choices=METAL_CHOICES, default=N_A)
+    premium_type = models.CharField(max_length=1000, blank=True, null=True, choices=PREMIUM_CHOICES, default=N_A)
+    metal_level = models.CharField(max_length=1000, blank=True, null=True, choices=METAL_CHOICES, default=N_A)
     enrollments = models.IntegerField()
 
     def check_plan_choices(self,):
@@ -182,10 +199,10 @@ class MetricsSubmission(models.Model):
     ref_medicaid_or_chip = models.IntegerField()
     filed_exemptions = models.IntegerField()
     rec_postenroll_support = models.IntegerField()
-    trends = models.CharField(max_length=5000, blank=True, default="")
+    trends = models.CharField(max_length=5000, blank=True, null=True, default="")
     success_story = models.CharField(max_length=5000)
     hardship_or_difficulty = models.CharField(max_length=5000)
-    outreach_activity = models.CharField(max_length=5000, blank=True, default="")
+    outreach_activity = models.CharField(max_length=5000, blank=True, null=True, default="")
     submission_date = models.DateField(blank=True, null=True)
     county = models.CharField(max_length=1000, default="")
     zipcode = models.CharField(max_length=1000, default="")

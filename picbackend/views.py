@@ -5,7 +5,7 @@ Defines views that are mapped to url configurations
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.db import models, IntegrityError
-from picmodels.models import PICStaff, MetricsSubmission, PlanStat
+from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer
 import datetime, json, sys, re
 from django.views.decorators.csrf import csrf_exempt
 
@@ -183,6 +183,177 @@ def staff_edit_handler(request):
                     sys.stdout.flush()
                 except PICStaff.MultipleObjectsReturned:
                     post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+
+            else:
+                response_raw_data["status"]["Error Code"] = 1
+                response_raw_data["status"]["Errors"] = post_errors
+
+                for message in post_errors:
+                    print message
+                    sys.stdout.flush()
+
+
+        # add parsing errors to response dictionary
+        else:
+            response_raw_data["status"]["Error Code"] = 1
+            response_raw_data["status"]["Errors"] = post_errors
+
+            for message in post_errors:
+                print message
+                sys.stdout.flush()
+
+    # if a GET request is made, add error message to response data
+    else:
+        response_raw_data["status"]["Error Code"] = 1
+        post_errors.append("Request needs POST data")
+        response_raw_data["status"]["Errors"] = post_errors
+        for message in post_errors:
+            print message
+        sys.stdout.flush()
+
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
+
+
+@csrf_exempt
+def consumer_edit_handler(request):
+    # initialize dictionary for response data, including parsing errors
+    response_raw_data = {'status': {"Error Code": 0, "Version": 1.0}}
+    post_errors = []
+
+    if request.method == 'POST' or request.is_ajax():
+        post_data = request.body
+        post_json = json.loads(post_data)
+
+        # Code to parse POSTed json request
+        rqst_action = clean_json_string_input(post_json, "root", "Database Action", post_errors)
+
+        # if there are no parsing errors, get or create database entries for consumer
+        if len(post_errors) == 0 and rqst_action == "Consumer Addition":
+            rqst_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+            rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
+            rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+            rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
+
+            if len(post_errors) == 0:
+                consumer_rqst_values = {"first_name": rqst_consumer_f_name,
+                                        "last_name": rqst_consumer_l_name}
+                consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(email=rqst_consumer_email,
+                                                                                                 defaults=consumer_rqst_values)
+                if not consumer_instance_created:
+                    post_errors.append('Consumer database entry already exists for the email: {!s}'.format(rqst_consumer_email))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+                else:
+                    try:
+                        nav_instance = PICStaff.objects.get(id=rqst_nav_id)
+                        consumer_instance.navigator = nav_instance
+                        consumer_instance.save()
+                        response_raw_data['Data'] = {"Database ID": consumer_instance.id}
+                    except PICStaff.DoesNotExist:
+                        post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
+                        response_raw_data["status"]["Error Code"] = 1
+                        response_raw_data["status"]["Errors"] = post_errors
+
+                        for message in post_errors:
+                            print message
+                        sys.stdout.flush()
+            else:
+                response_raw_data["status"]["Error Code"] = 1
+                response_raw_data["status"]["Errors"] = post_errors
+
+                for message in post_errors:
+                    print message
+                    sys.stdout.flush()
+
+        elif len(post_errors) == 0 and rqst_action == "Consumer Modification":
+            rqst_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+            rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
+            rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+            rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
+            rqst_consumer_id = clean_json_int_input(post_json, "root", "Consumer Database ID", post_errors)
+
+            if len(post_errors) == 0:
+                try:
+                    consumer_instance = PICConsumer.objects.get(id=rqst_consumer_id)
+                    consumer_instance.first_name = rqst_consumer_f_name
+                    consumer_instance.last_name = rqst_consumer_l_name
+                    consumer_instance.email = rqst_consumer_email
+
+                    nav_instance = PICStaff.objects.get(id=rqst_nav_id)
+                    consumer_instance.navigator = nav_instance
+
+                    consumer_instance.save()
+                    response_raw_data['Data'] = {"Database ID": consumer_instance.id}
+                except PICConsumer.DoesNotExist:
+                    post_errors.append('Consumer database entry does not exist for the id: {!s}'.format(str(rqst_consumer_id)))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+                except PICConsumer.MultipleObjectsReturned:
+                    post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_consumer_id)))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+                except IntegrityError:
+                    post_errors.append('Database entry already exists for the id: {!s}'.format(str(rqst_consumer_id)))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+                except PICStaff.DoesNotExist:
+                    post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+
+            else:
+                response_raw_data["status"]["Error Code"] = 1
+                response_raw_data["status"]["Errors"] = post_errors
+
+                for message in post_errors:
+                    print message
+                    sys.stdout.flush()
+
+        elif len(post_errors) == 0 and rqst_action == "Consumer Deletion":
+            rqst_consumer_id = clean_json_int_input(post_json, "root", "Consumer Database ID", post_errors)
+
+            if len(post_errors) == 0:
+                try:
+                    consumer_instance = PICConsumer.objects.get(id=rqst_consumer_id)
+                    consumer_instance.delete()
+                    response_raw_data['Data'] = {"Database ID": "Deleted"}
+                except PICConsumer.DoesNotExist:
+                    post_errors.append('Consumer database entry does not exist for the id: {!s}'.format(str(rqst_consumer_id)))
+                    response_raw_data["status"]["Error Code"] = 1
+                    response_raw_data["status"]["Errors"] = post_errors
+
+                    for message in post_errors:
+                        print message
+                    sys.stdout.flush()
+                except PICConsumer.MultipleObjectsReturned:
+                    post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_consumer_id)))
                     response_raw_data["status"]["Error Code"] = 1
                     response_raw_data["status"]["Errors"] = post_errors
 
@@ -556,6 +727,175 @@ def staff_api_handler(request):
             else:
                 response_raw_data['Status']['Error Code'] = 1
                 rqst_errors.append('No valid staff IDs provided in request (must be integers)')
+
+    else:
+        response_raw_data['Status']['Error Code'] = 1
+        rqst_errors.append('No Valid Parameters')
+
+    response_raw_data["Status"]["Errors"] = rqst_errors
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
+
+
+def consumer_api_handler(request):
+    rqst_params = request.GET
+    if 'fname' in rqst_params:
+        rqst_first_name = rqst_params['fname']
+        list_of_first_names = re.findall(r"[\w. '-]+", rqst_first_name)
+    else:
+        rqst_first_name = None
+        list_of_first_names = None
+    if 'lname' in rqst_params:
+        rqst_last_name = rqst_params['lname']
+        list_of_last_names = re.findall(r"[\w. '-]+", rqst_last_name)
+    else:
+        rqst_last_name = None
+        list_of_last_names = None
+    if 'email' in rqst_params:
+        rqst_email = rqst_params['email']
+        list_of_emails = re.findall(r"[@\w. '-]+", rqst_email)
+    else:
+        rqst_email = None
+        list_of_emails = None
+    if 'id' in rqst_params:
+        rqst_consumer_id = rqst_params['id']
+        if rqst_consumer_id != "all":
+            list_of_ids = re.findall("\d+", rqst_consumer_id)
+            for indx, element in enumerate(list_of_ids):
+                list_of_ids[indx] = int(element)
+        else:
+            list_of_ids = None
+    else:
+        rqst_consumer_id = None
+        list_of_ids = None
+
+    response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
+    rqst_errors = []
+
+    consumers = PICConsumer.objects.all()
+    if rqst_first_name and rqst_last_name:
+        consumers = consumers.filter(first_name__iexact=rqst_first_name, last_name__iexact=rqst_last_name)
+        if len(consumers) > 0:
+            consumer_dict = {}
+            rqst_full_name = rqst_first_name + " " + rqst_last_name
+            for consumer in consumers:
+                if rqst_full_name not in consumer_dict:
+                    consumer_dict[rqst_full_name] = [consumer.return_values_dict()]
+                else:
+                    consumer_dict[rqst_full_name].append(consumer.return_values_dict())
+
+            consumer_list = []
+            for consumer_key, consumer_entry in consumer_dict.iteritems():
+                consumer_list.append(consumer_entry)
+            response_raw_data["Data"] = consumer_list
+        else:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('Consumer with name: {!s} {!s} not found in database'.format(rqst_first_name,
+                                                                                                rqst_last_name))
+    elif list_of_emails and rqst_email:
+        consumer_dict = {}
+        for email in list_of_emails:
+            consumers = PICConsumer.objects.filter(email__iexact=email)
+            for consumer in consumers:
+                if email not in consumer_dict:
+                    consumer_dict[email] = [consumer.return_values_dict()]
+                else:
+                    consumer_dict[email].append(consumer.return_values_dict())
+        if len(consumer_dict) > 0:
+            consumer_list = []
+            for consumer_key, consumer_entry in consumer_dict.iteritems():
+                consumer_list.append(consumer_entry)
+            response_raw_data["Data"] = consumer_list
+            for email in list_of_emails:
+                if email not in consumer_dict:
+                    if response_raw_data['Status']['Error Code'] != 2:
+                        response_raw_data['Status']['Error Code'] = 2
+                    rqst_errors.append('Consumer with email: {!s} not found in database'.format(email))
+        else:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('Consumer with emails(s): {!s} not found in database'.format(rqst_email))
+
+    elif rqst_first_name and list_of_first_names:
+        consumer_dict = {}
+        for first_name in list_of_first_names:
+            consumers = PICConsumer.objects.filter(first_name__iexact=first_name)
+            for consumer in consumers:
+                if first_name not in consumer_dict:
+                    consumer_dict[first_name] = [consumer.return_values_dict()]
+                else:
+                    consumer_dict[first_name].append(consumer.return_values_dict())
+        if len(consumer_dict) > 0:
+            consumer_list = []
+            for consumer_key, consumer_entry in consumer_dict.iteritems():
+                consumer_list.append(consumer_entry)
+            response_raw_data["Data"] = consumer_list
+            for name in list_of_first_names:
+                if name not in consumer_dict:
+                    if response_raw_data['Status']['Error Code'] != 2:
+                        response_raw_data['Status']['Error Code'] = 2
+                    rqst_errors.append('Consumer with first name: {!s} not found in database'.format(name))
+        else:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('Consumer with first name(s): {!s} not found in database'.format(rqst_first_name))
+
+    elif rqst_last_name and list_of_last_names:
+        consumer_dict = {}
+        for last_name in list_of_last_names:
+            consumers = PICConsumer.objects.filter(last_name__iexact=last_name)
+            for consumer in consumers:
+                if last_name not in consumer_dict:
+                    consumer_dict[last_name] = [consumer.return_values_dict()]
+                else:
+                    consumer_dict[last_name].append(consumer.return_values_dict())
+        if len(consumer_dict) > 0:
+            consumer_list = []
+            for consumer_key, consumer_entry in consumer_dict.iteritems():
+                consumer_list.append(consumer_entry)
+            response_raw_data["Data"] = consumer_list
+            for name in list_of_last_names:
+                if name not in consumer_dict:
+                    if response_raw_data['Status']['Error Code'] != 2:
+                        response_raw_data['Status']['Error Code'] = 2
+                    rqst_errors.append('Staff Member with last name: {!s} not found in database'.format(name))
+        else:
+            response_raw_data['Status']['Error Code'] = 1
+            rqst_errors.append('Staff Member with last name(s): {!s} not found in database'.format(rqst_last_name))
+
+    elif rqst_consumer_id:
+        if rqst_consumer_id == "all":
+            all_consumers = PICConsumer.objects.all()
+            consumer_dict = {}
+            for consumer in all_consumers:
+                consumer_dict[consumer.id] = consumer.return_values_dict()
+            consumer_list = []
+            for consumer_key, consumer_entry in consumer_dict.iteritems():
+                consumer_list.append(consumer_entry)
+            response_raw_data["Data"] = consumer_list
+        elif list_of_ids:
+            if len(list_of_ids) > 0:
+                for indx, element in enumerate(list_of_ids):
+                    list_of_ids[indx] = int(element)
+                consumers = PICConsumer.objects.filter(id__in=list_of_ids)
+                if len(consumers) > 0:
+                    consumer_dict = {}
+                    for consumer in consumers:
+                        consumer_dict[consumer.id] = consumer.return_values_dict()
+                    consumer_list = []
+                    for consumer_key, consumer_entry in consumer_dict.iteritems():
+                        consumer_list.append(consumer_entry)
+                    response_raw_data["Data"] = consumer_list
+
+                    for consumer_id in list_of_ids:
+                        if consumer_id not in consumer_dict:
+                            if response_raw_data['Status']['Error Code'] != 2:
+                                response_raw_data['Status']['Error Code'] = 2
+                            rqst_errors.append('Consumer with id: {!s} not found in database'.format(str(consumer_id)))
+                else:
+                    response_raw_data['Status']['Error Code'] = 1
+                    rqst_errors.append('No consumers found for database ID(s): ' + rqst_consumer_id)
+            else:
+                response_raw_data['Status']['Error Code'] = 1
+                rqst_errors.append('No valid consumer IDs provided in request (must be integers)')
 
     else:
         response_raw_data['Status']['Error Code'] = 1
