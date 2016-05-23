@@ -51,12 +51,19 @@ class PICStaff(models.Model):
 class PICConsumer(models.Model):
     # fields for PICConsumer model
     first_name = models.CharField(max_length=1000)
+    middle_name = models.CharField(max_length=1000, blank=True, null=True)
     last_name = models.CharField(default="", max_length=1000)
     email = models.EmailField()
     phone = models.CharField(max_length=1000, blank=True, null=True)
     preferred_language = models.CharField(max_length=1000, blank=True, null=True)
     best_contact_time = models.CharField(max_length=1000, blank=True, null=True)
     navigator = models.ForeignKey(PICStaff, on_delete=models.SET_NULL, blank=True, null=True)
+
+    zipcode = models.CharField(max_length=1000, default="")
+    address = models.CharField(max_length=1000, blank=True, null=True)
+    household_size = models.IntegerField()
+    plan = models.CharField(max_length=1000, blank=True, null=True)
+    met_nav_at = models.CharField(max_length=1000)
 
     class Meta:
         # maps model to the picmodels module
@@ -71,10 +78,16 @@ class PICConsumer(models.Model):
 
     def return_values_dict(self):
         valuesdict = {"First Name": self.first_name,
+                      "Middle Name": self.middle_name,
                       "Last Name": self.last_name,
                       "Email": self.email,
                       "Phone Number": self.phone,
                       "Preferred Language": self.preferred_language,
+                      "Zipcode": self.zipcode,
+                      "Address": self.address,
+                      "Household Size": self.household_size,
+                      "Plan": self.plan,
+                      "Met Navigator At": self.met_nav_at,
                       "Best Contact Time": self.best_contact_time,
                       "Navigator": "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name),
                       "Database ID": self.id}

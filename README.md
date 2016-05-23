@@ -159,7 +159,20 @@ In response, a JSON document will be displayed with the following format:
                 "Database ID": Integer,
                 "County": String,
                 "First Name": String,
-                "Last Name": String
+                "Last Name": String,
+                "Consumers":[
+                                {
+                                "First Name": String,
+                                "Best Contact Time": String,
+                                "Database ID": Integer,
+                                "Last Name": String,
+                                "Preferred Language": String,
+                                "Navigator": String,
+                                "Phone Number": String,
+                                "Email": String
+                                },
+                                ....
+                            ],
             },
             ...,
             ...,
@@ -184,6 +197,118 @@ In response, a JSON document will be displayed with the following format:
 
 
 
+## Consumer Account Backend API
+
+### Consumer Data Submission API
+To modify or add members of the PICConsumer class in the database, submit a POST request to: http://obscure-harbor-6074.herokuapp.com/editconsumer/. The POST data a JSON document using the following template:
+
+```
+{
+"First Name": String,
+"Middle Name": String (Can be empty),
+"Last Name": String,
+"Email": String,
+"Phone Number": String (Can be empty),
+"Zipcode": String,
+"Address": String (Can be empty),
+"Met Navigator At": String,
+"Household Size": Integer,
+"Plan": String (Can be empty),
+"Preferred Language": String (Can be empty),
+"Navigator Database ID": Integer,
+"Consumer Database ID": Integer(Required when "Database Action" == "Consumer Modification" or "Consumer Deletion"),
+"Database Action": String,
+}
+```
+
+In response, a JSON document will be displayed with the following format:
+```
+{
+ "status": {
+            "Error Code": Integer,
+            "Version": Float,
+            "Errors": Array
+            "Data": Dictionary Object or "Deleted",
+           }
+}
+```
+
+- Adding a consumer database entry.
+    - To add a consumer database entry, the value for "Database Action" in the POST request must equal "Consumer Addition".
+    - All other fields except "Consumer Database ID" must be filled.
+    - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the added database entry.
+    
+- Modifying a consumer database entry.
+    - To modify a consumer database entry, the value for "Database Action" in the POST request must equal "Consumer Modification".
+    - All other fields must be filled.
+    - All key value pairs in the POSTed JSON document correspond to updated fields for specified "Consumer Database ID"
+    - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the updated database entry.
+
+- Deleting a consumer database entry.
+    - To delete a consumer database entry, the value for "Database Action" in the POST request must equal "Consumer Deletion".
+    - The only other field should be "Consumer Database ID".
+    - The response JSON document will have a "Deleted" as the value for the "Data" key.
+    
+- If there are errors in the POSTed JSON document:
+    - "Error Code" will be 1.
+    - An array of length > 0 will be the value for the "Errors" key in the "status" dictionary.
+        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+    - No changes are made to the database.
+    
+### Consumer Data Retrieval API
+- To retrieve consumer data stored in the backend, submit a GET request to http://obscure-harbor-6074.herokuapp.com/v1/consumer? with the following optional parameters: "fname", "lname", "email", "id"
+    - "fname" corresponds to first name.
+    - "lname" corresponds to last name.
+    - "email" corresponds to email.
+    - "id" corresponds to consumer database id.
+        - passing "all" as the value will return all consumer
+    - All parameters may have a single or multiple values separated by commas
+    - One parameter is allowed at a time (only "fname" and "lname" can be grouped)
+        - If "fname" and "lname" are given simultaneously as parameters, only one value each is permitted.
+    
+- The response will be a JSON document with the following format:
+    ```
+    {
+        "Data": [
+            {
+                "Email": String,
+                "Phone Number": String,
+                "Database ID": Integer,
+                "Preferred Language": String,
+                "First Name": String,
+                "Middle Name": String,
+                "Last Name": String,
+                "Navigator": String,
+                "Zipcode": String,
+                "Address": String,
+                "Met Navigator At": String,
+                "Household Size": Integer,
+                "Plan": String,
+                "Best Contact Time": String,
+            },
+            ...,
+            ...,
+            ...,
+        ],
+        "Status": {
+            "Version": Integer,
+            "Error Code": Integer,
+            "Errors": Array
+        }
+    }
+    ```
+
+- If consumers are found,
+    - "Error Code" will be 0
+    - Array corresponding to the "Data" key will be non empty.
+- If consumers are not found,
+    - "Error Code" will be 1.
+    - An array of length > 0 will be the value for the "Errors" key in the "status" dictionary.
+        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+    - Array corresponding to the "Data" key will be empty.
+    
+    
+    
 ## Consumer Metrics Backend API
 
 ### Consumer Metrics Submission API
@@ -197,28 +322,25 @@ To submit an entry of consumer metrics data corresponding to a specific staff me
                                     "Month": Integer,
                                     "Year": Integer,},
                     "County": String,
+                    "Zipcode": String,
                     "Received Education": Integer,
                     "Applied Medicaid": Integer,
                     "Selected QHP": Integer,
-                    "Enrolled SHOP": Integer,
                     "Referred Medicaid or CHIP": Integer,
-                    "Referred SHOP": Integer,
                     "Filed Exemptions": Integer,
                     "Received Post-Enrollment Support": Integer,
                     "Trends": String (Not Required),
                     "Success Story": String,
                     "Hardship or Difficulty": String,
-                    "Comments": String (Not Required),
                     "Outreach and Stakeholder Activities": String (Not Required),
-                    //////// IPC Questions /////////
-                    "Appointments Scheduled": Integer,
-                    "Confirmation Calls": Integer,
-                    "Appointments Held": Integer,
-                    "Appointments Over Hour": Integer,
-                    "Appointments Complex Market": Integer,
-                    "Appointments Complex Medicaid": Integer,
-                    "Appointments Post-Enrollment Assistance": Integer,
-                    "Appointments Over 3 Hours": Integer,
+                    "Plan Stats": [
+                                    {"Issuer Name": String,
+                                    "Enrollments": Integer,
+                                    "Premium Type": String,
+                                    "Metal Level": String},
+                                    {},
+                                    ....
+                                  ],
                     }
 }
 ```
@@ -253,14 +375,7 @@ In response, a JSON document will be displayed with the following format:
     - "email" corresponds to staff member email.
     - "id" corresponds to staff member class database id.
         - passing "all" as the value will return all staff members
-    - "county" corresponds to counties that metrics are requested for.
-    - "time" corresponds to the length of time from the current date that metrics should be retrieved for.
-    - "groupby" corresponds to which parameter results should be grouped by
-    - One parameter from "fname", "lname", "email", and "id" is allowed at a time. (only "fname" and "lname" can be grouped)
-        - The "fname", "lname", "email", and "id" parameters may have a single or multiple values separated by commas.
-        - If "fname" and "lname" are given simultaneously as parameters, only one value each is permitted.
-    - "county", "time", and "groupby" can be used in any combination
-        - One value is permitted for each parameter.
+    - "navid" corresponds to staff member class database id.
         
 - The response will be a JSON document with the following format:
     ```

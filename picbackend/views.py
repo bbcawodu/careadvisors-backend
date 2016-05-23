@@ -238,12 +238,28 @@ def consumer_edit_handler(request):
         if len(post_errors) == 0 and rqst_action == "Consumer Addition":
             rqst_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors)
             rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
+            rqst_consumer_m_name = clean_json_string_input(post_json, "root", "Middle Name", post_errors, empty_string_allowed=True)
             rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+            rqst_consumer_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors)
+            rqst_consumer_address = clean_json_string_input(post_json, "root", "Address", post_errors, empty_string_allowed=True)
+            rqst_consumer_plan = clean_json_string_input(post_json, "root", "Plan", post_errors, empty_string_allowed=True)
+            rqst_consumer_met_nav_at = clean_json_string_input(post_json, "root", "Met Navigator At", post_errors)
+            rqst_consumer_household_size = clean_json_int_input(post_json, "root", "Household Size", post_errors)
+            rqst_consumer_phone = clean_json_string_input(post_json, "root", "Phone Number", post_errors, empty_string_allowed=True)
+            rqst_consumer_pref_lang = clean_json_string_input(post_json, "root", "Preferred Language", post_errors, empty_string_allowed=True)
             rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
 
             if len(post_errors) == 0:
                 consumer_rqst_values = {"first_name": rqst_consumer_f_name,
-                                        "last_name": rqst_consumer_l_name}
+                                        "middle_name": rqst_consumer_m_name,
+                                        "last_name": rqst_consumer_l_name,
+                                        "phone": rqst_consumer_phone,
+                                        "zipcode": rqst_consumer_zipcode,
+                                        "address": rqst_consumer_address,
+                                        "plan": rqst_consumer_plan,
+                                        "met_nav_at": rqst_consumer_met_nav_at,
+                                        "household_size": rqst_consumer_household_size,
+                                        "preferred_language": rqst_consumer_pref_lang}
                 consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(email=rqst_consumer_email,
                                                                                                  defaults=consumer_rqst_values)
                 if not consumer_instance_created:
@@ -279,7 +295,15 @@ def consumer_edit_handler(request):
         elif len(post_errors) == 0 and rqst_action == "Consumer Modification":
             rqst_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors)
             rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
+            rqst_consumer_m_name = clean_json_string_input(post_json, "root", "Middle Name", post_errors, empty_string_allowed=True)
             rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+            rqst_consumer_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors)
+            rqst_consumer_address = clean_json_string_input(post_json, "root", "Address", post_errors, empty_string_allowed=True)
+            rqst_consumer_plan = clean_json_string_input(post_json, "root", "Plan", post_errors, empty_string_allowed=True)
+            rqst_consumer_met_nav_at = clean_json_string_input(post_json, "root", "Met Navigator At", post_errors)
+            rqst_consumer_household_size = clean_json_int_input(post_json, "root", "Household Size", post_errors)
+            rqst_consumer_phone = clean_json_string_input(post_json, "root", "Phone Number", post_errors, empty_string_allowed=True)
+            rqst_consumer_pref_lang = clean_json_string_input(post_json, "root", "Preferred Language", post_errors, empty_string_allowed=True)
             rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
             rqst_consumer_id = clean_json_int_input(post_json, "root", "Consumer Database ID", post_errors)
 
@@ -287,7 +311,15 @@ def consumer_edit_handler(request):
                 try:
                     consumer_instance = PICConsumer.objects.get(id=rqst_consumer_id)
                     consumer_instance.first_name = rqst_consumer_f_name
+                    consumer_instance.middle_name = rqst_consumer_m_name
                     consumer_instance.last_name = rqst_consumer_l_name
+                    consumer_instance.phone = rqst_consumer_phone
+                    consumer_instance.zipcode = rqst_consumer_zipcode
+                    consumer_instance.address = rqst_consumer_address
+                    consumer_instance.plan = rqst_consumer_plan
+                    consumer_instance.met_nav_at = rqst_consumer_met_nav_at
+                    consumer_instance.household_size = rqst_consumer_household_size
+                    consumer_instance.preferred_language = rqst_consumer_pref_lang
                     consumer_instance.email = rqst_consumer_email
 
                     nav_instance = PICStaff.objects.get(id=rqst_nav_id)
@@ -768,6 +800,14 @@ def consumer_api_handler(request):
     else:
         rqst_consumer_id = None
         list_of_ids = None
+    if 'navid' in rqst_params:
+        rqst_nav_id = rqst_params['navid']
+        list_of_nav_ids = re.findall("\d+", rqst_nav_id)
+        for indx, element in enumerate(list_of_nav_ids):
+            list_of_nav_ids[indx] = int(element)
+    else:
+        rqst_nav_id = None
+        list_of_nav_ids = None
 
     response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
     rqst_errors = []
@@ -896,6 +936,37 @@ def consumer_api_handler(request):
             else:
                 response_raw_data['Status']['Error Code'] = 1
                 rqst_errors.append('No valid consumer IDs provided in request (must be integers)')
+    elif rqst_nav_id:
+        if list_of_nav_ids:
+            if len(list_of_nav_ids) > 0:
+                for indx, element in enumerate(list_of_nav_ids):
+                    list_of_nav_ids[indx] = int(element)
+                consumers = PICConsumer.objects.filter(navigator__in=list_of_nav_ids)
+                if len(consumers) > 0:
+                    nav_dict = {}
+                    for consumer in consumers:
+                        if consumer.navigator.id not in nav_dict:
+                            nav_dict[consumer.navigator.id] = [consumer.return_values_dict()]
+                        else:
+                            nav_dict[consumer.navigator.id].append(consumer.return_values_dict())
+                    nav_list = []
+                    for nav_key, consumer_list in nav_dict.iteritems():
+                        nav_list_entry = {"Navigator ID" : nav_key,
+                                          "Consumer List": consumer_list}
+                        nav_list.append(nav_list_entry)
+                    response_raw_data["Data"] = nav_list
+
+                    for nav_id in list_of_nav_ids:
+                        if nav_id not in nav_dict:
+                            if response_raw_data['Status']['Error Code'] != 2:
+                                response_raw_data['Status']['Error Code'] = 2
+                            rqst_errors.append('No consumers found for navigator with id: {!s} found in database'.format(str(nav_id)))
+                else:
+                    response_raw_data['Status']['Error Code'] = 1
+                    rqst_errors.append('No consumers found for navigator with id(s): {!s} found in database' + rqst_nav_id)
+            else:
+                response_raw_data['Status']['Error Code'] = 1
+                rqst_errors.append('No valid navigator IDs provided in request (must be integers)')
 
     else:
         response_raw_data['Status']['Error Code'] = 1
