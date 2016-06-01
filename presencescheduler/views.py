@@ -189,7 +189,7 @@ def appointment_submission_handler(request):
             error_message = ""
             for message in post_errors:
                 error_message = error_message + message + ", "
-            print error_message
+            print(error_message)
             sys.stdout.flush()
 
     # if a GET request is made, add error message to response data
@@ -198,7 +198,7 @@ def appointment_submission_handler(request):
         post_errors.append("Request needs POST data")
         response_raw_data["status"]["Errors"] = post_errors
         for message in post_errors:
-            print message
+            print(message)
         sys.stdout.flush()
 
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")

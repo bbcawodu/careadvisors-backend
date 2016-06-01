@@ -43,5 +43,6 @@ urlpatterns = [
     url(r"^v1/staff$", views.staff_api_handler),
     url(r"^v1/consumers$", views.consumer_api_handler),
     url(r"^v1/metrics$", views.metrics_api_handler),
+    url(r"^v1/eligibility", views.eligibility_handler),
     url(r'^admin/', include(admin.site.urls)),
 ]

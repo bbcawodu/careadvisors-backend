@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.db import models, IntegrityError
 from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer
-import datetime, json, sys, re
+import datetime, json, sys, re, pokitdok
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -74,7 +74,7 @@ def staff_edit_handler(request):
     post_errors = []
 
     if request.method == 'POST' or request.is_ajax():
-        post_data = request.body
+        post_data = request.body.decode('utf-8')
         post_json = json.loads(post_data)
 
         # Code to parse POSTed json request
@@ -102,7 +102,7 @@ def staff_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
                 else:
                     response_raw_data['Data'] = {"Database ID": user_instance.id}
@@ -111,7 +111,7 @@ def staff_edit_handler(request):
                 response_raw_data["status"]["Errors"] = post_errors
 
                 for message in post_errors:
-                    print message
+                    print(message)
                     sys.stdout.flush()
 
         elif len(post_errors) == 0 and rqst_action == "Staff Modification":
@@ -138,7 +138,7 @@ def staff_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
                 except PICStaff.MultipleObjectsReturned:
                     post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
@@ -146,7 +146,7 @@ def staff_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
                 except IntegrityError:
                     post_errors.append('Database entry already exists for the email: {!s}'.format(rqst_usr_email))
@@ -154,7 +154,7 @@ def staff_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
 
             else:
@@ -162,7 +162,7 @@ def staff_edit_handler(request):
                 response_raw_data["status"]["Errors"] = post_errors
 
                 for message in post_errors:
-                    print message
+                    print(message)
                     sys.stdout.flush()
 
         elif len(post_errors) == 0 and rqst_action == "Staff Deletion":
@@ -179,7 +179,7 @@ def staff_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
                 except PICStaff.MultipleObjectsReturned:
                     post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
@@ -187,7 +187,7 @@ def staff_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
 
             else:
@@ -195,7 +195,7 @@ def staff_edit_handler(request):
                 response_raw_data["status"]["Errors"] = post_errors
 
                 for message in post_errors:
-                    print message
+                    print(message)
                     sys.stdout.flush()
 
 
@@ -205,7 +205,7 @@ def staff_edit_handler(request):
             response_raw_data["status"]["Errors"] = post_errors
 
             for message in post_errors:
-                print message
+                print(message)
                 sys.stdout.flush()
 
     # if a GET request is made, add error message to response data
@@ -214,7 +214,7 @@ def staff_edit_handler(request):
         post_errors.append("Request needs POST data")
         response_raw_data["status"]["Errors"] = post_errors
         for message in post_errors:
-            print message
+            print(message)
         sys.stdout.flush()
 
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
@@ -228,7 +228,7 @@ def consumer_edit_handler(request):
     post_errors = []
 
     if request.method == 'POST' or request.is_ajax():
-        post_data = request.body
+        post_data = request.body.decode('utf-8')
         post_json = json.loads(post_data)
 
         # Code to parse POSTed json request
@@ -268,7 +268,7 @@ def consumer_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
                 else:
                     try:
@@ -282,14 +282,14 @@ def consumer_edit_handler(request):
                         response_raw_data["status"]["Errors"] = post_errors
 
                         for message in post_errors:
-                            print message
+                            print(message)
                         sys.stdout.flush()
             else:
                 response_raw_data["status"]["Error Code"] = 1
                 response_raw_data["status"]["Errors"] = post_errors
 
                 for message in post_errors:
-                    print message
+                    print(message)
                     sys.stdout.flush()
 
         elif len(post_errors) == 0 and rqst_action == "Consumer Modification":
@@ -333,7 +333,7 @@ def consumer_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
                 except PICConsumer.MultipleObjectsReturned:
                     post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_consumer_id)))
@@ -341,7 +341,7 @@ def consumer_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
                 except IntegrityError:
                     post_errors.append('Database entry already exists for the id: {!s}'.format(str(rqst_consumer_id)))
@@ -349,7 +349,7 @@ def consumer_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
                 except PICStaff.DoesNotExist:
                     post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
@@ -357,7 +357,7 @@ def consumer_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
 
             else:
@@ -365,7 +365,7 @@ def consumer_edit_handler(request):
                 response_raw_data["status"]["Errors"] = post_errors
 
                 for message in post_errors:
-                    print message
+                    print(message)
                     sys.stdout.flush()
 
         elif len(post_errors) == 0 and rqst_action == "Consumer Deletion":
@@ -382,7 +382,7 @@ def consumer_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
                 except PICConsumer.MultipleObjectsReturned:
                     post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_consumer_id)))
@@ -390,7 +390,7 @@ def consumer_edit_handler(request):
                     response_raw_data["status"]["Errors"] = post_errors
 
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
 
             else:
@@ -398,7 +398,7 @@ def consumer_edit_handler(request):
                 response_raw_data["status"]["Errors"] = post_errors
 
                 for message in post_errors:
-                    print message
+                    print(message)
                     sys.stdout.flush()
 
 
@@ -408,7 +408,7 @@ def consumer_edit_handler(request):
             response_raw_data["status"]["Errors"] = post_errors
 
             for message in post_errors:
-                print message
+                print(message)
                 sys.stdout.flush()
 
     # if a GET request is made, add error message to response data
@@ -417,7 +417,7 @@ def consumer_edit_handler(request):
         post_errors.append("Request needs POST data")
         response_raw_data["status"]["Errors"] = post_errors
         for message in post_errors:
-            print message
+            print(message)
         sys.stdout.flush()
 
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
@@ -432,7 +432,7 @@ def metrics_submission_handler(request):
     post_errors = []
 
     if request.method == 'POST' or request.is_ajax():
-        post_data = request.body
+        post_data = request.body.decode('utf-8')
         post_json = json.loads(post_data)
 
         # Code to parse POSTed json request
@@ -504,7 +504,7 @@ def metrics_submission_handler(request):
                     post_errors.append("Multiple metrics entries exist for this date")
                     response_raw_data["status"]["Errors"] = post_errors
                     for message in post_errors:
-                        print message
+                        print(message)
                     sys.stdout.flush()
                     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
                     return response
@@ -565,7 +565,7 @@ def metrics_submission_handler(request):
                         response_raw_data["status"]["Errors"] = post_errors
 
                         for message in post_errors:
-                            print message
+                            print(message)
                             sys.stdout.flush()
 
             except models.ObjectDoesNotExist:
@@ -573,7 +573,7 @@ def metrics_submission_handler(request):
                 post_errors.append("Staff database entry does not exist for email: {!s}".format(rqst_usr_email))
                 response_raw_data["status"]["Errors"] = post_errors
                 for message in post_errors:
-                    print message
+                    print(message)
                 sys.stdout.flush()
 
         # add parsing errors to response dictionary
@@ -582,7 +582,7 @@ def metrics_submission_handler(request):
             response_raw_data["status"]["Errors"] = post_errors
 
             for message in post_errors:
-                print message
+                print(message)
                 sys.stdout.flush()
 
     # if a GET request is made, add error message to response data
@@ -591,7 +591,7 @@ def metrics_submission_handler(request):
         post_errors.append("Request needs POST data")
         response_raw_data["status"]["Errors"] = post_errors
         for message in post_errors:
-            print message
+            print(message)
         sys.stdout.flush()
 
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
@@ -973,6 +973,54 @@ def consumer_api_handler(request):
         rqst_errors.append('No Valid Parameters')
 
     response_raw_data["Status"]["Errors"] = rqst_errors
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
+
+@csrf_exempt
+def eligibility_handler(request):
+    # initialize dictionary for response data, including parsing errors
+    response_raw_data = {'status': {"Error Code": 0, "Version": 1.0}}
+    post_errors = []
+
+    if request.method == 'POST' or request.is_ajax():
+        post_data = request.body.decode('utf-8')
+        post_json = json.loads(post_data)
+
+        rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
+        rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+        rqst_consumer_birth = clean_json_string_input(post_json, "root", "Birth Date", post_errors)
+
+        # if no errors, make request to pokitdok
+        if len(post_errors) == 0:
+            pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
+            eligibility_results = pd.eligibility({
+                "member": {
+                    "birth_date": rqst_consumer_birth,
+                    "first_name": rqst_consumer_f_name,
+                    "last_name": rqst_consumer_l_name,
+                },
+                "trading_partner_id": "MOCKPAYER"
+            })
+            response_raw_data["Data"] = eligibility_results
+
+        # add parsing errors to response dictionary
+        else:
+            response_raw_data["status"]["Error Code"] = 1
+            response_raw_data["status"]["Errors"] = post_errors
+
+            for message in post_errors:
+                print(message)
+                sys.stdout.flush()
+
+    # if a GET request is made, add error message to response data
+    else:
+        response_raw_data["status"]["Error Code"] = 1
+        post_errors.append("Request needs POST data")
+        response_raw_data["status"]["Errors"] = post_errors
+        for message in post_errors:
+            print(message)
+        sys.stdout.flush()
+
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
 
