@@ -548,7 +548,7 @@ def metrics_submission_handler(request):
                             planstatobject.save()
                             metrics_instance.plan_stats.add(planstatobject)
                     metrics_instance.save()
-                    # for plan, enrollments in rqst_plan_stats.iteritems():
+                    # for plan, enrollments in rqst_plan_stats.items():
                     #     planstatobject = PlanStat()
                     #     planstatobject.plan_name = plan
                     #     if planstatobject.check_plan_choices():
@@ -647,7 +647,7 @@ def staff_api_handler(request):
                     staff_member_dict[rqst_full_name].append(staff_member.return_values_dict())
 
             staff_member_list = []
-            for staff_key, staff_entry in staff_member_dict.iteritems():
+            for staff_key, staff_entry in staff_member_dict.items():
                 staff_member_list.append(staff_entry)
             response_raw_data["Data"] = staff_member_list
         else:
@@ -665,7 +665,7 @@ def staff_api_handler(request):
                     staff_dict[email].append(staff_member.return_values_dict())
         if len(staff_dict) > 0:
             staff_list = []
-            for staff_key, staff_entry in staff_dict.iteritems():
+            for staff_key, staff_entry in staff_dict.items():
                 staff_list.append(staff_entry)
             response_raw_data["Data"] = staff_list
             for email in list_of_emails:
@@ -688,7 +688,7 @@ def staff_api_handler(request):
                     staff_dict[first_name].append(staff_member.return_values_dict())
         if len(staff_dict) > 0:
             staff_list = []
-            for staff_key, staff_entry in staff_dict.iteritems():
+            for staff_key, staff_entry in staff_dict.items():
                 staff_list.append(staff_entry)
             response_raw_data["Data"] = staff_list
             for name in list_of_first_names:
@@ -711,7 +711,7 @@ def staff_api_handler(request):
                     staff_dict[last_name].append(staff_member.return_values_dict())
         if len(staff_dict) > 0:
             staff_list = []
-            for staff_key, staff_entry in staff_dict.iteritems():
+            for staff_key, staff_entry in staff_dict.items():
                 staff_list.append(staff_entry)
             response_raw_data["Data"] = staff_list
             for name in list_of_last_names:
@@ -730,7 +730,7 @@ def staff_api_handler(request):
             for staff_member in all_staff_members:
                 staff_member_dict[staff_member.id] = staff_member.return_values_dict()
             staff_list = []
-            for staff_key, staff_entry in staff_member_dict.iteritems():
+            for staff_key, staff_entry in staff_member_dict.items():
                 staff_list.append(staff_entry)
             response_raw_data["Data"] = staff_list
         elif list_of_ids:
@@ -743,7 +743,7 @@ def staff_api_handler(request):
                     for staff_member in staff_members:
                         staff_dict[staff_member.id] = staff_member.return_values_dict()
                     staff_list = []
-                    for staff_key, staff_entry in staff_dict.iteritems():
+                    for staff_key, staff_entry in staff_dict.items():
                         staff_list.append(staff_entry)
                     response_raw_data["Data"] = staff_list
                     # response_raw_data["Data"] = staff_dict
@@ -825,7 +825,7 @@ def consumer_api_handler(request):
                     consumer_dict[rqst_full_name].append(consumer.return_values_dict())
 
             consumer_list = []
-            for consumer_key, consumer_entry in consumer_dict.iteritems():
+            for consumer_key, consumer_entry in consumer_dict.items():
                 consumer_list.append(consumer_entry)
             response_raw_data["Data"] = consumer_list
         else:
@@ -843,7 +843,7 @@ def consumer_api_handler(request):
                     consumer_dict[email].append(consumer.return_values_dict())
         if len(consumer_dict) > 0:
             consumer_list = []
-            for consumer_key, consumer_entry in consumer_dict.iteritems():
+            for consumer_key, consumer_entry in consumer_dict.items():
                 consumer_list.append(consumer_entry)
             response_raw_data["Data"] = consumer_list
             for email in list_of_emails:
@@ -866,7 +866,7 @@ def consumer_api_handler(request):
                     consumer_dict[first_name].append(consumer.return_values_dict())
         if len(consumer_dict) > 0:
             consumer_list = []
-            for consumer_key, consumer_entry in consumer_dict.iteritems():
+            for consumer_key, consumer_entry in consumer_dict.items():
                 consumer_list.append(consumer_entry)
             response_raw_data["Data"] = consumer_list
             for name in list_of_first_names:
@@ -889,7 +889,7 @@ def consumer_api_handler(request):
                     consumer_dict[last_name].append(consumer.return_values_dict())
         if len(consumer_dict) > 0:
             consumer_list = []
-            for consumer_key, consumer_entry in consumer_dict.iteritems():
+            for consumer_key, consumer_entry in consumer_dict.items():
                 consumer_list.append(consumer_entry)
             response_raw_data["Data"] = consumer_list
             for name in list_of_last_names:
@@ -908,7 +908,7 @@ def consumer_api_handler(request):
             for consumer in all_consumers:
                 consumer_dict[consumer.id] = consumer.return_values_dict()
             consumer_list = []
-            for consumer_key, consumer_entry in consumer_dict.iteritems():
+            for consumer_key, consumer_entry in consumer_dict.items():
                 consumer_list.append(consumer_entry)
             response_raw_data["Data"] = consumer_list
         elif list_of_ids:
@@ -921,7 +921,7 @@ def consumer_api_handler(request):
                     for consumer in consumers:
                         consumer_dict[consumer.id] = consumer.return_values_dict()
                     consumer_list = []
-                    for consumer_key, consumer_entry in consumer_dict.iteritems():
+                    for consumer_key, consumer_entry in consumer_dict.items():
                         consumer_list.append(consumer_entry)
                     response_raw_data["Data"] = consumer_list
 
@@ -950,7 +950,7 @@ def consumer_api_handler(request):
                         else:
                             nav_dict[consumer.navigator.id].append(consumer.return_values_dict())
                     nav_list = []
-                    for nav_key, consumer_list in nav_dict.iteritems():
+                    for nav_key, consumer_list in nav_dict.items():
                         nav_list_entry = {"Navigator ID" : nav_key,
                                           "Consumer List": consumer_list}
                         nav_list.append(nav_list_entry)
@@ -1029,7 +1029,7 @@ def eligibility_handler(request):
 def group_metrics(metrics_dict, grouping_parameter):
     return_dict = {}
     if grouping_parameter == "County":
-        for staff_key, staff_dict in metrics_dict.iteritems():
+        for staff_key, staff_dict in metrics_dict.items():
             for metrics_entry in staff_dict["Metrics Data"]:
                 if metrics_entry[grouping_parameter] not in return_dict:
                     return_dict[metrics_entry[grouping_parameter]] = {staff_key: {"Metrics Data": [metrics_entry],
@@ -1042,7 +1042,7 @@ def group_metrics(metrics_dict, grouping_parameter):
                         return_dict[metrics_entry[grouping_parameter]][staff_key]["Metrics Data"].append(metrics_entry)
 
     elif grouping_parameter == "Zipcode":
-        for staff_key, staff_dict in metrics_dict.iteritems():
+        for staff_key, staff_dict in metrics_dict.items():
             for metrics_entry in staff_dict["Metrics Data"]:
                 if metrics_entry[grouping_parameter] not in return_dict:
                     return_dict[metrics_entry[grouping_parameter]] = {staff_key: {"Metrics Data": [metrics_entry],
@@ -1310,18 +1310,18 @@ def metrics_api_handler(request):
         if rqst_params["groupby"] == "zipcode" or rqst_params["groupby"] == "Zipcode":
             metrics_dict = group_metrics(metrics_dict, "Zipcode")
             metrics_list = []
-            for metrics_key, metrics_entry in metrics_dict.iteritems():
+            for metrics_key, metrics_entry in metrics_dict.items():
                 metrics_list.append(metrics_entry)
             response_raw_data["Data"] = metrics_list
         else:
             metrics_list = []
-            for metrics_key, metrics_entry in metrics_dict.iteritems():
+            for metrics_key, metrics_entry in metrics_dict.items():
                 metrics_list.append(metrics_entry)
             response_raw_data["Data"] = metrics_list
             # response_raw_data["Data"] = metrics_dict
     else:
         metrics_list = []
-        for metrics_key, metrics_entry in metrics_dict.iteritems():
+        for metrics_key, metrics_entry in metrics_dict.items():
             metrics_list.append(metrics_entry)
         response_raw_data["Data"] = metrics_list
         # response_raw_data["Data"] = metrics_dict
