@@ -33,7 +33,7 @@ class PICStaff(models.Model):
         consumers = PICConsumer.objects.filter(navigator=self.id)
         consumer_list = []
         for consumer in consumers:
-            consumer_list.append(consumer.return_values_dict())
+            consumer_list.append(consumer.return_values_dict()["Database ID"])
         valuesdict = {"First Name": self.first_name,
                       "Last Name": self.last_name,
                       "Email": self.email,
