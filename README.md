@@ -256,16 +256,20 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Consumer Data Retrieval API
-- To retrieve consumer data stored in the backend, submit a GET request to http://obscure-harbor-6074.herokuapp.com/v1/consumer? with the following optional parameters: "fname", "lname", "email", "id"
-    - "fname" corresponds to first name.
-    - "lname" corresponds to last name.
-    - "email" corresponds to email.
-    - "id" corresponds to consumer database id.
-        - passing "all" as the value will return all consumer
-    - All parameters may have a single or multiple values separated by commas
-    - One parameter is allowed at a time (only "fname" and "lname" can be grouped)
-        - If "fname" and "lname" are given simultaneously as parameters, only one value each is permitted.
-    
+- To retrieve consumer data stored in the backend, submit a GET request to http://obscure-harbor-6074.herokuapp.com/v1/consumers? with the following parameters(at least one required)
+    - A maximum of 20 consumer records with full fields will be returned due to size constraints
+        - The rest are consumer database IDs
+        - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter
+    - "fname" corresponds to consumer first name.
+    - "lname" corresponds to consumer last name.
+        - "fname" and "lname" can be given simultaneously as parameters. If so, only one value each is permitted.
+    - "email" corresponds to consumer email.
+    - "id" corresponds to consumer class database id.
+        - passing "all" as the value will return all staff members
+    - "navid" corresponds to staff member class database id. (Can be combined with any of the above parameters)
+    - "page" corresponds to the current page of consumer instances to be displayed with full fields. 
+        - if this parameter is missing, the first 20 consumer instances will be displayed with full fields.
+        
 - The response will be a JSON document with the following format:
     ```
     {
@@ -289,12 +293,17 @@ In response, a JSON document will be displayed with the following format:
             ...,
             ...,
             ...,
+            up to 20 full record consumer entries,
+            2(Database IDs for the rest),
+            6,
+            9
         ],
         "Status": {
             "Version": Integer,
             "Error Code": Integer,
             "Errors": Array
-        }
+        },
+        "Page URLs": Array of strings (Will be missing if "page" parameter is given OR less than 20 consumers in results)
     }
     ```
 
@@ -306,6 +315,8 @@ In response, a JSON document will be displayed with the following format:
     - An array of length > 0 will be the value for the "Errors" key in the "status" dictionary.
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - Array corresponding to the "Data" key will be empty.
+- If "page" parameter is missing and there is more than one page of customer instances to display with all fields, "Page
+    URLs" key will be present in the root response dictionary. 
     
     
     
@@ -435,10 +446,10 @@ In response, a JSON document will be displayed with the following format:
     }
     ```
 
-- If staff members are found,
+- If metrics reports are found,
     - "Error Code" will be 0
     - Array corresponding to the "Data" key will be non empty.
-- If staff members are not found,
+- If metrics reports are not found,
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "status" dictionary.
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.

@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.db import models, IntegrityError
 from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer
-import datetime, json, sys, re, pokitdok
+import datetime, json, sys, re, pokitdok, math
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -770,6 +770,8 @@ def staff_api_handler(request):
 
 
 def consumer_api_handler(request):
+    CONSUMERS_PER_PAGE = 20
+
     rqst_params = request.GET
     if 'fname' in rqst_params:
         rqst_first_name = rqst_params['fname']
@@ -809,10 +811,18 @@ def consumer_api_handler(request):
         rqst_nav_id = None
         list_of_nav_ids = None
 
+    if 'page' in rqst_params:
+        rqst_page_no = int(rqst_params['page'])
+    else:
+        rqst_page_no = None
+
     response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
     rqst_errors = []
 
     consumers = PICConsumer.objects.all()
+    if rqst_nav_id:
+        consumers = consumers.filter(navigator__in=list_of_nav_ids)
+
     if rqst_first_name and rqst_last_name:
         consumers = consumers.filter(first_name__iexact=rqst_first_name, last_name__iexact=rqst_last_name)
         if len(consumers) > 0:
@@ -903,20 +913,22 @@ def consumer_api_handler(request):
 
     elif rqst_consumer_id:
         if rqst_consumer_id == "all":
-            all_consumers = PICConsumer.objects.all()
+            all_consumers = consumers
             consumer_dict = {}
             for consumer in all_consumers:
                 consumer_dict[consumer.id] = consumer.return_values_dict()
             consumer_list = []
             for consumer_key, consumer_entry in consumer_dict.items():
                 consumer_list.append(consumer_entry)
+
             response_raw_data["Data"] = consumer_list
         elif list_of_ids:
             if len(list_of_ids) > 0:
                 for indx, element in enumerate(list_of_ids):
                     list_of_ids[indx] = int(element)
-                consumers = PICConsumer.objects.filter(id__in=list_of_ids)
+                consumers = consumers.filter(id__in=list_of_ids)
                 if len(consumers) > 0:
+
                     consumer_dict = {}
                     for consumer in consumers:
                         consumer_dict[consumer.id] = consumer.return_values_dict()
@@ -936,41 +948,30 @@ def consumer_api_handler(request):
             else:
                 response_raw_data['Status']['Error Code'] = 1
                 rqst_errors.append('No valid consumer IDs provided in request (must be integers)')
-    elif rqst_nav_id:
-        if list_of_nav_ids:
-            if len(list_of_nav_ids) > 0:
-                for indx, element in enumerate(list_of_nav_ids):
-                    list_of_nav_ids[indx] = int(element)
-                consumers = PICConsumer.objects.filter(navigator__in=list_of_nav_ids)
-                if len(consumers) > 0:
-                    nav_dict = {}
-                    for consumer in consumers:
-                        if consumer.navigator.id not in nav_dict:
-                            nav_dict[consumer.navigator.id] = [consumer.return_values_dict()]
-                        else:
-                            nav_dict[consumer.navigator.id].append(consumer.return_values_dict())
-                    nav_list = []
-                    for nav_key, consumer_list in nav_dict.items():
-                        nav_list_entry = {"Navigator ID" : nav_key,
-                                          "Consumer List": consumer_list}
-                        nav_list.append(nav_list_entry)
-                    response_raw_data["Data"] = nav_list
-
-                    for nav_id in list_of_nav_ids:
-                        if nav_id not in nav_dict:
-                            if response_raw_data['Status']['Error Code'] != 2:
-                                response_raw_data['Status']['Error Code'] = 2
-                            rqst_errors.append('No consumers found for navigator with id: {!s} found in database'.format(str(nav_id)))
-                else:
-                    response_raw_data['Status']['Error Code'] = 1
-                    rqst_errors.append('No consumers found for navigator with id(s): {!s} found in database' + rqst_nav_id)
-            else:
-                response_raw_data['Status']['Error Code'] = 1
-                rqst_errors.append('No valid navigator IDs provided in request (must be integers)')
 
     else:
         response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('No Valid Parameters')
+
+    if "Data" in response_raw_data:
+        consumer_list = response_raw_data["Data"]
+        if len(consumer_list) > CONSUMERS_PER_PAGE:
+            if rqst_page_no:
+                if len(consumer_list) > ((rqst_page_no - 1) * CONSUMERS_PER_PAGE):
+                    for i, consumer in enumerate(consumer_list[:(CONSUMERS_PER_PAGE * (rqst_page_no - 1))]):
+                        consumer_list[i] = consumer["Database ID"]
+                if len(consumer_list) > (rqst_page_no * CONSUMERS_PER_PAGE):
+                    for i, consumer in enumerate(consumer_list[(rqst_page_no * CONSUMERS_PER_PAGE):]):
+                        consumer_list[(rqst_page_no * CONSUMERS_PER_PAGE)+i] = consumer["Database ID"]
+            else:
+                response_raw_data["Page URLs"] = []
+                total_pages = math.ceil(len(consumer_list) / CONSUMERS_PER_PAGE)
+                for i in range(total_pages):
+                    response_raw_data["Page URLs"].append(request.build_absolute_uri(None) + "&page=" + str(i+1))
+
+                for i, consumer in enumerate(consumer_list[CONSUMERS_PER_PAGE:]):
+                    consumer_list[CONSUMERS_PER_PAGE+i] = consumer["Database ID"]
+        response_raw_data["Data"] = consumer_list
 
     response_raw_data["Status"]["Errors"] = rqst_errors
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
