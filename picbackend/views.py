@@ -1008,6 +1008,7 @@ def eligibility_handler(request):
                 eligibility_data["member"]["id"] = rqst_consumer_plan_id
             eligibility_results = pd.eligibility(eligibility_data)
             response_raw_data["Data"] = eligibility_results
+            response_raw_data["Pokitdok Request"] = eligibility_data
 
         # add parsing errors to response dictionary
         else:
