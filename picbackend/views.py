@@ -991,20 +991,22 @@ def eligibility_handler(request):
         rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
         rqst_consumer_birth = clean_json_string_input(post_json, "root", "Birth Date", post_errors)
         rqst_consumer_trading_partner = clean_json_string_input(post_json, "root", "Trading Partner ID", post_errors)
-        rqst_consumer_plan_id = clean_json_string_input(post_json, "root", "Consumer Plan ID", post_errors)
+        rqst_consumer_plan_id = clean_json_string_input(post_json, "root", "Consumer Plan ID", post_errors, none_allowed=True)
 
         # if no errors, make request to pokitdok
         if len(post_errors) == 0:
             pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
-            eligibility_results = pd.eligibility({
+            eligibility_data = {
                 "member": {
                     "birth_date": rqst_consumer_birth,
                     "first_name": rqst_consumer_f_name,
                     "last_name": rqst_consumer_l_name,
-                    "id": rqst_consumer_plan_id,
                 },
                 "trading_partner_id": rqst_consumer_trading_partner
-            })
+            }
+            if rqst_consumer_plan_id:
+                eligibility_data["member"]["id"] = rqst_consumer_plan_id
+            eligibility_results = pd.eligibility(eligibility_data)
             response_raw_data["Data"] = eligibility_results
 
         # add parsing errors to response dictionary
