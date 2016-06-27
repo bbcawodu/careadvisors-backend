@@ -1026,6 +1026,20 @@ def eligibility_handler(request):
     return response
 
 
+def trading_partner_handler(request):
+    # initialize dictionary for response data, including parsing errors
+    response_raw_data = {'status': {"Error Code": 0, "Version": 1.0}}
+    post_errors = []
+
+    # make request to pokitdok
+    pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
+    trading_partners = pd.trading_partners()
+    response_raw_data["Data"] = trading_partners["data"]
+
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
+
+
 # defines function to group metrics by given parameter
 def group_metrics(metrics_dict, grouping_parameter):
     return_dict = {}
