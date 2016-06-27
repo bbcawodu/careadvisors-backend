@@ -990,7 +990,8 @@ def eligibility_handler(request):
         rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
         rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
         rqst_consumer_birth = clean_json_string_input(post_json, "root", "Birth Date", post_errors)
-        rqst_consumer_trading_partner = clean_json_string_input(post_json, "root", "trading_partner_id", post_errors)
+        rqst_consumer_trading_partner = clean_json_string_input(post_json, "root", "Trading Partner ID", post_errors)
+        rqst_consumer_plan_id = clean_json_string_input(post_json, "root", "Consumer Plan ID", post_errors)
 
         # if no errors, make request to pokitdok
         if len(post_errors) == 0:
@@ -1000,6 +1001,7 @@ def eligibility_handler(request):
                     "birth_date": rqst_consumer_birth,
                     "first_name": rqst_consumer_f_name,
                     "last_name": rqst_consumer_l_name,
+                    "id": rqst_consumer_plan_id,
                 },
                 "trading_partner_id": rqst_consumer_trading_partner
             })
