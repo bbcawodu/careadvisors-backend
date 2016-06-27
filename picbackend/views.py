@@ -1004,7 +1004,7 @@ def eligibility_handler(request):
                 },
                 "trading_partner_id": rqst_consumer_trading_partner
             }
-            if rqst_consumer_plan_id:
+            if rqst_consumer_plan_id != "None":
                 eligibility_data["member"]["id"] = rqst_consumer_plan_id
             eligibility_results = pd.eligibility(eligibility_data)
             response_raw_data["Data"] = eligibility_results
