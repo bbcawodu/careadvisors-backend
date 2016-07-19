@@ -58,7 +58,7 @@ To add an appointment to the database using our appointments API, make a POST re
 In response, a JSON document will be displayed with the following format:
 ```
 {
- "status": {
+ "Status": {
             "Error Code": Integer,
             "Version": Float,
             "Errors": Array
@@ -68,7 +68,7 @@ In response, a JSON document will be displayed with the following format:
 
 - If there are no errors in the POSTed JSON doc:
     - "Error Code" will be 0.
-    - There will be no "Errors" key in the "status" dictionary.
+    - There will be no "Errors" key in the "Status" dictionary.
     - An instance of the Appointment class corresponding to the POSTed JSON doc will be created and saved in the database.
         - If there isn't a consumer database entry with an email field corresponding to the POST, one is created.
         - If there isn't a location database entry with a name field corresponding to the POST, one is created.
@@ -76,7 +76,7 @@ In response, a JSON document will be displayed with the following format:
     
 - If there are errors in the POSTed JSON doc:
     - "Error Code" will be 1.
-    - An array of length > 0 will be the value for the "Errors" key in the "status" dictionary.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         - Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - No changes are made to the database.
 
@@ -107,7 +107,7 @@ To modify or add members of the PICStaff class in the database, submit a POST re
 In response, a JSON document will be displayed with the following format:
 ```
 {
- "status": {
+ "Status": {
             "Error Code": Integer,
             "Version": Float,
             "Errors": Array
@@ -134,7 +134,7 @@ In response, a JSON document will be displayed with the following format:
     
 - If there are errors in the POSTed JSON document:
     - "Error Code" will be 1.
-    - An array of length > 0 will be the value for the "Errors" key in the "status" dictionary.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - No changes are made to the database.
     
@@ -191,7 +191,7 @@ In response, a JSON document will be displayed with the following format:
     - Array corresponding to the "Data" key will be non empty.
 - If staff members are not found,
     - "Error Code" will be 1.
-    - An array of length > 0 will be the value for the "Errors" key in the "status" dictionary.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - Array corresponding to the "Data" key will be empty.
 
@@ -224,7 +224,7 @@ To modify or add members of the PICConsumer class in the database, submit a POST
 In response, a JSON document will be displayed with the following format:
 ```
 {
- "status": {
+ "Status": {
             "Error Code": Integer,
             "Version": Float,
             "Errors": Array
@@ -251,7 +251,7 @@ In response, a JSON document will be displayed with the following format:
     
 - If there are errors in the POSTed JSON document:
     - "Error Code" will be 1.
-    - An array of length > 0 will be the value for the "Errors" key in the "status" dictionary.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - No changes are made to the database.
     
@@ -312,7 +312,7 @@ In response, a JSON document will be displayed with the following format:
     - Array corresponding to the "Data" key will be non empty.
 - If consumers are not found,
     - "Error Code" will be 1.
-    - An array of length > 0 will be the value for the "Errors" key in the "status" dictionary.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - Array corresponding to the "Data" key will be empty.
 - If "page" parameter is missing and there is more than one page of customer instances to display with all fields, "Page
@@ -359,7 +359,7 @@ To submit an entry of consumer metrics data corresponding to a specific staff me
 In response, a JSON document will be displayed with the following format:
 ```
 {
- "status": {
+ "Status": {
             "Error Code": Integer,
             "Version": Float,
             "Errors": Array
@@ -369,13 +369,13 @@ In response, a JSON document will be displayed with the following format:
 
 - If there are no errors in the POSTed JSON doc:
     - "Error Code" will be 0.
-    - There will be no "Errors" key in the "status" dictionary.
+    - There will be no "Errors" key in the "Status" dictionary.
     - An instance of the MetricsSubmission class corresponding to the POSTed JSON doc will be created and saved in the database.
         - Only one metrics submission is allowed per day.
     
 - If there are errors in the POSTed JSON doc:
     - "Error Code" will be 1.
-    - An array of length > 0 will be the value for the "Errors" key in the "status" dictionary.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         - Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - No changes are made to the database.
     
@@ -451,7 +451,7 @@ In response, a JSON document will be displayed with the following format:
     - Array corresponding to the "Data" key will be non empty.
 - If metrics reports are not found,
     - "Error Code" will be 1.
-    - An array of length > 0 will be the value for the "Errors" key in the "status" dictionary.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - Array corresponding to the "Data" key will be empty.
 
