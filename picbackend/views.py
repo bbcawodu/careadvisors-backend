@@ -7,7 +7,7 @@ from django.shortcuts import render
 from picmodels.models import PICStaff, MetricsSubmission, PICConsumer
 import json, sys, pokitdok
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils.base import clean_json_string_input, init_response_data
+from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors
 from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff, add_consumer, modify_consumer, delete_consumer,\
     add_or_update_metrics_entity
 from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_staff, retrieve_first_name_staff,\
@@ -45,24 +45,11 @@ def handle_staff_edit_request(request):
         elif len(post_errors) == 0 and rqst_action == "Staff Deletion":
             response_raw_data = delete_staff(response_raw_data, post_json, post_errors)
 
-        # add parsing errors to response dictionary
-        else:
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-                sys.stdout.flush()
-
     # if a GET request is made, add error message to response data
     else:
-        response_raw_data["Status"]["Error Code"] = 1
         post_errors.append("Request needs POST data")
-        response_raw_data["Status"]["Errors"] = post_errors
-        for message in post_errors:
-            print(message)
-        sys.stdout.flush()
 
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
 
@@ -89,24 +76,11 @@ def handle_consumer_edit_request(request):
         elif len(post_errors) == 0 and rqst_action == "Consumer Deletion":
             response_raw_data = delete_consumer(response_raw_data, post_json, post_errors)
 
-        # add parsing errors to response dictionary
-        else:
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-                sys.stdout.flush()
-
     # if a GET request is made, add error message to response data
     else:
-        response_raw_data["Status"]["Error Code"] = 1
         post_errors.append("Request needs POST data")
-        response_raw_data["Status"]["Errors"] = post_errors
-        for message in post_errors:
-            print(message)
-        sys.stdout.flush()
 
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
 
@@ -126,13 +100,9 @@ def handle_metrics_submission_request(request):
 
     # if a GET request is made, add error message to response data
     else:
-        response_raw_data["Status"]["Error Code"] = 1
         post_errors.append("Request needs POST data")
-        response_raw_data["Status"]["Errors"] = post_errors
-        for message in post_errors:
-            print(message)
-        sys.stdout.flush()
 
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
 
@@ -171,10 +141,9 @@ def handle_staff_api_request(request):
             list_of_ids = None
         response_raw_data, rqst_errors = retrieve_id_staff(response_raw_data, rqst_errors, rqst_staff_id, list_of_ids)
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('No Valid Parameters')
 
-    response_raw_data["Status"]["Errors"] = rqst_errors
+    response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
 
@@ -217,18 +186,13 @@ def handle_consumer_api_request(request):
         response_raw_data, rqst_errors = retrieve_id_consumers(response_raw_data, rqst_errors, consumers,
                                                                rqst_consumer_id, list_of_ids)
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('No Valid Parameters')
 
     if "Data" in response_raw_data:
-        if 'page number' in search_params:
-            rqst_page_no = search_params['page number']
-        else:
-            rqst_page_no = None
-
+        rqst_page_no = search_params['page number'] if 'page number' in search_params else None
         response_raw_data = break_results_into_pages(request, response_raw_data, CONSUMERS_PER_PAGE, rqst_page_no)
 
-    response_raw_data["Status"]["Errors"] = rqst_errors
+    response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
 
@@ -267,24 +231,11 @@ def handle_eligibility_request(request):
             response_raw_data["Data"] = eligibility_results
             response_raw_data["Pokitdok Request"] = eligibility_data
 
-        # add parsing errors to response dictionary
-        else:
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-                sys.stdout.flush()
-
     # if a GET request is made, add error message to response data
     else:
-        response_raw_data["Status"]["Error Code"] = 1
         post_errors.append("Request needs POST data")
-        response_raw_data["Status"]["Errors"] = post_errors
-        for message in post_errors:
-            print(message)
-        sys.stdout.flush()
 
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
 
@@ -376,6 +327,6 @@ def handle_metrics_api_request(request):
         response_raw_data["Data"] = metrics_list
         # response_raw_data["Data"] = metrics_dict
 
-    response_raw_data["Status"]["Errors"] = rqst_errors
+    response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response

@@ -78,7 +78,6 @@ def retrieve_f_l_name_staff(response_raw_data, rqst_errors, staff_members, rqst_
             staff_member_list.append(staff_entry)
         response_raw_data["Data"] = staff_member_list
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('Staff Member with name: {!s} {!s} not found in database'.format(rqst_first_name,
                                                                                             rqst_last_name))
 
@@ -105,7 +104,6 @@ def retrieve_email_staff(response_raw_data, rqst_errors, rqst_email, list_of_ema
                     response_raw_data['Status']['Error Code'] = 2
                 rqst_errors.append('Staff Member with email: {!s} not found in database'.format(email))
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('Staff Member with emails(s): {!s} not found in database'.format(rqst_email))
 
     return response_raw_data, rqst_errors
@@ -131,7 +129,6 @@ def retrieve_first_name_staff(response_raw_data, rqst_errors, rqst_first_name, l
                     response_raw_data['Status']['Error Code'] = 2
                 rqst_errors.append('Staff Member with first name: {!s} not found in database'.format(name))
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('Staff Member with first name(s): {!s} not found in database'.format(rqst_first_name))
 
     return response_raw_data, rqst_errors
@@ -157,7 +154,6 @@ def retrieve_last_name_staff(response_raw_data, rqst_errors, rqst_last_name, lis
                     response_raw_data['Status']['Error Code'] = 2
                 rqst_errors.append('Staff Member with last name: {!s} not found in database'.format(name))
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('Staff Member with last name(s): {!s} not found in database'.format(rqst_last_name))
 
     return response_raw_data, rqst_errors
@@ -194,10 +190,8 @@ def retrieve_id_staff(response_raw_data, rqst_errors, rqst_staff_id, list_of_ids
                             response_raw_data['Status']['Error Code'] = 2
                         rqst_errors.append('Staff Member with id: {!s} not found in database'.format(str(staff_id)))
             else:
-                response_raw_data['Status']['Error Code'] = 1
                 rqst_errors.append('No staff members found for database ID(s): ' + rqst_staff_id)
         else:
-            response_raw_data['Status']['Error Code'] = 1
             rqst_errors.append('No valid staff IDs provided in request (must be integers)')
 
     return response_raw_data, rqst_errors
@@ -219,7 +213,6 @@ def retrieve_f_l_name_consumers(response_raw_data, rqst_errors, consumers, rqst_
             consumer_list.append(consumer_entry)
         response_raw_data["Data"] = consumer_list
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('Consumer with name: {!s} {!s} not found in database'.format(rqst_first_name,
                                                                                             rqst_last_name))
 
@@ -247,7 +240,6 @@ def retrieve_email_consumers(response_raw_data, rqst_errors, consumers, rqst_ema
                     response_raw_data['Status']['Error Code'] = 2
                 rqst_errors.append('Consumer with email: {!s} not found in database'.format(email))
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('Consumer with emails(s): {!s} not found in database'.format(rqst_email))
 
     return response_raw_data, rqst_errors
@@ -274,7 +266,6 @@ def retrieve_first_name_consumers(response_raw_data, rqst_errors, consumers, rqs
                     response_raw_data['Status']['Error Code'] = 2
                 rqst_errors.append('Consumer with first name: {!s} not found in database'.format(name))
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('Consumer with first name(s): {!s} not found in database'.format(rqst_first_name))
 
     return response_raw_data, rqst_errors
@@ -301,7 +292,6 @@ def retrieve_last_name_consumers(response_raw_data, rqst_errors, consumers, rqst
                     response_raw_data['Status']['Error Code'] = 2
                 rqst_errors.append('Staff Member with last name: {!s} not found in database'.format(name))
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('Staff Member with last name(s): {!s} not found in database'.format(rqst_last_name))
 
     return response_raw_data, rqst_errors
@@ -339,10 +329,8 @@ def retrieve_id_consumers(response_raw_data, rqst_errors, consumers, rqst_consum
                             response_raw_data['Status']['Error Code'] = 2
                         rqst_errors.append('Consumer with id: {!s} not found in database'.format(str(consumer_id)))
             else:
-                response_raw_data['Status']['Error Code'] = 1
                 rqst_errors.append('No consumers found for database ID(s): ' + rqst_consumer_id)
         else:
-            response_raw_data['Status']['Error Code'] = 1
             rqst_errors.append('No valid consumer IDs provided in request (must be integers)')
 
     return response_raw_data, rqst_errors
@@ -422,7 +410,6 @@ def retrieve_id_metrics(response_raw_data, rqst_errors, metrics_submissions, rqs
                         response_raw_data['Status']['Error Code'] = 2
                     rqst_errors.append('Metrics for staff Member with id: {!s} not found in database'.format(str(staff_id)))
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('No metrics entries for staff ID(s): {!s} not found in database'.format(rqst_staff_id))
 
     return metrics_dict
@@ -449,7 +436,6 @@ def retrieve_f_l_name_metrics(response_raw_data, rqst_errors, metrics_submission
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for first names(s): {!s}; and last names(s): {!s} not found in database'.format(rqst_fname, rqst_lname))
-            response_raw_data['Status']['Error Code'] = 1
 
         if len(metrics_submissions) > 0:
             for metrics_submission in metrics_submissions:
@@ -463,7 +449,6 @@ def retrieve_f_l_name_metrics(response_raw_data, rqst_errors, metrics_submission
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for first names(s): {!s}; and last names(s): {!s} not found in database'.format(rqst_fname, rqst_lname))
     else:
-        response_raw_data['Status']['Error Code'] = 1
         rqst_errors.append('Length of first name list must be equal to length of last name list')
 
     return metrics_dict
@@ -497,11 +482,9 @@ def retrieve_first_name_metrics(response_raw_data, rqst_errors, metrics_submissi
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_fname))
-            response_raw_data['Status']['Error Code'] = 1
     else:
         if response_raw_data['Status']['Error Code'] != 2:
             rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_fname))
-        response_raw_data['Status']['Error Code'] = 1
 
     return metrics_dict
 
@@ -534,11 +517,9 @@ def retrieve_last_name_metrics(response_raw_data, rqst_errors, metrics_submissio
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_lname))
-            response_raw_data['Status']['Error Code'] = 1
     else:
         if response_raw_data['Status']['Error Code'] != 2:
             rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_lname))
-        response_raw_data['Status']['Error Code'] = 1
 
     return metrics_dict
 
@@ -571,10 +552,8 @@ def retrieve_email_metrics(response_raw_data, rqst_errors, metrics_submissions, 
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_staff_email))
-            response_raw_data['Status']['Error Code'] = 1
     else:
         if response_raw_data['Status']['Error Code'] != 2:
             rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_staff_email))
-        response_raw_data['Status']['Error Code'] = 1
 
     return metrics_dict

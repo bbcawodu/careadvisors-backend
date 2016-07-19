@@ -2,7 +2,8 @@ from django.http import HttpResponse
 from django.db import models, IntegrityError
 from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer
 import datetime, json, sys
-from picbackend.utils.base import clean_json_string_input, clean_json_int_input, clean_dict_input, clean_list_input
+from picbackend.utils.base import clean_json_string_input, clean_json_int_input, clean_dict_input, clean_list_input,\
+    parse_and_log_errors
 
 
 def add_staff(response_raw_data, post_json, post_errors):
@@ -21,22 +22,10 @@ def add_staff(response_raw_data, post_json, post_errors):
                                                                               defaults=usr_rqst_values)
         if not user_instance_created:
             post_errors.append('Staff database entry already exists for the email: {!s}'.format(rqst_usr_email))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
         else:
             response_raw_data['Data'] = {"Database ID": user_instance.id}
-    else:
-        response_raw_data["Status"]["Error Code"] = 1
-        response_raw_data["Status"]["Errors"] = post_errors
 
-        for message in post_errors:
-            print(message)
-            sys.stdout.flush()
-
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 
@@ -60,37 +49,12 @@ def modify_staff(response_raw_data, post_json, post_errors):
             response_raw_data['Data'] = {"Database ID": staff_instance.id}
         except PICStaff.DoesNotExist:
             post_errors.append('Staff database entry does not exist for the id: {!s}'.format(str(rqst_usr_id)))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
         except PICStaff.MultipleObjectsReturned:
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
         except IntegrityError:
             post_errors.append('Database entry already exists for the email: {!s}'.format(rqst_usr_email))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
 
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
-
-    else:
-        response_raw_data["Status"]["Error Code"] = 1
-        response_raw_data["Status"]["Errors"] = post_errors
-
-        for message in post_errors:
-            print(message)
-            sys.stdout.flush()
-
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 
@@ -104,29 +68,10 @@ def delete_staff(response_raw_data, post_json, post_errors):
             response_raw_data['Data'] = {"Database ID": "Deleted"}
         except PICStaff.DoesNotExist:
             post_errors.append('Staff database entry does not exist for the id: {!s}'.format(str(rqst_usr_id)))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
         except PICStaff.MultipleObjectsReturned:
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
 
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
-
-    else:
-        response_raw_data["Status"]["Error Code"] = 1
-        response_raw_data["Status"]["Errors"] = post_errors
-
-        for message in post_errors:
-            print(message)
-            sys.stdout.flush()
-
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 
@@ -159,12 +104,6 @@ def add_consumer(response_raw_data, post_json, post_errors):
                                                                                          defaults=consumer_rqst_values)
         if not consumer_instance_created:
             post_errors.append('Consumer database entry already exists for the email: {!s}'.format(rqst_consumer_email))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
         else:
             try:
                 nav_instance = PICStaff.objects.get(id=rqst_nav_id)
@@ -173,20 +112,8 @@ def add_consumer(response_raw_data, post_json, post_errors):
                 response_raw_data['Data'] = {"Database ID": consumer_instance.id}
             except PICStaff.DoesNotExist:
                 post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
-                response_raw_data["Status"]["Error Code"] = 1
-                response_raw_data["Status"]["Errors"] = post_errors
 
-                for message in post_errors:
-                    print(message)
-                sys.stdout.flush()
-    else:
-        response_raw_data["Status"]["Error Code"] = 1
-        response_raw_data["Status"]["Errors"] = post_errors
-
-        for message in post_errors:
-            print(message)
-            sys.stdout.flush()
-
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 
@@ -227,45 +154,14 @@ def modify_consumer(response_raw_data, post_json, post_errors):
             response_raw_data['Data'] = {"Database ID": consumer_instance.id}
         except PICConsumer.DoesNotExist:
             post_errors.append('Consumer database entry does not exist for the id: {!s}'.format(str(rqst_consumer_id)))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
         except PICConsumer.MultipleObjectsReturned:
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_consumer_id)))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
         except IntegrityError:
             post_errors.append('Database entry already exists for the id: {!s}'.format(str(rqst_consumer_id)))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
         except PICStaff.DoesNotExist:
             post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
 
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
-
-    else:
-        response_raw_data["Status"]["Error Code"] = 1
-        response_raw_data["Status"]["Errors"] = post_errors
-
-        for message in post_errors:
-            print(message)
-            sys.stdout.flush()
-
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 
@@ -279,29 +175,10 @@ def delete_consumer(response_raw_data, post_json, post_errors):
             response_raw_data['Data'] = {"Database ID": "Deleted"}
         except PICConsumer.DoesNotExist:
             post_errors.append('Consumer database entry does not exist for the id: {!s}'.format(str(rqst_consumer_id)))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
-
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
         except PICConsumer.MultipleObjectsReturned:
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_consumer_id)))
-            response_raw_data["Status"]["Error Code"] = 1
-            response_raw_data["Status"]["Errors"] = post_errors
 
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
-
-    else:
-        response_raw_data["Status"]["Error Code"] = 1
-        response_raw_data["Status"]["Errors"] = post_errors
-
-        for message in post_errors:
-            print(message)
-            sys.stdout.flush()
-
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 
@@ -370,14 +247,12 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
                 metrics_instance = MetricsSubmission(staff_member=user_instance, submission_date=metrics_date)
                 response_raw_data["Status"]["Message"] = ['Metrics Entry Created']
             except MetricsSubmission.MultipleObjectsReturned:
-                response_raw_data["Status"]["Error Code"] = 1
                 post_errors.append("Multiple metrics entries exist for this date")
-                response_raw_data["Status"]["Errors"] = post_errors
-                for message in post_errors:
-                    print(message)
-                sys.stdout.flush()
+
+                response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
                 response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
                 return response
+
             metrics_instance.received_education = rqst_cons_rec_edu
             metrics_instance.applied_medicaid = rqst_cons_app_maid
             metrics_instance.selected_qhp = rqst_cons_sel_qhp
@@ -430,29 +305,8 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
                 #     else:
                 #         post_errors.append("Plan: {!s} is not part of member plans".format(plan))
 
-                if len(post_errors) > 0:
-                    response_raw_data["Status"]["Error Code"] = 1
-                    response_raw_data["Status"]["Errors"] = post_errors
-
-                    for message in post_errors:
-                        print(message)
-                        sys.stdout.flush()
-
         except models.ObjectDoesNotExist:
-            response_raw_data["Status"]["Error Code"] = 1
             post_errors.append("Staff database entry does not exist for email: {!s}".format(rqst_usr_email))
-            response_raw_data["Status"]["Errors"] = post_errors
-            for message in post_errors:
-                print(message)
-            sys.stdout.flush()
 
-    # add parsing errors to response dictionary
-    else:
-        response_raw_data["Status"]["Error Code"] = 1
-        response_raw_data["Status"]["Errors"] = post_errors
-
-        for message in post_errors:
-            print(message)
-            sys.stdout.flush()
-
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data

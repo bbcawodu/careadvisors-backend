@@ -1,3 +1,6 @@
+import sys
+
+
 def clean_json_string_input(json_dict, dict_name, dict_key, post_errors, empty_string_allowed=False,
                             none_allowed=False):
     if dict_key not in json_dict:
@@ -51,3 +54,16 @@ def clean_list_input(json_dict, dict_name, dict_key, post_errors):
 
 def init_response_data():
     return {'Status': {"Error Code": 0, "Version": 1.0}}, []
+
+
+def parse_and_log_errors(response_raw_data, errors_list):
+    if len(errors_list) > 0:
+        if response_raw_data["Status"]["Error Code"] == 0:
+            response_raw_data["Status"]["Error Code"] = 1
+        response_raw_data["Status"]["Errors"] = errors_list
+
+        for message in errors_list:
+            print(message)
+            sys.stdout.flush()
+
+    return response_raw_data
