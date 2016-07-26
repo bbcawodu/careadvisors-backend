@@ -13,7 +13,7 @@ This app runs on a django installation hosted on Heroku. To install Heroku for c
 ## Presence Healthcare Appointment Scheduler Backend
 
 ### Presence Healthcare Appointment Addition API
-To add an appointment to the database using our appointments API, make a POST request to: http://obscure-harbor-6074.herokuapp.com/submitappointment/. The POST data should be a JSON document which has the following format:
+To add an appointment to the database using our appointments API, make a POST request to: http://picbackend.herokuapp.com/submitappointment/. The POST data should be a JSON document which has the following format:
 
 ```
 {
@@ -83,14 +83,14 @@ In response, a JSON document will be displayed with the following format:
 
 
 ### Presence Healthcare Appointments Viewer
-Go to http://obscure-harbor-6074.herokuapp.com/viewappointments to view what appointments have been submitted by consumers and to whom they have been assigned.
+Go to http://picbackend.herokuapp.com/viewappointments to view what appointments have been submitted by consumers and to whom they have been assigned.
 
 
 
 ## Staff Account Backend API
 
 ### Staff Data Submission API
-To modify or add members of the PICStaff class in the database, submit a POST request to: http://obscure-harbor-6074.herokuapp.com/editstaff/. The POST data a JSON document using the following template:
+To modify or add members of the PICStaff class in the database, submit a POST request to: http://picbackend.herokuapp.com/editstaff/. The POST data a JSON document using the following template:
 
 ```
 {
@@ -139,7 +139,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Staff Data Retrieval API
-- To retrieve staff data stored in the backend, submit a GET request to http://obscure-harbor-6074.herokuapp.com/v1/staff? with the following optional parameters: "fname", "lname", "email", "id"
+- To retrieve staff data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/staff? with the following optional parameters: "fname", "lname", "email", "id"
     - "fname" corresponds to first name.
     - "lname" corresponds to last name.
     - "email" corresponds to email.
@@ -200,7 +200,7 @@ In response, a JSON document will be displayed with the following format:
 ## Consumer Account Backend API
 
 ### Consumer Data Submission API
-To modify or add members of the PICConsumer class in the database, submit a POST request to: http://obscure-harbor-6074.herokuapp.com/editconsumer/. The POST data a JSON document using the following template:
+To modify or add members of the PICConsumer class in the database, submit a POST request to: http://picbackend.herokuapp.com/editconsumer/. The POST data a JSON document using the following template:
 
 ```
 {
@@ -256,7 +256,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Consumer Data Retrieval API
-- To retrieve consumer data stored in the backend, submit a GET request to http://obscure-harbor-6074.herokuapp.com/v1/consumers? with the following parameters(at least one required)
+- To retrieve consumer data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/consumers? with the following parameters(at least one required)
     - A maximum of 20 consumer records with full fields will be returned due to size constraints
         - The rest are consumer database IDs
         - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter
@@ -323,7 +323,7 @@ In response, a JSON document will be displayed with the following format:
 ## Consumer Metrics Backend API
 
 ### Consumer Metrics Submission API
-To submit an entry of consumer metrics data corresponding to a specific staff member, make a POST request to: http://obscure-harbor-6074.herokuapp.com/submitmetrics/. The POST data should be a JSON document which has the following format:
+To submit an entry of consumer metrics data corresponding to a specific staff member, make a POST request to: http://picbackend.herokuapp.com/submitmetrics/. The POST data should be a JSON document which has the following format:
 
 ```
 {
@@ -380,7 +380,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Consumer Metrics Retrieval API.
-- To retrieve metrics data stored in the backend, submit a GET request to http://obscure-harbor-6074.herokuapp.com/v1/metrics? with the following optional parameters: "fname", "lname", "email", "id", "county", "time", "groupby"
+- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/metrics? with the following optional parameters: "fname", "lname", "email", "id", "county", "time", "groupby"
     - "fname" corresponds to staff member first name.
     - "lname" corresponds to staff member last name.
     - "email" corresponds to staff member email.
@@ -458,7 +458,7 @@ In response, a JSON document will be displayed with the following format:
 
 
 ### Pokitdok Eligibility Retrieval API.
-- To retrieve parsed eligibility data from pokitdok for a consumer, submit a POST request to http://obscure-harbor-6074.herokuapp.com/v1/eligibility The POST data a JSON document using the following template:
+- To retrieve parsed eligibility data from pokitdok for a consumer, submit a POST request to http://picbackend.herokuapp.com/v1/eligibility The POST data a JSON document using the following template:
 
 ```
 {
