@@ -7,7 +7,7 @@ from django.shortcuts import render
 from picmodels.models import PICStaff, MetricsSubmission, PICConsumer
 import json, sys, pokitdok
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors
+from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors, fetch_and_parse_pokit_elig_data
 from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff, add_consumer, modify_consumer, delete_consumer,\
     add_or_update_metrics_entity
 from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_staff, retrieve_first_name_staff,\
@@ -200,36 +200,13 @@ def handle_consumer_api_request(request):
 @csrf_exempt
 def handle_eligibility_request(request):
     # initialize dictionary for response data, including parsing errors
-    response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
-    post_errors = []
+    response_raw_data, post_errors = init_response_data()
 
     if request.method == 'POST' or request.is_ajax():
         post_data = request.body.decode('utf-8')
         post_json = json.loads(post_data)
 
-        rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
-        rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
-        rqst_consumer_birth = clean_json_string_input(post_json, "root", "Birth Date", post_errors)
-        rqst_consumer_trading_partner = clean_json_string_input(post_json, "root", "Trading Partner ID", post_errors)
-        rqst_consumer_plan_id = clean_json_string_input(post_json, "root", "Consumer Plan ID", post_errors,
-                                                        none_allowed=True)
-
-        # if no errors, make request to pokitdok
-        if len(post_errors) == 0:
-            pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
-            eligibility_data = {
-                "member": {
-                    "birth_date": rqst_consumer_birth,
-                    "first_name": rqst_consumer_f_name,
-                    "last_name": rqst_consumer_l_name,
-                },
-                "trading_partner_id": rqst_consumer_trading_partner
-            }
-            if rqst_consumer_plan_id != "None":
-                eligibility_data["member"]["id"] = rqst_consumer_plan_id
-            eligibility_results = pd.eligibility(eligibility_data)
-            response_raw_data["Data"] = eligibility_results
-            response_raw_data["Pokitdok Request"] = eligibility_data
+        response_raw_data = fetch_and_parse_pokit_elig_data(post_json, response_raw_data, post_errors)
 
     # if a GET request is made, add error message to response data
     else:
@@ -242,8 +219,7 @@ def handle_eligibility_request(request):
 
 def handle_trading_partner_request(request):
     # initialize dictionary for response data, including parsing errors
-    response_raw_data = {'Status': {"Error Code": 0, "Version": 1.0}}
-    post_errors = []
+    response_raw_data, post_errors = init_response_data()
 
     # make request to pokitdok
     pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
