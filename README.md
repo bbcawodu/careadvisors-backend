@@ -504,7 +504,11 @@ In response, a JSON document will be displayed with the following format:
                                         "last_name": String,
                                         "gender": String,
                                         "middle_name": String
-                                     }, 
+                                     },
+                    "Payer Info": {
+                                        "id": Plan code (String),
+                                        "name": Plan name (String),
+                                     },
                     "Insurance Type": eg. commercial, etc (String),
                     "Copay": [
                                 {

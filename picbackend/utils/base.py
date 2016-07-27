@@ -99,6 +99,7 @@ def fetch_and_parse_pokit_elig_data(post_json, response_raw_data, post_errors):
         if "No Data in response from Pokitdok" not in post_errors and "Errors in Pokitdok Data" not in post_errors:
             parse_elig_consumer_info(eligibility_results, parsed_elig_dict, post_errors)
             parse_elig_service_types(eligibility_results, parsed_elig_dict, post_errors)
+            parse_elig_payer(eligibility_results, parsed_elig_dict, post_errors)
 
             coverage_dict = parse_elig_coverage_dict(eligibility_results, post_errors)
             if coverage_dict:
@@ -149,6 +150,14 @@ def check_elig_results_for_errors(eligibility_results, post_errors):
         post_errors.append("No Data in response from Pokitdok")
 
     return eligibility_results
+
+
+def parse_elig_payer(eligibility_results, parsed_elig_dict, post_errors):
+    if "payer" in eligibility_results:
+        parsed_elig_dict["Payer Info"] = eligibility_results["payer"]
+    else:
+        post_errors.append("Payer Info not found.")
+        parsed_elig_dict["Payer Info"] = None
 
 
 def parse_elig_consumer_info(eligibility_results, parsed_elig_dict, post_errors):
