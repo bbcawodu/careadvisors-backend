@@ -219,11 +219,16 @@ def handle_eligibility_request(request):
 
 def handle_trading_partner_request(request):
     # initialize dictionary for response data, including parsing errors
-    response_raw_data, post_errors = init_response_data()
+    response_raw_data, rqst_errors = init_response_data()
+    search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+    pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
 
     # make request to pokitdok
-    pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
-    trading_partners = pd.trading_partners()
+    if "partnerid" in search_params:
+        trading_partners = pd.trading_partners(search_params["partnerid"])
+    else:
+        trading_partners = pd.trading_partners()
+
     response_raw_data["Data"] = trading_partners["data"]
 
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")

@@ -20,6 +20,10 @@ def build_search_params(rqst_params, response_raw_data, rqst_errors):
             for indx, element in enumerate(list_of_ids):
                 list_of_ids[indx] = int(element)
             search_params['id list'] = list_of_ids
+    if 'partnerid' in rqst_params:
+        search_params['partnerid'] = rqst_params['partnerid']
+        list_of_ids = re.findall("[@\w. '-_]+", search_params['partnerid'])
+        search_params['partnerid list'] = list_of_ids
     if 'navid' in rqst_params:
         search_params['navigator id'] = rqst_params['navid']
 

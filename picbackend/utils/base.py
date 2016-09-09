@@ -10,8 +10,10 @@ def clean_json_string_input(json_dict, dict_name, dict_key, post_errors, empty_s
     elif json_dict[dict_key] is None and none_allowed is False:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
     else:
-        return str(json_dict[dict_key])
-    return None
+        if json_dict[dict_key]:
+            return str(json_dict[dict_key])
+        else:
+            return None
 
 
 def clean_json_int_input(json_dict, dict_name, dict_key, post_errors):
@@ -20,8 +22,10 @@ def clean_json_int_input(json_dict, dict_name, dict_key, post_errors):
     elif json_dict[dict_key] is None:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
     else:
-        return int(json_dict[dict_key])
-    return None
+        if json_dict[dict_key]:
+            return int(json_dict[dict_key])
+        else:
+            return None
 
 
 def clean_dict_input(json_dict, dict_name, dict_key, post_errors):
@@ -70,26 +74,31 @@ def parse_and_log_errors(response_raw_data, errors_list):
 
 
 def fetch_and_parse_pokit_elig_data(post_json, response_raw_data, post_errors):
-    rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
-    rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+    rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors, none_allowed=True)
+    rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors, none_allowed=True)
     rqst_consumer_birth = clean_json_string_input(post_json, "root", "Birth Date", post_errors, none_allowed=True)
-    rqst_consumer_trading_partner = clean_json_string_input(post_json, "root", "Trading Partner ID", post_errors)
     rqst_consumer_plan_id = clean_json_string_input(post_json, "root", "Consumer Plan ID", post_errors,
                                                     none_allowed=True)
+    rqst_consumer_gender = clean_json_string_input(post_json, "root", "Gender", post_errors,
+                                                    none_allowed=True)
+    rqst_consumer_trading_partner = clean_json_string_input(post_json, "root", "Trading Partner ID", post_errors)
 
     # if no errors, make request to pokitdok
     if len(post_errors) == 0:
         eligibility_data = {
-            "member": {
-                "first_name": rqst_consumer_f_name,
-                "last_name": rqst_consumer_l_name,
-            },
+            "member": {},
             "trading_partner_id": rqst_consumer_trading_partner
         }
-        if rqst_consumer_plan_id != "None":
-            eligibility_data["member"]["id"] = rqst_consumer_plan_id
-        if rqst_consumer_birth != "None":
+        if rqst_consumer_f_name:
+            eligibility_data["member"]["first_name"] = rqst_consumer_f_name
+        if rqst_consumer_l_name:
+            eligibility_data["member"]["last_name"] = rqst_consumer_l_name
+        if rqst_consumer_birth:
             eligibility_data["member"]["birth_date"] = rqst_consumer_birth
+        if rqst_consumer_plan_id:
+            eligibility_data["member"]["id"] = rqst_consumer_plan_id
+        if rqst_consumer_gender:
+            eligibility_data["member"]["gender"] = rqst_consumer_gender
 
         pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
         eligibility_results = pd.eligibility(eligibility_data)
@@ -97,26 +106,33 @@ def fetch_and_parse_pokit_elig_data(post_json, response_raw_data, post_errors):
 
         parsed_elig_dict = {}
         if "No Data in response from Pokitdok" not in post_errors and "Errors in Pokitdok Data" not in post_errors:
-            parse_elig_consumer_info(eligibility_results, parsed_elig_dict, post_errors)
-            parse_elig_service_types(eligibility_results, parsed_elig_dict, post_errors)
-            parse_elig_payer(eligibility_results, parsed_elig_dict, post_errors)
-
-            coverage_dict = parse_elig_coverage_dict(eligibility_results, post_errors)
-            if coverage_dict:
-                parse_elig_deductibles_info(coverage_dict, parsed_elig_dict, post_errors)
-                parse_elig_group_no(coverage_dict, parsed_elig_dict, post_errors)
-                parse_elig_coinsurance(coverage_dict, parsed_elig_dict, post_errors)
-                parse_elig_plan_start(coverage_dict, parsed_elig_dict, post_errors)
-                parse_elig_out_of_pocket_info(coverage_dict, parsed_elig_dict, post_errors)
-                parse_elig_copay(coverage_dict, parsed_elig_dict, post_errors)
-                parse_elig_is_plan_active(coverage_dict, parsed_elig_dict, post_errors)
-                parse_elig_insurace_type(coverage_dict, parsed_elig_dict, post_errors)
-                parse_elig_plan_description(coverage_dict, parsed_elig_dict, post_errors)
+            if rqst_consumer_trading_partner == "united_health_care":
+                parse_united_health_care_data(eligibility_results, parsed_elig_dict, post_errors)
+            else:
+                parse_united_health_care_data(eligibility_results, parsed_elig_dict, post_errors)
 
         response_raw_data["Data"] = parsed_elig_dict
         # response_raw_data["Pokitdok Request"] = eligibility_data
 
     return response_raw_data
+
+
+def parse_united_health_care_data(eligibility_results, parsed_elig_dict, post_errors):
+    parse_elig_consumer_info(eligibility_results, parsed_elig_dict, post_errors)
+    parse_elig_service_types(eligibility_results, parsed_elig_dict, post_errors)
+    parse_elig_payer(eligibility_results, parsed_elig_dict, post_errors)
+
+    coverage_dict = parse_elig_coverage_dict(eligibility_results, post_errors)
+    if coverage_dict:
+        parse_elig_deductibles_info(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_group_no(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_coinsurance(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_plan_start(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_out_of_pocket_info(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_copay(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_is_plan_active(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_insurace_type(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_plan_description(coverage_dict, parsed_elig_dict, post_errors)
 
 
 def parse_errors_key_in_elig_data(errors_obj, results):
