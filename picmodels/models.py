@@ -173,6 +173,55 @@ class Appointment(models.Model):
         app_label = 'picmodels'
 
 
+class MetricsSubmission(models.Model):
+    # fields for PICStaff model
+    staff_member = models.ForeignKey(PICStaff, on_delete=models.CASCADE)
+    received_education = models.IntegerField()
+    applied_medicaid = models.IntegerField()
+    selected_qhp = models.IntegerField()
+    ref_medicaid_or_chip = models.IntegerField()
+    filed_exemptions = models.IntegerField()
+    rec_postenroll_support = models.IntegerField()
+    trends = models.CharField(max_length=5000, blank=True, null=True, default="")
+    success_story = models.CharField(max_length=5000)
+    hardship_or_difficulty = models.CharField(max_length=5000)
+    outreach_activity = models.CharField(max_length=5000, blank=True, null=True, default="")
+    submission_date = models.DateField(blank=True, null=True)
+    county = models.CharField(max_length=1000, default="")
+    zipcode = models.CharField(max_length=1000, default="")
+    date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
+
+    def return_values_dict(self):
+        valuesdict = {"Received Education": self.received_education,
+                      "Applied Medicaid": self.applied_medicaid,
+                      "Selected QHP": self.selected_qhp,
+                      "Referred Medicaid or CHIP": self.ref_medicaid_or_chip,
+                      "Filed Exemptions": self.filed_exemptions,
+                      "Received Post-Enrollment Support": self.rec_postenroll_support,
+                      "Trends": self.trends,
+                      "Success Story": self.success_story,
+                      "Hardship or Difficulty": self.hardship_or_difficulty,
+                      "Outreach Activities": self.outreach_activity,
+                      "Staff Member ID": self.staff_member_id,
+                      "Date Created": self.date_created.isoformat(),
+                      "Submission Date": self.submission_date.isoformat(),
+                      "County": self.county,
+                      "Zipcode": self.zipcode,
+                      "Plan Stats": None,
+                      }
+        plan_stats = PlanStat.objects.filter(metrics_submission=self.id)
+        plan_stats_list = []
+        for plan_stat in plan_stats:
+            plan_stats_list.append(plan_stat.return_values_dict())
+        valuesdict["Plan Stats"] = plan_stats_list
+
+        return valuesdict
+
+    class Meta:
+        # maps model to the picmodels module
+        app_label = 'picmodels'
+
+
 class PlanStat(models.Model):
     ALL_SAVERS = "All Savers Insurance Company"
     CARESOURCE_INDIANA = "CareSource Indiana, Inc."
@@ -226,6 +275,7 @@ class PlanStat(models.Model):
                      (CATASTROPHIC, "Catastrophic"),
                      (N_A, "Not Available"))
 
+    metrics_submission = models.ForeignKey(MetricsSubmission, on_delete=models.CASCADE, blank=True, null=True)
     plan_name = models.CharField(max_length=1000,
                                  choices=PLAN_CHOICES,
                                  default=MISCELLANEOUS)
@@ -251,56 +301,11 @@ class PlanStat(models.Model):
                 return True
         return False
 
-    class Meta:
-        # maps model to the picmodels module
-        app_label = 'picmodels'
-
-
-class MetricsSubmission(models.Model):
-    # fields for PICStaff model
-    staff_member = models.ForeignKey(PICStaff, on_delete=models.CASCADE)
-    plan_stats = models.ManyToManyField(PlanStat)
-    received_education = models.IntegerField()
-    applied_medicaid = models.IntegerField()
-    selected_qhp = models.IntegerField()
-    ref_medicaid_or_chip = models.IntegerField()
-    filed_exemptions = models.IntegerField()
-    rec_postenroll_support = models.IntegerField()
-    trends = models.CharField(max_length=5000, blank=True, null=True, default="")
-    success_story = models.CharField(max_length=5000)
-    hardship_or_difficulty = models.CharField(max_length=5000)
-    outreach_activity = models.CharField(max_length=5000, blank=True, null=True, default="")
-    submission_date = models.DateField(blank=True, null=True)
-    county = models.CharField(max_length=1000, default="")
-    zipcode = models.CharField(max_length=1000, default="")
-    date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
-
     def return_values_dict(self):
-        valuesdict = {"Received Education": self.received_education,
-                      "Applied Medicaid": self.applied_medicaid,
-                      "Selected QHP": self.selected_qhp,
-                      "Referred Medicaid or CHIP": self.ref_medicaid_or_chip,
-                      "Filed Exemptions": self.filed_exemptions,
-                      "Received Post-Enrollment Support": self.rec_postenroll_support,
-                      "Trends": self.trends,
-                      "Success Story": self.success_story,
-                      "Hardship or Difficulty": self.hardship_or_difficulty,
-                      "Outreach Activities": self.outreach_activity,
-                      "Staff Member ID": self.staff_member_id,
-                      "Date Created": self.date_created.isoformat(),
-                      "Submission Date": self.submission_date.isoformat(),
-                      "County": self.county,
-                      "Zipcode": self.zipcode,
-                      "Plan Stats": [],
-                      }
-        plan_stats = self.plan_stats.all()
-        if len(plan_stats) > 0:
-            for plan_stat_object in plan_stats:
-                plan_stat_dict = {"Issuer Name": plan_stat_object.plan_name,
-                                  "Enrollments": plan_stat_object.enrollments,
-                                  "Metal Level": plan_stat_object.metal_level,
-                                  "Premium Type": plan_stat_object.premium_type}
-                valuesdict["Plan Stats"].append(plan_stat_dict)
+        valuesdict = {"Enrollments": self.enrollments,
+                      "Metal Level": self.metal_level,
+                      "Premium Type": self.premium_type,
+                      "Issuer Name": self.plan_name}
 
         return valuesdict
 

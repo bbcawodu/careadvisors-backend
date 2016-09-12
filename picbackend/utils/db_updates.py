@@ -269,7 +269,7 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
             metrics_instance.save()
 
             rqst_plan_stats = clean_list_input(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors)
-            metrics_instance_plan_stats = metrics_instance.plan_stats.all()
+            metrics_instance_plan_stats = PlanStat.objects.filter(metrics_submission=metrics_instance.id)
             for instance_plan_stat in metrics_instance_plan_stats:
                 instance_plan_stat.delete()
             if rqst_plan_stats is not None:
@@ -289,10 +289,10 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
                         post_errors.append("Premium Type: {!s} is not a valid premium type".format(planstatobject.premium_type))
                     if not metal_level_valid:
                         post_errors.append("Metal: {!s} is not a valid metal level".format(planstatobject.metal_level))
+
                     if plan_name_valid and premium_type_valid and metal_level_valid:
+                        planstatobject.metrics_submission = metrics_instance
                         planstatobject.save()
-                        metrics_instance.plan_stats.add(planstatobject)
-                metrics_instance.save()
                 # for plan, enrollments in rqst_plan_stats.items():
                 #     planstatobject = PlanStat()
                 #     planstatobject.plan_name = plan

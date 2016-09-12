@@ -22,10 +22,7 @@ def clean_json_int_input(json_dict, dict_name, dict_key, post_errors):
     elif json_dict[dict_key] is None:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
     else:
-        if json_dict[dict_key]:
-            return int(json_dict[dict_key])
-        else:
-            return None
+        return int(json_dict[dict_key])
 
 
 def clean_dict_input(json_dict, dict_name, dict_key, post_errors):
