@@ -14,7 +14,7 @@ from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_
     retrieve_last_name_staff, retrieve_id_staff, build_search_params, retrieve_f_l_name_consumers,\
     retrieve_email_consumers, retrieve_first_name_consumers, retrieve_last_name_consumers, retrieve_id_consumers,\
     break_results_into_pages, group_metrics, retrieve_id_metrics, retrieve_f_l_name_metrics,\
-    retrieve_first_name_metrics, retrieve_last_name_metrics, retrieve_email_metrics
+    retrieve_first_name_metrics, retrieve_last_name_metrics, retrieve_email_metrics, retrieve_county_staff
 
 
 # defines view for home page
@@ -133,6 +133,11 @@ def handle_staff_api_request(request):
         list_of_last_names = search_params['last name list']
         response_raw_data, rqst_errors = retrieve_last_name_staff(response_raw_data, rqst_errors, rqst_last_name,
                                                                   list_of_last_names)
+    elif 'county' in search_params:
+        rqst_county = search_params['county']
+        list_of_counties = search_params['county list']
+        response_raw_data, rqst_errors = retrieve_county_staff(response_raw_data, rqst_errors, rqst_county,
+                                                               list_of_counties)
     elif 'id' in search_params:
         rqst_staff_id = search_params['id']
         if rqst_staff_id != 'all':

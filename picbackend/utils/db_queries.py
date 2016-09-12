@@ -163,6 +163,31 @@ def retrieve_last_name_staff(response_raw_data, rqst_errors, rqst_last_name, lis
     return response_raw_data, rqst_errors
 
 
+def retrieve_county_staff(response_raw_data, rqst_errors, rqst_county, list_of_counties):
+    staff_dict = {}
+    for county in list_of_counties:
+        staff_members = PICStaff.objects.filter(county__iexact=county)
+        for staff_member in staff_members:
+            if county not in staff_dict:
+                staff_dict[county] = [staff_member.return_values_dict()]
+            else:
+                staff_dict[county].append(staff_member.return_values_dict())
+    if len(staff_dict) > 0:
+        staff_list = []
+        for staff_key, staff_entry in staff_dict.items():
+            staff_list.append(staff_entry)
+        response_raw_data["Data"] = staff_list
+        for county in list_of_counties:
+            if county not in staff_dict:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    response_raw_data['Status']['Error Code'] = 2
+                rqst_errors.append('Staff Member(s) with county: {!s} not found in database'.format(county))
+    else:
+        rqst_errors.append('Staff Member(s) with county(s): {!s} not found in database'.format(rqst_county))
+
+    return response_raw_data, rqst_errors
+
+
 def retrieve_id_staff(response_raw_data, rqst_errors, rqst_staff_id, list_of_ids):
     if rqst_staff_id == "all":
         all_staff_members = PICStaff.objects.all()
