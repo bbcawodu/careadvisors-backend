@@ -143,6 +143,7 @@ In response, a JSON document will be displayed with the following format:
     - "fname" corresponds to first name.
     - "lname" corresponds to last name.
     - "email" corresponds to email.
+    - "county" corresponds to email.
     - "id" corresponds to database id.
         - passing "all" as the value will return all staff members
     - All parameters may have a single or multiple values separated by commas
@@ -380,13 +381,18 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Consumer Metrics Retrieval API.
-- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/metrics? with the following optional parameters: "fname", "lname", "email", "id", "county", "time", "groupby"
+- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/metrics? with the following optional parameters: "fname", "lname", "email", "id", "time", "groupby", "startdate", "enddate", "time", "zipcode"
     - "fname" corresponds to staff member first name.
     - "lname" corresponds to staff member last name.
     - "email" corresponds to staff member email.
     - "id" corresponds to staff member class database id.
         - passing "all" as the value will return all staff members
-    - "navid" corresponds to staff member class database id.
+    - One of the above parameters is allowed at a time (only "fname" and "lname" can be grouped)
+        - If "fname" and "lname" are given simultaneously as parameters, only one value each is permitted.
+    - The following parameters can be added without limit to the query: "startdate", "enddate", "time", "zipcode", "groupby"
+        - "startdate" and "enddate" must be given in "YYYY-MM-DD" format
+        - "time" must be an integer amount of days to look up in the past
+        - "grouby" can be "zipcode" to group the metrics submissions returned by zipcode
         
 - The response will be a JSON document with the following format:
     ```
