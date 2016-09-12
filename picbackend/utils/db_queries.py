@@ -13,6 +13,9 @@ def build_search_params(rqst_params, response_raw_data, rqst_errors):
     if 'email' in rqst_params:
         search_params['email'] = rqst_params['email']
         search_params['email list'] = re.findall(r"[@\w. '-]+", search_params['email'])
+    if 'region' in rqst_params:
+        search_params['region'] = rqst_params['region']
+        search_params['region list'] = re.findall(r"[@\w. '-]+", search_params['region'])
     if 'id' in rqst_params:
         search_params['id'] = rqst_params['id']
         if search_params['id'] != "all":
@@ -184,6 +187,42 @@ def retrieve_county_staff(response_raw_data, rqst_errors, rqst_county, list_of_c
                 rqst_errors.append('Staff Member(s) with county: {!s} not found in database'.format(county))
     else:
         rqst_errors.append('Staff Member(s) with county(s): {!s} not found in database'.format(rqst_county))
+
+    return response_raw_data, rqst_errors
+
+
+def retrieve_region_staff(response_raw_data, rqst_errors, rqst_region, list_of_regions):
+    staff_dict = {}
+
+    region_mappings = PICStaff.REGIONS
+    for region in list_of_regions:
+        region_counties = region_mappings[region]
+        for county in region_counties:
+            staff_members = PICStaff.objects.filter(county__iexact=county)
+            for staff_member in staff_members:
+                if region not in staff_dict:
+                    staff_dict[region] = [staff_member.return_values_dict()]
+                else:
+                    staff_dict[region].append(staff_member.return_values_dict())
+
+    # staff_members = PICStaff.objects.filter(region__in=list_of_regions)
+    # if len(staff_members) > 0:
+    #     staff_dict = {}
+    #     for staff_member in staff_members:
+    #         staff_dict[staff_member.region] = staff_member.return_values_dict()
+
+    if len(staff_dict) > 0:
+        staff_list = []
+        for staff_key, staff_entry in staff_dict.items():
+            staff_list.append(staff_entry)
+        response_raw_data["Data"] = staff_list
+        for region in list_of_regions:
+            if region not in staff_dict:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    response_raw_data['Status']['Error Code'] = 2
+                rqst_errors.append('Staff Member(s) with region: {!s} not found in database'.format(region))
+    else:
+        rqst_errors.append('Staff Member(s) with region(s): {!s} not found in database'.format(rqst_region))
 
     return response_raw_data, rqst_errors
 

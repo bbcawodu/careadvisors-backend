@@ -23,11 +23,48 @@ class PICUser(models.Model):
 
 class PICStaff(models.Model):
     # fields for PICStaff model
+    REGIONS = {"1": ["cook",
+                     "lake",
+                     "mchenry",
+                     "kane",
+                     "kendall",
+                     "dupage",
+                     "will"],
+               "2": ["stepheson",
+                     "winnebago",
+                     "ogle",
+                     "lee",
+                     "bureau",
+                     "lasalle",
+                     "peoria",
+                     "livingston",
+                     "iroquois",
+                     "champaign"],
+               "3": ["pike",
+                     "scott",
+                     "morgan",
+                     "calhoun",
+                     "greene",
+                     "macoupin",
+                     "jersey",
+                     "montgomery",
+                     "fayette",
+                     "bond",
+                     "marion",
+                     "marison",
+                     "clinton",
+                     "st. clair",
+                     "washington",
+                     "monroe",
+                     "randolph",
+                     "perry",
+                     "jackson"]}
     first_name = models.CharField(max_length=1000)
     last_name = models.CharField(default="", max_length=1000)
     email = models.EmailField(unique=True)
     type = models.CharField(max_length=1000)
     county = models.CharField(blank=True, null=True, max_length=1000, default="")
+    region = models.CharField(blank=True, null=True, max_length=1000, default="")
 
     def return_values_dict(self):
         consumers = PICConsumer.objects.filter(navigator=self.id)
@@ -40,8 +77,25 @@ class PICStaff(models.Model):
                       "Type": self.type,
                       "Database ID": self.id,
                       "County": self.county,
+                      "Region": None,
                       "Consumers": consumer_list}
+
+        if self.county:
+            for region in self.REGIONS:
+                if self.county.lower() in self.REGIONS[region]:
+                    valuesdict["Region"] = region
+                    break
+
         return valuesdict
+
+    def save(self, *args, **kwargs):
+        if self.county or self.county != "":
+            for region in self.REGIONS:
+                if self.county.lower() in self.REGIONS[region]:
+                    self.region = region
+                    break
+
+        super(PICStaff, self).save(*args, **kwargs)
 
     class Meta:
         # maps model to the picmodels module
