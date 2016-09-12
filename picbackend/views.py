@@ -4,7 +4,7 @@ Defines views that are mapped to url configurations
 
 from django.http import HttpResponse
 from django.shortcuts import render
-from picmodels.models import PICStaff, MetricsSubmission, PICConsumer
+from picmodels.models import PICStaff, MetricsSubmission, PICConsumer, PlanStat
 import json, sys, pokitdok
 from django.views.decorators.csrf import csrf_exempt
 from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors, fetch_and_parse_pokit_elig_data
@@ -229,6 +229,8 @@ def handle_eligibility_request(request):
 
 
 def handle_trading_partner_request(request):
+    plan_stat_objects = PlanStat.objects.all()
+    plan_stat_objects.delete()
     # initialize dictionary for response data, including parsing errors
     response_raw_data, rqst_errors = init_response_data()
     search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
