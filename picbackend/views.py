@@ -229,8 +229,6 @@ def handle_eligibility_request(request):
 
 
 def handle_trading_partner_request(request):
-    plan_stat_objects = PlanStat.objects.all()
-    plan_stat_objects.delete()
     # initialize dictionary for response data, including parsing errors
     response_raw_data, rqst_errors = init_response_data()
     search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
