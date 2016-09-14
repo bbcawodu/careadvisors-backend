@@ -159,6 +159,7 @@ In response, a JSON document will be displayed with the following format:
                 "Type": String,
                 "Database ID": Integer,
                 "County": String,
+                "Region": String,
                 "First Name": String,
                 "Last Name": String,
                 "Consumers":[
@@ -265,6 +266,7 @@ In response, a JSON document will be displayed with the following format:
     - "lname" corresponds to consumer last name.
         - "fname" and "lname" can be given simultaneously as parameters. If so, only one value each is permitted.
     - "email" corresponds to consumer email.
+    - "region" corresponds to consumer region.
     - "id" corresponds to consumer class database id.
         - passing "all" as the value will return all staff members
     - "navid" corresponds to staff member class database id. (Can be combined with any of the above parameters)
@@ -462,7 +464,76 @@ In response, a JSON document will be displayed with the following format:
     - Array corresponding to the "Data" key will be empty.
 
 
-
+### Pokitdok Trading Partner Retrieval API.
+- To retrieve parsed trading partner data from pokitdok, submit a GET request to http://picbackend.herokuapp.com/v1/eligibility with the following optional parameter: "partnerid"
+    - "partnerid" corresponds to the partner id provided by pokitdok for a given trading partner.
+        - If this parameter is provided, results will contain valid search parameters for eligibility checks.
+    
+    
+- The response for requests WITHOUT partnerid provided will be a JSON document with the following format:
+    ```
+    {
+        "Status": {
+                    "Version": Integer,
+                    "Error Code": Integer,
+                    "Errors": Array
+                  }
+        "Data": {
+                    {
+                    "enrollment_required": [],
+                    "restricted_transactions": [
+                    "837"
+                    ],
+                    "supported_transactions": [
+                    "837"
+                    ],
+                    "name": "8th District Electrical Benefit Fund",
+                    "is_enabled": true,
+                    "id": "8th_district_electrical"
+                    },
+                    {
+                    "enrollment_required": [],
+                    "restricted_transactions": [
+                    "837"
+                    ],
+                    "supported_transactions": [
+                    "837",
+                    "270"
+                    ],
+                    "name": "AARP Medicare Complete",
+                    "is_enabled": true,
+                    "id": "aarp_medicare_complete"
+                    },
+    }
+    ```
+    
+    
+- The response for requests WITH partnerid provided will be a JSON document with the following format:
+    ```
+    {
+        "Status": {
+                    "Version": Integer,
+                    "Error Code": Integer,
+                    "Errors": Array
+                  }
+        "Data": {
+                    {
+                    "enrollment_required": [],
+                    "restricted_transactions": [
+                    "837"
+                    ],
+                    "supported_transactions": [
+                    "837"
+                    ],
+                    "name": "8th District Electrical Benefit Fund",
+                    "is_enabled": true,
+                    "id": "8th_district_electrical"
+                    }
+    }
+    ```
+    
+    
+    
 ### Pokitdok Eligibility Retrieval API.
 - To retrieve parsed eligibility data from pokitdok for a consumer, submit a POST request to http://picbackend.herokuapp.com/v1/eligibility The POST data a JSON document using the following template:
 
@@ -471,18 +542,15 @@ In response, a JSON document will be displayed with the following format:
 "Birth Date":"YYYY-MM-DD" (Can be None),
 "First Name": String (Can be None),
 "Last Name": String (Can be None),
+"Gender": String (Can be None),
 "Trading Partner ID": Plan name code which can be retrieved from trading partner API (String),
 "Consumer Plan ID": String (Can be None)
 }
 ```
 
-- The consumer parameters ("Trading Partner ID" is mandatory) need to match one of these search patterns:
-    - ["First Name", "Last Name", "Birth Date"]
-    - ["First Name", "Last Name", "Consumer Plan ID"]
-    - ["First Name", "Last Name", "Consumer Plan ID", "Birth Date"]
-    - ["Consumer Plan ID", "Birth Date"]
-    - ["Last Name", "Consumer Plan ID", "Birth Date"]
-    
+- The consumer parameters ("Trading Partner ID" is mandatory) need to match patterns according to the trading partner you are requesting. Use /v1/tradingpartners?partnerid="Trading Partner ID" to retrieve valid paramater set:
+
+
     
 - The response will be a JSON document with the following format:
     ```

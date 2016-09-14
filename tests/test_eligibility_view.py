@@ -17,6 +17,7 @@ class EligibilityValidPostTestBase(object):
                          "First Name": None,
                          "Last Name": None,
                          "Trading Partner ID": None,
+                         "Gender": None,
                          "Consumer Plan ID": None}
 
     def test_for_ok_response_code(self):
@@ -444,6 +445,8 @@ class UnitedHealthcareTestsWithValidPost(TestCase, EligibilityValidPostTestBase)
         cls.post_data["Birth Date"] = "1989-05-01"
         cls.post_data["First Name"] = "Nicole"
         cls.post_data["Last Name"] = "Mahan"
+        cls.post_data["Consumer Plan ID"] = None
+        cls.post_data["Gender"] = None
         cls.post_data["Trading Partner ID"] = "united_health_care"
         json_post_data = json.dumps(cls.post_data)
 
@@ -463,10 +466,12 @@ class AmbetterTestsWithValidPost(TestCase, EligibilityValidPostTestBase):
     def setUpClass(cls):
         TestCase.setUpClass()
         EligibilityValidPostTestBase.setUpClass()
-        cls.post_data["Birth Date"] = "1951-10-16"
-        cls.post_data["First Name"] = "Ruibo"
-        cls.post_data["Last Name"] = "Liu"
-        cls.post_data["Trading Partner ID"] = "united_health_care"
+        cls.post_data["Birth Date"] = "1997-12-07"
+        cls.post_data["First Name"] = "Chunru"
+        cls.post_data["Last Name"] = "Zeng"
+        cls.post_data["Consumer Plan ID"] = "U9055841101"
+        cls.post_data["Gender"] = None
+        cls.post_data["Trading Partner ID"] = "ambetter"
         json_post_data = json.dumps(cls.post_data)
 
         c = Client()
