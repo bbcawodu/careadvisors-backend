@@ -1,9 +1,11 @@
 from picmodels.models import PICStaff
-import datetime, re, math
+import datetime, re, math, urllib
 
 
 def build_search_params(rqst_params, response_raw_data, rqst_errors):
     search_params = {}
+    if 'location' in rqst_params:
+        search_params['location'] = urllib.parse.unquote(rqst_params['location'])
     if 'fname' in rqst_params:
         search_params['first name'] = rqst_params['fname']
         search_params['first name list'] = re.findall(r"[\w. '-]+", search_params['first name'])
@@ -623,5 +625,23 @@ def retrieve_email_metrics(response_raw_data, rqst_errors, metrics_submissions, 
     else:
         if response_raw_data['Status']['Error Code'] != 2:
             rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_staff_email))
+
+    return metrics_dict
+
+
+def retrieve_location_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_location):
+    metrics_submissions = metrics_submissions.filter(location__name__iexact=rqst_location)
+
+    metrics_dict = {}
+    if len(metrics_submissions) > 0:
+        for metrics_submission in metrics_submissions:
+            if metrics_submission.staff_member.email not in metrics_dict:
+                metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [metrics_submission.return_values_dict()]}
+                metrics_dict[metrics_submission.staff_member.email]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+            else:
+                metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(metrics_submission.return_values_dict())
+    else:
+        if response_raw_data['Status']['Error Code'] != 2:
+            rqst_errors.append('No metrics entries for location(s): {!s} found in database'.format(rqst_location))
 
     return metrics_dict

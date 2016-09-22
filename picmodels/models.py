@@ -8,6 +8,47 @@ import datetime
 
 
 # Create your models here.
+class Country(models.Model):
+    """Model for countries"""
+    name = models.CharField(max_length=45, blank=False)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        app_label = 'picmodels'
+        verbose_name_plural = "Countries"
+        ordering = ["name"]
+
+
+class NavMetricsLocation(models.Model):
+    """Model to store addresses for accounts"""
+    name = models.CharField(max_length=200, unique=True)
+    address_line1 = models.CharField("Address line 1", max_length=45)
+    address_line2 = models.CharField("Address line 2", max_length=45, blank=True)
+    zipcode = models.CharField(max_length=10)
+    city = models.CharField(max_length=50, blank=False)
+    state_province = models.CharField("State/Province", max_length=40, blank=True)
+    country = models.ForeignKey(Country, blank=False)
+
+    class Meta:
+        app_label = 'picmodels'
+        verbose_name_plural = "Navigator Metrics Locations"
+        unique_together = ("name", "address_line1", "address_line2", "zipcode",
+                           "city", "state_province", "country")
+
+    def return_values_dict(self):
+        valuesdict = {"Name": self.name,
+                      "Address Line 1": self.address_line1,
+                      "Address Line 2": self.address_line2,
+                      "Zipcode": self.zipcode,
+                      "City": self.city,
+                      "State": self.state_province,
+                      "Country": self.country.name,
+                      }
+        return valuesdict
+
+
 class PICUser(models.Model):
     # one to one reference to django built in user model
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -176,6 +217,7 @@ class Appointment(models.Model):
 class MetricsSubmission(models.Model):
     # fields for PICStaff model
     staff_member = models.ForeignKey(PICStaff, on_delete=models.CASCADE)
+    location = models.ForeignKey(NavMetricsLocation, blank=True, null=True, on_delete=models.SET_NULL)
     received_education = models.IntegerField()
     applied_medicaid = models.IntegerField()
     selected_qhp = models.IntegerField()
@@ -207,13 +249,18 @@ class MetricsSubmission(models.Model):
                       "Submission Date": self.submission_date.isoformat(),
                       "County": self.county,
                       "Zipcode": self.zipcode,
+                      "Location": None,
                       "Plan Stats": None,
                       }
+
         plan_stats = PlanStat.objects.filter(metrics_submission=self.id)
         plan_stats_list = []
         for plan_stat in plan_stats:
             plan_stats_list.append(plan_stat.return_values_dict())
         valuesdict["Plan Stats"] = plan_stats_list
+
+        if self.location:
+            valuesdict["Location"] = self.location.return_values_dict()
 
         return valuesdict
 

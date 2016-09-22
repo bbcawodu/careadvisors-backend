@@ -336,7 +336,7 @@ To submit an entry of consumer metrics data corresponding to a specific staff me
                                     "Month": Integer,
                                     "Year": Integer,},
                     "County": String,
-                    "Zipcode": String,
+                    "Location": String,
                     "Received Education": Integer,
                     "Applied Medicaid": Integer,
                     "Selected QHP": Integer,
@@ -383,7 +383,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Consumer Metrics Retrieval API.
-- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/metrics? with the following optional parameters: "fname", "lname", "email", "id", "time", "groupby", "startdate", "enddate", "time", "zipcode"
+- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/metrics? with the following optional parameters: "fname", "lname", "email", "id", "time", "groupby", "startdate", "enddate", "time", "zipcode", "location"
     - "fname" corresponds to staff member first name.
     - "lname" corresponds to staff member last name.
     - "email" corresponds to staff member email.
@@ -391,9 +391,11 @@ In response, a JSON document will be displayed with the following format:
         - passing "all" as the value will return all staff members
     - One of the above parameters is allowed at a time (only "fname" and "lname" can be grouped)
         - If "fname" and "lname" are given simultaneously as parameters, only one value each is permitted.
-    - The following parameters can be added without limit to the query: "startdate", "enddate", "time", "zipcode", "groupby"
+    - The following parameters can be added without limit to the query: "startdate", "enddate", "time", "zipcode", "groupby", "location"
         - "startdate" and "enddate" must be given in "YYYY-MM-DD" format
         - "time" must be an integer amount of days to look up in the past
+        - "zipcode" must be a non empty comma separated string of zipcodes
+        - "location" must be a percent encoded string that corresponds to the name of the location you desire to search for
         - "grouby" can be "zipcode" to group the metrics submissions returned by zipcode
         
 - The response will be a JSON document with the following format:
@@ -458,6 +460,50 @@ In response, a JSON document will be displayed with the following format:
     - "Error Code" will be 0
     - Array corresponding to the "Data" key will be non empty.
 - If metrics reports are not found,
+    - "Error Code" will be 1.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
+        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+    - Array corresponding to the "Data" key will be empty.
+    
+
+### Navigator Location Submission URL
+- To add a location where navigators can submit metrics reports, visit http://picbackend.herokuapp.com/addlocation
+
+
+### Navigator Location Management URL
+- To manage and edit locations where navigators can submit metrics reports, visit http://picbackend.herokuapp.com/managelocations
+
+
+### Navigator Location Data Retrieval API
+- To navigator location data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/navlocations
+    
+- The response will be a JSON document with the following format:
+    ```
+    {
+        "Data": [
+            {"Name": "Presence Saint Joseph Hospital",
+             "Zipcode": "60657",
+             "State": "IL",
+             "Address Line 1": "2900 N Lake Shore Dr.",
+             "Address Line 2": "",
+             "Country": "United States of America",
+             "City": "Chicago"},
+            ...,
+            ...,
+            ...,
+        ],
+        "Status": {
+            "Version": Integer,
+            "Error Code": Integer,
+            "Errors": Array
+        }
+    }
+    ```
+
+- If navigator locations are found,
+    - "Error Code" will be 0
+    - Array corresponding to the "Data" key will be non empty.
+- If navigator locationss are not found,
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.

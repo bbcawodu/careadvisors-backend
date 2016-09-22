@@ -2,10 +2,12 @@
 Defines views that are mapped to url configurations
 """
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from picmodels.models import PICStaff, MetricsSubmission, PICConsumer, PlanStat
+from picmodels.models import PICStaff, MetricsSubmission, PICConsumer, PlanStat, NavMetricsLocation
 import json, sys, pokitdok
+from picbackend.forms import NavMetricsLocationForm
+from django.forms import modelformset_factory
 from django.views.decorators.csrf import csrf_exempt
 from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors, fetch_and_parse_pokit_elig_data
 from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff, add_consumer, modify_consumer, delete_consumer,\
@@ -15,12 +17,41 @@ from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_
     retrieve_email_consumers, retrieve_first_name_consumers, retrieve_last_name_consumers, retrieve_id_consumers,\
     break_results_into_pages, group_metrics, retrieve_id_metrics, retrieve_f_l_name_metrics,\
     retrieve_first_name_metrics, retrieve_last_name_metrics, retrieve_email_metrics, retrieve_county_staff,\
-    retrieve_region_staff
+    retrieve_region_staff, retrieve_location_metrics
 
 
 # defines view for home page
 def index(request):
     return render(request, "home_page.html")
+
+
+def handle_location_add_request(request):
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = NavMetricsLocationForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/addlocation/')
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = NavMetricsLocationForm()
+
+    return render(request, 'nav_location_add_form.html', {'form': form})
+
+
+def handle_manage_locations_request(request):
+    location_form_set = modelformset_factory(NavMetricsLocation, exclude=('country', ), extra=0)
+    if request.method == 'POST':
+        formset = location_form_set(request.POST, request.FILES)
+        if formset.is_valid():
+            # do something with the formset.cleaned_data
+            pass
+    else:
+        formset = location_form_set()
+    return render(request, 'manage_nav_locations.html', {'formset': formset})
 
 
 @csrf_exempt
@@ -257,7 +288,11 @@ def handle_metrics_api_request(request):
     metrics_submissions = MetricsSubmission.objects.all()
     if 'zipcode list' in search_params:
         list_of_zipcodes = search_params['zipcode list']
-        metrics_submissions = metrics_submissions.filter(zipcode__in=list_of_zipcodes)
+
+        old_zipcode_field_filter_metrics = metrics_submissions.filter(zipcode__in=list_of_zipcodes)
+        new_location_zipcode_metrics = MetricsSubmission.objects.filter(location__zipcode__in=list_of_zipcodes)
+
+        metrics_submissions = old_zipcode_field_filter_metrics | new_location_zipcode_metrics
     if 'look up date' in search_params:
         look_up_date = search_params['look up date']
         metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
@@ -267,6 +302,9 @@ def handle_metrics_api_request(request):
     if 'end date' in search_params:
         rqst_end_date = search_params['end date']
         metrics_submissions = metrics_submissions.filter(submission_date__lte=rqst_end_date)
+    if 'location' in search_params:
+        rqst_location = search_params['location']
+        metrics_submissions = metrics_submissions.filter(location__name__iexact=rqst_location)
 
     if 'id' in search_params:
         rqst_staff_id = search_params['id']
@@ -298,6 +336,9 @@ def handle_metrics_api_request(request):
         list_of_emails = search_params['email list']
         metrics_dict = retrieve_email_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_staff_email,
                                               list_of_emails)
+    # elif 'location' in search_params:
+    #     rqst_location = search_params['location']
+    #     metrics_dict = retrieve_location_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_location)
 
     if "group by" in search_params:
         if search_params["group by"] == "zipcode" or search_params["group by"] == "Zipcode":
@@ -318,6 +359,26 @@ def handle_metrics_api_request(request):
             metrics_list.append(metrics_entry)
         response_raw_data["Data"] = metrics_list
         # response_raw_data["Data"] = metrics_dict
+
+    response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
+
+
+# defines view for returning navigator location data from api requests
+def handle_nav_location_api_request(request):
+    response_raw_data, rqst_errors = init_response_data()
+    # search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+    nav_location_list = []
+
+    nav_location_entries = NavMetricsLocation.objects.all()
+    for nav_location_entry in nav_location_entries:
+        nav_location_list.append(nav_location_entry.return_values_dict())
+
+    if nav_location_list:
+        response_raw_data["Data"] = nav_location_list
+    else:
+        rqst_errors.append("No location entries found in database.")
 
     response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")

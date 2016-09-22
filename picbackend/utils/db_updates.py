@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.db import models, IntegrityError
-from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer
+from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer, NavMetricsLocation
 import datetime, json, sys
 from picbackend.utils.base import clean_json_string_input, clean_json_int_input, clean_dict_input, clean_list_input,\
     parse_and_log_errors
@@ -210,7 +210,7 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
                                                             "Outreach Activities", post_errors,
                                                             empty_string_allowed=True, none_allowed=True)
         rqst_metrics_county = clean_json_string_input(consumer_metrics, "Consumer Metrics", "County", post_errors)
-        rqst_metrics_zipcode = clean_json_string_input(consumer_metrics, "Consumer Metrics", "Zipcode", post_errors)
+        rqst_metrics_location = clean_json_string_input(consumer_metrics, "Consumer Metrics", "Location", post_errors)
 
         metrics_date_dict = clean_dict_input(consumer_metrics, "Consumer Metrics", "Metrics Date", post_errors)
         if metrics_date_dict is not None:
@@ -264,46 +264,55 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
             metrics_instance.hardship_or_difficulty = rqst_cons_hard_or_diff
             metrics_instance.outreach_activity = rqst_usr_outr_act
             metrics_instance.county = rqst_metrics_county
-            metrics_instance.zipcode = rqst_metrics_zipcode
 
-            metrics_instance.save()
+            try:
+                location_instance = NavMetricsLocation.objects.get(name=rqst_metrics_location)
+                metrics_instance.location = location_instance
+                metrics_instance.zipcode = location_instance.zipcode
+            except models.ObjectDoesNotExist:
+                post_errors.append("Location instance does not exist for given location name: {!s}.".format(rqst_metrics_location))
+            except MetricsSubmission.MultipleObjectsReturned:
+                post_errors.append("Multiple location instances exist for given location name: {!s}".format(rqst_metrics_location))
 
-            rqst_plan_stats = clean_list_input(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors)
-            metrics_instance_plan_stats = PlanStat.objects.filter(metrics_submission=metrics_instance.id)
-            for instance_plan_stat in metrics_instance_plan_stats:
-                instance_plan_stat.delete()
-            if rqst_plan_stats is not None:
-                for rqst_plan_stat_dict in rqst_plan_stats:
-                    planstatobject = PlanStat()
-                    planstatobject.plan_name = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Issuer Name", post_errors)
-                    planstatobject.premium_type = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Premium Type", post_errors)
-                    planstatobject.metal_level = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Metal Level", post_errors)
-                    planstatobject.enrollments = clean_json_int_input(rqst_plan_stat_dict, "Plans Dict", "Enrollments", post_errors)
+            if len(post_errors) == 0:
+                metrics_instance.save()
 
-                    plan_name_valid = planstatobject.check_plan_choices()
-                    premium_type_valid = planstatobject.check_premium_choices()
-                    metal_level_valid = planstatobject.check_metal_choices()
-                    if not plan_name_valid:
-                        post_errors.append("Plan: {!s} is not part of member plans".format(planstatobject.plan_name))
-                    if not premium_type_valid:
-                        post_errors.append("Premium Type: {!s} is not a valid premium type".format(planstatobject.premium_type))
-                    if not metal_level_valid:
-                        post_errors.append("Metal: {!s} is not a valid metal level".format(planstatobject.metal_level))
+                rqst_plan_stats = clean_list_input(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors)
+                metrics_instance_plan_stats = PlanStat.objects.filter(metrics_submission=metrics_instance.id)
+                for instance_plan_stat in metrics_instance_plan_stats:
+                    instance_plan_stat.delete()
+                if rqst_plan_stats is not None:
+                    for rqst_plan_stat_dict in rqst_plan_stats:
+                        planstatobject = PlanStat()
+                        planstatobject.plan_name = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Issuer Name", post_errors)
+                        planstatobject.premium_type = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Premium Type", post_errors)
+                        planstatobject.metal_level = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Metal Level", post_errors)
+                        planstatobject.enrollments = clean_json_int_input(rqst_plan_stat_dict, "Plans Dict", "Enrollments", post_errors)
 
-                    if plan_name_valid and premium_type_valid and metal_level_valid:
-                        planstatobject.metrics_submission = metrics_instance
-                        planstatobject.save()
-                # for plan, enrollments in rqst_plan_stats.items():
-                #     planstatobject = PlanStat()
-                #     planstatobject.plan_name = plan
-                #     if planstatobject.check_plan_choices():
-                #         rqst_plan_enrollments = clean_json_int_input(rqst_plan_stats, "Plan Stats", plan, post_errors)
-                #         if rqst_plan_enrollments is not None:
-                #             planstatobject.enrollments = rqst_plan_enrollments
-                #             planstatobject.save()
-                #             metrics_instance.plan_stats.add(planstatobject)
-                #     else:
-                #         post_errors.append("Plan: {!s} is not part of member plans".format(plan))
+                        plan_name_valid = planstatobject.check_plan_choices()
+                        premium_type_valid = planstatobject.check_premium_choices()
+                        metal_level_valid = planstatobject.check_metal_choices()
+                        if not plan_name_valid:
+                            post_errors.append("Plan: {!s} is not part of member plans".format(planstatobject.plan_name))
+                        if not premium_type_valid:
+                            post_errors.append("Premium Type: {!s} is not a valid premium type".format(planstatobject.premium_type))
+                        if not metal_level_valid:
+                            post_errors.append("Metal: {!s} is not a valid metal level".format(planstatobject.metal_level))
+
+                        if plan_name_valid and premium_type_valid and metal_level_valid:
+                            planstatobject.metrics_submission = metrics_instance
+                            planstatobject.save()
+                    # for plan, enrollments in rqst_plan_stats.items():
+                    #     planstatobject = PlanStat()
+                    #     planstatobject.plan_name = plan
+                    #     if planstatobject.check_plan_choices():
+                    #         rqst_plan_enrollments = clean_json_int_input(rqst_plan_stats, "Plan Stats", plan, post_errors)
+                    #         if rqst_plan_enrollments is not None:
+                    #             planstatobject.enrollments = rqst_plan_enrollments
+                    #             planstatobject.save()
+                    #             metrics_instance.plan_stats.add(planstatobject)
+                    #     else:
+                    #         post_errors.append("Plan: {!s} is not part of member plans".format(plan))
 
         except models.ObjectDoesNotExist:
             post_errors.append("Staff database entry does not exist for email: {!s}".format(rqst_usr_email))

@@ -4,10 +4,11 @@ forms across
 """
 
 from django import forms
+from django.forms import ModelForm, ModelChoiceField
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from picmodels.models import PICUser
+from picmodels.models import PICUser, NavMetricsLocation, Country
 
 # defines dictionary mapping choices to values for forms.ChoiceField
 YES_NO_CHOICE = [
@@ -15,6 +16,18 @@ YES_NO_CHOICE = [
     (0, 'No'),
     (1, 'Yes'),
 ]
+
+
+class NavMetricsLocationForm(ModelForm):
+    # country = ModelChoiceField(queryset=Country.objects.all(), empty_label="Choose Country", to_field_name="name")
+
+    def __init__(self, *args, **kwargs):
+        super(NavMetricsLocationForm, self).__init__(*args, **kwargs)
+        self.fields['country'].label_from_instance = lambda obj: "%s" % obj.name
+
+    class Meta:
+        model = NavMetricsLocation
+        fields = ["name", "address_line1", "address_line2", "zipcode", "city", "state_province", "country"]
 
 
 # defines form class for creating user registration form
