@@ -105,6 +105,8 @@ def fetch_and_parse_pokit_elig_data(post_json, response_raw_data, post_errors):
         if "No Data in response from Pokitdok" not in post_errors and "Errors in Pokitdok Data" not in post_errors:
             if rqst_consumer_trading_partner == "united_health_care":
                 parse_united_health_care_data(eligibility_results, parsed_elig_dict, post_errors)
+            elif rqst_consumer_trading_partner == "ambetter":
+                parse_ambetter_data(eligibility_results, parsed_elig_dict, post_errors)
             else:
                 parse_united_health_care_data(eligibility_results, parsed_elig_dict, post_errors)
 
@@ -129,6 +131,22 @@ def parse_united_health_care_data(eligibility_results, parsed_elig_dict, post_er
         parse_elig_copay(coverage_dict, parsed_elig_dict, post_errors)
         parse_elig_is_plan_active(coverage_dict, parsed_elig_dict, post_errors)
         parse_elig_insurace_type(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_plan_description(coverage_dict, parsed_elig_dict, post_errors)
+
+
+def parse_ambetter_data(eligibility_results, parsed_elig_dict, post_errors):
+    parse_elig_consumer_info(eligibility_results, parsed_elig_dict, post_errors)
+    parse_elig_service_types(eligibility_results, parsed_elig_dict, post_errors)
+    parse_elig_payer(eligibility_results, parsed_elig_dict, post_errors)
+
+    coverage_dict = parse_elig_coverage_dict(eligibility_results, post_errors)
+    if coverage_dict:
+        parse_elig_deductibles_info(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_group_no(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_coinsurance(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_plan_start(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_out_of_pocket_info(coverage_dict, parsed_elig_dict, post_errors)
+        parse_elig_is_plan_active(coverage_dict, parsed_elig_dict, post_errors)
         parse_elig_plan_description(coverage_dict, parsed_elig_dict, post_errors)
 
 
