@@ -22,22 +22,22 @@ from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_
 
 # defines view for home page
 def index(request):
+    metrics_sumbissions = MetricsSubmission.objects.all()
+    for submission in metrics_sumbissions:
+        submission.delete()
     return render(request, "home_page.html")
 
 
 def handle_location_add_request(request):
+    form = NavMetricsLocationForm(request.POST or None, request.FILES or None)
+
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
-        form = NavMetricsLocationForm(request.POST)
         # check whether it's valid:
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/addlocation/')
-
-    # if a GET (or any other method) we'll create a blank form
-    else:
-        form = NavMetricsLocationForm()
 
     return render(request, 'nav_location_add_form.html', {'form': form})
 
