@@ -23,8 +23,7 @@ from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_
 # defines view for home page
 def index(request):
     metrics_sumbissions = MetricsSubmission.objects.all()
-    for submission in metrics_sumbissions:
-        submission.delete()
+    metrics_sumbissions.delete()
     return render(request, "home_page.html")
 
 
