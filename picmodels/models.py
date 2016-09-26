@@ -230,7 +230,6 @@ class MetricsSubmission(models.Model):
     outreach_activity = models.CharField(max_length=5000, blank=True, null=True, default="")
     submission_date = models.DateField(blank=True, null=True)
     county = models.CharField(max_length=1000, default="")
-    zipcode = models.CharField(max_length=1000, default="")
     date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
 
     def return_values_dict(self):
@@ -248,7 +247,6 @@ class MetricsSubmission(models.Model):
                       "Date Created": self.date_created.isoformat(),
                       "Submission Date": self.submission_date.isoformat(),
                       "County": self.county,
-                      "Zipcode": self.zipcode,
                       "Location": None,
                       "Plan Stats": None,
                       }
