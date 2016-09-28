@@ -1,6 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+<head>
+    <link href="{% static 'css/manage_nav_locations.css' %}" rel='stylesheet' type='text/css'>
+</head>
+<body>
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
 <form method="post" action="/managelocations/">
     <table>
         {{ formset }}
     </table>
     <input type="submit" value="Submit" />
 </form>
+</body>
+</html>

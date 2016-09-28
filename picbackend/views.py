@@ -7,6 +7,7 @@ from django.shortcuts import render
 from picmodels.models import PICStaff, MetricsSubmission, PICConsumer, PlanStat, NavMetricsLocation
 import json, sys, pokitdok
 from picbackend.forms import NavMetricsLocationForm
+from django.contrib import messages
 from django.forms import modelformset_factory
 from django.views.decorators.csrf import csrf_exempt
 from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors, fetch_and_parse_pokit_elig_data
@@ -34,7 +35,10 @@ def handle_location_add_request(request):
         # check whether it's valid:
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/addlocation/')
+            form = NavMetricsLocationForm()
+            messages.success(request, 'Success!')
+        else:
+            messages.error(request, "You done fucked up!")
 
     return render(request, 'nav_location_add_form.html', {'form': form})
 
@@ -44,8 +48,10 @@ def handle_manage_locations_request(request):
     if request.method == 'POST':
         formset = location_form_set(request.POST, request.FILES)
         if formset.is_valid():
-            # do something with the formset.cleaned_data
-            pass
+            formset.save()
+            messages.success(request, 'Success!')
+        else:
+            messages.error(request, "You done fucked up!")
     else:
         formset = location_form_set()
     return render(request, 'manage_nav_locations.html', {'formset': formset})
