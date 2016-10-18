@@ -21,9 +21,8 @@ env = environ.Env(DEBUG=(bool, True),)
 
 # Ideally move env file should be outside the git repo
 # i.e. BASE_DIR.parent.parent
-env_file = os.path.join(os.path.dirname(__file__), 'local.env')
-if os.path.exists(env_file):
-    environ.Env.read_env(str(env_file))
+env_file = os.path.join(os.path.dirname(__file__), 'test.env')
+environ.Env.read_env(str(env_file))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -93,8 +92,7 @@ WSGI_APPLICATION = 'picbackend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
     }
 }
 
@@ -126,7 +124,8 @@ import dj_database_url
 
 # DATABASES['default'] = dj_database_url.config(
 #     default='postgres://ngklalieajpptd:Day5uAny5L-cI0OB3L2nUmfHhh@ec2-54-197-224-173.compute-1.amazonaws.com:5432/dehaud8hlr9iqq')
-DATABASES['default'] = dj_database_url.config()
+# DATABASES['default'] = dj_database_url.config()
+DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
 # DATABASES['default'] = dj_database_url.config('postgres://Kirabee:n1ggmag3@localhost:5432/mydb')
 
 # # Enable Persistent Connections
@@ -153,3 +152,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
+
+# FIXTURE_DIRS = (
+#     os.path.join(BASE_DIR, 'fixtures'),
+# )

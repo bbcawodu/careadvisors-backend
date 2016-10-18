@@ -7,7 +7,7 @@ from django.conf import settings
 from django.test.utils import get_runner
 
 if __name__ == "__main__":
-    #os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.test_settings'
+    # os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.test_settings'
     #line above should be used as settings file. using pickbackend settings file to get test suite to work
     os.environ['DJANGO_SETTINGS_MODULE'] = 'picbackend.settings'
     django.setup()
