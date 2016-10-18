@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1990ad25-4822-4da6-815b-03692f3687bb" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/test.env" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/test_staff_query_api.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picbackend/settings.py" afterPath="$PROJECT_DIR$/picbackend/settings.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/runtests.py" afterPath="$PROJECT_DIR$/runtests.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test_settings.py" afterPath="$PROJECT_DIR$/tests/test_settings.py" />
     </list>
     <ignored path="picproject.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -45,7 +40,7 @@
       <file leaf-file-name="settings.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/picbackend/settings.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.3195691">
+            <state vertical-scroll-proportion="-0.48114902">
               <caret line="110" column="2" selection-start-line="110" selection-start-column="2" selection-end-line="110" selection-end-column="2" />
               <folding />
             </state>
@@ -562,7 +557,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1440" height="896" extended-state="1" />
+    <frame x="0" y="0" width="1440" height="896" extended-state="0" />
     <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.30615166" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -983,7 +978,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/picbackend/settings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.3195691">
+        <state vertical-scroll-proportion="-0.48114902">
           <caret line="110" column="2" selection-start-line="110" selection-start-column="2" selection-end-line="110" selection-end-column="2" />
           <folding />
         </state>
