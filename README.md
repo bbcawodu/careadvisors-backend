@@ -385,6 +385,7 @@ To submit an entry of consumer metrics data corresponding to a specific staff me
 
 
 The Following is a list of possible Plan Issuer Names with corresponding model constant names:
+```
 [
     MISCELLANEOUS = "Miscellaneous"
     HEALTH_ALLIANCE_MEDICAL_PLANS = 'Health Alliance Medical Plans, Inc.'
@@ -536,16 +537,20 @@ The Following is a list of possible Plan Issuer Names with corresponding model c
     HIGHMARK_BLUE_CROSS_BLUE_SHIELD_WEST_VIRGINIA = 'Highmark Blue Cross Blue Shield West Virginia'
     BLUE_CROSS_BLUE_SHIELD_OF_WYOMING = 'Blue Cross Blue Shield of Wyoming'
 ]
+```
 
 The Following is a list of possible Plan Premium Types with corresponding model constant names:
+```
 [
     HMO = "HMO"
     PPO = "PPO"
     POS = 'POS'
     EPO = 'EPO'
 ]
+```
 
 The Following is a list of possible Plan Metal Levels with corresponding model constant names:
+```
 [
     BRONZE = "Bronze"
     SILVER = "Silver"
@@ -553,6 +558,7 @@ The Following is a list of possible Plan Metal Levels with corresponding model c
     PLATINUM = 'Platinum'
     CATASTROPHIC = "Catastrophic"
 ]
+```
 
 
 In response, a JSON document will be displayed with the following format:
@@ -666,6 +672,7 @@ In response, a JSON document will be displayed with the following format:
 - To add a hub location where navigators can submit metrics reports, visit http://picbackend.herokuapp.com/addlocation
 
 The following is a list of the current 2016 Navigator Hub Locations(As of 10/28/16):
+```
 [
     ['Presence Holy Family Medical Center', '100 North River Road', '', 'Des Plaines', 'IL', '60016', 'United States of America'],
     ['Presence Resurrection Medical Center', '7435 West Talcott Avenue', '', 'Chicago', 'IL', '60631', 'United States of America'],
@@ -747,6 +754,7 @@ The following is a list of the current 2016 Navigator Hub Locations(As of 10/28/
     ['LIHEAP DuQuoin (Perry County)', '317 S Washington', '', 'DuQuoin', 'IL', '62832', 'United States of America'],
     ['Randolph Public Health Department', '2515 State Street', '', 'Chester', 'IL', '62233', 'United States of America']
 ]
+```
 
 
 ### Navigator Hub Location Management URL

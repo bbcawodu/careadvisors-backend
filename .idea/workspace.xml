@@ -4,10 +4,6 @@
     <list default="true" id="1990ad25-4822-4da6-815b-03692f3687bb" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picbackend/urls.py" afterPath="$PROJECT_DIR$/picbackend/urls.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picbackend/utils/db_updates.py" afterPath="$PROJECT_DIR$/picbackend/utils/db_updates.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picbackend/views.py" afterPath="$PROJECT_DIR$/picbackend/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picmodels/models.py" afterPath="$PROJECT_DIR$/picmodels/models.py" />
     </list>
     <ignored path="picproject.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -139,8 +135,8 @@
           </provider>
           <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
             <state split_layout="FIRST">
-              <first_editor vertical-scroll-proportion="13.548388">
-                <caret line="672" column="24" selection-start-line="672" selection-start-column="24" selection-end-line="672" selection-end-column="24" />
+              <first_editor vertical-scroll-proportion="0.67330676">
+                <caret line="560" column="3" selection-start-line="560" selection-start-column="3" selection-end-line="560" selection-end-column="3" />
                 <folding />
               </first_editor>
               <second_editor />
@@ -204,8 +200,8 @@
         <option value="$PROJECT_DIR$/tests/test_staff_query_api.py" />
         <option value="$PROJECT_DIR$/picbackend/urls.py" />
         <option value="$PROJECT_DIR$/picbackend/views.py" />
-        <option value="$PROJECT_DIR$/picmodels/models.py" />
         <option value="$PROJECT_DIR$/picbackend/utils/db_updates.py" />
+        <option value="$PROJECT_DIR$/picmodels/models.py" />
         <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
@@ -626,7 +622,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="896" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30972818" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -998,14 +994,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/picbackend/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="51" column="46" selection-start-line="51" selection-start-column="46" selection-end-line="51" selection-end-column="46" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/picbackend/views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1023,6 +1011,14 @@
           <folding>
             <element signature="e#0#36#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/picbackend/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="51" column="46" selection-start-line="51" selection-start-column="46" selection-end-line="51" selection-end-column="46" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1045,8 +1041,8 @@
       </provider>
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="FIRST">
-          <first_editor vertical-scroll-proportion="13.548388">
-            <caret line="672" column="24" selection-start-line="672" selection-start-column="24" selection-end-line="672" selection-end-column="24" />
+          <first_editor vertical-scroll-proportion="0.67330676">
+            <caret line="560" column="3" selection-start-line="560" selection-start-column="3" selection-end-line="560" selection-end-column="3" />
             <folding />
           </first_editor>
           <second_editor />
