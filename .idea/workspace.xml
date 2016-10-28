@@ -4,6 +4,9 @@
     <list default="true" id="1990ad25-4822-4da6-815b-03692f3687bb" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picbackend/utils/base.py" afterPath="$PROJECT_DIR$/picbackend/utils/base.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picbackend/utils/db_updates.py" afterPath="$PROJECT_DIR$/picbackend/utils/db_updates.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picmodels/models.py" afterPath="$PROJECT_DIR$/picmodels/models.py" />
     </list>
     <ignored path="picproject.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -48,11 +51,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="models.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/picmodels/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="26" column="52" selection-start-line="26" selection-start-column="52" selection-end-line="26" selection-end-column="52" />
+            <state vertical-scroll-proportion="0.080789946">
+              <caret line="113" column="48" selection-start-line="113" selection-start-column="48" selection-end-line="113" selection-end-column="48" />
               <folding />
             </state>
           </provider>
@@ -72,7 +75,7 @@
         <entry file="file://$PROJECT_DIR$/picbackend/views.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="106" column="36" selection-start-line="106" selection-start-column="36" selection-end-line="106" selection-end-column="36" />
+              <caret line="106" column="37" selection-start-line="106" selection-start-column="37" selection-end-line="106" selection-end-column="37" />
               <folding>
                 <element signature="e#61#119#0" expanded="true" />
               </folding>
@@ -84,10 +87,20 @@
         <entry file="file://$PROJECT_DIR$/picbackend/utils/db_updates.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="138" column="12" selection-start-line="138" selection-start-column="12" selection-end-line="138" selection-end-column="12" />
+              <caret line="173" column="42" selection-start-line="173" selection-start-column="42" selection-end-line="173" selection-end-column="42" />
               <folding>
                 <element signature="e#0#36#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="base.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/picbackend/utils/base.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="55" column="15" selection-start-line="55" selection-start-column="15" selection-end-line="55" selection-end-column="15" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -128,22 +141,22 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="README.md" pinned="false" current-in-tab="true">
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/README.md">
+          <provider editor-type-id="MarkdownPreviewEditor">
+            <state />
+          </provider>
           <provider editor-type-id="MarkdownFxPreviewEditor">
             <state />
           </provider>
           <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
             <state split_layout="FIRST">
-              <first_editor vertical-scroll-proportion="0.67330676">
-                <caret line="560" column="3" selection-start-line="560" selection-start-column="3" selection-end-line="560" selection-end-column="3" />
+              <first_editor vertical-scroll-proportion="0.7768924">
+                <caret line="176" column="50" selection-start-line="176" selection-start-column="50" selection-end-line="176" selection-end-column="50" />
                 <folding />
               </first_editor>
               <second_editor />
             </state>
-          </provider>
-          <provider editor-type-id="MarkdownPreviewEditor">
-            <state />
           </provider>
         </entry>
       </file>
@@ -184,7 +197,6 @@
         <option value="$PROJECT_DIR$/picmodels/admin.py" />
         <option value="$PROJECT_DIR$/picbackend/forms.py" />
         <option value="$PROJECT_DIR$/picbackend/utils/db_queries.py" />
-        <option value="$PROJECT_DIR$/picbackend/utils/base.py" />
         <option value="$PROJECT_DIR$/picbackend/templates/nav_location_add_form.html" />
         <option value="$PROJECT_DIR$/picbackend/templates/manage_nav_locations.html" />
         <option value="$PROJECT_DIR$/picbackend/fixtures/10_04_2016.json" />
@@ -200,8 +212,9 @@
         <option value="$PROJECT_DIR$/tests/test_staff_query_api.py" />
         <option value="$PROJECT_DIR$/picbackend/urls.py" />
         <option value="$PROJECT_DIR$/picbackend/views.py" />
-        <option value="$PROJECT_DIR$/picbackend/utils/db_updates.py" />
+        <option value="$PROJECT_DIR$/picbackend/utils/base.py" />
         <option value="$PROJECT_DIR$/picmodels/models.py" />
+        <option value="$PROJECT_DIR$/picbackend/utils/db_updates.py" />
         <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
@@ -622,7 +635,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="896" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30972818" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -631,7 +644,7 @@
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287841" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287841" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27419356" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27419356" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -987,33 +1000,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/picbackend/utils/base.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.10771993">
-          <caret line="4" column="46" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/picbackend/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="106" column="36" selection-start-line="106" selection-start-column="36" selection-end-line="106" selection-end-column="36" />
-          <folding>
-            <element signature="e#61#119#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/picbackend/utils/db_updates.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="138" column="12" selection-start-line="138" selection-start-column="12" selection-end-line="138" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#36#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/picbackend/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1022,34 +1008,62 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/picmodels/models.py">
+    <entry file="file://$PROJECT_DIR$/picbackend/views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="26" column="52" selection-start-line="26" selection-start-column="52" selection-end-line="26" selection-end-column="52" />
-          <folding />
+          <caret line="106" column="37" selection-start-line="106" selection-start-column="37" selection-end-line="106" selection-end-column="37" />
+          <folding>
+            <element signature="e#61#119#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
-      <provider editor-type-id="MarkdownFxPreviewEditor">
-        <state />
-      </provider>
       <provider editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.028142588">
           <caret line="534" column="4" selection-start-line="534" selection-start-column="4" selection-end-line="534" selection-end-column="4" />
         </state>
       </provider>
+      <provider editor-type-id="MarkdownPreviewEditor">
+        <state />
+      </provider>
+      <provider editor-type-id="MarkdownFxPreviewEditor">
+        <state />
+      </provider>
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="FIRST">
-          <first_editor vertical-scroll-proportion="0.67330676">
-            <caret line="560" column="3" selection-start-line="560" selection-start-column="3" selection-end-line="560" selection-end-column="3" />
+          <first_editor vertical-scroll-proportion="0.7768924">
+            <caret line="176" column="50" selection-start-line="176" selection-start-column="50" selection-end-line="176" selection-end-column="50" />
             <folding />
           </first_editor>
           <second_editor />
         </state>
       </provider>
-      <provider editor-type-id="MarkdownPreviewEditor">
-        <state />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/picbackend/utils/db_updates.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="173" column="42" selection-start-line="173" selection-start-column="42" selection-end-line="173" selection-end-column="42" />
+          <folding>
+            <element signature="e#0#36#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/picbackend/utils/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="55" column="15" selection-start-line="55" selection-start-column="15" selection-end-line="55" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/picmodels/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.080789946">
+          <caret line="113" column="48" selection-start-line="113" selection-start-column="48" selection-end-line="113" selection-end-column="48" />
+          <folding />
+        </state>
       </provider>
     </entry>
   </component>
