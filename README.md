@@ -99,7 +99,7 @@ To modify or add members of the PICStaff class in the database, submit a POST re
 "Email": String,
 "User Type": String,
 "User County": String,
-"Base Location Name": String (Can be None or empty string),
+"Base Location Names": [Strings (Can be None or empty string)],
 "MPN": String(Can be None or empty string),
 "Database ID": Integer(Required when "Database Action" == "Staff Modification" or "Staff Deletion"),
 "Database Action": String,
@@ -164,7 +164,7 @@ In response, a JSON document will be displayed with the following format:
                 "Region": String,
                 "First Name": String,
                 "Last Name": String,
-                "Base Location": {
+                "Base Location": [{
                                     "Location Name": String,
                                     "Address Line 1": String,
                                     "Address Line 2": String,
@@ -173,7 +173,8 @@ In response, a JSON document will be displayed with the following format:
                                     "Zipcode": String,
                                     "Country": String,
                                     "Database Action": String
-                                 } (Can be None),
+                                 },
+                                  ...(Can be Empty)],
                 "MPN": String,
                 "Consumers":[
                                 {

@@ -97,28 +97,35 @@ def add_staff(response_raw_data, post_json, post_errors):
     rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
     rqst_county = clean_json_string_input(post_json, "root", "User County", post_errors)
     rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
-    rqst_base_location_name = clean_json_string_input(post_json, "root", "Base Location Name", post_errors, empty_string_allowed=True, none_allowed=True)
-    base_location_object = None
-    if rqst_base_location_name is not None or rqst_base_location_name != '':
-        try:
-            base_location_object = NavMetricsLocation.objects.get(name__iexact=rqst_base_location_name)
-        except NavMetricsLocation.DoesNotExist:
-            post_errors.append('Location object does not exist for \'Base Location Name]\': {!s}'.format(rqst_base_location_name))
+    rqst_base_locations = clean_list_input(post_json, "root", "Base Locations", post_errors, empty_list_allowed=True)
+    rqst_base_locations = list(set(rqst_base_locations))
+    base_location_objects = []
+    location_errors = []
+    if rqst_base_locations:
+        for base_location_name in rqst_base_locations:
+            try:
+                base_location_object = NavMetricsLocation.objects.get(name=base_location_name)
+                base_location_objects.append(base_location_object)
+            except NavMetricsLocation.DoesNotExist:
+                location_errors.append("No Nav Hub Location Database entry found for name: {!s}".format(base_location_name))
 
     if len(post_errors) == 0:
         usr_rqst_values = {"first_name": rqst_usr_f_name,
                            "last_name": rqst_usr_l_name,
                            "type": rqst_usr_type,
                            "county": rqst_county,
-                           "base_location": base_location_object,
                            "mpn": rqst_usr_mpn}
         user_instance, user_instance_created = PICStaff.objects.get_or_create(email=rqst_usr_email,
                                                                               defaults=usr_rqst_values)
+        user_instance.base_locations = base_location_objects
+        user_instance.save()
         if not user_instance_created:
             post_errors.append('Staff database entry already exists for the email: {!s}'.format(rqst_usr_email))
         else:
             response_raw_data['Data'] = {"Database ID": user_instance.id}
 
+    for location_error in location_errors:
+        post_errors.append(location_error)
     response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
@@ -133,13 +140,17 @@ def modify_staff(response_raw_data, post_json, post_errors):
     rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
     rqst_county = clean_json_string_input(post_json, "root", "User County", post_errors)
     rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
-    rqst_base_location_name = clean_json_string_input(post_json, "root", "Base Location Name", post_errors, empty_string_allowed=True, none_allowed=True)
-    base_location_object = None
-    if rqst_base_location_name is not None or rqst_base_location_name != '':
-        try:
-            base_location_object = NavMetricsLocation.objects.get(name__iexact=rqst_base_location_name)
-        except NavMetricsLocation.DoesNotExist:
-            post_errors.append('Location object does not exist for \'Base Location Name]\': {!s}'.format(rqst_base_location_name))
+    rqst_base_locations = clean_list_input(post_json, "root", "Base Locations", post_errors, empty_list_allowed=True)
+    rqst_base_locations = list(set(rqst_base_locations))
+    base_location_objects = []
+    location_errors = []
+    if rqst_base_locations:
+        for base_location_name in rqst_base_locations:
+            try:
+                base_location_object = NavMetricsLocation.objects.get(name=base_location_name)
+                base_location_objects.append(base_location_object)
+            except NavMetricsLocation.DoesNotExist:
+                location_errors.append("No Nav Hub Location Database entry found for name: {!s}".format(base_location_name))
 
     if len(post_errors) == 0:
         try:
@@ -150,7 +161,7 @@ def modify_staff(response_raw_data, post_json, post_errors):
             staff_instance.county = rqst_county
             staff_instance.email = rqst_usr_email
             staff_instance.mpn = rqst_usr_mpn
-            staff_instance.base_location = base_location_object
+            staff_instance.base_locations = base_location_objects
             staff_instance.save()
             response_raw_data['Data'] = {"Database ID": staff_instance.id}
         except PICStaff.DoesNotExist:
@@ -160,6 +171,8 @@ def modify_staff(response_raw_data, post_json, post_errors):
         except IntegrityError:
             post_errors.append('Database entry already exists for the email: {!s}'.format(rqst_usr_email))
 
+    for location_error in location_errors:
+        post_errors.append(location_error)
     response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 

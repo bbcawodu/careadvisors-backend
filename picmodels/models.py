@@ -108,7 +108,7 @@ class PICStaff(models.Model):
     county = models.CharField(blank=True, null=True, max_length=1000, default="")
     region = models.CharField(blank=True, null=True, max_length=1000, default="")
     mpn = models.CharField(blank=True, max_length=1000, default="")
-    base_location = models.ForeignKey(NavMetricsLocation, on_delete=models.SET_NULL, blank=True, null=True)
+    base_locations = models.ManyToManyField(NavMetricsLocation, blank=True)
 
     def return_values_dict(self):
         consumers = PICConsumer.objects.filter(navigator=self.id)
@@ -123,7 +123,7 @@ class PICStaff(models.Model):
                       "Database ID": self.id,
                       "County": self.county,
                       "Region": None,
-                      "Base Location": None,
+                      "Base Locations": [],
                       "Consumers": consumer_list}
 
         if self.county:
@@ -132,9 +132,10 @@ class PICStaff(models.Model):
                     valuesdict["Region"] = region
                     break
 
-        if self.base_location:
-            base_location_object = NavMetricsLocation.objects.get(id=self.base_location.id)
-            valuesdict["Base Location"] = base_location_object.return_values_dict()
+        base_locations = self.base_locations.all()
+        if base_locations:
+            for base_location in base_locations:
+                valuesdict["Base Locations"].append(base_location.return_values_dict())
 
         return valuesdict
 

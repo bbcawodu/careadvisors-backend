@@ -39,7 +39,7 @@ def clean_dict_input(json_dict, dict_name, dict_key, post_errors):
     return None
 
 
-def clean_list_input(json_dict, dict_name, dict_key, post_errors):
+def clean_list_input(json_dict, dict_name, dict_key, post_errors, empty_list_allowed=False):
     if dict_key not in json_dict:
         post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
     elif json_dict[dict_key] is None:
@@ -47,7 +47,10 @@ def clean_list_input(json_dict, dict_name, dict_key, post_errors):
     elif not isinstance(json_dict[dict_key], list):
         post_errors.append("Value for {!r} in {!r} dictionary is not a list".format(dict_key, dict_name))
     elif json_dict[dict_key] == []:
-        post_errors.append("Value for {!r} in {!r} dictionary is an empty list".format(dict_key, dict_name))
+        if empty_list_allowed:
+            return []
+        else:
+            post_errors.append("Value for {!r} in {!r} dictionary is an empty list".format(dict_key, dict_name))
     else:
         return json_dict[dict_key]
     return None
