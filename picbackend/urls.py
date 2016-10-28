@@ -42,6 +42,7 @@ urlpatterns = [
     url(r"^addlocation/$", views.handle_location_add_request),
     url(r"^managelocations/$", views.handle_manage_locations_request),
     url(r"^editconsumer/$", views.handle_consumer_edit_request),
+    url(r"^edithublocation/$", views.handle_hub_location_edit_api_request),
     url(r"^v1/staff/$", views.handle_staff_api_request),
     url(r"^v1/consumers/$", views.handle_consumer_api_request),
     url(r"^v1/metrics/$", views.handle_metrics_api_request),

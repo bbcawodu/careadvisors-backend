@@ -12,7 +12,7 @@ from django.forms import modelformset_factory
 from django.views.decorators.csrf import csrf_exempt
 from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors, fetch_and_parse_pokit_elig_data
 from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff, add_consumer, modify_consumer, delete_consumer,\
-    add_or_update_metrics_entity
+    add_or_update_metrics_entity, add_nav_hub_location, modify_nav_hub_location, delete_nav_hub_location
 from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_staff, retrieve_first_name_staff,\
     retrieve_last_name_staff, retrieve_id_staff, build_search_params, retrieve_f_l_name_consumers,\
     retrieve_email_consumers, retrieve_first_name_consumers, retrieve_last_name_consumers, retrieve_id_consumers,\
@@ -55,6 +55,38 @@ def handle_manage_locations_request(request):
     else:
         formset = location_form_set()
     return render(request, 'manage_nav_locations.html', {'formset': formset})
+
+
+@csrf_exempt
+def handle_hub_location_edit_api_request(request):
+    # initialize dictionary for response data, including parsing errors
+    response_raw_data, post_errors = init_response_data()
+
+    if request.method == 'POST' or request.is_ajax():
+        post_data = request.body.decode('utf-8')
+        post_json = json.loads(post_data)
+
+        # Code to parse POSTed json request
+        rqst_action = clean_json_string_input(post_json, "root", "Database Action", post_errors)
+
+        # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
+        # create and save database entry for appointment
+        if len(post_errors) == 0 and rqst_action == "Location Addition":
+            response_raw_data = add_nav_hub_location(response_raw_data, post_json, post_errors)
+
+        elif len(post_errors) == 0 and rqst_action == "Location Modification":
+            response_raw_data = modify_nav_hub_location(response_raw_data, post_json, post_errors)
+
+        elif len(post_errors) == 0 and rqst_action == "Location Deletion":
+            response_raw_data = delete_nav_hub_location(response_raw_data, post_json, post_errors)
+
+    # if a GET request is made, add error message to response data
+    else:
+        post_errors.append("Request needs POST data")
+
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
 
 
 @csrf_exempt

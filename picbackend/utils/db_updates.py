@@ -1,23 +1,117 @@
 from django.http import HttpResponse
 from django.db import models, IntegrityError
-from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer, NavMetricsLocation
+from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer, NavMetricsLocation, Country
 import datetime, json, sys
 from picbackend.utils.base import clean_json_string_input, clean_json_int_input, clean_dict_input, clean_list_input,\
     parse_and_log_errors
 
 
+def add_nav_hub_location(response_raw_data, post_json, post_errors):
+    rqst_location_name = clean_json_string_input(post_json, "root", "Location Name", post_errors)
+    rqst_address_line_1 = clean_json_string_input(post_json, "root", "Address Line 1", post_errors)
+    rqst_address_line_2 = clean_json_string_input(post_json, "root", "Address Line 2", post_errors, empty_string_allowed=True)
+    if rqst_address_line_2 is None:
+        rqst_address_line_2 = ''
+    rqst_city = clean_json_string_input(post_json, "root", "City", post_errors)
+    rqst_state = clean_json_string_input(post_json, "root", "State", post_errors)
+    rqst_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors)
+    rqst_country = clean_json_string_input(post_json, "root", "Country", post_errors)
+
+    if len(post_errors) == 0:
+        location_rqst_values = {"name": rqst_location_name,
+                                "address_line1": rqst_address_line_1,
+                                "address_line2": rqst_address_line_2,
+                                "city": rqst_city,
+                                "state_province": rqst_state,
+                                "zipcode": rqst_zipcode,
+                                "country": Country.objects.get(name=rqst_country)}
+        location_instance, location_instance_created = NavMetricsLocation.objects.get_or_create(name=rqst_location_name,
+                                                                                                defaults=location_rqst_values)
+        if not location_instance_created:
+            post_errors.append('Nav Hub Location database entry already exists for the name: {!s}'.format(rqst_location_name))
+        else:
+            response_raw_data['Data'] = {"Database ID": location_instance.id}
+
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
+    return response_raw_data
+
+
+def modify_nav_hub_location(response_raw_data, post_json, post_errors):
+    rqst_location_id = clean_json_int_input(post_json, "root", "Database ID", post_errors)
+    rqst_location_name = clean_json_string_input(post_json, "root", "Location Name", post_errors)
+    rqst_address_line_1 = clean_json_string_input(post_json, "root", "Address Line 1", post_errors)
+    rqst_address_line_2 = clean_json_string_input(post_json, "root", "Address Line 2", post_errors, empty_string_allowed=True)
+    if rqst_address_line_2 is None:
+        rqst_address_line_2 = ''
+    rqst_city = clean_json_string_input(post_json, "root", "City", post_errors)
+    rqst_state = clean_json_string_input(post_json, "root", "State", post_errors)
+    rqst_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors)
+    rqst_country = clean_json_string_input(post_json, "root", "Country", post_errors)
+
+    if len(post_errors) == 0:
+        try:
+            location_instance = NavMetricsLocation.objects.get(id=rqst_location_id)
+            location_instance.name = rqst_location_name
+            location_instance.address_line1 = rqst_address_line_1
+            location_instance.address_line2 = rqst_address_line_2
+            location_instance.city = rqst_city
+            location_instance.state_province = rqst_state
+            location_instance.zipcode = rqst_zipcode
+            location_instance.country = Country.objects.get(name=rqst_country)
+            location_instance.save()
+            response_raw_data['Data'] = {"Database ID": location_instance.id}
+        except NavMetricsLocation.DoesNotExist:
+            post_errors.append('Nav Hub Location database entry does not exist for the id: {!s}'.format(str(rqst_location_id)))
+        except NavMetricsLocation.MultipleObjectsReturned:
+            post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_location_id)))
+        except IntegrityError:
+            post_errors.append('Database entry already exists for the name: {!s}'.format(rqst_location_name))
+
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
+    return response_raw_data
+
+
+def delete_nav_hub_location(response_raw_data, post_json, post_errors):
+    rqst_location_id = clean_json_int_input(post_json, "root", "Database ID", post_errors)
+
+    if len(post_errors) == 0:
+        try:
+            location_instance = NavMetricsLocation.objects.get(id=rqst_location_id)
+            location_instance.delete()
+            response_raw_data['Data'] = {"Database ID": "Deleted"}
+        except NavMetricsLocation.DoesNotExist:
+            post_errors.append('Location database entry does not exist for the id: {!s}'.format(str(rqst_location_id)))
+        except NavMetricsLocation.MultipleObjectsReturned:
+            post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_location_id)))
+
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
+    return response_raw_data
+
+
 def add_staff(response_raw_data, post_json, post_errors):
     rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+    rqst_usr_mpn = clean_json_string_input(post_json, "root", "MPN", post_errors, empty_string_allowed=True, none_allowed=True)
+    if rqst_usr_mpn is None:
+        rqst_usr_mpn = ''
     rqst_usr_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
     rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
     rqst_county = clean_json_string_input(post_json, "root", "User County", post_errors)
     rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
+    rqst_base_location_name = clean_json_string_input(post_json, "root", "Base Location Name", post_errors, empty_string_allowed=True, none_allowed=True)
+    base_location_object = None
+    if rqst_base_location_name is not None or rqst_base_location_name != '':
+        try:
+            base_location_object = NavMetricsLocation.objects.get(name__iexact=rqst_base_location_name)
+        except NavMetricsLocation.DoesNotExist:
+            post_errors.append('Location object does not exist for \'Base Location Name]\': {!s}'.format(rqst_base_location_name))
 
     if len(post_errors) == 0:
         usr_rqst_values = {"first_name": rqst_usr_f_name,
                            "last_name": rqst_usr_l_name,
                            "type": rqst_usr_type,
-                           "county": rqst_county,}
+                           "county": rqst_county,
+                           "base_location": base_location_object,
+                           "mpn": rqst_usr_mpn}
         user_instance, user_instance_created = PICStaff.objects.get_or_create(email=rqst_usr_email,
                                                                               defaults=usr_rqst_values)
         if not user_instance_created:
@@ -32,10 +126,20 @@ def add_staff(response_raw_data, post_json, post_errors):
 def modify_staff(response_raw_data, post_json, post_errors):
     rqst_usr_id = clean_json_int_input(post_json, "root", "Database ID", post_errors)
     rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+    rqst_usr_mpn = clean_json_string_input(post_json, "root", "MPN", post_errors, empty_string_allowed=True, none_allowed=True)
+    if rqst_usr_mpn is None:
+        rqst_usr_mpn = ''
     rqst_usr_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
     rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
     rqst_county = clean_json_string_input(post_json, "root", "User County", post_errors)
     rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
+    rqst_base_location_name = clean_json_string_input(post_json, "root", "Base Location Name", post_errors, empty_string_allowed=True, none_allowed=True)
+    base_location_object = None
+    if rqst_base_location_name is not None or rqst_base_location_name != '':
+        try:
+            base_location_object = NavMetricsLocation.objects.get(name__iexact=rqst_base_location_name)
+        except NavMetricsLocation.DoesNotExist:
+            post_errors.append('Location object does not exist for \'Base Location Name]\': {!s}'.format(rqst_base_location_name))
 
     if len(post_errors) == 0:
         try:
@@ -45,6 +149,8 @@ def modify_staff(response_raw_data, post_json, post_errors):
             staff_instance.type = rqst_usr_type
             staff_instance.county = rqst_county
             staff_instance.email = rqst_usr_email
+            staff_instance.mpn = rqst_usr_mpn
+            staff_instance.base_location = base_location_object
             staff_instance.save()
             response_raw_data['Data'] = {"Database ID": staff_instance.id}
         except PICStaff.DoesNotExist:
@@ -189,26 +295,49 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
     if consumer_metrics is not None:
         consumer_metrics = post_json["Consumer Metrics"]
 
-        rqst_cons_rec_edu = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Received Education",
+        rqst_no_general_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_general_assis",
                                                  post_errors)
-        rqst_cons_app_maid = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Applied Medicaid",
-                                                  post_errors)
-        rqst_cons_sel_qhp = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Selected QHP", post_errors)
-        rqst_cons_ref_maidorchip = clean_json_int_input(consumer_metrics, "Consumer Metrics",
-                                                        "Referred Medicaid or CHIP", post_errors)
-        rqst_cons_filed_exemptions = clean_json_int_input(consumer_metrics, "Consumer Metrics", "Filed Exemptions",
-                                                          post_errors)
-        rqst_cons_rec_postenr_support = clean_json_int_input(consumer_metrics, "Consumer Metrics",
-                                                             "Received Post-Enrollment Support", post_errors)
-        rqst_cons_trends = clean_json_string_input(consumer_metrics, "Consumer Metrics", "Trends", post_errors,
-                                                   empty_string_allowed=True, none_allowed=True)
-        rqst_cons_success_story = clean_json_string_input(consumer_metrics, "Consumer Metrics", "Success Story",
-                                                          post_errors)
-        rqst_cons_hard_or_diff = clean_json_string_input(consumer_metrics, "Consumer Metrics",
-                                                         "Hardship or Difficulty", post_errors)
-        rqst_usr_outr_act = clean_json_string_input(consumer_metrics, "Consumer Metrics",
-                                                            "Outreach Activities", post_errors,
-                                                            empty_string_allowed=True, none_allowed=True)
+        rqst_no_plan_usage_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_plan_usage_assis",
+                                                 post_errors)
+        rqst_no_locating_provider_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_locating_provider_assis",
+                                                 post_errors)
+        rqst_no_billing_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_billing_assis",
+                                                 post_errors)
+        rqst_no_enroll_apps_started = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_enroll_apps_started",
+                                                 post_errors)
+        rqst_no_enroll_qhp = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_enroll_qhp",
+                                                 post_errors)
+        rqst_no_enroll_abe_chip = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_enroll_abe_chip",
+                                                 post_errors)
+        rqst_no_enroll_shop = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_enroll_shop",
+                                                 post_errors)
+        rqst_no_referrals_agents_brokers = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_referrals_agents_brokers",
+                                                 post_errors)
+        rqst_no_referrals_ship_medicare = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_referrals_ship_medicare",
+                                                 post_errors)
+        rqst_no_referrals_other_assis_programs = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_referrals_other_assis_programs",
+                                                 post_errors)
+        rqst_no_referrals_issuers = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_referrals_issuers",
+                                                 post_errors)
+        rqst_no_referrals_doi = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_referrals_doi",
+                                                 post_errors)
+        rqst_no_mplace_tax_form_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_mplace_tax_form_assis",
+                                                 post_errors)
+        rqst_no_mplace_exempt_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_mplace_exempt_assis",
+                                                 post_errors)
+        rqst_no_qhp_abe_appeals = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_qhp_abe_appeals",
+                                                 post_errors)
+        rqst_no_data_matching_mplace_issues = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_data_matching_mplace_issues",
+                                                 post_errors)
+        rqst_no_sep_eligible = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_sep_eligible",
+                                                 post_errors)
+        rqst_no_employ_spons_cov_issues = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_employ_spons_cov_issues",
+                                                 post_errors)
+        rqst_no_aptc_csr_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_aptc_csr_assis",
+                                                 post_errors)
+        rqst_cmplx_cases_mplace_issues = clean_json_string_input(consumer_metrics, "Consumer Metrics", "cmplx_cases_mplace_issues", post_errors,
+                                                   empty_string_allowed=True)
+
         rqst_metrics_county = clean_json_string_input(consumer_metrics, "Consumer Metrics", "County", post_errors)
         rqst_metrics_location = clean_json_string_input(consumer_metrics, "Consumer Metrics", "Location", post_errors)
 
@@ -238,14 +367,14 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
         # user_instance, user_instance_created = PICStaff.objects.get_or_create(email=rqst_usr_email,
         #                                                                       defaults=usr_rqst_values)
         try:
+            metrics_instance_message = 'Metrics Entry Updated'
             user_instance = PICStaff.objects.get(email__iexact=rqst_usr_email)
 
             try:
                 metrics_instance = MetricsSubmission.objects.get(staff_member=user_instance, submission_date=metrics_date)
-                response_raw_data["Status"]["Message"] = ['Metrics Entry Updated']
             except models.ObjectDoesNotExist:
                 metrics_instance = MetricsSubmission(staff_member=user_instance, submission_date=metrics_date)
-                response_raw_data["Status"]["Message"] = ['Metrics Entry Created']
+                metrics_instance_message = 'Metrics Entry Created'
             except MetricsSubmission.MultipleObjectsReturned:
                 post_errors.append("Multiple metrics entries exist for this date")
 
@@ -253,16 +382,27 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
                 response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
                 return response
 
-            metrics_instance.received_education = rqst_cons_rec_edu
-            metrics_instance.applied_medicaid = rqst_cons_app_maid
-            metrics_instance.selected_qhp = rqst_cons_sel_qhp
-            metrics_instance.ref_medicaid_or_chip = rqst_cons_ref_maidorchip
-            metrics_instance.filed_exemptions = rqst_cons_filed_exemptions
-            metrics_instance.rec_postenroll_support = rqst_cons_rec_postenr_support
-            metrics_instance.trends = rqst_cons_trends
-            metrics_instance.success_story = rqst_cons_success_story
-            metrics_instance.hardship_or_difficulty = rqst_cons_hard_or_diff
-            metrics_instance.outreach_activity = rqst_usr_outr_act
+            metrics_instance.no_general_assis = rqst_no_general_assis
+            metrics_instance.no_plan_usage_assis = rqst_no_plan_usage_assis
+            metrics_instance.no_locating_provider_assis = rqst_no_locating_provider_assis
+            metrics_instance.no_billing_assis = rqst_no_billing_assis
+            metrics_instance.no_enroll_apps_started = rqst_no_enroll_apps_started
+            metrics_instance.no_enroll_qhp = rqst_no_enroll_qhp
+            metrics_instance.no_enroll_abe_chip = rqst_no_enroll_abe_chip
+            metrics_instance.no_enroll_shop = rqst_no_enroll_shop
+            metrics_instance.no_referrals_agents_brokers = rqst_no_referrals_agents_brokers
+            metrics_instance.no_referrals_ship_medicare = rqst_no_referrals_ship_medicare
+            metrics_instance.no_referrals_other_assis_programs = rqst_no_referrals_other_assis_programs
+            metrics_instance.no_referrals_issuers = rqst_no_referrals_issuers
+            metrics_instance.no_referrals_doi = rqst_no_referrals_doi
+            metrics_instance.no_mplace_tax_form_assis = rqst_no_mplace_tax_form_assis
+            metrics_instance.no_mplace_exempt_assis = rqst_no_mplace_exempt_assis
+            metrics_instance.no_qhp_abe_appeals = rqst_no_qhp_abe_appeals
+            metrics_instance.no_data_matching_mplace_issues = rqst_no_data_matching_mplace_issues
+            metrics_instance.no_sep_eligible = rqst_no_sep_eligible
+            metrics_instance.no_employ_spons_cov_issues = rqst_no_employ_spons_cov_issues
+            metrics_instance.no_aptc_csr_assis = rqst_no_aptc_csr_assis
+            metrics_instance.cmplx_cases_mplace_issues = rqst_cmplx_cases_mplace_issues
             metrics_instance.county = rqst_metrics_county
 
             try:
@@ -275,6 +415,7 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
                 post_errors.append("Multiple location instances exist for given location name: {!s}".format(rqst_metrics_location))
 
             if len(post_errors) == 0:
+                response_raw_data["Status"]["Message"] = [metrics_instance_message]
                 metrics_instance.save()
 
                 rqst_plan_stats = clean_list_input(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors)
