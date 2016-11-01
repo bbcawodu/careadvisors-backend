@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.db import models, IntegrityError
-from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer, NavMetricsLocation, Country
+from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer, NavMetricsLocation, Country, ConsumerNote
 import datetime, json, sys
 from picbackend.utils.base import clean_json_string_input, clean_json_int_input, clean_dict_input, clean_list_input,\
     parse_and_log_errors
@@ -206,6 +206,7 @@ def add_consumer(response_raw_data, post_json, post_errors):
     rqst_consumer_household_size = clean_json_int_input(post_json, "root", "Household Size", post_errors)
     rqst_consumer_phone = clean_json_string_input(post_json, "root", "Phone Number", post_errors, empty_string_allowed=True)
     rqst_consumer_pref_lang = clean_json_string_input(post_json, "root", "Preferred Language", post_errors, empty_string_allowed=True)
+    rqst_navigator_notes = clean_list_input(post_json, "root", "Navigator Notes", post_errors, empty_list_allowed=True)
     rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
 
     if len(post_errors) == 0:
@@ -219,6 +220,7 @@ def add_consumer(response_raw_data, post_json, post_errors):
                                 "met_nav_at": rqst_consumer_met_nav_at,
                                 "household_size": rqst_consumer_household_size,
                                 "preferred_language": rqst_consumer_pref_lang}
+
         consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(email=rqst_consumer_email,
                                                                                          defaults=consumer_rqst_values)
         if not consumer_instance_created:
@@ -231,6 +233,15 @@ def add_consumer(response_raw_data, post_json, post_errors):
                 response_raw_data['Data'] = {"Database ID": consumer_instance.id}
             except PICStaff.DoesNotExist:
                 post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
+
+        if consumer_instance:
+            old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
+            for old_consumer_note in old_consumer_notes:
+                old_consumer_note.delete()
+
+            for navigator_note in rqst_navigator_notes:
+                consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
+                consumer_note_object.save()
 
     response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
@@ -249,6 +260,7 @@ def modify_consumer(response_raw_data, post_json, post_errors):
     rqst_consumer_phone = clean_json_string_input(post_json, "root", "Phone Number", post_errors, empty_string_allowed=True)
     rqst_consumer_pref_lang = clean_json_string_input(post_json, "root", "Preferred Language", post_errors, empty_string_allowed=True)
     rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
+    rqst_navigator_notes = clean_list_input(post_json, "root", "Navigator Notes", post_errors, empty_list_allowed=True)
     rqst_consumer_id = clean_json_int_input(post_json, "root", "Consumer Database ID", post_errors)
 
     if len(post_errors) == 0:
@@ -270,6 +282,16 @@ def modify_consumer(response_raw_data, post_json, post_errors):
             consumer_instance.navigator = nav_instance
 
             consumer_instance.save()
+
+            if consumer_instance:
+                old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
+                for old_consumer_note in old_consumer_notes:
+                    old_consumer_note.delete()
+
+                for navigator_note in rqst_navigator_notes:
+                    consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
+                    consumer_note_object.save()
+
             response_raw_data['Data'] = {"Database ID": consumer_instance.id}
         except PICConsumer.DoesNotExist:
             post_errors.append('Consumer database entry does not exist for the id: {!s}'.format(str(rqst_consumer_id)))
