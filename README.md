@@ -229,6 +229,12 @@ To modify or add members of the PICConsumer class in the database, submit a POST
 "Address": String (Can be empty),
 "Met Navigator At": String,
 "Household Size": Integer,
+"Navigator Notes": [
+                        "These are",
+                        "sample notes",
+                        "navigators write about consumers",
+                        ...
+                    ](Can be an empty array),
 "Plan": String (Can be empty),
 "Preferred Language": String (Can be empty),
 "Navigator Database ID": Integer,
@@ -301,6 +307,12 @@ In response, a JSON document will be displayed with the following format:
                 "Last Name": String,
                 "Navigator": String,
                 "Zipcode": String,
+                "Navigator Notes": [
+                                        "These are",
+                                        "sample notes",
+                                        "navigators write about consumers",
+                                        ...
+                                    ],
                 "Address": String,
                 "Met Navigator At": String,
                 "Household Size": Integer,

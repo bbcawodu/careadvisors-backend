@@ -169,7 +169,6 @@ class PICConsumer(models.Model):
     household_size = models.IntegerField()
     plan = models.CharField(max_length=1000, blank=True, null=True)
     met_nav_at = models.CharField(max_length=1000)
-    #Add consumer notes field
 
     class Meta:
         # maps model to the picmodels module
@@ -196,8 +195,21 @@ class PICConsumer(models.Model):
                       "Met Navigator At": self.met_nav_at,
                       "Best Contact Time": self.best_contact_time,
                       "Navigator": "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name),
+                      "Navigator Notes": None,
                       "Database ID": self.id}
+
+        navigator_note_objects = ConsumerNote.objects.filter(consumer=self.id)
+        navigator_note_list = []
+        for navigator_note in navigator_note_objects:
+            navigator_note_list.append(navigator_note.navigator_notes)
+        valuesdict["Navigator Notes"] = navigator_note_list
+
         return valuesdict
+
+
+class ConsumerNote(models.Model):
+    consumer = models.ForeignKey(PICConsumer, on_delete=models.CASCADE)
+    navigator_notes = models.TextField(blank=True, default="")
 
 
 class Location(models.Model):
