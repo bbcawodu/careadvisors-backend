@@ -18,7 +18,7 @@ from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_
     retrieve_email_consumers, retrieve_first_name_consumers, retrieve_last_name_consumers, retrieve_id_consumers,\
     break_results_into_pages, group_metrics, retrieve_id_metrics, retrieve_f_l_name_metrics,\
     retrieve_first_name_metrics, retrieve_last_name_metrics, retrieve_email_metrics, retrieve_county_staff,\
-    retrieve_region_staff, retrieve_location_metrics
+    retrieve_region_staff, retrieve_location_metrics, retrieve_mpn_metrics, retrieve_mpn_staff
 
 
 # defines view for home page
@@ -190,6 +190,11 @@ def handle_staff_api_request(request):
         list_of_emails = search_params['email list']
         response_raw_data, rqst_errors = retrieve_email_staff(response_raw_data, rqst_errors, rqst_email,
                                                               list_of_emails)
+    elif 'mpn' in search_params:
+        rqst_mpn = search_params['mpn']
+        list_of_mpns = search_params['mpn list']
+        response_raw_data, rqst_errors = retrieve_mpn_staff(response_raw_data, rqst_errors, rqst_mpn,
+                                                              list_of_mpns)
     elif 'first name' in search_params:
         rqst_first_name = search_params['first name']
         list_of_first_names = search_params['first name list']
@@ -367,6 +372,11 @@ def handle_metrics_api_request(request):
         list_of_emails = search_params['email list']
         metrics_dict = retrieve_email_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_staff_email,
                                               list_of_emails)
+    elif 'mpn' in search_params:
+        rqst_staff_mpn = search_params['mpn']
+        list_of_mpns = search_params['mpn list']
+        metrics_dict = retrieve_mpn_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_staff_mpn,
+                                              list_of_mpns)
     # elif 'location' in search_params:
     #     rqst_location = search_params['location']
     #     metrics_dict = retrieve_location_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_location)

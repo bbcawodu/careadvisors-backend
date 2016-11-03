@@ -15,6 +15,9 @@ def build_search_params(rqst_params, response_raw_data, rqst_errors):
     if 'email' in rqst_params:
         search_params['email'] = rqst_params['email']
         search_params['email list'] = re.findall(r"[@\w. '-]+", search_params['email'])
+    if 'mpn' in rqst_params:
+        search_params['mpn'] = rqst_params['mpn']
+        search_params['mpn list'] = re.findall(r"[@\w. '-]+", search_params['mpn'])
     if 'region' in rqst_params:
         search_params['region'] = rqst_params['region']
         search_params['region list'] = re.findall(r"[@\w. '-]+", search_params['region'])
@@ -113,7 +116,32 @@ def retrieve_email_staff(response_raw_data, rqst_errors, rqst_email, list_of_ema
                     response_raw_data['Status']['Error Code'] = 2
                 rqst_errors.append('Staff Member with email: {!s} not found in database'.format(email))
     else:
-        rqst_errors.append('Staff Member with emails(s): {!s} not found in database'.format(rqst_email))
+        rqst_errors.append('Staff Member with email(s): {!s} not found in database'.format(rqst_email))
+
+    return response_raw_data, rqst_errors
+
+
+def retrieve_mpn_staff(response_raw_data, rqst_errors, rqst_mpn, list_of_mpns):
+    staff_dict = {}
+    for mpn in list_of_mpns:
+        staff_members = PICStaff.objects.filter(mpn__iexact=mpn)
+        for staff_member in staff_members:
+            if mpn not in staff_dict:
+                staff_dict[mpn] = [staff_member.return_values_dict()]
+            else:
+                staff_dict[mpn].append(staff_member.return_values_dict())
+    if len(staff_dict) > 0:
+        staff_list = []
+        for staff_key, staff_entry in staff_dict.items():
+            staff_list.append(staff_entry)
+        response_raw_data["Data"] = staff_list
+        for mpn in list_of_mpns:
+            if email not in staff_dict:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    response_raw_data['Status']['Error Code'] = 2
+                rqst_errors.append('Staff Member with mpn: {!s} not found in database'.format(mpn))
+    else:
+        rqst_errors.append('Staff Member with mpn(s): {!s} not found in database'.format(rqst_mpn))
 
     return response_raw_data, rqst_errors
 
@@ -625,6 +653,41 @@ def retrieve_email_metrics(response_raw_data, rqst_errors, metrics_submissions, 
     else:
         if response_raw_data['Status']['Error Code'] != 2:
             rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_staff_email))
+
+    return metrics_dict
+
+
+def retrieve_mpn_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_staff_mpn, list_of_mpns):
+    list_of_ids = []
+    metrics_dict = {}
+
+    for mpn in list_of_mpns:
+        mpn_ids = PICStaff.objects.filter(mpn__iexact=mpn).values_list('id', flat=True)
+        if len(mpn_ids) > 0:
+            list_of_ids.append(mpn_ids)
+        else:
+            if response_raw_data['Status']['Error Code'] != 2:
+                response_raw_data['Status']['Error Code'] = 2
+            rqst_errors.append('Staff member with mpn: {!s} not found in database'.format(mpn))
+    list_of_ids = list(set().union(*list_of_ids))
+    if len(list_of_ids) > 0:
+        for indx, element in enumerate(list_of_ids):
+            list_of_ids[indx] = int(element)
+        metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
+
+        if len(metrics_submissions) > 0:
+            for metrics_submission in metrics_submissions:
+                if metrics_submission.staff_member.email not in metrics_dict:
+                    metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [metrics_submission.return_values_dict()]}
+                    metrics_dict[metrics_submission.staff_member.email]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+                else:
+                    metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(metrics_submission.return_values_dict())
+        else:
+            if response_raw_data['Status']['Error Code'] != 2:
+                rqst_errors.append('No metrics entries for mpn(s): {!s} not found in database'.format(rqst_staff_mpn))
+    else:
+        if response_raw_data['Status']['Error Code'] != 2:
+            rqst_errors.append('No metrics entries for mpn(s): {!s} not found in database'.format(rqst_staff_mpn))
 
     return metrics_dict
 
