@@ -141,10 +141,11 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Staff Data Retrieval API
-- To retrieve staff data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/staff? with the following optional parameters: "fname", "lname", "email", "id"
+- To retrieve staff data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/staff? with the following optional parameters: "fname", "lname", "email", "mpn", "id"
     - "fname" corresponds to first name.
     - "lname" corresponds to last name.
     - "email" corresponds to email.
+    - "mpn" corresponds to mpn.
     - "county" corresponds to email.
     - "id" corresponds to database id.
         - passing "all" as the value will return all staff members
@@ -552,6 +553,17 @@ The Following is a list of possible Plan Issuer Names with corresponding model c
 ]
 ```
 
+The following is a list of contact numbers for plan issuers
+```
+[
+    'Health Alliance Medical Plans, Inc.' = '1-800-851-3379, option 3'
+    'Blue Cross Blue Shield of Illinois' = '866-514-8044'
+    'Humana Health Plan, Inc.' = '1-800-833-6917
+    "Celtic Insurance Company" = "1-800-477-7870"
+    'Cigna HealthCare of Illinois, Inc.' = '1.866.494.2111'
+]
+```
+
 The Following is a list of possible Plan Premium Types with corresponding model constant names:
 ```
 [
@@ -598,10 +610,11 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Consumer Metrics Retrieval API.
-- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/metrics? with the following optional parameters: "fname", "lname", "email", "id", "time", "groupby", "startdate", "enddate", "time", "zipcode", "location"
+- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/metrics? with the following optional parameters: "fname", "lname", "email", "mpn", "id", "time", "groupby", "startdate", "enddate", "time", "zipcode", "location"
     - "fname" corresponds to staff member first name.
     - "lname" corresponds to staff member last name.
     - "email" corresponds to staff member email.
+    - "mpn" corresponds to staff member mpn.
     - "id" corresponds to staff member class database id.
         - passing "all" as the value will return all staff members
     - One of the above parameters is allowed at a time (only "fname" and "lname" can be grouped)
