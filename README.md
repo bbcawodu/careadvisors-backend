@@ -610,7 +610,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Consumer Metrics Retrieval API.
-- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/metrics? with the following optional parameters: "fname", "lname", "email", "mpn", "id", "time", "groupby", "startdate", "enddate", "time", "zipcode", "location"
+- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/metrics? with the following optional parameters: "fname", "lname", "email", "mpn", "id", "time", "groupby", "startdate", "enddate", "time", "zipcode", "location", "fields"
     - "fname" corresponds to staff member first name.
     - "lname" corresponds to staff member last name.
     - "email" corresponds to staff member email.
@@ -619,12 +619,14 @@ In response, a JSON document will be displayed with the following format:
         - passing "all" as the value will return all staff members
     - One of the above parameters is allowed at a time (only "fname" and "lname" can be grouped)
         - If "fname" and "lname" are given simultaneously as parameters, only one value each is permitted.
-    - The following parameters can be added without limit to the query: "startdate", "enddate", "time", "zipcode", "groupby", "location"
+    - The following parameters can be added without limit to the query: "startdate", "enddate", "time", "zipcode", "groupby", "location", "fields"
         - "startdate" and "enddate" must be given in "YYYY-MM-DD" format
         - "time" must be an integer amount of days to look up in the past
         - "zipcode" must be a non empty comma separated string of zipcodes
         - "location" must be a percent encoded string that corresponds to the name of the location you desire to search for
         - "grouby" can be "zipcode" to group the metrics submissions returned by zipcode
+        - "fields" must be a percent encoded list of fields that you would like each metrics report to include.
+            - If no valid fields are given, all fields of each metrics report will be returned
         
 - The response will be a JSON document with the following format:
     ```
