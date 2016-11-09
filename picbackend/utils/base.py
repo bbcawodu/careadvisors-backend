@@ -57,7 +57,7 @@ def clean_list_input(json_dict, dict_name, dict_key, post_errors, empty_list_all
 
 
 def init_response_data():
-    return {'Status': {"Error Code": 0, "Version": 1.0}}, []
+    return {'Status': {"Error Code": 0, "Version": 1.0, "Missing Parameters": []}}, []
 
 
 def parse_and_log_errors(response_raw_data, errors_list):

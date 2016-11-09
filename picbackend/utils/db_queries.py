@@ -139,7 +139,7 @@ def retrieve_mpn_staff(response_raw_data, rqst_errors, rqst_mpn, list_of_mpns):
             staff_list.append(staff_entry)
         response_raw_data["Data"] = staff_list
         for mpn in list_of_mpns:
-            if email not in staff_dict:
+            if mpn not in staff_dict:
                 if response_raw_data['Status']['Error Code'] != 2:
                     response_raw_data['Status']['Error Code'] = 2
                 rqst_errors.append('Staff Member with mpn: {!s} not found in database'.format(mpn))
@@ -518,8 +518,10 @@ def retrieve_id_metrics(response_raw_data, rqst_errors, metrics_submissions, rqs
                     if response_raw_data['Status']['Error Code'] != 2:
                         response_raw_data['Status']['Error Code'] = 2
                     rqst_errors.append('Metrics for staff Member with id: {!s} not found in database'.format(str(staff_id)))
+                    response_raw_data["Status"]["Missing Parameters"].append(str(staff_id))
     else:
         rqst_errors.append('No metrics entries for staff ID(s): {!s} not found in database'.format(rqst_staff_id))
+        response_raw_data["Status"]["Missing Parameters"].append(rqst_staff_id)
 
     return metrics_dict
 
@@ -537,6 +539,7 @@ def retrieve_f_l_name_metrics(response_raw_data, rqst_errors, metrics_submission
                 if response_raw_data['Status']['Error Code'] != 2:
                     response_raw_data['Status']['Error Code'] = 2
                 rqst_errors.append('Metrics for staff member with name: {!s} {!s} not found in database'.format(first_name, last_name))
+                response_raw_data["Status"]["Missing Parameters"].append(first_name + last_name)
         list_of_ids = list(set().union(*list_of_ids))
         if len(list_of_ids) > 0:
             for indx, element in enumerate(list_of_ids):
@@ -545,6 +548,7 @@ def retrieve_f_l_name_metrics(response_raw_data, rqst_errors, metrics_submission
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for first names(s): {!s}; and last names(s): {!s} not found in database'.format(rqst_fname, rqst_lname))
+                response_raw_data["Status"]["Missing Parameters"].append(rqst_fname + rqst_lname)
 
         if len(metrics_submissions) > 0:
             for metrics_submission in metrics_submissions:
@@ -565,6 +569,7 @@ def retrieve_f_l_name_metrics(response_raw_data, rqst_errors, metrics_submission
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for first names(s): {!s}; and last names(s): {!s} not found in database'.format(rqst_fname, rqst_lname))
+                response_raw_data["Status"]["Missing Parameters"].append(rqst_fname + rqst_lname)
     else:
         rqst_errors.append('Length of first name list must be equal to length of last name list')
 
@@ -583,6 +588,7 @@ def retrieve_first_name_metrics(response_raw_data, rqst_errors, metrics_submissi
             if response_raw_data['Status']['Error Code'] != 2:
                 response_raw_data['Status']['Error Code'] = 2
             rqst_errors.append('Metrics for staff member with first name: {!s} not found in database'.format(first_name))
+            response_raw_data["Status"]["Missing Parameters"].append(first_name)
     list_of_ids = list(set().union(*list_of_ids))
     if len(list_of_ids) > 0:
         for indx, element in enumerate(list_of_ids):
@@ -607,9 +613,11 @@ def retrieve_first_name_metrics(response_raw_data, rqst_errors, metrics_submissi
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_fname))
+                response_raw_data["Status"]["Missing Parameters"].append(rqst_fname)
     else:
         if response_raw_data['Status']['Error Code'] != 2:
             rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_fname))
+            response_raw_data["Status"]["Missing Parameters"].append(rqst_fname)
 
     return metrics_dict
 
@@ -626,6 +634,7 @@ def retrieve_last_name_metrics(response_raw_data, rqst_errors, metrics_submissio
             if response_raw_data['Status']['Error Code'] != 2:
                 response_raw_data['Status']['Error Code'] = 2
             rqst_errors.append('Metrics for staff member with last name: {!s} not found in database'.format(last_name))
+            response_raw_data["Status"]["Missing Parameters"].append(last_name)
     list_of_ids = list(set().union(*list_of_ids))
     if len(list_of_ids) > 0:
         for indx, element in enumerate(list_of_ids):
@@ -650,9 +659,11 @@ def retrieve_last_name_metrics(response_raw_data, rqst_errors, metrics_submissio
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_lname))
+                response_raw_data["Status"]["Missing Parameters"].append(rqst_lname)
     else:
         if response_raw_data['Status']['Error Code'] != 2:
             rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_lname))
+            response_raw_data["Status"]["Missing Parameters"].append(rqst_lname)
 
     return metrics_dict
 
@@ -669,6 +680,7 @@ def retrieve_email_metrics(response_raw_data, rqst_errors, metrics_submissions, 
             if response_raw_data['Status']['Error Code'] != 2:
                 response_raw_data['Status']['Error Code'] = 2
             rqst_errors.append('Staff member with email: {!s} not found in database'.format(email))
+            response_raw_data["Status"]["Missing Parameters"].append(email)
     list_of_ids = list(set().union(*list_of_ids))
     if len(list_of_ids) > 0:
         for indx, element in enumerate(list_of_ids):
@@ -693,9 +705,11 @@ def retrieve_email_metrics(response_raw_data, rqst_errors, metrics_submissions, 
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_staff_email))
+                response_raw_data["Status"]["Missing Parameters"].append(rqst_staff_email)
     else:
         if response_raw_data['Status']['Error Code'] != 2:
             rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_staff_email))
+            response_raw_data["Status"]["Missing Parameters"].append(rqst_staff_email)
 
     return metrics_dict
 
@@ -712,6 +726,7 @@ def retrieve_mpn_metrics(response_raw_data, rqst_errors, metrics_submissions, rq
             if response_raw_data['Status']['Error Code'] != 2:
                 response_raw_data['Status']['Error Code'] = 2
             rqst_errors.append('Staff member with mpn: {!s} not found in database'.format(mpn))
+            response_raw_data["Status"]["Missing Parameters"].append(mpn)
     list_of_ids = list(set().union(*list_of_ids))
     if len(list_of_ids) > 0:
         for indx, element in enumerate(list_of_ids):
@@ -736,9 +751,11 @@ def retrieve_mpn_metrics(response_raw_data, rqst_errors, metrics_submissions, rq
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for mpn(s): {!s} not found in database'.format(rqst_staff_mpn))
+                response_raw_data["Status"]["Missing Parameters"].append(rqst_staff_mpn)
     else:
         if response_raw_data['Status']['Error Code'] != 2:
             rqst_errors.append('No metrics entries for mpn(s): {!s} not found in database'.format(rqst_staff_mpn))
+            response_raw_data["Status"]["Missing Parameters"].append(rqst_staff_mpn)
 
     return metrics_dict
 
