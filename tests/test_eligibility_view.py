@@ -583,3 +583,26 @@ class AmbetterTestsWithValidPost2(TestCase, EligibilityValidPostTestBase):
         cls.status_data = cls.response_data["Status"]
 
         cls.elig_data = cls.response_data["Data"]
+
+class TricareTestsWithValidPost2(TestCase, EligibilityValidPostTestBase):
+    @classmethod
+    def setUpClass(cls):
+        TestCase.setUpClass()
+        EligibilityValidPostTestBase.setUpClass()
+        cls.post_data["Birth Date"] = "1957-02-13"
+        cls.post_data["First Name"] = "Isaac"
+        cls.post_data["Last Name"] = "Bradford"
+        cls.post_data["Consumer Plan ID"] = "329546447"
+        cls.post_data["Gender"] = None
+        cls.post_data["Trading Partner ID"] = "tricare"
+        json_post_data = json.dumps(cls.post_data)
+
+        c = Client()
+        cls.response = c.post('/v1/eligibility/', json_post_data, content_type="application/json")
+
+        response_data_json = cls.response.content.decode('utf-8')
+        cls.response_data = json.loads(response_data_json)
+
+        cls.status_data = cls.response_data["Status"]
+
+        cls.elig_data = cls.response_data["Data"]

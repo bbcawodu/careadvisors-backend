@@ -6,6 +6,22 @@ from django.db import models, IntegrityError
 from django.contrib.auth.models import User
 import datetime
 
+import pickle
+import base64
+
+from django.contrib import admin
+
+from oauth2client.contrib.django_util.models import CredentialsField
+
+
+class CredentialsModel(models.Model):
+  id = models.ForeignKey(User, primary_key=True)
+  credential = CredentialsField()
+
+
+class CredentialsAdmin(admin.ModelAdmin):
+    pass
+
 
 # Create your models here.
 class Country(models.Model):
@@ -158,14 +174,15 @@ class PICConsumer(models.Model):
     first_name = models.CharField(max_length=1000)
     middle_name = models.CharField(max_length=1000, blank=True, null=True)
     last_name = models.CharField(default="", max_length=1000)
-    email = models.EmailField()
+    email = models.EmailField(blank=True)
     phone = models.CharField(max_length=1000, blank=True, null=True)
     preferred_language = models.CharField(max_length=1000, blank=True, null=True)
     best_contact_time = models.CharField(max_length=1000, blank=True, null=True)
     navigator = models.ForeignKey(PICStaff, on_delete=models.SET_NULL, blank=True, null=True)
 
-    zipcode = models.CharField(max_length=1000, default="")
-    address = models.CharField(max_length=1000, blank=True, null=True)
+    zipcode = models.CharField(max_length=1000, blank=True, default="")
+    address_line_1 = models.CharField(max_length=1000, blank=True)
+    address_line_2 = models.CharField(max_length=1000, blank=True)
     household_size = models.IntegerField()
     plan = models.CharField(max_length=1000, blank=True, null=True)
     met_nav_at = models.CharField(max_length=1000)
@@ -189,7 +206,8 @@ class PICConsumer(models.Model):
                       "Phone Number": self.phone,
                       "Preferred Language": self.preferred_language,
                       "Zipcode": self.zipcode,
-                      "Address": self.address,
+                      "address_line_1": self.address_line_1,
+                      "address_line_2": self.address_line_2,
                       "Household Size": self.household_size,
                       "Plan": self.plan,
                       "Met Navigator At": self.met_nav_at,
@@ -205,6 +223,78 @@ class PICConsumer(models.Model):
         valuesdict["Navigator Notes"] = navigator_note_list
 
         return valuesdict
+# class PICConsumer(models.Model):
+#     #Why is using variables in addition to tuples is better? Error prevention and logic separation.
+#     MISCELLANEOUS = "Miscellaneous"
+#     MARKETPLACE = 'Marketplace'
+#     MEDICARE = 'Medicare'
+#     PLAN_TYPES = ((MISCELLANEOUS, "Miscellaneous"),
+#                   (MARKETPLACE, "Marketplace"),
+#                   (MEDICARE, "Medicare"),)
+#
+#     # fields for PICConsumer model
+#     first_name = models.CharField(max_length=1000)
+#     middle_name = models.CharField(max_length=1000, blank=True, null=True)
+#     last_name = models.CharField(default="", max_length=1000)
+#     email = models.EmailField()
+#     phone = models.CharField(max_length=1000, blank=True, null=True)
+#     preferred_language = models.CharField(max_length=1000, blank=True, null=True)
+#     best_contact_time = models.CharField(max_length=1000, blank=True, null=True)
+#     navigator = models.ForeignKey(PICStaff, on_delete=models.SET_NULL, blank=True, null=True)
+#
+#     zipcode = models.CharField(max_length=1000, default="")
+#     address = models.CharField(max_length=1000, blank=True, null=True)
+#     household_size = models.IntegerField()
+#     plan = models.CharField(max_length=1000, blank=True, null=True)
+#     met_nav_at = models.CharField(max_length=1000)
+#     date_met = models.DateField(blank=True, null=True)
+#     plan_type = models.CharField(max_length=1000,
+#                                  choices=PLAN_TYPES,
+#                                  default=MISCELLANEOUS)
+#
+#     class Meta:
+#         # maps model to the picmodels module
+#         app_label = 'picmodels'
+#
+#         unique_together = ("first_name",
+#                            "last_name",
+#                            "email",
+#                            "phone",
+#                            "preferred_language",
+#                            "best_contact_time")
+#
+#     def check_plan_types(self,):
+#         for plan_tuple in self.PLAN_TYPES:
+#             if plan_tuple[1].lower() == self.plan_type.lower():
+#                 return True
+#         return False
+#
+#     def return_values_dict(self):
+#         valuesdict = {"First Name": self.first_name,
+#                       "Middle Name": self.middle_name,
+#                       "Last Name": self.last_name,
+#                       "Email": self.email,
+#                       "Phone Number": self.phone,
+#                       "Preferred Language": self.preferred_language,
+#                       "Zipcode": self.zipcode,
+#                       "Address": self.address,
+#                       "Household Size": self.household_size,
+#                       "Plan": self.plan,
+#                       "Met Navigator At": self.met_nav_at,
+#                       "Best Contact Time": self.best_contact_time,
+#                       "Navigator": "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name),
+#                       "Navigator Notes": None,
+#                       "date_met": self.date_met.isoformat(),
+#                       "plan_type": self.plan_type,
+#                       "Database ID": self.id}
+#
+#         navigator_note_objects = ConsumerNote.objects.filter(consumer=self.id)
+#         navigator_note_list = []
+#         for navigator_note in navigator_note_objects:
+#             navigator_note_list.append(navigator_note.navigator_notes)
+#         valuesdict["Navigator Notes"] = navigator_note_list
+#
+#         return valuesdict
 
 
 class ConsumerNote(models.Model):

@@ -25,6 +25,7 @@ env_file = os.path.join(os.path.dirname(__file__), 'local.env')
 if os.path.exists(env_file):
     environ.Env.read_env(str(env_file))
 
+GOOGLE_OAUTH2_CLIENT_SECRETS_JSON = os.path.join(os.path.dirname(__file__), 'client_secret.json')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 

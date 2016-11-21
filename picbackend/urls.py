@@ -18,6 +18,8 @@ from django.contrib import admin
 from picbackend import views
 from presencescheduler import urls as scheduler_urls
 
+from django.contrib.auth.views import login
+
 #enables admin
 admin.autodiscover()
 
@@ -50,4 +52,6 @@ urlpatterns = [
     url(r"^v1/tradingpartners/$", views.handle_trading_partner_request),
     url(r"^v1/navlocations/$", views.handle_nav_location_api_request),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^oauth2callback', views.auth_return),
+    url(r'^accounts/login/$', login, {'template_name': 'login.html'}),
 ]

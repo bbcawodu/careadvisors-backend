@@ -10,7 +10,7 @@ def clean_json_string_input(json_dict, dict_name, dict_key, post_errors, empty_s
     elif json_dict[dict_key] is None and none_allowed is False:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
     else:
-        if json_dict[dict_key]:
+        if json_dict[dict_key] or json_dict[dict_key] == "":
             return str(json_dict[dict_key])
         else:
             return None
@@ -73,6 +73,7 @@ def parse_and_log_errors(response_raw_data, errors_list):
     return response_raw_data
 
 
+#Need to obtain valid NPI
 def fetch_and_parse_pokit_elig_data(post_json, response_raw_data, post_errors):
     rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors, none_allowed=True)
     rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors, none_allowed=True)

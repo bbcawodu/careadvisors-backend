@@ -195,12 +195,13 @@ def delete_staff(response_raw_data, post_json, post_errors):
 
 
 def add_consumer(response_raw_data, post_json, post_errors):
-    rqst_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+    rqst_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors, empty_string_allowed=True)
     rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
     rqst_consumer_m_name = clean_json_string_input(post_json, "root", "Middle Name", post_errors, empty_string_allowed=True)
     rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
-    rqst_consumer_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors)
-    rqst_consumer_address = clean_json_string_input(post_json, "root", "Address", post_errors, empty_string_allowed=True)
+    rqst_consumer_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors, empty_string_allowed=True)
+    rqst_address_line_1 = clean_json_string_input(post_json, "root", "address_line_1", post_errors, empty_string_allowed=True)
+    rqst_address_line_2 = clean_json_string_input(post_json, "root", "address_line_2", post_errors, empty_string_allowed=True)
     rqst_consumer_plan = clean_json_string_input(post_json, "root", "Plan", post_errors, empty_string_allowed=True)
     rqst_consumer_met_nav_at = clean_json_string_input(post_json, "root", "Met Navigator At", post_errors)
     rqst_consumer_household_size = clean_json_int_input(post_json, "root", "Household Size", post_errors)
@@ -210,18 +211,19 @@ def add_consumer(response_raw_data, post_json, post_errors):
     rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
 
     if len(post_errors) == 0:
-        consumer_rqst_values = {"first_name": rqst_consumer_f_name,
-                                "middle_name": rqst_consumer_m_name,
-                                "last_name": rqst_consumer_l_name,
-                                "phone": rqst_consumer_phone,
-                                "zipcode": rqst_consumer_zipcode,
-                                "address": rqst_consumer_address,
-                                "plan": rqst_consumer_plan,
+        consumer_rqst_values = {"plan": rqst_consumer_plan,
                                 "met_nav_at": rqst_consumer_met_nav_at,
                                 "household_size": rqst_consumer_household_size,
                                 "preferred_language": rqst_consumer_pref_lang}
 
         consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(email=rqst_consumer_email,
+                                                                                         first_name=rqst_consumer_f_name,
+                                                                                         middle_name=rqst_consumer_m_name,
+                                                                                         last_name=rqst_consumer_l_name,
+                                                                                         address_line_1=rqst_address_line_1,
+                                                                                         address_line_2=rqst_address_line_2,
+                                                                                         zipcode=rqst_consumer_zipcode,
+                                                                                         phone=rqst_consumer_phone,
                                                                                          defaults=consumer_rqst_values)
         if not consumer_instance_created:
             post_errors.append('Consumer database entry already exists for the email: {!s}'.format(rqst_consumer_email))
@@ -245,22 +247,98 @@ def add_consumer(response_raw_data, post_json, post_errors):
 
     response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
+# def add_consumer(response_raw_data, post_json, post_errors):
+#     rqst_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+#     rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
+#     rqst_consumer_m_name = clean_json_string_input(post_json, "root", "Middle Name", post_errors, empty_string_allowed=True)
+#     rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
+#     rqst_consumer_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors)
+#     rqst_consumer_address = clean_json_string_input(post_json, "root", "Address", post_errors, empty_string_allowed=True)
+#     rqst_consumer_plan = clean_json_string_input(post_json, "root", "Plan", post_errors, empty_string_allowed=True)
+#     rqst_consumer_met_nav_at = clean_json_string_input(post_json, "root", "Met Navigator At", post_errors)
+#     rqst_consumer_household_size = clean_json_int_input(post_json, "root", "Household Size", post_errors)
+#     rqst_consumer_phone = clean_json_string_input(post_json, "root", "Phone Number", post_errors, empty_string_allowed=True)
+#     rqst_consumer_pref_lang = clean_json_string_input(post_json, "root", "Preferred Language", post_errors, empty_string_allowed=True)
+#     rqst_navigator_notes = clean_list_input(post_json, "root", "Navigator Notes", post_errors, empty_list_allowed=True)
+#     rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
+#     date_met_dict = clean_dict_input(post_json, "root", "date_met", post_errors)
+#     if date_met_dict is not None:
+#         month = clean_json_int_input(date_met_dict, "date_met", "Month", post_errors)
+#         if month < 1 or month > 12:
+#             post_errors.append("Month must be between 1 and 12 inclusive")
+#
+#         day = clean_json_int_input(date_met_dict, "date_met", "Day", post_errors)
+#         if day < 1 or day > 31:
+#             post_errors.append("Day must be between 1 and 31 inclusive")
+#
+#         year = clean_json_int_input(date_met_dict, "date_met", "Year", post_errors)
+#         if year < 1 or year > 9999:
+#             post_errors.append("Year must be between 1 and 9999 inclusive")
+#
+#         if len(post_errors) == 0:
+#             date_met = datetime.date(year, month, day)
+#     rqst_plan_type = clean_json_string_input(post_json, "root", "plan_type", post_errors)
+#
+#     if len(post_errors) == 0:
+#         consumer_rqst_values = {"first_name": rqst_consumer_f_name,
+#                                 "middle_name": rqst_consumer_m_name,
+#                                 "last_name": rqst_consumer_l_name,
+#                                 "phone": rqst_consumer_phone,
+#                                 "zipcode": rqst_consumer_zipcode,
+#                                 "address": rqst_consumer_address,
+#                                 "plan": rqst_consumer_plan,
+#                                 "met_nav_at": rqst_consumer_met_nav_at,
+#                                 "household_size": rqst_consumer_household_size,
+#                                 "date_met": date_met,
+#                                 "plan_type": rqst_plan_type,
+#                                 "preferred_language": rqst_consumer_pref_lang}
+#
+#         consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(email=rqst_consumer_email,
+#                                                                                          defaults=consumer_rqst_values)
+#         plan_type_valid = consumer_instance.check_plan_types()
+#         if not plan_type_valid:
+#             post_errors.append("plan_type: {!s} is not part of member plan types".format(consumer_instance.plan_type))
+#
+#         if plan_type_valid:
+#             if not consumer_instance_created:
+#                 post_errors.append('Consumer database entry already exists for the email: {!s}'.format(rqst_consumer_email))
+#             else:
+#                 try:
+#                     nav_instance = PICStaff.objects.get(id=rqst_nav_id)
+#                     consumer_instance.navigator = nav_instance
+#                     consumer_instance.save()
+#                     response_raw_data['Data'] = {"Database ID": consumer_instance.id}
+#                 except PICStaff.DoesNotExist:
+#                     post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
+#
+#             if consumer_instance:
+#                 old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
+#                 for old_consumer_note in old_consumer_notes:
+#                     old_consumer_note.delete()
+#
+#                 for navigator_note in rqst_navigator_notes:
+#                     consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
+#                     consumer_note_object.save()
+#
+#     response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
+#     return response_raw_data
 
 
 def modify_consumer(response_raw_data, post_json, post_errors):
-    rqst_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+    rqst_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors, empty_string_allowed=True)
     rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
     rqst_consumer_m_name = clean_json_string_input(post_json, "root", "Middle Name", post_errors, empty_string_allowed=True)
     rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
-    rqst_consumer_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors)
-    rqst_consumer_address = clean_json_string_input(post_json, "root", "Address", post_errors, empty_string_allowed=True)
+    rqst_consumer_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors, empty_string_allowed=True)
+    rqst_address_line_1 = clean_json_string_input(post_json, "root", "address_line_1", post_errors, empty_string_allowed=True)
+    rqst_address_line_2 = clean_json_string_input(post_json, "root", "address_line_2", post_errors, empty_string_allowed=True)
     rqst_consumer_plan = clean_json_string_input(post_json, "root", "Plan", post_errors, empty_string_allowed=True)
     rqst_consumer_met_nav_at = clean_json_string_input(post_json, "root", "Met Navigator At", post_errors)
     rqst_consumer_household_size = clean_json_int_input(post_json, "root", "Household Size", post_errors)
     rqst_consumer_phone = clean_json_string_input(post_json, "root", "Phone Number", post_errors, empty_string_allowed=True)
     rqst_consumer_pref_lang = clean_json_string_input(post_json, "root", "Preferred Language", post_errors, empty_string_allowed=True)
-    rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
     rqst_navigator_notes = clean_list_input(post_json, "root", "Navigator Notes", post_errors, empty_list_allowed=True)
+    rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
     rqst_consumer_id = clean_json_int_input(post_json, "root", "Consumer Database ID", post_errors)
 
     if len(post_errors) == 0:
@@ -271,7 +349,8 @@ def modify_consumer(response_raw_data, post_json, post_errors):
             consumer_instance.last_name = rqst_consumer_l_name
             consumer_instance.phone = rqst_consumer_phone
             consumer_instance.zipcode = rqst_consumer_zipcode
-            consumer_instance.address = rqst_consumer_address
+            consumer_instance.address_line_1 = rqst_address_line_1
+            consumer_instance.address_line_2 = rqst_address_line_2
             consumer_instance.plan = rqst_consumer_plan
             consumer_instance.met_nav_at = rqst_consumer_met_nav_at
             consumer_instance.household_size = rqst_consumer_household_size

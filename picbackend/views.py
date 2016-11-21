@@ -4,7 +4,7 @@ Defines views that are mapped to url configurations
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from picmodels.models import PICStaff, MetricsSubmission, PICConsumer, PlanStat, NavMetricsLocation
+from picmodels.models import PICStaff, MetricsSubmission, PICConsumer, PlanStat, NavMetricsLocation, CredentialsModel
 import json, sys, pokitdok
 from picbackend.forms import NavMetricsLocationForm
 from django.contrib import messages
@@ -20,10 +20,58 @@ from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_
     retrieve_first_name_metrics, retrieve_last_name_metrics, retrieve_email_metrics, retrieve_county_staff,\
     retrieve_region_staff, retrieve_location_metrics, retrieve_mpn_metrics, retrieve_mpn_staff
 
+from oauth2client.client import flow_from_clientsecrets
+from picbackend.settings import GOOGLE_OAUTH2_CLIENT_SECRETS_JSON, SECRET_KEY
+from oauth2client.contrib.django_util.storage import DjangoORMStorage
+# from oauth2client.contrib.django_orm import Storage
+from django.contrib.auth.decorators import login_required
+from oauth2client.contrib import xsrfutil
+import logging
+import httplib2
+from googleapiclient.discovery import build
+from django.http import HttpResponseBadRequest
 
-# defines view for home page
+
+FLOW = flow_from_clientsecrets(
+    GOOGLE_OAUTH2_CLIENT_SECRETS_JSON,
+    scope='https://www.googleapis.com/auth/plus.me',
+    redirect_uri='http://localhost:5000/oauth2callback')
+
+
+@login_required
 def index(request):
-    return render(request, "home_page.html")
+    storage = DjangoORMStorage(CredentialsModel, 'id', request.user, 'credential')
+    credential = storage.get()
+    if credential is None or credential.invalid == True:
+        FLOW.params['state'] = xsrfutil.generate_token(SECRET_KEY,
+                                                       request.user)
+        authorize_url = FLOW.step1_get_authorize_url()
+        return HttpResponseRedirect(authorize_url)
+
+    else:
+        http = httplib2.Http()
+        http = credential.authorize(http)
+        service = build("plus", "v1", http=http)
+        activities = service.activities()
+        activitylist = activities.list(collection='public',
+                                       userId='me').execute()
+        logging.info(activitylist)
+
+        return render(request, 'welcome.html', {'activitylist': activitylist,})
+
+
+@login_required
+def auth_return(request):
+    if not xsrfutil.validate_token(SECRET_KEY, request.REQUEST['state'], request.user):
+        return HttpResponseBadRequest()
+    credential = FLOW.step2_exchange(request.REQUEST)
+    storage = Storage(CredentialsModel, 'id', request.user, 'credential')
+    storage.put(credential)
+    return HttpResponseRedirect("/")
+
+# # defines view for home page
+# def index(request):
+#     return render(request, "home_page.html")
 
 
 def handle_location_add_request(request):
