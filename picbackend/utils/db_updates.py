@@ -549,7 +549,7 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
             try:
                 location_instance = NavMetricsLocation.objects.get(name=rqst_metrics_location)
                 metrics_instance.location = location_instance
-                metrics_instance.zipcode = location_instance.zipcode
+                metrics_instance.zipcode = location_instance.address.zipcode
             except models.ObjectDoesNotExist:
                 post_errors.append("Location instance does not exist for given location name: {!s}.".format(rqst_metrics_location))
             except MetricsSubmission.MultipleObjectsReturned:
