@@ -64,9 +64,9 @@ def modify_nav_hub_location(response_raw_data, post_json, post_errors):
             location_instance.save()
             response_raw_data['Data'] = {"Database ID": location_instance.id}
         except NavMetricsLocation.DoesNotExist:
-            post_errors.append('Nav Hub Location database entry does not exist for the id: {!s}'.format(str(rqst_location_id)))
+            post_errors.append('Nav Hub Location database entry does not exist for the name: {!s}'.format(str(rqst_location_name)))
         except NavMetricsLocation.MultipleObjectsReturned:
-            post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_location_id)))
+            post_errors.append('Multiple database entries exist for the name: {!s}'.format(str(rqst_location_name)))
         except IntegrityError:
             post_errors.append('Database entry already exists for the name: {!s}'.format(rqst_location_name))
 
