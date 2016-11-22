@@ -201,9 +201,7 @@ class PICConsumer(models.Model):
     best_contact_time = models.CharField(max_length=1000, blank=True, null=True)
     navigator = models.ForeignKey(PICStaff, on_delete=models.SET_NULL, blank=True, null=True)
 
-    zipcode = models.CharField(max_length=1000, blank=True, default="")
-    address_line_1 = models.CharField(max_length=1000, blank=True)
-    address_line_2 = models.CharField(max_length=1000, blank=True)
+    address = models.ForeignKey(Address, blank=True, null=True)
     household_size = models.IntegerField()
     plan = models.CharField(max_length=1000, blank=True, null=True)
     met_nav_at = models.CharField(max_length=1000)
@@ -216,6 +214,7 @@ class PICConsumer(models.Model):
                            "last_name",
                            "email",
                            "phone",
+                           "address",
                            "preferred_language",
                            "best_contact_time")
 
@@ -226,9 +225,7 @@ class PICConsumer(models.Model):
                       "Email": self.email,
                       "Phone Number": self.phone,
                       "Preferred Language": self.preferred_language,
-                      "Zipcode": self.zipcode,
-                      "address_line_1": self.address_line_1,
-                      "address_line_2": self.address_line_2,
+                      "address": None,
                       "Household Size": self.household_size,
                       "Plan": self.plan,
                       "Met Navigator At": self.met_nav_at,
@@ -242,6 +239,12 @@ class PICConsumer(models.Model):
         for navigator_note in navigator_note_objects:
             navigator_note_list.append(navigator_note.navigator_notes)
         valuesdict["Navigator Notes"] = navigator_note_list
+
+        if self.address:
+            valuesdict["address"] = {}
+            address_values = self.address.return_values_dict()
+            for key in address_values:
+                valuesdict["address"][key] = address_values[key]
 
         return valuesdict
 # class PICConsumer(models.Model):

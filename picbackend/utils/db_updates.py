@@ -39,7 +39,7 @@ def add_nav_hub_location(response_raw_data, post_json, post_errors):
 
 
 def modify_nav_hub_location(response_raw_data, post_json, post_errors):
-    rqst_location_id = clean_json_int_input(post_json, "root", "Database ID", post_errors)
+    # rqst_location_id = clean_json_int_input(post_json, "root", "Database ID", post_errors)
     rqst_location_name = clean_json_string_input(post_json, "root", "Location Name", post_errors)
     rqst_address_line_1 = clean_json_string_input(post_json, "root", "Address Line 1", post_errors)
     rqst_address_line_2 = clean_json_string_input(post_json, "root", "Address Line 2", post_errors, empty_string_allowed=True)
@@ -202,9 +202,6 @@ def add_consumer(response_raw_data, post_json, post_errors):
     rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
     rqst_consumer_m_name = clean_json_string_input(post_json, "root", "Middle Name", post_errors, empty_string_allowed=True)
     rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
-    rqst_consumer_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors, empty_string_allowed=True)
-    rqst_address_line_1 = clean_json_string_input(post_json, "root", "address_line_1", post_errors, empty_string_allowed=True)
-    rqst_address_line_2 = clean_json_string_input(post_json, "root", "address_line_2", post_errors, empty_string_allowed=True)
     rqst_consumer_plan = clean_json_string_input(post_json, "root", "Plan", post_errors, empty_string_allowed=True)
     rqst_consumer_met_nav_at = clean_json_string_input(post_json, "root", "Met Navigator At", post_errors)
     rqst_consumer_household_size = clean_json_int_input(post_json, "root", "Household Size", post_errors)
@@ -213,7 +210,24 @@ def add_consumer(response_raw_data, post_json, post_errors):
     rqst_navigator_notes = clean_list_input(post_json, "root", "Navigator Notes", post_errors, empty_list_allowed=True)
     rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
 
+    rqst_address_line_1 = clean_json_string_input(post_json, "root", "Address Line 1", post_errors, empty_string_allowed=True)
+    rqst_address_line_2 = clean_json_string_input(post_json, "root", "Address Line 2", post_errors, empty_string_allowed=True)
+    if rqst_address_line_2 is None:
+        rqst_address_line_2 = ''
+    rqst_city = clean_json_string_input(post_json, "root", "City", post_errors, empty_string_allowed=True)
+    rqst_state = clean_json_string_input(post_json, "root", "State", post_errors, empty_string_allowed=True)
+    rqst_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors, empty_string_allowed=True)
+
     if len(post_errors) == 0:
+        address_instance = None
+        if rqst_address_line_1 != '' and rqst_city != '' and rqst_state != '' and rqst_zipcode != '':
+            address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=rqst_address_line_1,
+                                                                                       address_line_2=rqst_address_line_2,
+                                                                                       city=rqst_city,
+                                                                                       state_province=rqst_state,
+                                                                                       zipcode=rqst_zipcode,
+                                                                                       country=Country.objects.all()[0])
+
         consumer_rqst_values = {"plan": rqst_consumer_plan,
                                 "met_nav_at": rqst_consumer_met_nav_at,
                                 "household_size": rqst_consumer_household_size,
@@ -223,9 +237,7 @@ def add_consumer(response_raw_data, post_json, post_errors):
                                                                                          first_name=rqst_consumer_f_name,
                                                                                          middle_name=rqst_consumer_m_name,
                                                                                          last_name=rqst_consumer_l_name,
-                                                                                         address_line_1=rqst_address_line_1,
-                                                                                         address_line_2=rqst_address_line_2,
-                                                                                         zipcode=rqst_consumer_zipcode,
+                                                                                         address=address_instance,
                                                                                          phone=rqst_consumer_phone,
                                                                                          defaults=consumer_rqst_values)
         if not consumer_instance_created:
@@ -332,9 +344,6 @@ def modify_consumer(response_raw_data, post_json, post_errors):
     rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
     rqst_consumer_m_name = clean_json_string_input(post_json, "root", "Middle Name", post_errors, empty_string_allowed=True)
     rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
-    rqst_consumer_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors, empty_string_allowed=True)
-    rqst_address_line_1 = clean_json_string_input(post_json, "root", "address_line_1", post_errors, empty_string_allowed=True)
-    rqst_address_line_2 = clean_json_string_input(post_json, "root", "address_line_2", post_errors, empty_string_allowed=True)
     rqst_consumer_plan = clean_json_string_input(post_json, "root", "Plan", post_errors, empty_string_allowed=True)
     rqst_consumer_met_nav_at = clean_json_string_input(post_json, "root", "Met Navigator At", post_errors)
     rqst_consumer_household_size = clean_json_int_input(post_json, "root", "Household Size", post_errors)
@@ -344,16 +353,31 @@ def modify_consumer(response_raw_data, post_json, post_errors):
     rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
     rqst_consumer_id = clean_json_int_input(post_json, "root", "Consumer Database ID", post_errors)
 
+    rqst_address_line_1 = clean_json_string_input(post_json, "root", "Address Line 1", post_errors, empty_string_allowed=True)
+    rqst_address_line_2 = clean_json_string_input(post_json, "root", "Address Line 2", post_errors, empty_string_allowed=True)
+    if rqst_address_line_2 is None:
+        rqst_address_line_2 = ''
+    rqst_city = clean_json_string_input(post_json, "root", "City", post_errors, empty_string_allowed=True)
+    rqst_state = clean_json_string_input(post_json, "root", "State", post_errors, empty_string_allowed=True)
+    rqst_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors, empty_string_allowed=True)
+
     if len(post_errors) == 0:
+        address_instance = None
+        if rqst_address_line_1 != '' and rqst_city != '' and rqst_state != '' and rqst_zipcode != '':
+            address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=rqst_address_line_1,
+                                                                                       address_line_2=rqst_address_line_2,
+                                                                                       city=rqst_city,
+                                                                                       state_province=rqst_state,
+                                                                                       zipcode=rqst_zipcode,
+                                                                                       country=Country.objects.all()[0])
+
         try:
             consumer_instance = PICConsumer.objects.get(id=rqst_consumer_id)
             consumer_instance.first_name = rqst_consumer_f_name
             consumer_instance.middle_name = rqst_consumer_m_name
             consumer_instance.last_name = rqst_consumer_l_name
             consumer_instance.phone = rqst_consumer_phone
-            consumer_instance.zipcode = rqst_consumer_zipcode
-            consumer_instance.address_line_1 = rqst_address_line_1
-            consumer_instance.address_line_2 = rqst_address_line_2
+            consumer_instance.address = address_instance
             consumer_instance.plan = rqst_consumer_plan
             consumer_instance.met_nav_at = rqst_consumer_met_nav_at
             consumer_instance.household_size = rqst_consumer_household_size

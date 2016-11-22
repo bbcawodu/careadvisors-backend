@@ -226,9 +226,6 @@ To modify or add members of the PICConsumer class in the database, submit a POST
 "Last Name": String,
 "Email": String (Can be empty),
 "Phone Number": String (Can be empty),
-"Zipcode": String (Can be empty),
-"address_line_1": String (Can be empty),
-"address_line_2": String (Can be empty),
 "Met Navigator At": String,
 "Household Size": Integer,
 "Navigator Notes": [
@@ -240,6 +237,14 @@ To modify or add members of the PICConsumer class in the database, submit a POST
 "Plan": String (Can be empty),
 "Preferred Language": String (Can be empty),
 "Navigator Database ID": Integer,
+
+Address(Every field within address can be given as an empty string. Address will only be recorded/updated iff a full address is given)
+"Address Line 1": String (Can be empty),
+"Address Line 2": String (Can be empty),
+"City": String (Can be empty),
+"State": String (Can be empty),
+"Zipcode": String (Can be empty),
+
 "Consumer Database ID": Integer(Required when "Database Action" == "Consumer Modification" or "Consumer Deletion"),
 "Database Action": String,
 }
@@ -308,19 +313,25 @@ In response, a JSON document will be displayed with the following format:
                 "Middle Name": String,
                 "Last Name": String,
                 "Navigator": String,
-                "Zipcode": String,
                 "Navigator Notes": [
                                         "These are",
                                         "sample notes",
                                         "navigators write about consumers",
                                         ...
                                     ],
-                "address_line_1": String,
-                "address_line_2": String,
                 "Met Navigator At": String,
                 "Household Size": Integer,
                 "Plan": String,
                 "Best Contact Time": String,
+                "address": Will either be None or a dictionary of the following form:
+                           {
+                            "Address Line 1": String,
+                            "Address Line 2": String,
+                            "City": String,
+                            "State": String,
+                            "Zipcode": String,
+                            "Country": String,
+                           }
             },
             ...,
             ...,

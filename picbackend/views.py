@@ -413,7 +413,7 @@ def handle_metrics_api_request(request):
     metrics_submissions = MetricsSubmission.objects.all()
     if 'zipcode list' in search_params:
         list_of_zipcodes = search_params['zipcode list']
-        metrics_submissions = metrics_submissions.filter(location__zipcode__in=list_of_zipcodes)
+        metrics_submissions = metrics_submissions.filter(location__address__zipcode__in=list_of_zipcodes)
     if 'look up date' in search_params:
         look_up_date = search_params['look up date']
         metrics_submissions = metrics_submissions.filter(submission_date__gte=look_up_date)
