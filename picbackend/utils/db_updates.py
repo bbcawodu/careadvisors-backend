@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.db import models, IntegrityError
-from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer, NavMetricsLocation, Country, ConsumerNote
+from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer, NavMetricsLocation, Country, ConsumerNote,\
+    Address
 import datetime, json, sys
 from picbackend.utils.base import clean_json_string_input, clean_json_int_input, clean_dict_input, clean_list_input,\
     parse_and_log_errors
@@ -18,13 +19,14 @@ def add_nav_hub_location(response_raw_data, post_json, post_errors):
     rqst_country = clean_json_string_input(post_json, "root", "Country", post_errors)
 
     if len(post_errors) == 0:
+        address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=rqst_address_line_1,
+                                                                                   address_line_2=rqst_address_line_2,
+                                                                                   city=rqst_city,
+                                                                                   state_province=rqst_state,
+                                                                                   zipcode=rqst_zipcode,
+                                                                                   country=Country.objects.get(name=rqst_country))
         location_rqst_values = {"name": rqst_location_name,
-                                "address_line1": rqst_address_line_1,
-                                "address_line2": rqst_address_line_2,
-                                "city": rqst_city,
-                                "state_province": rqst_state,
-                                "zipcode": rqst_zipcode,
-                                "country": Country.objects.get(name=rqst_country)}
+                                "address": address_instance}
         location_instance, location_instance_created = NavMetricsLocation.objects.get_or_create(name=rqst_location_name,
                                                                                                 defaults=location_rqst_values)
         if not location_instance_created:
@@ -49,15 +51,16 @@ def modify_nav_hub_location(response_raw_data, post_json, post_errors):
     rqst_country = clean_json_string_input(post_json, "root", "Country", post_errors)
 
     if len(post_errors) == 0:
+        address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=rqst_address_line_1,
+                                                                                   address_line_2=rqst_address_line_2,
+                                                                                   city=rqst_city,
+                                                                                   state_province=rqst_state,
+                                                                                   zipcode=rqst_zipcode,
+                                                                                   country=Country.objects.get(name=rqst_country))
         try:
-            location_instance = NavMetricsLocation.objects.get(id=rqst_location_id)
+            location_instance = NavMetricsLocation.objects.get(name=rqst_location_name)
             location_instance.name = rqst_location_name
-            location_instance.address_line1 = rqst_address_line_1
-            location_instance.address_line2 = rqst_address_line_2
-            location_instance.city = rqst_city
-            location_instance.state_province = rqst_state
-            location_instance.zipcode = rqst_zipcode
-            location_instance.country = Country.objects.get(name=rqst_country)
+            location_instance.address = address_instance
             location_instance.save()
             response_raw_data['Data'] = {"Database ID": location_instance.id}
         except NavMetricsLocation.DoesNotExist:

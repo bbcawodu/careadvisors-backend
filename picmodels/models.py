@@ -37,11 +37,10 @@ class Country(models.Model):
         ordering = ["name"]
 
 
-class NavMetricsLocation(models.Model):
+class Address(models.Model):
     """Model to store addresses for accounts"""
-    name = models.CharField(max_length=200, unique=True)
-    address_line1 = models.CharField("Address line 1", max_length=45)
-    address_line2 = models.CharField("Address line 2", max_length=45, blank=True)
+    address_line_1 = models.CharField("Address line 1", max_length=45)
+    address_line_2 = models.CharField("Address line 2", max_length=45, blank=True)
     zipcode = models.CharField(max_length=10)
     city = models.CharField(max_length=50, blank=False)
     state_province = models.CharField("State/Province", max_length=40, blank=True)
@@ -49,19 +48,41 @@ class NavMetricsLocation(models.Model):
 
     class Meta:
         app_label = 'picmodels'
-        verbose_name_plural = "Navigator Metrics Locations"
-        unique_together = ("address_line1", "address_line2", "zipcode",
+        unique_together = ("address_line_1", "address_line_2", "zipcode",
                            "city", "state_province", "country")
 
     def return_values_dict(self):
-        valuesdict = {"Name": self.name,
-                      "Address Line 1": self.address_line1,
-                      "Address Line 2": self.address_line2,
+        valuesdict = {"Address Line 1": self.address_line_1,
+                      "Address Line 2": self.address_line_2,
                       "Zipcode": self.zipcode,
                       "City": self.city,
                       "State": self.state_province,
                       "Country": self.country.name,
+                      "Database ID": self.id,
                       }
+        return valuesdict
+
+
+class NavMetricsLocation(models.Model):
+    """Model to store addresses for accounts"""
+    name = models.CharField(max_length=200, unique=True)
+    address = models.ForeignKey(Address, blank=True, null=True)
+
+    class Meta:
+        app_label = 'picmodels'
+        verbose_name_plural = "Navigator Metrics Locations"
+        unique_together = ("name",
+                           "address",)
+
+    def return_values_dict(self):
+        valuesdict = {"Name": self.name,
+                      "Database ID": self.id,
+                      }
+
+        if self.address:
+            address_values = self.address.return_values_dict()
+            for key in address_values:
+                valuesdict[key] = address_values[key]
         return valuesdict
 
 
