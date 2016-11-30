@@ -1,4 +1,5 @@
 import sys, pokitdok
+from django.http import HttpResponseRedirect
 
 
 def clean_json_string_input(json_dict, dict_name, dict_key, post_errors, empty_string_allowed=False,
@@ -347,3 +348,11 @@ def parse_cal_year_amounts(poki_data):
     #                         return_dict["Network not applicable"]["Individual"] = benefit_dict["amount"] + ' ' + benefit_dict["currency"]
 
     # return return_dict
+
+
+def custom_redirect(url_name, *args, **kwargs):
+    from django.core.urlresolvers import reverse
+    import urllib
+    url = reverse(url_name, args = args)
+    params = urllib.urlencode(kwargs)
+    return HttpResponseRedirect(url + "&%s" % params)

@@ -53,5 +53,6 @@ urlpatterns = [
     url(r"^v1/navlocations/$", views.handle_nav_location_api_request),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^oauth2callback', views.auth_return),
-    url(r'^accounts/login/$', login, {'template_name': 'login.html'}),
+    url(r"^accounts/login/$", login, {'template_name': 'login.html'}),
+    url(r"^v1/calendar_auth/$", views.handle_calendar_auth_request),
 ]

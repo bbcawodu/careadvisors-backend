@@ -815,6 +815,7 @@ To modify or add navigator hub locations in the database programatically, submit
 "Zipcode": String,
 "Country": String,
 "Database Action": String
+"Database ID": Integer(Required when "Database Action" == "Staff Modification" or "Staff Deletion"),
 }
 ```
 

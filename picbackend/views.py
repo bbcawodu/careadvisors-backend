@@ -5,7 +5,7 @@ Defines views that are mapped to url configurations
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from picmodels.models import PICStaff, MetricsSubmission, PICConsumer, PlanStat, NavMetricsLocation, CredentialsModel
-import json, sys, pokitdok
+import json, sys, pokitdok, base64
 from picbackend.forms import NavMetricsLocationForm
 from django.contrib import messages
 from django.forms import modelformset_factory
@@ -38,40 +38,87 @@ FLOW = flow_from_clientsecrets(
     redirect_uri='http://localhost:5000/oauth2callback')
 
 
-@login_required
+# @login_required
+# def index(request):
+#     storage = DjangoORMStorage(CredentialsModel, 'id', request.user, 'credential')
+#     credential = storage.get()
+#     if credential is None or credential.invalid == True:
+#         FLOW.params['state'] = xsrfutil.generate_token(SECRET_KEY,
+#                                                        request.user)
+#         authorize_url = FLOW.step1_get_authorize_url()
+#         return HttpResponseRedirect(authorize_url)
+#
+#     else:
+#         http = httplib2.Http()
+#         http = credential.authorize(http)
+#         service = build("plus", "v1", http=http)
+#         activities = service.activities()
+#         activitylist = activities.list(collection='public',
+#                                        userId='me').execute()
+#         logging.info(activitylist)
+#
+#         return render(request, 'welcome.html', {'activitylist': activitylist,})
 def index(request):
-    storage = DjangoORMStorage(CredentialsModel, 'id', request.user, 'credential')
-    credential = storage.get()
-    if credential is None or credential.invalid == True:
-        FLOW.params['state'] = xsrfutil.generate_token(SECRET_KEY,
-                                                       request.user)
-        authorize_url = FLOW.step1_get_authorize_url()
-        return HttpResponseRedirect(authorize_url)
-
-    else:
-        http = httplib2.Http()
-        http = credential.authorize(http)
-        service = build("plus", "v1", http=http)
-        activities = service.activities()
-        activitylist = activities.list(collection='public',
-                                       userId='me').execute()
-        logging.info(activitylist)
-
-        return render(request, 'welcome.html', {'activitylist': activitylist,})
+    return HttpResponse("PIC Backend Home")
 
 
-@login_required
 def auth_return(request):
-    if not xsrfutil.validate_token(SECRET_KEY, request.REQUEST['state'], request.user):
+    response_raw_data, rqst_errors = init_response_data()
+    search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+
+    state_string = request.GET['state']
+    state_dict = json.loads(base64.urlsafe_b64decode(state_string).decode('ascii'))
+    if not xsrfutil.validate_token(SECRET_KEY, bytes(state_dict['token'], 'utf-8'), state_dict["navid"]):
         return HttpResponseBadRequest()
+    # if not xsrfutil.validate_token(SECRET_KEY, bytes(request.GET['state'], 'utf-8'), search_params["navigator id"]):
+    #     return HttpResponseBadRequest()
     credential = FLOW.step2_exchange(request.REQUEST)
-    storage = Storage(CredentialsModel, 'id', request.user, 'credential')
+    storage = DjangoORMStorage(CredentialsModel, 'id', PICStaff.objects.get(id=state_dict["navid"]), 'credential')
     storage.put(credential)
-    return HttpResponseRedirect("/")
+    return HttpResponseRedirect("/v1/calendar_auth/?navid={:d}".format(state_dict["navid"]))
 
 # # defines view for home page
 # def index(request):
 #     return render(request, "home_page.html")
+
+
+def handle_calendar_auth_request(request):
+    response_raw_data, rqst_errors = init_response_data()
+    search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+    nav_id = search_params["navigator id"]
+    if 'navigator id' in search_params:
+        try:
+            picstaff_object = PICStaff.objects.get(id=nav_id)
+            storage = DjangoORMStorage(CredentialsModel, 'id', nav_id, 'credential')
+            credential = storage.get()
+            if credential is None or credential.invalid == True:
+                google_token = xsrfutil.generate_token(SECRET_KEY, picstaff_object.id)
+                params_dict = {"navid": nav_id,
+                               "token": google_token.decode('ascii')}
+                params_json = json.dumps(params_dict).encode('ascii')
+                params_base64_encoded = base64.urlsafe_b64encode(params_json)
+                authorize_url = FLOW.step1_get_authorize_url(state=params_base64_encoded)
+                return HttpResponseRedirect(authorize_url)
+
+            else:
+                http = httplib2.Http()
+                http = credential.authorize(http)
+                service = build("plus", "v1", http=http)
+                activities = service.activities()
+                activitylist = activities.list(collection='public',
+                                               userId='me').execute()
+                logging.info(activitylist)
+                response_raw_data["Data"] = activitylist
+
+        except PICStaff.DoesNotExist:
+            rqst_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(nav_id)))
+
+    else:
+        rqst_errors.append("Bitch, No. navid must be in GET paramaters")
+
+    response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
 
 
 def handle_location_add_request(request):

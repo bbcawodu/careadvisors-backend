@@ -14,15 +14,6 @@ from django.contrib import admin
 from oauth2client.contrib.django_util.models import CredentialsField
 
 
-class CredentialsModel(models.Model):
-  id = models.ForeignKey(User, primary_key=True)
-  credential = CredentialsField()
-
-
-class CredentialsAdmin(admin.ModelAdmin):
-    pass
-
-
 # Create your models here.
 class Country(models.Model):
     """Model for countries"""
@@ -791,3 +782,13 @@ class PlanStat(models.Model):
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
+
+
+# Maybe add some sort of authorization to our API? OAuth? OAuth2? Some shit?
+class CredentialsModel(models.Model):
+    id = models.ForeignKey(PICStaff, primary_key=True)
+    credential = CredentialsField()
+
+
+class CredentialsAdmin(admin.ModelAdmin):
+    pass
