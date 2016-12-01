@@ -19,6 +19,7 @@ from picbackend import views
 from presencescheduler import urls as scheduler_urls
 
 from django.contrib.auth.views import login
+from django.views.generic import TemplateView
 
 #enables admin
 admin.autodiscover()
@@ -55,4 +56,5 @@ urlpatterns = [
     url(r'^oauth2callback', views.auth_return),
     url(r"^accounts/login/$", login, {'template_name': 'login.html'}),
     url(r"^v1/calendar_auth/$", views.handle_calendar_auth_request),
+    url(r'^google2a62fdb4823a96c9.html$', TemplateView.as_view(template_name="google2a62fdb4823a96c9.html"), name='google2a62fdb4823a96c9'),
 ]
