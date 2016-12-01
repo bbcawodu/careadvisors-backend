@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3b6e3fa-4b10-4520-bd24-f4ec81c0d431" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picbackend/settings/client_secret.json" afterPath="$PROJECT_DIR$/picbackend/settings/client_secret.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picbackend/views.py" afterPath="$PROJECT_DIR$/picbackend/views.py" />
     </list>
     <ignored path="picbackend.iws" />
     <ignored path=".idea/workspace.xml" />
