@@ -21,7 +21,6 @@ from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_
     retrieve_region_staff, retrieve_location_metrics, retrieve_mpn_metrics, retrieve_mpn_staff
 
 from oauth2client.client import flow_from_clientsecrets
-from django.conf import settings
 # from picbackend.settings import GOOGLE_OAUTH2_CLIENT_SECRETS_JSON, SECRET_KEY, HOSTURL
 from oauth2client.contrib.django_util.storage import DjangoORMStorage
 # from oauth2client.contrib.django_orm import Storage
