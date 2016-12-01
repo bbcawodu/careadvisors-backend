@@ -36,7 +36,7 @@ from django.http import HttpResponseBadRequest
 FLOW = flow_from_clientsecrets(
     settings.GOOGLE_OAUTH2_CLIENT_SECRETS_JSON,
     scope='https://www.googleapis.com/auth/plus.me',
-    redirect_uri=(settings.HOSTURL + '/oauth2callback/'))
+    redirect_uri=(settings.HOSTURL + '/oauth2callback'))
 
 
 # @login_required
