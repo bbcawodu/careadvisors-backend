@@ -21,7 +21,8 @@ from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_
     retrieve_region_staff, retrieve_location_metrics, retrieve_mpn_metrics, retrieve_mpn_staff
 
 from oauth2client.client import flow_from_clientsecrets
-from picbackend.settings import GOOGLE_OAUTH2_CLIENT_SECRETS_JSON, SECRET_KEY, HOSTNAME
+from django.conf import settings
+# from picbackend.settings import GOOGLE_OAUTH2_CLIENT_SECRETS_JSON, SECRET_KEY, HOSTURL
 from oauth2client.contrib.django_util.storage import DjangoORMStorage
 # from oauth2client.contrib.django_orm import Storage
 from django.contrib.auth.decorators import login_required
@@ -33,9 +34,9 @@ from django.http import HttpResponseBadRequest
 
 
 FLOW = flow_from_clientsecrets(
-    GOOGLE_OAUTH2_CLIENT_SECRETS_JSON,
+    settings.GOOGLE_OAUTH2_CLIENT_SECRETS_JSON,
     scope='https://www.googleapis.com/auth/plus.me',
-    redirect_uri='http://localhost:5000/oauth2callback')
+    redirect_uri=(settings.HOSTURL + '/oauth2callback'))
 
 
 # @login_required
@@ -68,7 +69,7 @@ def auth_return(request):
 
     state_string = request.GET['state']
     state_dict = json.loads(base64.urlsafe_b64decode(state_string).decode('ascii'))
-    if not xsrfutil.validate_token(SECRET_KEY, bytes(state_dict['token'], 'utf-8'), state_dict["navid"]):
+    if not xsrfutil.validate_token(settings.SECRET_KEY, bytes(state_dict['token'], 'utf-8'), state_dict["navid"]):
         return HttpResponseBadRequest()
     # if not xsrfutil.validate_token(SECRET_KEY, bytes(request.GET['state'], 'utf-8'), search_params["navigator id"]):
     #     return HttpResponseBadRequest()
@@ -92,7 +93,7 @@ def handle_calendar_auth_request(request):
             storage = DjangoORMStorage(CredentialsModel, 'id', nav_id, 'credential')
             credential = storage.get()
             if credential is None or credential.invalid == True:
-                google_token = xsrfutil.generate_token(SECRET_KEY, picstaff_object.id)
+                google_token = xsrfutil.generate_token(settings.SECRET_KEY, picstaff_object.id)
                 params_dict = {"navid": nav_id,
                                "token": google_token.decode('ascii')}
                 params_json = json.dumps(params_dict).encode('ascii')
@@ -116,7 +117,7 @@ def handle_calendar_auth_request(request):
     else:
         rqst_errors.append("Bitch, No. navid must be in GET paramaters")
 
-    response_raw_data["Host"] = HOSTNAME
+    response_raw_data["Host"] = settings.HOSTURL
     response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response

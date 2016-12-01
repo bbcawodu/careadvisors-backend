@@ -13,13 +13,9 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 # Use 12factor inspired environment variables or from a file
 import environ
 env = environ.Env(DEBUG=(bool, True),)
-
-HOSTNAME = os.environ.get('HOSTNAME')
 
 # Ideally move env file should be outside the git repo
 # i.e. BASE_DIR.parent.parent
@@ -27,15 +23,11 @@ env_file = os.path.join(os.path.dirname(__file__), 'local.env')
 if os.path.exists(env_file):
     environ.Env.read_env(str(env_file))
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 GOOGLE_OAUTH2_CLIENT_SECRETS_JSON = os.path.join(os.path.dirname(__file__), 'client_secret.json')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 's!=a^t83cuz95n16m6s0*-r!ad%m3s8)t_tw9u0=4928vu1f$i'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -90,16 +82,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'picbackend.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
@@ -118,6 +100,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 's!=a^t83cuz95n16m6s0*-r!ad%m3s8)t_tw9u0=4928vu1f$i'
+
 """
 This section of code configures the application for the Heroku environment.
 The dj-database-url module will parse the value of the DATABASE_URL environment variable
@@ -128,7 +113,9 @@ import dj_database_url
 
 # DATABASES['default'] = dj_database_url.config(
 #     default='postgres://ngklalieajpptd:Day5uAny5L-cI0OB3L2nUmfHhh@ec2-54-197-224-173.compute-1.amazonaws.com:5432/dehaud8hlr9iqq')
-DATABASES['default'] = dj_database_url.config()
+DATABASES = {
+    'default': dj_database_url.config()
+    }
 # DATABASES['default'] = dj_database_url.config('postgres://Kirabee:n1ggmag3@localhost:5432/mydb')
 
 # # Enable Persistent Connections
