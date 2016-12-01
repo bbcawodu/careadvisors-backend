@@ -21,7 +21,7 @@ from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_
     retrieve_region_staff, retrieve_location_metrics, retrieve_mpn_metrics, retrieve_mpn_staff
 
 from oauth2client.client import flow_from_clientsecrets
-from picbackend.settings import GOOGLE_OAUTH2_CLIENT_SECRETS_JSON, SECRET_KEY
+from picbackend.settings import GOOGLE_OAUTH2_CLIENT_SECRETS_JSON, SECRET_KEY, HOSTNAME
 from oauth2client.contrib.django_util.storage import DjangoORMStorage
 # from oauth2client.contrib.django_orm import Storage
 from django.contrib.auth.decorators import login_required
@@ -116,6 +116,7 @@ def handle_calendar_auth_request(request):
     else:
         rqst_errors.append("Bitch, No. navid must be in GET paramaters")
 
+    response_raw_data["Host"] = HOSTNAME
     response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response

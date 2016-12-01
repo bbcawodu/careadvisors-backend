@@ -19,6 +19,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 import environ
 env = environ.Env(DEBUG=(bool, True),)
 
+HOSTNAME = os.environ.get('HOSTNAME')
+
 # Ideally move env file should be outside the git repo
 # i.e. BASE_DIR.parent.parent
 env_file = os.path.join(os.path.dirname(__file__), 'local.env')

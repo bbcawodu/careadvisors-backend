@@ -244,6 +244,9 @@ Address(Every field within address can be given as an empty string. Address will
 "City": String (Can be empty),
 "State": String (Can be empty),
 "Zipcode": String (Can be empty),
+"date_met_nav":(Can be Null) or {"Day": Integer,
+                                "Month": Integer,
+                                "Year": Integer,},
 
 "Consumer Database ID": Integer(Required when "Database Action" == "Consumer Modification" or "Consumer Deletion"),
 "Database Action": String,
@@ -312,6 +315,7 @@ In response, a JSON document will be displayed with the following format:
                 "First Name": String,
                 "Middle Name": String,
                 "Last Name": String,
+                "date_met_nav": String (Can be Null),
                 "Navigator": String,
                 "Navigator Notes": [
                                         "These are",

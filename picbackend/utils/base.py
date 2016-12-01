@@ -26,10 +26,10 @@ def clean_json_int_input(json_dict, dict_name, dict_key, post_errors):
         return int(json_dict[dict_key])
 
 
-def clean_dict_input(json_dict, dict_name, dict_key, post_errors):
+def clean_dict_input(json_dict, dict_name, dict_key, post_errors, none_allowed=False):
     if dict_key not in json_dict:
         post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
-    elif json_dict[dict_key] is None:
+    elif json_dict[dict_key] is None and none_allowed == False:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
     elif not isinstance(json_dict[dict_key], dict):
         post_errors.append("Value for {!r} in {!r} dictionary is not a dictionary".format(dict_key, dict_name))

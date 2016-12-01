@@ -219,6 +219,24 @@ def add_consumer(response_raw_data, post_json, post_errors):
     rqst_state = clean_json_string_input(post_json, "root", "State", post_errors, empty_string_allowed=True)
     rqst_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors, empty_string_allowed=True)
 
+    date_met_nav_dict = clean_dict_input(post_json, "root", "date_met_nav", post_errors, none_allowed=True)
+    rqst_date_met_nav = None
+    if date_met_nav_dict is not None:
+        month = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Month", post_errors)
+        if month < 1 or month > 12:
+            post_errors.append("Month must be between 1 and 12 inclusive")
+
+        day = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Day", post_errors)
+        if day < 1 or day > 31:
+            post_errors.append("Day must be between 1 and 31 inclusive")
+
+        year = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Year", post_errors)
+        if year < 1 or year > 9999:
+            post_errors.append("Year must be between 1 and 9999 inclusive")
+
+        if len(post_errors) == 0:
+            rqst_date_met_nav = datetime.date(year, month, day)
+
     if len(post_errors) == 0:
         address_instance = None
         if rqst_address_line_1 != '' and rqst_city != '' and rqst_state != '' and rqst_zipcode != '':
@@ -240,6 +258,7 @@ def add_consumer(response_raw_data, post_json, post_errors):
                                                                                          last_name=rqst_consumer_l_name,
                                                                                          address=address_instance,
                                                                                          phone=rqst_consumer_phone,
+                                                                                         date_met_nav=rqst_date_met_nav,
                                                                                          defaults=consumer_rqst_values)
         if not consumer_instance_created:
             post_errors.append('Consumer database entry already exists for the email: {!s}'.format(rqst_consumer_email))
@@ -362,6 +381,24 @@ def modify_consumer(response_raw_data, post_json, post_errors):
     rqst_state = clean_json_string_input(post_json, "root", "State", post_errors, empty_string_allowed=True)
     rqst_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors, empty_string_allowed=True)
 
+    date_met_nav_dict = clean_dict_input(post_json, "root", "date_met_nav", post_errors, none_allowed=True)
+    rqst_date_met_nav = None
+    if date_met_nav_dict is not None:
+        month = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Month", post_errors)
+        if month < 1 or month > 12:
+            post_errors.append("Month must be between 1 and 12 inclusive")
+
+        day = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Day", post_errors)
+        if day < 1 or day > 31:
+            post_errors.append("Day must be between 1 and 31 inclusive")
+
+        year = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Year", post_errors)
+        if year < 1 or year > 9999:
+            post_errors.append("Year must be between 1 and 9999 inclusive")
+
+        if len(post_errors) == 0:
+            rqst_date_met_nav = datetime.date(year, month, day)
+
     if len(post_errors) == 0:
         address_instance = None
         if rqst_address_line_1 != '' and rqst_city != '' and rqst_state != '' and rqst_zipcode != '':
@@ -384,6 +421,7 @@ def modify_consumer(response_raw_data, post_json, post_errors):
             consumer_instance.household_size = rqst_consumer_household_size
             consumer_instance.preferred_language = rqst_consumer_pref_lang
             consumer_instance.email = rqst_consumer_email
+            consumer_instance.date_met_nav = rqst_date_met_nav
 
             nav_instance = PICStaff.objects.get(id=rqst_nav_id)
             consumer_instance.navigator = nav_instance

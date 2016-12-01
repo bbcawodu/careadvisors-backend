@@ -196,6 +196,7 @@ class PICConsumer(models.Model):
     household_size = models.IntegerField()
     plan = models.CharField(max_length=1000, blank=True, null=True)
     met_nav_at = models.CharField(max_length=1000)
+    date_met_nav = models.DateField(blank=True, null=True)
 
     class Meta:
         # maps model to the picmodels module
@@ -207,7 +208,8 @@ class PICConsumer(models.Model):
                            "phone",
                            "address",
                            "preferred_language",
-                           "best_contact_time")
+                           "best_contact_time",
+                           "date_met_nav")
 
     def return_values_dict(self):
         valuesdict = {"First Name": self.first_name,
@@ -223,7 +225,11 @@ class PICConsumer(models.Model):
                       "Best Contact Time": self.best_contact_time,
                       "Navigator": "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name),
                       "Navigator Notes": None,
+                      "date_met_nav": None,
                       "Database ID": self.id}
+
+        if self.date_met_nav is not None:
+            valuesdict["date_met_nav"] = self.date_met_nav.isoformat()
 
         navigator_note_objects = ConsumerNote.objects.filter(consumer=self.id)
         navigator_note_list = []
