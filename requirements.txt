@@ -9,4 +9,5 @@ static3==0.6.1
 wheel==0.24.0
 django-extensions
 pokitdok
+django-cors-headers
 google-api-python-client
