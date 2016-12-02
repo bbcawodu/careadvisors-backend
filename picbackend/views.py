@@ -76,7 +76,7 @@ def auth_return(request):
     credential = FLOW.step2_exchange(request.REQUEST)
     storage = DjangoORMStorage(CredentialsModel, 'id', PICStaff.objects.get(id=state_dict["navid"]), 'credential')
     storage.put(credential)
-    return HttpResponseRedirect("/v1/calendar_auth/?navid={:d}".format(state_dict["navid"]))
+    return HttpResponseRedirect("/v1/calendar_auth/?navid={!s}".format(state_dict["navid"]))
 
 # # defines view for home page
 # def index(request):
