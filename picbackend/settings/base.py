@@ -29,8 +29,6 @@ GOOGLE_OAUTH2_CLIENT_SECRETS_JSON = os.path.join(os.path.dirname(__file__), 'cli
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
-ALLOWED_HOSTS = []
-
 # Application definition
 
 INSTALLED_APPS = (
@@ -61,15 +59,13 @@ ROOT_URLCONF = 'picbackend.urls'
 # sets template directory to root/templates
 PROJECT_DIR = os.path.dirname(__file__)
 TEMPLATE_DIRS = (
-    os.path.join(PROJECT_DIR, 'templates'),
     os.path.join(BASE_DIR, 'templates'),
 )
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(PROJECT_DIR, 'templates'),
-                 os.path.join(BASE_DIR, 'templates'),],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
