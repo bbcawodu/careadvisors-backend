@@ -147,6 +147,7 @@ class PICStaff(models.Model):
                       "Last Name": self.last_name,
                       "MPN": self.mpn,
                       "Email": self.email,
+                      "Authorized Credentials": False,
                       "Type": self.type,
                       "Database ID": self.id,
                       "County": self.county,
@@ -164,6 +165,13 @@ class PICStaff(models.Model):
         if base_locations:
             for base_location in base_locations:
                 valuesdict["Base Locations"].append(base_location.return_values_dict())
+
+        try:
+            credentials_object = CredentialsModel.objects.get(id=self.id)
+            if not credentials_object.credential.invalid:
+                valuesdict["Authorized Credentials"] = True
+        except CredentialsModel.DoesNotExist:
+            pass
 
         return valuesdict
 
