@@ -212,6 +212,33 @@ In response, a JSON document will be displayed with the following format:
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - Array corresponding to the "Data" key will be empty.
 
+### Google Calendar API OAuth2 Credentials Authorization Page for Navigators
+- To retrieve and update Google Calendar API OAuth2 Credentials for a navigator and store it in the database, submit a GET request to http://picbackend.herokuapp.com/v1/calendar_auth/? with the following MANDATORY parameter: "navid".
+    - "navid" corresponds to navigator database id.
+        - passing a database id that does not appear in the database will result in an error.
+
+- If there are no valid credentials for the given navigator id stored in the database, navigator will be redirected to a Google authorization page where they can authorize our application to view and modify their calendar.
+- Once the navigator has succesfuly authorized our application or if there are any errors, navigator will be redirected to a page of the following format:
+- The response will be a JSON document with the following format:
+    ```
+    {
+        "Data": "Authorized!" (Only if there is authorized navigator credentials in database),
+        "Status": {
+            "Version": Integer,
+            "Error Code": Integer,
+            "Errors": Array
+        }
+    }
+    ```
+
+- If staff members are found,
+    - "Error Code" will be 0
+    - Array corresponding to the "Data" key will be non empty.
+- If staff members are not found,
+    - "Error Code" will be 1.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
+        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+    - Array corresponding to the "Data" key will be empty.
 
 
 ## Consumer Account Backend API
