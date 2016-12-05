@@ -185,7 +185,7 @@ def handle_hub_location_edit_api_request(request):
     return response
 
 
-@ensure_csrf_cookie
+@csrf_exempt
 def handle_staff_edit_request(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
