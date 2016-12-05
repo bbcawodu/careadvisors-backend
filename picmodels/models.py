@@ -211,6 +211,7 @@ class PICConsumer(models.Model):
         app_label = 'picmodels'
 
         unique_together = ("first_name",
+                           "middle_name",
                            "last_name",
                            "email",
                            "phone",
