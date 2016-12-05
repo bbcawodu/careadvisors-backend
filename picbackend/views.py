@@ -9,7 +9,7 @@ import json, sys, pokitdok, base64
 from picbackend.forms import NavMetricsLocationForm
 from django.contrib import messages
 from django.forms import modelformset_factory
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors, fetch_and_parse_pokit_elig_data
 from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff, add_consumer, modify_consumer, delete_consumer,\
     add_or_update_metrics_entity, add_nav_hub_location, modify_nav_hub_location, delete_nav_hub_location
@@ -185,7 +185,7 @@ def handle_hub_location_edit_api_request(request):
     return response
 
 
-@csrf_exempt
+@ensure_csrf_cookie
 def handle_staff_edit_request(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
@@ -217,6 +217,7 @@ def handle_staff_edit_request(request):
     return response
 
 
+@ensure_csrf_cookie
 def handle_consumer_edit_request(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
@@ -247,7 +248,7 @@ def handle_consumer_edit_request(request):
     return response
 
 
-# defines view for saving scheduled appointments to the database
+@ensure_csrf_cookie
 def handle_metrics_submission_request(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
@@ -373,6 +374,7 @@ def handle_consumer_api_request(request):
     return response
 
 
+@ensure_csrf_cookie
 def handle_eligibility_request(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
