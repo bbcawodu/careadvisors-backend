@@ -168,7 +168,9 @@ class PICStaff(models.Model):
 
         try:
             credentials_object = CredentialsModel.objects.get(id=self.id)
-            if not credentials_object.credential.invalid:
+            if credentials_object.credential.invalid:
+                credentials_object.delete()
+            else:
                 valuesdict["Authorized Credentials"] = True
         except CredentialsModel.DoesNotExist:
             pass
