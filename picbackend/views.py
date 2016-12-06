@@ -375,7 +375,7 @@ def handle_consumer_api_request(request):
     return response
 
 
-@ensure_csrf_cookie
+@csrf_exempt
 def handle_eligibility_request(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
@@ -395,6 +395,7 @@ def handle_eligibility_request(request):
     return response
 
 
+@csrf_exempt
 def handle_trading_partner_request(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data, rqst_errors = init_response_data()
