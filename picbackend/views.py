@@ -5,12 +5,13 @@ Defines views that are mapped to url configurations
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from picmodels.models import PICStaff, MetricsSubmission, PICConsumer, PlanStat, NavMetricsLocation, CredentialsModel
-import json, sys, pokitdok, base64
+import json, sys, pokitdok, base64, datetime
 from picbackend.forms import NavMetricsLocationForm
 from django.contrib import messages
 from django.forms import modelformset_factory
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
-from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors, fetch_and_parse_pokit_elig_data
+from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors,\
+    fetch_and_parse_pokit_elig_data, clean_list_input
 from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff, add_consumer, modify_consumer, delete_consumer,\
     add_or_update_metrics_entity, add_nav_hub_location, modify_nav_hub_location, delete_nav_hub_location
 from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_staff, retrieve_first_name_staff,\
@@ -35,8 +36,9 @@ from django.http import HttpResponseBadRequest
 
 FLOW = flow_from_clientsecrets(
     settings.GOOGLE_OAUTH2_CLIENT_SECRETS_JSON,
-    scope='https://www.googleapis.com/auth/plus.me',
+    scope='https://www.googleapis.com/auth/calendar',
     redirect_uri=(settings.HOSTURL + '/oauth2callback'))
+FLOW.params['access_type'] = 'offline'
 
 
 # @login_required
@@ -104,12 +106,11 @@ def handle_calendar_auth_request(request):
             else:
                 http = httplib2.Http()
                 http = credential.authorize(http)
-                service = build("plus", "v1", http=http)
-                activities = service.activities()
-                activitylist = activities.list(collection='public',
-                                               userId='me').execute()
-                logging.info(activitylist)
-                response_raw_data["Data"] = activitylist
+                service = build("calendar", "v3", http=http)
+                events_result = service.events().list(calendarId='primary', maxResults=10, singleEvents=True,
+                                                      orderBy='startTime').execute()
+                logging.info(events_result)
+                response_raw_data["Data"] = events_result
 
         except PICStaff.DoesNotExist:
             rqst_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(nav_id)))
@@ -556,5 +557,53 @@ def handle_nav_location_api_request(request):
         rqst_errors.append("No location entries found in database.")
 
     response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
+
+
+@ensure_csrf_cookie
+def handle_nav_appointments_api_request(request):
+    # initialize dictionary for response data, including parsing errors
+    response_raw_data, post_errors = init_response_data()
+
+    if request.method == 'POST' or request.is_ajax():
+        post_data = request.body.decode('utf-8')
+        post_json = json.loads(post_data)
+        # response_raw_data['Activity Lists'] = []
+        response_raw_data['Events Lists'] = []
+
+        # Code to parse POSTed json request
+        rqst_preferred_times = clean_list_input(post_json, "root", "Preferred Times", post_errors, empty_list_allowed=True)
+
+        credentials_objects = list(CredentialsModel.objects.all())
+        while credentials_objects:
+            credentials_object = credentials_objects.pop()
+            if credentials_object.credential.invalid:
+                credentials_object.delete()
+            else:
+                credential = credentials_object.credential
+
+                now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+                http = httplib2.Http()
+                http = credential.authorize(http)
+                service = build("calendar", "v3", http=http)
+                events_result = service.events().list(calendarId='primary', timeMin=now, maxResults=10,
+                                                      singleEvents=True, orderBy='startTime').execute()
+                logging.info(events_result)
+                response_raw_data['Events Lists'].append(events_result)
+
+                # activities = service.activities()
+                # activitylist = activities.list(collection='public',
+                #                                userId='me').execute()
+                # logging.info(activitylist)
+                # response_raw_data['Activity Lists'].append(activitylist)
+
+        response_raw_data['Preferred Times'] = rqst_preferred_times
+
+    # if a GET request is made, add error message to response data
+    else:
+        post_errors.append("Request needs POST data")
+
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response

@@ -151,3 +151,131 @@ In response, a JSON document will be displayed with the following format:
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - Array corresponding to the "Data" key will be empty.
+    
+    
+### Available Navigator Appointments API (IN DEVELOPMENT)
+To retrieve available navigator appointments for a given dictionary of consumer preferences, submit a POST request to: http://picbackend.herokuapp.com/v1/getnavappointments/. The POST data a JSON document using the following template:
+
+```
+{
+"Preferred Times": ['',
+                    '',
+                    '',
+                    ...
+                    ] (List of date times to request navigator appointments for)(Can be an Empty List),
+}
+```
+
+In response, a JSON document will be displayed with the following format:
+```
+{
+ "Status": {
+            "Error Code": Integer,
+            "Version": Float,
+            "Errors": Array
+            "Data": {
+                        "Next Available Appointments" :[
+                                                        {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                        },
+                                                        {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                        },
+                                                        {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                        },
+                                                        ...
+                                                        ],
+                        "Preferred Appointments" : [
+                                                        [
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            },
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            },
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            },
+                                                            ...
+                                                        ],
+                                                        [
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            },
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            },
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            },
+                                                            ...
+                                                        ],
+                                                        [
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            },
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            },
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : "",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            },
+                                                            ...
+                                                        ],
+                                                        ...
+                                                   ] (Can Be Empty),
+                    },
+           }
+}
+```
+
+- Data will be a dictionary with the following keys
+    - "Next Available Appointments"
+        - An array of available appointments with navigators starting from the time the request was made
+    - "Preferred Appointments"
+        - An array of arrays of available appointments with navigators
+        - Length of "Preferred Appointments" will EXACTLY match the length of the "Preferred Times" array in the request
+        - Appointment Date and Time of an index of the "Preferred Appointments" array corresponds to the index of the "Preferred Times" array
+    
+- If there are errors in the POSTed JSON document:
+    - "Error Code" will be 1.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
+        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+    - No changes are made to the database.

@@ -52,6 +52,7 @@ urlpatterns = [
     url(r"^v1/eligibility/$", views.handle_eligibility_request),
     url(r"^v1/tradingpartners/$", views.handle_trading_partner_request),
     url(r"^v1/navlocations/$", views.handle_nav_location_api_request),
+    url(r"^v1/getnavappointments/$", views.handle_nav_appointments_api_request),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^oauth2callback', views.auth_return),
     url(r"^accounts/login/$", login, {'template_name': 'login.html'}),
