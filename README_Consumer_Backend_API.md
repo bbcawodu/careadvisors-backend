@@ -147,4 +147,4 @@ In response, a JSON document will be displayed with the following format:
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - Array corresponding to the "Data" key will be empty.
 - If "page" parameter is missing and there is more than one page of customer instances to display with all fields, "Page
-    URLs" key will be present in the root response dictionary. 
+    URLs" key will be present in the root response dictionary.
