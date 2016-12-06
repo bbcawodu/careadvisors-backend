@@ -179,19 +179,19 @@ In response, a JSON document will be displayed with the following format:
                                                         {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : "",
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00.000000',
                                                             "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
                                                         },
                                                         {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : "",
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00.000000',
                                                             "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
                                                         },
                                                         {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : "",
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00.000000',
                                                             "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
                                                         },
                                                         ...
@@ -201,19 +201,19 @@ In response, a JSON document will be displayed with the following format:
                                                             {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : "",
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00.000000',
                                                             "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
                                                             },
                                                             {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : "",
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00.000000',
                                                             "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
                                                             },
                                                             {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : "",
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00.000000',
                                                             "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
                                                             },
                                                             ...
@@ -222,19 +222,19 @@ In response, a JSON document will be displayed with the following format:
                                                             {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : "",
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00.000000',
                                                             "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
                                                             },
                                                             {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : "",
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00.000000',
                                                             "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
                                                             },
                                                             {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : "",
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00.000000',
                                                             "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
                                                             },
                                                             ...
