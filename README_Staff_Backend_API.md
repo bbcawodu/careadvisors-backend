@@ -76,6 +76,7 @@ In response, a JSON document will be displayed with the following format:
                 "Region": String,
                 "First Name": String,
                 "Last Name": String,
+                "Authorized Credentials": Boolean,
                 "Base Location": [{
                                     "Location Name": String,
                                     "Address Line 1": String,
