@@ -633,9 +633,6 @@ def handle_nav_appointments_api_request(request):
                 nav_free_busy_list.append(free_busy_entry)
 
         response_raw_data["Navigator Busy Times"] = nav_free_busy_list
-        response_raw_data["Now"] = now_date_time.isoformat()
-        response_raw_data["Earliest available time"] = earliest_available_date_time.isoformat()
-        response_raw_data["End of next business day"] = end_of_next_b_day_date_time.isoformat()
 
         shuffle(nav_free_busy_list)
 

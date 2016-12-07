@@ -173,7 +173,65 @@ In response, a JSON document will be displayed with the following format:
  "Status": {
             "Error Code": Integer,
             "Version": Float,
-            "Errors": Array
+            "Errors": Array,
+            "Navigator Busy Times": [
+                                        [
+                                            {
+                                                "Region": "1",
+                                                "Consumers": [1, 2, 13, 15, 16, 17, 19, 20, 18],
+                                                "Last Name": "Awodu",
+                                                "Base Locations": [],
+                                                "County": "Cook",
+                                                "Authorized Credentials": true,
+                                                "Database ID": 1,
+                                                "Email": "tech@piccares.org",
+                                                "First Name": "Bradley",
+                                                "MPN": "",
+                                                "Type": "Navigator"
+                                            },
+                                            [
+                                                {"start": "2016-12-07T19:32:41Z", "end": "2016-12-07T20:00:00Z"},
+                                                {"start": "2016-12-07T21:00:00Z", "end": "2016-12-07T22:00:00Z"}
+                                            ]
+                                        ],
+                                        [
+                                            {
+                                                "Region": "1",
+                                                "Consumers": [1, 2, 13, 15, 16, 17, 19, 20, 18],
+                                                "Last Name": "Awodu",
+                                                "Base Locations": [],
+                                                "County": "Cook",
+                                                "Authorized Credentials": true,
+                                                "Database ID": 1,
+                                                "Email": "tech@piccares.org",
+                                                "First Name": "Bradley",
+                                                "MPN": "",
+                                                "Type": "Navigator"
+                                            },
+                                            [
+                                                {"start": "2016-12-07T19:32:41Z", "end": "2016-12-07T20:00:00Z"},
+                                                {"start": "2016-12-07T21:00:00Z", "end": "2016-12-07T22:00:00Z"}
+                                            ]
+                                        ], 
+                                        [
+                                            {
+                                                "Region": "1",
+                                                "Consumers": [1, 2, 13, 15, 16, 17, 19, 20, 18],
+                                                "Last Name": "Awodu",
+                                                "Base Locations": [],
+                                                "County": "Cook",
+                                                "Authorized Credentials": true,
+                                                "Database ID": 1,
+                                                "Email": "tech@piccares.org",
+                                                "First Name": "Bradley",
+                                                "MPN": "",
+                                                "Type": "Navigator"
+                                            },
+                                            [
+                                            
+                                            ]
+                                        ]
+                                    ]
             "Data": {
                         "Next Available Appointments" :[
                                                         {
@@ -274,6 +332,7 @@ In response, a JSON document will be displayed with the following format:
         - An array of arrays of available appointments with navigators
         - Length of "Preferred Appointments" will EXACTLY match the length of the "Preferred Times" array in the request
         - Appointment Date and Time of an index of the "Preferred Appointments" array corresponds to the index of the "Preferred Times" array
+    - "Navigator Busy Times" is an intermediate data structure of busy times of all authenticated navigators from now(or the start of the next buisness day) to the end of the next business day
     
 - If there are errors in the POSTed JSON document:
     - "Error Code" will be 1.
