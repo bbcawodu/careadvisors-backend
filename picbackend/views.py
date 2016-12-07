@@ -42,6 +42,7 @@ FLOW = flow_from_clientsecrets(
     scope='https://www.googleapis.com/auth/calendar',
     redirect_uri=(settings.HOSTURL + '/oauth2callback'))
 FLOW.params['access_type'] = 'offline'
+FLOW.params["prompt"] = "consent"
 
 
 # @login_required
