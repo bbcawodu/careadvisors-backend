@@ -11,3 +11,5 @@ django-extensions
 pokitdok
 django-cors-headers
 google-api-python-client
+pandas
+bdateutil

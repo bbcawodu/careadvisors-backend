@@ -32,6 +32,9 @@ import logging
 import httplib2
 from googleapiclient.discovery import build
 from django.http import HttpResponseBadRequest
+from random import shuffle
+from pandas.tseries.offsets import BDay
+from bdateutil import isbday
 
 
 FLOW = flow_from_clientsecrets(
@@ -104,19 +107,20 @@ def handle_calendar_auth_request(request):
                 return HttpResponseRedirect(authorize_url)
 
             else:
-                http = httplib2.Http()
-                http = credential.authorize(http)
-                service = build("calendar", "v3", http=http)
-                events_result = service.events().list(calendarId='primary', maxResults=10, singleEvents=True,
-                                                      orderBy='startTime').execute()
-                logging.info(events_result)
-                response_raw_data["Data"] = events_result
+                response_raw_data["Data"] = "Authorized!"
+                # http = httplib2.Http()
+                # http = credential.authorize(http)
+                # service = build("calendar", "v3", http=http)
+                # events_result = service.events().list(calendarId='primary', maxResults=10, singleEvents=True,
+                #                                       orderBy='startTime').execute()
+                # logging.info(events_result)
+                # response_raw_data["Data"] = events_result
 
         except PICStaff.DoesNotExist:
             rqst_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(nav_id)))
 
     else:
-        rqst_errors.append("Bitch, No. navid must be in GET paramaters")
+        rqst_errors.append("No valid parameters")
 
     response_raw_data["Host"] = settings.HOSTURL
     response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
@@ -570,36 +574,71 @@ def handle_nav_appointments_api_request(request):
     if request.method == 'POST' or request.is_ajax():
         post_data = request.body.decode('utf-8')
         post_json = json.loads(post_data)
-        # response_raw_data['Activity Lists'] = []
-        response_raw_data['Events Lists'] = []
 
-        # Code to parse POSTed json request
+        response_raw_data["Data"] = {}
+        response_raw_data["Data"]["Next Available Appointments"] = []
+        response_raw_data["Data"]["Preferred Appointments"] = []
+
         rqst_preferred_times = clean_list_input(post_json, "root", "Preferred Times", post_errors, empty_list_allowed=True)
 
+        now_date_time = datetime.datetime.utcnow()
+        if not isbday(now_date_time):
+            earliest_available_date_time = now_date_time + BDay(1)
+            earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
+        else:
+            start_of_business = datetime.time(hour=15, minute=0, second=0, microsecond=0)
+            end_of_business = datetime.time(hour=23, minute=0, second=0, microsecond=0)
+            current_time = datetime.time(hour=now_date_time.hour, minute=now_date_time.minute, second=now_date_time.second, microsecond=now_date_time.microsecond)
+
+            if current_time > end_of_business:
+                earliest_available_date_time = now_date_time + BDay(1)
+                earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
+            elif current_time < start_of_business:
+                earliest_available_date_time = now_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
+            else:
+                earliest_available_date_time = now_date_time
+
+        end_of_next_b_day_date_time = earliest_available_date_time + BDay(1)
+        end_of_next_b_day_date_time = end_of_next_b_day_date_time.replace(hour=23, minute=0, second=0, microsecond=0)
+
         credentials_objects = list(CredentialsModel.objects.all())
+        nav_free_busy_list = []
         while credentials_objects:
             credentials_object = credentials_objects.pop()
+            nav_object = credentials_object.id
+
             if credentials_object.credential.invalid:
                 credentials_object.delete()
             else:
+                #Obtain valid credential and use it to build authorized service object for given navigator
                 credential = credentials_object.credential
-
-                now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
                 http = httplib2.Http()
                 http = credential.authorize(http)
                 service = build("calendar", "v3", http=http)
-                events_result = service.events().list(calendarId='primary', timeMin=now, maxResults=10,
-                                                      singleEvents=True, orderBy='startTime').execute()
-                logging.info(events_result)
-                response_raw_data['Events Lists'].append(events_result)
 
-                # activities = service.activities()
-                # activitylist = activities.list(collection='public',
-                #                                userId='me').execute()
-                # logging.info(activitylist)
-                # response_raw_data['Activity Lists'].append(activitylist)
+                # events_result = service.events().list(calendarId='primary', timeMin=now_date_time,
+                #                                       timeMax=tomorrow_date_time, maxResults=10,
+                #                                       singleEvents=True, orderBy='startTime').execute()
+                # logging.info(events_result)
+                # response_raw_data['Events Lists'].append(events_result)
 
-        response_raw_data['Preferred Times'] = rqst_preferred_times
+                free_busy_args = {"timeMin": earliest_available_date_time.isoformat() + 'Z', # 'Z' indicates UTC time
+                                  "timeMax": end_of_next_b_day_date_time.isoformat() + 'Z',
+                                  "items": [{"id": "primary"}
+                                            ]}
+                free_busy_result = service.freebusy().query(body=free_busy_args).execute()
+                logging.info(free_busy_result)
+
+                free_busy_entry = [nav_object.return_values_dict(), free_busy_result["calendars"]["primary"]["busy"]]
+                nav_free_busy_list.append(free_busy_entry)
+
+        response_raw_data["Navigator Busy Times"] = nav_free_busy_list
+        response_raw_data["Now"] = now_date_time.isoformat()
+        response_raw_data["Earliest available time"] = earliest_available_date_time.isoformat()
+        response_raw_data["End of next business day"] = end_of_next_b_day_date_time.isoformat()
+
+        shuffle(nav_free_busy_list)
+
 
     # if a GET request is made, add error message to response data
     else:
