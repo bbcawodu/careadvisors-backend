@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="b3b6e3fa-4b10-4520-bd24-f4ec81c0d431" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README_Staff_Backend_API.md" afterPath="$PROJECT_DIR$/README_Staff_Backend_API.md" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/picbackend/views.py" afterPath="$PROJECT_DIR$/picbackend/views.py" />
     </list>
     <ignored path="picbackend.iws" />
@@ -36,11 +35,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/picbackend/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="634" column="26" selection-start-line="634" selection-start-column="26" selection-end-line="634" selection-end-column="48" />
+            <state vertical-scroll-proportion="0.46728972">
+              <caret line="573" column="39" selection-start-line="573" selection-start-column="39" selection-end-line="573" selection-end-column="39" />
               <folding>
                 <element signature="e#61#119#0" expanded="true" />
               </folding>
@@ -77,7 +76,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="README_Staff_Backend_API.md" pinned="false" current-in-tab="true">
+      <file leaf-file-name="README_Staff_Backend_API.md" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/README_Staff_Backend_API.md">
           <provider editor-type-id="MarkdownPreviewEditor">
             <state />
@@ -125,8 +124,8 @@
         <option value="$PROJECT_DIR$/picbackend/urls.py" />
         <option value="$PROJECT_DIR$/picmodels/models.py" />
         <option value="$PROJECT_DIR$/requirements.txt" />
-        <option value="$PROJECT_DIR$/picbackend/views.py" />
         <option value="$PROJECT_DIR$/README_Staff_Backend_API.md" />
+        <option value="$PROJECT_DIR$/picbackend/views.py" />
       </list>
     </option>
   </component>
@@ -953,16 +952,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/picbackend/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="634" column="26" selection-start-line="634" selection-start-column="26" selection-end-line="634" selection-end-column="48" />
-          <folding>
-            <element signature="e#61#119#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/README_Staff_Backend_API.md">
       <provider editor-type-id="MarkdownPreviewEditor">
         <state />
@@ -977,6 +966,16 @@
             <folding />
           </first_editor>
           <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/picbackend/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.46728972">
+          <caret line="573" column="39" selection-start-line="573" selection-start-column="39" selection-end-line="573" selection-end-column="39" />
+          <folding>
+            <element signature="e#61#119#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

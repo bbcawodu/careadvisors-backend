@@ -566,7 +566,7 @@ def handle_nav_location_api_request(request):
     return response
 
 
-@ensure_csrf_cookie
+@csrf_exempt
 def handle_nav_appointments_api_request(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
