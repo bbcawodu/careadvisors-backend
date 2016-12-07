@@ -88,8 +88,8 @@ def auth_return(request):
 def handle_calendar_auth_request(request):
     response_raw_data, rqst_errors = init_response_data()
     search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
-    nav_id = search_params["navigator id"]
     if 'navigator id' in search_params:
+        nav_id = search_params["navigator id"]
         try:
             picstaff_object = PICStaff.objects.get(id=nav_id)
             storage = DjangoORMStorage(CredentialsModel, 'id', nav_id, 'credential')
