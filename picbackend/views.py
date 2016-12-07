@@ -160,6 +160,7 @@ def handle_manage_locations_request(request):
     return render(request, 'manage_nav_locations.html', {'formset': formset})
 
 
+@csrf_exempt
 def handle_hub_location_edit_api_request(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
@@ -223,7 +224,7 @@ def handle_staff_edit_request(request):
     return response
 
 
-@ensure_csrf_cookie
+@csrf_exempt
 def handle_consumer_edit_request(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
@@ -254,7 +255,7 @@ def handle_consumer_edit_request(request):
     return response
 
 
-@ensure_csrf_cookie
+@csrf_exempt
 def handle_metrics_submission_request(request):
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
