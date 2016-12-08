@@ -38,6 +38,7 @@ from pandas import bdate_range
 from bdateutil import isbday
 import dateutil.parser
 from dateutil.tz import tzutc
+import pytz
 
 
 FLOW = flow_from_clientsecrets(
@@ -662,7 +663,7 @@ def handle_nav_appointments_api_request(request):
                 possible_appointment_times.append(timestamp)
 
         for appointment_time in possible_appointment_times:
-            response_raw_data["Appointment Times"].append(appointment_time.isoformat())
+            response_raw_data["Appointment Times"].append(appointment_time.isoformat()[:-6])
 
             shuffle(nav_free_busy_list)
             next_available_apt_entry = {"Navigator Name": None,
@@ -676,7 +677,7 @@ def handle_nav_appointments_api_request(request):
                 if not nav_busy_list:
                     next_available_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
                     next_available_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
-                    next_available_apt_entry["Appointment Date and Time"] = appointment_time.isoformat()
+                    next_available_apt_entry["Appointment Date and Time"] = appointment_time.isoformat()[:-6]
                     next_available_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
                     response_raw_data["Data"]["Next Available Appointments"].append(next_available_apt_entry)
                     break
@@ -692,10 +693,58 @@ def handle_nav_appointments_api_request(request):
                     if not nav_is_busy:
                         next_available_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
                         next_available_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
-                        next_available_apt_entry["Appointment Date and Time"] = appointment_time.isoformat()
+                        next_available_apt_entry["Appointment Date and Time"] = appointment_time.isoformat()[:-6]
                         next_available_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
                         response_raw_data["Data"]["Next Available Appointments"].append(next_available_apt_entry)
                         break
+
+        for preferred_time_iso_string in rqst_preferred_times:
+            shuffle(nav_free_busy_list)
+            preferred_appointments_list = []
+
+            if not isinstance(preferred_time_iso_string, str):
+                post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(preferred_time_iso_string)))
+            else:
+                try:
+                    preferred_time_timestamp = dateutil.parser.parse(preferred_time_iso_string).replace(tzinfo=pytz.UTC)
+
+                    preferred_apt_entry = {"Navigator Name": None,
+                                                "Navigator Database ID": None,
+                                                "Appointment Date and Time": None,
+                                                "Schedule Appointment Link": None,
+                                                }
+
+                    for nav_free_busy_entry in nav_free_busy_list:
+                        nav_info = nav_free_busy_entry[0]
+                        nav_busy_list = nav_free_busy_entry[1]
+                        if not nav_busy_list:
+                            preferred_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
+                            preferred_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
+                            preferred_apt_entry["Appointment Date and Time"] = preferred_time_timestamp.isoformat()[:-6]
+                            preferred_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
+                            preferred_appointments_list.append(preferred_apt_entry)
+                            break
+                        else:
+                            nav_is_busy = False
+                            for busy_time_dict in nav_busy_list:
+                                start_date_time = dateutil.parser.parse(busy_time_dict['start'])
+                                end_date_time = dateutil.parser.parse(busy_time_dict['end'])
+                                if start_date_time <= preferred_time_timestamp < end_date_time:
+                                    nav_is_busy = True
+                                    break
+
+                            if not nav_is_busy:
+                                preferred_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
+                                preferred_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
+                                preferred_apt_entry["Appointment Date and Time"] = preferred_time_timestamp.isoformat()[:-6]
+                                preferred_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
+                                preferred_appointments_list.append(preferred_apt_entry)
+                                break
+
+                except ValueError:
+                    post_errors.append("{!s} is not a properly iso formatted date and time, Preferred Times must be a string iso formatted date and time".format(preferred_time_iso_string))
+
+            response_raw_data["Data"]["Preferred Appointments"].append(preferred_appointments_list)
 
     # if a GET request is made, add error message to response data
     else:
