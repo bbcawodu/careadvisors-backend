@@ -34,7 +34,10 @@ from googleapiclient.discovery import build
 from django.http import HttpResponseBadRequest
 from random import shuffle
 from pandas.tseries.offsets import BDay
+from pandas import bdate_range
 from bdateutil import isbday
+import dateutil.parser
+from dateutil.tz import tzutc
 
 
 FLOW = flow_from_clientsecrets(
@@ -570,6 +573,9 @@ def handle_nav_location_api_request(request):
 
 @csrf_exempt
 def handle_nav_appointments_api_request(request):
+    START_OF_BUSINESS_TIMESTAMP = datetime.time(hour=15, minute=0, second=0, microsecond=0)
+    END_OF_BUSINESS_TIMESTAMP = datetime.time(hour=23, minute=0, second=0, microsecond=0)
+
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
 
@@ -580,6 +586,7 @@ def handle_nav_appointments_api_request(request):
         response_raw_data["Data"] = {}
         response_raw_data["Data"]["Next Available Appointments"] = []
         response_raw_data["Data"]["Preferred Appointments"] = []
+        response_raw_data["Appointment Times"] = []
 
         rqst_preferred_times = clean_list_input(post_json, "root", "Preferred Times", post_errors, empty_list_allowed=True)
 
@@ -588,14 +595,12 @@ def handle_nav_appointments_api_request(request):
             earliest_available_date_time = now_date_time + BDay(1)
             earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
         else:
-            start_of_business = datetime.time(hour=15, minute=0, second=0, microsecond=0)
-            end_of_business = datetime.time(hour=23, minute=0, second=0, microsecond=0)
             current_time = datetime.time(hour=now_date_time.hour, minute=now_date_time.minute, second=now_date_time.second, microsecond=now_date_time.microsecond)
 
-            if current_time > end_of_business:
+            if current_time > END_OF_BUSINESS_TIMESTAMP:
                 earliest_available_date_time = now_date_time + BDay(1)
                 earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
-            elif current_time < start_of_business:
+            elif current_time < START_OF_BUSINESS_TIMESTAMP:
                 earliest_available_date_time = now_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
             else:
                 earliest_available_date_time = now_date_time
@@ -634,10 +639,63 @@ def handle_nav_appointments_api_request(request):
                 free_busy_entry = [nav_object.return_values_dict(), free_busy_result["calendars"]["primary"]["busy"]]
                 nav_free_busy_list.append(free_busy_entry)
 
-        response_raw_data["Navigator Busy Times"] = nav_free_busy_list
+        earliest_available_time = datetime.time(hour=earliest_available_date_time.hour, minute=earliest_available_date_time.minute, second=earliest_available_date_time.second, microsecond=earliest_available_date_time.microsecond)
+        start_of_b_day_time = datetime.time(hour=START_OF_BUSINESS_TIMESTAMP.hour, minute=START_OF_BUSINESS_TIMESTAMP.minute, second=START_OF_BUSINESS_TIMESTAMP.second, microsecond=START_OF_BUSINESS_TIMESTAMP.microsecond)
+        end_of_b_day_time = datetime.time(hour=END_OF_BUSINESS_TIMESTAMP.hour, minute=END_OF_BUSINESS_TIMESTAMP.minute, second=END_OF_BUSINESS_TIMESTAMP.second, microsecond=END_OF_BUSINESS_TIMESTAMP.microsecond)
 
-        shuffle(nav_free_busy_list)
+        possible_appointment_times = []
 
+        day_1_appointment_timesstamps = bdate_range(start=earliest_available_date_time, end=end_of_next_b_day_date_time, freq='30min', tz=tzutc())
+        day_1_appointment_timesstamps = day_1_appointment_timesstamps.tolist()
+
+        for timestamp in day_1_appointment_timesstamps:
+            timestamp_time = datetime.time(hour=timestamp.hour, minute=timestamp.minute, second=timestamp.second, microsecond=timestamp.microsecond)
+            if earliest_available_time < timestamp_time < end_of_b_day_time:
+                possible_appointment_times.append(timestamp)
+
+        day_2_appointment_timesstamps = bdate_range(start=end_of_next_b_day_date_time, end=end_of_next_b_day_date_time + datetime.timedelta(days=1), freq='30min', tz=tzutc())
+        day_2_appointment_timesstamps = day_2_appointment_timesstamps.tolist()
+
+        for timestamp in day_2_appointment_timesstamps:
+            timestamp_time = datetime.time(hour=timestamp.hour, minute=timestamp.minute, second=timestamp.second, microsecond=timestamp.microsecond)
+            if start_of_b_day_time <= timestamp_time < end_of_b_day_time:
+                possible_appointment_times.append(timestamp)
+
+        for appointment_time in possible_appointment_times:
+            response_raw_data["Appointment Times"].append(appointment_time.isoformat())
+
+            shuffle(nav_free_busy_list)
+            next_available_apt_entry = {"Navigator Name": None,
+                                        "Navigator Database ID": None,
+                                        "Appointment Date and Time": None,
+                                        "Schedule Appointment Link": None,
+                                        }
+            for nav_free_busy_entry in nav_free_busy_list:
+                nav_info = nav_free_busy_entry[0]
+                nav_busy_list = nav_free_busy_entry[1]
+                if not nav_busy_list:
+                    next_available_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
+                    next_available_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
+                    next_available_apt_entry["Appointment Date and Time"] = appointment_time.isoformat()
+                    next_available_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
+                    response_raw_data["Data"]["Next Available Appointments"].append(next_available_apt_entry)
+                    break
+                else:
+                    nav_is_busy = False
+                    for busy_time_dict in nav_busy_list:
+                        start_date_time = dateutil.parser.parse(busy_time_dict['start'])
+                        end_date_time = dateutil.parser.parse(busy_time_dict['end'])
+                        if start_date_time <= appointment_time < end_date_time:
+                            nav_is_busy = True
+                            break
+
+                    if not nav_is_busy:
+                        next_available_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
+                        next_available_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
+                        next_available_apt_entry["Appointment Date and Time"] = appointment_time.isoformat()
+                        next_available_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
+                        response_raw_data["Data"]["Next Available Appointments"].append(next_available_apt_entry)
+                        break
 
     # if a GET request is made, add error message to response data
     else:

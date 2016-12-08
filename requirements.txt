@@ -13,3 +13,4 @@ django-cors-headers
 google-api-python-client
 pandas
 bdateutil
+python-dateutil
