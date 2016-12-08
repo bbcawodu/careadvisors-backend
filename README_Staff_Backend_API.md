@@ -271,8 +271,10 @@ In response, a JSON document will be displayed with the following format:
 
 - Data will be a dictionary with the following keys
     - "Next Available Appointments"
+        - Will be empty if "Preferred Times" has at least one valid time
         - An array of available appointments with navigators starting from the time the request was made
     - "Preferred Appointments"
+        - Will be empty if "Preferred Times" is empty
         - An array of arrays of available appointments with navigators
         - Length of "Preferred Appointments" will EXACTLY match the length of the "Preferred Times" array in the request
         - Array of navigator appointments at the index of the "Preferred Appointments" array corresponds to the  date and time at the same index of the "Preferred Times" array

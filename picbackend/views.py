@@ -591,160 +591,196 @@ def handle_nav_appointments_api_request(request):
 
         rqst_preferred_times = clean_list_input(post_json, "root", "Preferred Times", post_errors, empty_list_allowed=True)
 
-        now_date_time = datetime.datetime.utcnow()
-        if not isbday(now_date_time):
-            earliest_available_date_time = now_date_time + BDay(1)
-            earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
-        else:
-            current_time = datetime.time(hour=now_date_time.hour, minute=now_date_time.minute, second=now_date_time.second, microsecond=now_date_time.microsecond)
-
-            if current_time > END_OF_BUSINESS_TIMESTAMP:
-                earliest_available_date_time = now_date_time + BDay(1)
-                earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
-            elif current_time < START_OF_BUSINESS_TIMESTAMP:
-                earliest_available_date_time = now_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
-            else:
-                earliest_available_date_time = now_date_time
-
-        end_of_next_b_day_date_time = earliest_available_date_time + BDay(1)
-        end_of_next_b_day_date_time = end_of_next_b_day_date_time.replace(hour=23, minute=0, second=0, microsecond=0)
-
-        credentials_objects = list(CredentialsModel.objects.all())
-        nav_free_busy_list = []
-        while credentials_objects:
-            credentials_object = credentials_objects.pop()
-            nav_object = credentials_object.id
-
-            if credentials_object.credential.invalid:
-                credentials_object.delete()
-            else:
-                #Obtain valid credential and use it to build authorized service object for given navigator
-                credential = credentials_object.credential
-                http = httplib2.Http()
-                http = credential.authorize(http)
-                service = build("calendar", "v3", http=http)
-
-                # events_result = service.events().list(calendarId='primary', timeMin=now_date_time,
-                #                                       timeMax=tomorrow_date_time, maxResults=10,
-                #                                       singleEvents=True, orderBy='startTime').execute()
-                # logging.info(events_result)
-                # response_raw_data['Events Lists'].append(events_result)
-
-                free_busy_args = {"timeMin": earliest_available_date_time.isoformat() + 'Z', # 'Z' indicates UTC time
-                                  "timeMax": end_of_next_b_day_date_time.isoformat() + 'Z',
-                                  "items": [{"id": "primary"}
-                                            ]}
-                free_busy_result = service.freebusy().query(body=free_busy_args).execute()
-                logging.info(free_busy_result)
-
-                free_busy_entry = [nav_object.return_values_dict(), free_busy_result["calendars"]["primary"]["busy"]]
-                nav_free_busy_list.append(free_busy_entry)
-
-        earliest_available_time = datetime.time(hour=earliest_available_date_time.hour, minute=earliest_available_date_time.minute, second=earliest_available_date_time.second, microsecond=earliest_available_date_time.microsecond)
-        start_of_b_day_time = datetime.time(hour=START_OF_BUSINESS_TIMESTAMP.hour, minute=START_OF_BUSINESS_TIMESTAMP.minute, second=START_OF_BUSINESS_TIMESTAMP.second, microsecond=START_OF_BUSINESS_TIMESTAMP.microsecond)
-        end_of_b_day_time = datetime.time(hour=END_OF_BUSINESS_TIMESTAMP.hour, minute=END_OF_BUSINESS_TIMESTAMP.minute, second=END_OF_BUSINESS_TIMESTAMP.second, microsecond=END_OF_BUSINESS_TIMESTAMP.microsecond)
-
-        possible_appointment_times = []
-
-        day_1_appointment_timesstamps = bdate_range(start=earliest_available_date_time, end=end_of_next_b_day_date_time, freq='30min', tz=tzutc())
-        day_1_appointment_timesstamps = day_1_appointment_timesstamps.tolist()
-
-        for timestamp in day_1_appointment_timesstamps:
-            timestamp_time = datetime.time(hour=timestamp.hour, minute=timestamp.minute, second=timestamp.second, microsecond=timestamp.microsecond)
-            if earliest_available_time < timestamp_time < end_of_b_day_time:
-                possible_appointment_times.append(timestamp)
-
-        day_2_appointment_timesstamps = bdate_range(start=end_of_next_b_day_date_time, end=end_of_next_b_day_date_time + datetime.timedelta(days=1), freq='30min', tz=tzutc())
-        day_2_appointment_timesstamps = day_2_appointment_timesstamps.tolist()
-
-        for timestamp in day_2_appointment_timesstamps:
-            timestamp_time = datetime.time(hour=timestamp.hour, minute=timestamp.minute, second=timestamp.second, microsecond=timestamp.microsecond)
-            if start_of_b_day_time <= timestamp_time < end_of_b_day_time:
-                possible_appointment_times.append(timestamp)
-
-        for appointment_time in possible_appointment_times:
-            response_raw_data["Appointment Times"].append(appointment_time.isoformat()[:-6])
-
-            shuffle(nav_free_busy_list)
-            next_available_apt_entry = {"Navigator Name": None,
-                                        "Navigator Database ID": None,
-                                        "Appointment Date and Time": None,
-                                        "Schedule Appointment Link": None,
-                                        }
-            for nav_free_busy_entry in nav_free_busy_list:
-                nav_info = nav_free_busy_entry[0]
-                nav_busy_list = nav_free_busy_entry[1]
-                if not nav_busy_list:
-                    next_available_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
-                    next_available_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
-                    next_available_apt_entry["Appointment Date and Time"] = appointment_time.isoformat()[:-6]
-                    next_available_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
-                    response_raw_data["Data"]["Next Available Appointments"].append(next_available_apt_entry)
-                    break
-                else:
-                    nav_is_busy = False
-                    for busy_time_dict in nav_busy_list:
-                        start_date_time = dateutil.parser.parse(busy_time_dict['start'])
-                        end_date_time = dateutil.parser.parse(busy_time_dict['end'])
-                        if start_date_time <= appointment_time < end_date_time:
-                            nav_is_busy = True
-                            break
-
-                    if not nav_is_busy:
-                        next_available_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
-                        next_available_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
-                        next_available_apt_entry["Appointment Date and Time"] = appointment_time.isoformat()[:-6]
-                        next_available_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
-                        response_raw_data["Data"]["Next Available Appointments"].append(next_available_apt_entry)
-                        break
-
+        valid_rqst_preferred_times_timestamps = []
         for preferred_time_iso_string in rqst_preferred_times:
-            shuffle(nav_free_busy_list)
-            preferred_appointments_list = []
-
-            if not isinstance(preferred_time_iso_string, str):
-                post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(preferred_time_iso_string)))
-            else:
+            if isinstance(preferred_time_iso_string, str):
                 try:
-                    preferred_time_timestamp = dateutil.parser.parse(preferred_time_iso_string).replace(tzinfo=pytz.UTC)
+                    valid_rqst_preferred_times_timestamps.append(dateutil.parser.parse(preferred_time_iso_string))
+                except ValueError:
+                    pass
 
-                    preferred_apt_entry = {"Navigator Name": None,
+        if valid_rqst_preferred_times_timestamps:
+            oldest_preferred_time_timestamp = min(valid_rqst_preferred_times_timestamps)
+            max_preferred_time_timestamp = max(valid_rqst_preferred_times_timestamps) + datetime.timedelta(hours=1)
+
+            credentials_objects = list(CredentialsModel.objects.all())
+            nav_free_busy_list = []
+            while credentials_objects:
+                credentials_object = credentials_objects.pop()
+                nav_object = credentials_object.id
+
+                if credentials_object.credential.invalid:
+                    credentials_object.delete()
+                else:
+                    #Obtain valid credential and use it to build authorized service object for given navigator
+                    credential = credentials_object.credential
+                    http = httplib2.Http()
+                    http = credential.authorize(http)
+                    service = build("calendar", "v3", http=http)
+
+                    free_busy_args = {"timeMin": oldest_preferred_time_timestamp.isoformat() + 'Z', # 'Z' indicates UTC time
+                                      "timeMax": max_preferred_time_timestamp.isoformat() + 'Z',
+                                      "items": [{"id": "primary"}
+                                                ]}
+                    free_busy_result = service.freebusy().query(body=free_busy_args).execute()
+
+                    free_busy_entry = [nav_object.return_values_dict(), free_busy_result["calendars"]["primary"]["busy"]]
+                    nav_free_busy_list.append(free_busy_entry)
+
+            for preferred_time_iso_string in rqst_preferred_times:
+                shuffle(nav_free_busy_list)
+                preferred_appointments_list = []
+
+                if not isinstance(preferred_time_iso_string, str):
+                    post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(preferred_time_iso_string)))
+                else:
+                    try:
+                        preferred_time_timestamp = dateutil.parser.parse(preferred_time_iso_string).replace(tzinfo=pytz.UTC)
+
+                        preferred_apt_entry = {"Navigator Name": None,
                                                 "Navigator Database ID": None,
                                                 "Appointment Date and Time": None,
                                                 "Schedule Appointment Link": None,
                                                 }
 
-                    for nav_free_busy_entry in nav_free_busy_list:
-                        nav_info = nav_free_busy_entry[0]
-                        nav_busy_list = nav_free_busy_entry[1]
-                        if not nav_busy_list:
-                            preferred_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
-                            preferred_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
-                            preferred_apt_entry["Appointment Date and Time"] = preferred_time_timestamp.isoformat()[:-6]
-                            preferred_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
-                            preferred_appointments_list.append(preferred_apt_entry)
-                            break
-                        else:
-                            nav_is_busy = False
-                            for busy_time_dict in nav_busy_list:
-                                start_date_time = dateutil.parser.parse(busy_time_dict['start'])
-                                end_date_time = dateutil.parser.parse(busy_time_dict['end'])
-                                if start_date_time <= preferred_time_timestamp < end_date_time:
-                                    nav_is_busy = True
-                                    break
-
-                            if not nav_is_busy:
+                        for nav_free_busy_entry in nav_free_busy_list:
+                            nav_info = nav_free_busy_entry[0]
+                            nav_busy_list = nav_free_busy_entry[1]
+                            if not nav_busy_list:
                                 preferred_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
                                 preferred_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
                                 preferred_apt_entry["Appointment Date and Time"] = preferred_time_timestamp.isoformat()[:-6]
                                 preferred_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
                                 preferred_appointments_list.append(preferred_apt_entry)
                                 break
+                            else:
+                                nav_is_busy = False
+                                for busy_time_dict in nav_busy_list:
+                                    start_date_time = dateutil.parser.parse(busy_time_dict['start'])
+                                    end_date_time = dateutil.parser.parse(busy_time_dict['end'])
+                                    if start_date_time <= preferred_time_timestamp < end_date_time:
+                                        nav_is_busy = True
+                                        break
 
-                except ValueError:
-                    post_errors.append("{!s} is not a properly iso formatted date and time, Preferred Times must be a string iso formatted date and time".format(preferred_time_iso_string))
+                                if not nav_is_busy:
+                                    preferred_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
+                                    preferred_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
+                                    preferred_apt_entry["Appointment Date and Time"] = preferred_time_timestamp.isoformat()[:-6]
+                                    preferred_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
+                                    preferred_appointments_list.append(preferred_apt_entry)
+                                    break
 
-            response_raw_data["Data"]["Preferred Appointments"].append(preferred_appointments_list)
+                    except ValueError:
+                        post_errors.append("{!s} is not a properly iso formatted date and time, Preferred Times must be a string iso formatted date and time".format(preferred_time_iso_string))
+
+                response_raw_data["Data"]["Preferred Appointments"].append(preferred_appointments_list)
+        else:
+            now_date_time = datetime.datetime.utcnow()
+            if not isbday(now_date_time):
+                earliest_available_date_time = now_date_time + BDay(1)
+                earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
+            else:
+                current_time = datetime.time(hour=now_date_time.hour, minute=now_date_time.minute, second=now_date_time.second, microsecond=now_date_time.microsecond)
+
+                if current_time > END_OF_BUSINESS_TIMESTAMP:
+                    earliest_available_date_time = now_date_time + BDay(1)
+                    earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
+                elif current_time < START_OF_BUSINESS_TIMESTAMP:
+                    earliest_available_date_time = now_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
+                else:
+                    earliest_available_date_time = now_date_time
+
+            end_of_next_b_day_date_time = earliest_available_date_time + BDay(1)
+            end_of_next_b_day_date_time = end_of_next_b_day_date_time.replace(hour=23, minute=0, second=0, microsecond=0)
+
+            credentials_objects = list(CredentialsModel.objects.all())
+            nav_free_busy_list = []
+            while credentials_objects:
+                credentials_object = credentials_objects.pop()
+                nav_object = credentials_object.id
+
+                if credentials_object.credential.invalid:
+                    credentials_object.delete()
+                else:
+                    #Obtain valid credential and use it to build authorized service object for given navigator
+                    credential = credentials_object.credential
+                    http = httplib2.Http()
+                    http = credential.authorize(http)
+                    service = build("calendar", "v3", http=http)
+
+                    # events_result = service.events().list(calendarId='primary', timeMin=now_date_time,
+                    #                                       timeMax=tomorrow_date_time, maxResults=10,
+                    #                                       singleEvents=True, orderBy='startTime').execute()
+                    # logging.info(events_result)
+                    # response_raw_data['Events Lists'].append(events_result)
+
+                    free_busy_args = {"timeMin": earliest_available_date_time.isoformat() + 'Z', # 'Z' indicates UTC time
+                                      "timeMax": end_of_next_b_day_date_time.isoformat() + 'Z',
+                                      "items": [{"id": "primary"}
+                                                ]}
+                    free_busy_result = service.freebusy().query(body=free_busy_args).execute()
+                    logging.info(free_busy_result)
+
+                    free_busy_entry = [nav_object.return_values_dict(), free_busy_result["calendars"]["primary"]["busy"]]
+                    nav_free_busy_list.append(free_busy_entry)
+
+            earliest_available_time = datetime.time(hour=earliest_available_date_time.hour, minute=earliest_available_date_time.minute, second=earliest_available_date_time.second, microsecond=earliest_available_date_time.microsecond)
+            start_of_b_day_time = datetime.time(hour=START_OF_BUSINESS_TIMESTAMP.hour, minute=START_OF_BUSINESS_TIMESTAMP.minute, second=START_OF_BUSINESS_TIMESTAMP.second, microsecond=START_OF_BUSINESS_TIMESTAMP.microsecond)
+            end_of_b_day_time = datetime.time(hour=END_OF_BUSINESS_TIMESTAMP.hour, minute=END_OF_BUSINESS_TIMESTAMP.minute, second=END_OF_BUSINESS_TIMESTAMP.second, microsecond=END_OF_BUSINESS_TIMESTAMP.microsecond)
+
+            possible_appointment_times = []
+
+            day_1_appointment_timesstamps = bdate_range(start=earliest_available_date_time, end=end_of_next_b_day_date_time, freq='30min', tz=tzutc())
+            day_1_appointment_timesstamps = day_1_appointment_timesstamps.tolist()
+
+            for timestamp in day_1_appointment_timesstamps:
+                timestamp_time = datetime.time(hour=timestamp.hour, minute=timestamp.minute, second=timestamp.second, microsecond=timestamp.microsecond)
+                if earliest_available_time < timestamp_time < end_of_b_day_time:
+                    possible_appointment_times.append(timestamp)
+
+            day_2_appointment_timesstamps = bdate_range(start=end_of_next_b_day_date_time, end=end_of_next_b_day_date_time + datetime.timedelta(days=1), freq='30min', tz=tzutc())
+            day_2_appointment_timesstamps = day_2_appointment_timesstamps.tolist()
+
+            for timestamp in day_2_appointment_timesstamps:
+                timestamp_time = datetime.time(hour=timestamp.hour, minute=timestamp.minute, second=timestamp.second, microsecond=timestamp.microsecond)
+                if start_of_b_day_time <= timestamp_time < end_of_b_day_time:
+                    possible_appointment_times.append(timestamp)
+
+            for appointment_time in possible_appointment_times:
+                response_raw_data["Appointment Times"].append(appointment_time.isoformat()[:-6])
+
+                shuffle(nav_free_busy_list)
+                next_available_apt_entry = {"Navigator Name": None,
+                                            "Navigator Database ID": None,
+                                            "Appointment Date and Time": None,
+                                            "Schedule Appointment Link": None,
+                                            }
+                for nav_free_busy_entry in nav_free_busy_list:
+                    nav_info = nav_free_busy_entry[0]
+                    nav_busy_list = nav_free_busy_entry[1]
+                    if not nav_busy_list:
+                        next_available_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
+                        next_available_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
+                        next_available_apt_entry["Appointment Date and Time"] = appointment_time.isoformat()[:-6]
+                        next_available_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
+                        response_raw_data["Data"]["Next Available Appointments"].append(next_available_apt_entry)
+                        break
+                    else:
+                        nav_is_busy = False
+                        for busy_time_dict in nav_busy_list:
+                            start_date_time = dateutil.parser.parse(busy_time_dict['start'])
+                            end_date_time = dateutil.parser.parse(busy_time_dict['end'])
+                            if start_date_time <= appointment_time < end_date_time:
+                                nav_is_busy = True
+                                break
+
+                        if not nav_is_busy:
+                            next_available_apt_entry["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
+                            next_available_apt_entry["Navigator Database ID"] = nav_info["Database ID"]
+                            next_available_apt_entry["Appointment Date and Time"] = appointment_time.isoformat()[:-6]
+                            next_available_apt_entry["Schedule Appointment Link"] = "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"]))
+                            response_raw_data["Data"]["Next Available Appointments"].append(next_available_apt_entry)
+                            break
 
     # if a GET request is made, add error message to response data
     else:
