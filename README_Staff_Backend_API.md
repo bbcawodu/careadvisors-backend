@@ -154,8 +154,8 @@ In response, a JSON document will be displayed with the following format:
     - Array corresponding to the "Data" key will be empty.
     
     
-### Available Navigator Appointments API (IN DEVELOPMENT)
-ALL DATES AND TIMES ARE UTC
+### Available Navigator Appointments API (IN TEST)
+#### ALL DATES AND TIMES ARE UTC
 
 To retrieve available navigator appointments for a given dictionary of consumer preferences, submit a POST request to: http://picbackend.herokuapp.com/v1/getnavappointments/. The POST data a JSON document using the following template:
 
