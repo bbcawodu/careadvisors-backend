@@ -889,6 +889,14 @@ def get_next_available_nav_apts():
 def get_nav_free_busy_times(start_timestamp, end_timestamp):
     nav_free_busy_list = []
 
+    def add_free_busy_entry(request_id, response, exception):
+        free_busy_entry = [nav_object.return_values_dict(), response["calendars"]["primary"]["busy"]]
+        nav_free_busy_list.append(free_busy_entry)
+
+    #build batch request
+    service_for_batch = build("calendar", "v3")
+    batch = service_for_batch.new_batch_http_request()
+
     credentials_objects = list(CredentialsModel.objects.all())
     while credentials_objects:
         credentials_object = credentials_objects.pop()
@@ -907,10 +915,13 @@ def get_nav_free_busy_times(start_timestamp, end_timestamp):
                               "timeMax": end_timestamp.isoformat() + 'Z',
                               "items": [{"id": "primary"}
                                         ]}
-            free_busy_result = service.freebusy().query(body=free_busy_args).execute()
+            batch.add(service.freebusy().query(body=free_busy_args), callback=add_free_busy_entry)
 
-            free_busy_entry = [nav_object.return_values_dict(), free_busy_result["calendars"]["primary"]["busy"]]
-            nav_free_busy_list.append(free_busy_entry)
+            # free_busy_result = service.freebusy().query(body=free_busy_args).execute()
+
+            # free_busy_entry = [nav_object.return_values_dict(), free_busy_result["calendars"]["primary"]["busy"]]
+            # nav_free_busy_list.append(free_busy_entry)
+    batch.execute()
 
     return nav_free_busy_list
 
