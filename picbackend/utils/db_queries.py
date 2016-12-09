@@ -888,11 +888,11 @@ def get_next_available_nav_apts():
 
 
 def get_nav_free_busy_times(start_timestamp, end_timestamp):
+    nav_free_busy_dict = {}
     nav_free_busy_list = []
 
     def add_free_busy_entry(request_id, response, exception):
-        free_busy_entry = [nav_object.return_values_dict(), response["calendars"]["primary"]["busy"]]
-        nav_free_busy_list.append(free_busy_entry)
+        nav_free_busy_dict[request_id] = response["calendars"]["primary"]["busy"]
 
     #build batch request
     batch = BatchHttpRequest()
@@ -905,6 +905,8 @@ def get_nav_free_busy_times(start_timestamp, end_timestamp):
         if credentials_object.credential.invalid:
             credentials_object.delete()
         else:
+            nav_free_busy_dict[str(nav_object.id)] = []
+
             #Obtain valid credential and use it to build authorized service object for given navigator
             credential = credentials_object.credential
             http = httplib2.Http()
@@ -915,13 +917,16 @@ def get_nav_free_busy_times(start_timestamp, end_timestamp):
                               "timeMax": end_timestamp.isoformat() + 'Z',
                               "items": [{"id": "primary"}
                                         ]}
-            batch.add(service.freebusy().query(body=free_busy_args), callback=add_free_busy_entry)
+            batch.add(service.freebusy().query(body=free_busy_args), callback=add_free_busy_entry, request_id=str(nav_object.id))
 
             # free_busy_result = service.freebusy().query(body=free_busy_args).execute()
 
             # free_busy_entry = [nav_object.return_values_dict(), free_busy_result["calendars"]["primary"]["busy"]]
             # nav_free_busy_list.append(free_busy_entry)
     batch.execute()
+
+    for key, value in nav_free_busy_dict.items():
+        nav_free_busy_list.append([PICStaff.objects.get(id=int(key)).return_values_dict(), value])
 
     return nav_free_busy_list
 
