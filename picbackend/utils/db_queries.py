@@ -8,6 +8,7 @@ from bdateutil import isbday
 import dateutil.parser
 from dateutil.tz import tzutc
 import pytz
+from googleapiclient.http import BatchHttpRequest
 
 
 START_OF_BUSINESS_TIMESTAMP = datetime.time(hour=15, minute=0, second=0, microsecond=0)
@@ -894,8 +895,7 @@ def get_nav_free_busy_times(start_timestamp, end_timestamp):
         nav_free_busy_list.append(free_busy_entry)
 
     #build batch request
-    service_for_batch = build("calendar", "v3")
-    batch = service_for_batch.new_batch_http_request()
+    batch = BatchHttpRequest()
 
     credentials_objects = list(CredentialsModel.objects.all())
     while credentials_objects:
