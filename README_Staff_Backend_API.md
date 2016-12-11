@@ -10,7 +10,7 @@ To modify or add members of the PICStaff class in the database, submit a POST re
 "Email": String,
 "User Type": String,
 "User County": String,
-"Base Location Names": [Strings (Can be None or empty string)],
+"Base Location Names": [Strings (Can be None or empty string)], # If any locations are not found, an error will be added and the staff member will still be saved
 "MPN": String(Can be None or empty string),
 "Database ID": Integer(Required when "Database Action" == "Staff Modification" or "Staff Deletion"),
 "Database Action": String,

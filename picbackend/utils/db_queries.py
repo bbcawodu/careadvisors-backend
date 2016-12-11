@@ -918,11 +918,6 @@ def get_nav_free_busy_times(start_timestamp, end_timestamp):
                               "items": [{"id": "primary"}
                                         ]}
             batch.add(service.freebusy().query(body=free_busy_args), callback=add_free_busy_entry, request_id=str(nav_object.id))
-
-            # free_busy_result = service.freebusy().query(body=free_busy_args).execute()
-
-            # free_busy_entry = [nav_object.return_values_dict(), free_busy_result["calendars"]["primary"]["busy"]]
-            # nav_free_busy_list.append(free_busy_entry)
     batch.execute()
 
     for key, value in nav_free_busy_dict.items():
