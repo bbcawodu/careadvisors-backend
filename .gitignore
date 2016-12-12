@@ -1,5 +1,8 @@
 venv
-.idea
+stderr.txt
+stdout.txt
+.idea/
+idea/
 picbackend/settings/local.env
 *.pyc
 staticfiles

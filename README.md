@@ -39,6 +39,11 @@ This app runs on a django installation hosted on Heroku. To install Heroku for c
 ## Pokitdok Backend API
 
 [Pokitdok Backend API README](README_Pokitdok_Backend_API.md)
+
+
+## Writing and Running Tests README
+
+[Writing and Running Tests README](README_Testing.md)
     
     
 ## Contributing
