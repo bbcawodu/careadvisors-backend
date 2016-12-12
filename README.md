@@ -12,7 +12,7 @@ This app runs on a django installation hosted on Heroku. To install Heroku for c
 
 ## Presence Healthcare Appointment Scheduler Backend
 
-[Presence Healthcare Backend README](README_Presence.md)
+[Presence Healthcare Backend README](docs/README_Presence.md)
 
 
 
