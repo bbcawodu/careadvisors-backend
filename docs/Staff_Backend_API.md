@@ -126,6 +126,7 @@ In response, a JSON document will be displayed with the following format:
     
     
 ### Google Calendar API OAuth2 Credentials Authorization Page for Navigators
+# NAVIGATORS MUST NOT CHANGE THE NAME OF THE PATIENT INNOVATION CENTER CONSUMER APPOINTMENT GOOGLE CALENDAR. IF THEY DO, THEY WILL NO LONGER BE SCHEDULED APPOINTMENTS
 - To retrieve and update Google Calendar API OAuth2 Credentials for a navigator and store it in the database, submit a GET request to http://picbackend.herokuapp.com/v1/calendar_auth/? with the following MANDATORY parameter: "navid".
     - "navid" corresponds to navigator database id.
         - passing a database id that does not appear in the database will result in an error.
@@ -279,6 +280,55 @@ In response, a JSON document will be displayed with the following format:
         - Length of "Preferred Appointments" will EXACTLY match the length of the "Preferred Times" array in the request
         - Array of navigator appointments at the index of the "Preferred Appointments" array corresponds to the  date and time at the same index of the "Preferred Times" array
             - If no navigator appointments are found for the date and time at a given index of preferred times, the array of navigator appointments at that index of "Preferred Appointments" will be empty
+    
+- If there are errors in the POSTed JSON document:
+    - "Error Code" will be 1.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
+        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+    - No changes are made to the database.
+    
+    
+### View Scheduled Consumer Appointments API (IN DEVELOPMENT)
+#### ALL DATES AND TIMES ARE UTC
+
+To retrieve scheduled consumer appointments for a given navigator, submit a GET request to: http://picbackend.herokuapp.com/v1/viewscheduledappointments/? with the following MANDATORY parameter: "navid"
+
+- The response will be a JSON document with the following format:
+```
+{
+ "Status": {
+            "Error Code": Integer,
+            "Version": Float,
+            "Errors": Array,
+            "Data": {
+                        "Scheduled Appointments" :[
+                                                        {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
+                                                            "Appointment Summary" : "alihihifhsjkdhfjkdsfhkjsdf",
+                                                        },
+                                                        {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
+                                                            "Appointment Summary" : "alihihifhsjkdhfjkdsfhkjsdf",
+                                                        },
+                                                        {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
+                                                            "Appointment Summary" : "alihihifhsjkdhfjkdsfhkjsdf",
+                                                        },
+                                                        ...
+                                                  ](In chronological order)
+           }
+}
+```
+
+- Data will be a dictionary with the following keys
+    - "Scheduled Appointments"
+        - An array of scheduled consumer appointments.
     
 - If there are errors in the POSTed JSON document:
     - "Error Code" will be 1.
