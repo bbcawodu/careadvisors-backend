@@ -888,40 +888,9 @@ def get_next_available_nav_apts():
 
 
 def get_nav_free_busy_times(start_timestamp, end_timestamp):
-    nav_free_busy_dict = {}
-    nav_free_busy_list = []
+    nav_cal_list_dict = get_nav_cal_lists()
 
-    def add_free_busy_entry(request_id, response, exception):
-        nav_free_busy_dict[request_id] = response["calendars"]["primary"]["busy"]
-
-    #build batch request
-    batch = BatchHttpRequest()
-
-    credentials_objects = list(CredentialsModel.objects.all())
-    while credentials_objects:
-        credentials_object = credentials_objects.pop()
-        nav_object = credentials_object.id
-
-        if credentials_object.credential.invalid:
-            credentials_object.delete()
-        else:
-            nav_free_busy_dict[str(nav_object.id)] = []
-
-            #Obtain valid credential and use it to build authorized service object for given navigator
-            credential = credentials_object.credential
-            http = httplib2.Http()
-            http = credential.authorize(http)
-            service = build("calendar", "v3", http=http)
-
-            free_busy_args = {"timeMin": start_timestamp.isoformat() + 'Z', # 'Z' indicates UTC time
-                              "timeMax": end_timestamp.isoformat() + 'Z',
-                              "items": [{"id": "primary"}
-                                        ]}
-            batch.add(service.freebusy().query(body=free_busy_args), callback=add_free_busy_entry, request_id=str(nav_object.id))
-    batch.execute()
-
-    for key, value in nav_free_busy_dict.items():
-        nav_free_busy_list.append([PICStaff.objects.get(id=int(key)).return_values_dict(), value])
+    nav_free_busy_list = get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict)
 
     return nav_free_busy_list
 
@@ -975,3 +944,82 @@ def get_possible_appointments_range(earliest_available_date_time, end_of_next_b_
             possible_appointment_times.append(timestamp)
 
     return possible_appointment_times
+
+
+def get_nav_cal_lists():
+    nav_cal_list_dict = {}
+
+    def add_cal_list_entry(request_id, response, exception):
+        nav_cal_list_dict[request_id] = response["items"]
+
+    #build batch request
+    cal_list_batch = BatchHttpRequest()
+
+    credentials_objects = list(CredentialsModel.objects.all())
+    while credentials_objects:
+        credentials_object = credentials_objects.pop()
+        nav_object = credentials_object.id
+
+        if credentials_object.credential.invalid:
+            credentials_object.delete()
+        else:
+            nav_cal_list_dict[str(nav_object.id)] = []
+
+            #Obtain valid credential and use it to build authorized service object for given navigator
+            credential = credentials_object.credential
+            http = httplib2.Http()
+            http = credential.authorize(http)
+            service = build("calendar", "v3", http=http)
+
+            cal_list_batch.add(service.calendarList().list(showHidden=True), callback=add_cal_list_entry, request_id=str(nav_object.id))
+    cal_list_batch.execute()
+
+    return nav_cal_list_dict
+
+
+def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict):
+    nav_free_busy_dict = {}
+    nav_free_busy_list = []
+
+    def add_free_busy_entry(request_id, response, exception):
+        for cals_key, calendar_object in response["calendars"].items():
+            busy_list = calendar_object["busy"]
+            if busy_list:
+                for busy_entry in busy_list:
+                    nav_free_busy_dict[request_id].append(busy_entry)
+
+    #build batch request
+    free_busy_batch = BatchHttpRequest()
+
+    credentials_objects = list(CredentialsModel.objects.all())
+    while credentials_objects:
+        credentials_object = credentials_objects.pop()
+        nav_object = credentials_object.id
+
+        if credentials_object.credential.invalid:
+            credentials_object.delete()
+        else:
+            nav_free_busy_dict[str(nav_object.id)] = []
+
+            #Obtain valid credential and use it to build authorized service object for given navigator
+            credential = credentials_object.credential
+            http = httplib2.Http()
+            http = credential.authorize(http)
+            service = build("calendar", "v3", http=http)
+
+            nav_cal_list_object = nav_cal_list_dict[str(nav_object.id)]
+            items_list = []
+            for nav_cal_object in nav_cal_list_object:
+                items_entry = {"id": nav_cal_object["id"]}
+                items_list.append(items_entry)
+
+            free_busy_args = {"timeMin": start_timestamp.isoformat() + 'Z', # 'Z' indicates UTC time
+                              "timeMax": end_timestamp.isoformat() + 'Z',
+                              "items": items_list}
+            free_busy_batch.add(service.freebusy().query(body=free_busy_args), callback=add_free_busy_entry, request_id=str(nav_object.id))
+    free_busy_batch.execute()
+
+    for key, value in nav_free_busy_dict.items():
+        nav_free_busy_list.append([PICStaff.objects.get(id=int(key)).return_values_dict(), value])
+
+    return nav_free_busy_list
