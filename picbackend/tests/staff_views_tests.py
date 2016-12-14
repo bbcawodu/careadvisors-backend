@@ -1,8 +1,9 @@
+from picbackend.tests.base import BaseWithDBTests
 from django.test import TestCase, Client
 import json
 
 
-class StaffAPITests(TestCase):
+class StaffAPITests(BaseWithDBTests):
     # fixtures = ["10_06_2016.json"]
 
     def setUp(self):

@@ -2,9 +2,10 @@ from django.http import HttpResponse
 from django.db import models, IntegrityError
 from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer, NavMetricsLocation, Country, ConsumerNote,\
     Address
-import datetime, json, sys
+import datetime, json, httplib2
 from picbackend.utils.base import clean_json_string_input, clean_json_int_input, clean_dict_input, clean_list_input,\
     parse_and_log_errors
+from googleapiclient.discovery import build
 
 
 def add_nav_hub_location(response_raw_data, post_json, post_errors):
@@ -640,3 +641,40 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
 
     response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
+
+
+def check_or_create_navigator_google_cal(credential):
+    service = build_authorized_cal_http_service_object(credential)
+
+    navigator_calendar_found = check_cal_objects_for_nav_cal(service)
+
+    if not navigator_calendar_found:
+        service = build_authorized_cal_http_service_object(credential)
+        add_nav_cal_to_google_cals(service)
+
+
+def check_cal_objects_for_nav_cal(service):
+    cal_list_entry_objects = service.calendarList().list(showHidden=True).execute()["items"]
+
+    navigator_calendar_found = False
+    for cal_list_entry in cal_list_entry_objects:
+        calendar_title = cal_list_entry["summary"]
+        if calendar_title == "Navigator-Consumer Appointments (DO NOT CHANGE)":
+            navigator_calendar_found = True
+            break
+
+    return navigator_calendar_found
+
+
+def add_nav_cal_to_google_cals(service):
+    insert_args = {"summary": "Navigator-Consumer Appointments (DO NOT CHANGE)",
+                   "description": "DO NOT CHANGE THE TITLE OF THIS CALENDAR. IF YOU DO, YOU WILL NOT RECIEVE NEW CONSUMER APPOINTMENTS."}
+    new_cal = service.calendars().insert(body=insert_args).execute()
+
+
+def build_authorized_cal_http_service_object(credential):
+    http = httplib2.Http()
+    http = credential.authorize(http)
+    service = build("calendar", "v3", http=http)
+
+    return service

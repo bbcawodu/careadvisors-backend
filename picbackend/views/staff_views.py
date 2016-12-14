@@ -7,7 +7,7 @@ from picmodels.models import PICStaff, CredentialsModel
 import json, base64
 from django.views.decorators.csrf import csrf_exempt
 from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors, clean_list_input
-from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff
+from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff, check_or_create_navigator_google_cal
 from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_staff, retrieve_first_name_staff,\
     retrieve_last_name_staff, retrieve_id_staff, build_search_params, retrieve_county_staff,\
     retrieve_region_staff, retrieve_mpn_staff, get_preferred_nav_apts, get_next_available_nav_apts
@@ -47,13 +47,8 @@ def handle_calendar_auth_request(request):
 
             else:
                 response_raw_data["Data"] = "Authorized!"
-                # http = httplib2.Http()
-                # http = credential.authorize(http)
-                # service = build("calendar", "v3", http=http)
-                # events_result = service.events().list(calendarId='primary', maxResults=10, singleEvents=True,
-                #                                       orderBy='startTime').execute()
-                # logging.info(events_result)
-                # response_raw_data["Data"] = events_result
+
+                check_or_create_navigator_google_cal(credential)
 
         except PICStaff.DoesNotExist:
             rqst_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(nav_id)))
