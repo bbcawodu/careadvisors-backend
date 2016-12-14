@@ -842,7 +842,7 @@ def get_preferred_nav_apts(rqst_preferred_times, valid_rqst_preferred_times_time
     return preferred_appointments
 
 
-def get_next_available_nav_apts():
+def get_next_available_nav_apts(post_errors):
     next_available_appointments = []
 
     now_date_time = datetime.datetime.utcnow()
@@ -851,38 +851,42 @@ def get_next_available_nav_apts():
     end_of_next_b_day_date_time = earliest_available_date_time + BDay(1)
     end_of_next_b_day_date_time = end_of_next_b_day_date_time.replace(hour=23, minute=0, second=0, microsecond=0)
 
-    while not next_available_appointments:
-        possible_appointment_times = get_possible_appointments_range(earliest_available_date_time, end_of_next_b_day_date_time)
-        nav_free_busy_list = get_nav_free_busy_times(earliest_available_date_time, end_of_next_b_day_date_time)
+    credentials_objects = CredentialsModel.objects.all()
+    if credentials_objects:
+        while not next_available_appointments:
+            possible_appointment_times = get_possible_appointments_range(earliest_available_date_time, end_of_next_b_day_date_time)
+            nav_free_busy_list = get_nav_free_busy_times(earliest_available_date_time, end_of_next_b_day_date_time)
 
-        for appointment_time in possible_appointment_times:
-            shuffle(nav_free_busy_list)
+            for appointment_time in possible_appointment_times:
+                shuffle(nav_free_busy_list)
 
-            for nav_free_busy_entry in nav_free_busy_list:
-                nav_info = nav_free_busy_entry[0]
-                nav_busy_list = nav_free_busy_entry[1]
-                if not nav_busy_list:
-                    next_available_appointments.append(create_navigator_apt_entry(nav_info, appointment_time))
-                    break
-                else:
-                    nav_is_busy = False
-                    for busy_time_dict in nav_busy_list:
-                        start_date_time = dateutil.parser.parse(busy_time_dict['start'])
-                        end_date_time = dateutil.parser.parse(busy_time_dict['end'])
-                        if start_date_time <= appointment_time < end_date_time:
-                            nav_is_busy = True
-                            break
-
-                    if not nav_is_busy:
+                for nav_free_busy_entry in nav_free_busy_list:
+                    nav_info = nav_free_busy_entry[0]
+                    nav_busy_list = nav_free_busy_entry[1]
+                    if not nav_busy_list:
                         next_available_appointments.append(create_navigator_apt_entry(nav_info, appointment_time))
                         break
+                    else:
+                        nav_is_busy = False
+                        for busy_time_dict in nav_busy_list:
+                            start_date_time = dateutil.parser.parse(busy_time_dict['start'])
+                            end_date_time = dateutil.parser.parse(busy_time_dict['end'])
+                            if start_date_time <= appointment_time < end_date_time:
+                                nav_is_busy = True
+                                break
 
-        if not next_available_appointments:
-            earliest_available_date_time = end_of_next_b_day_date_time + BDay(1)
-            earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
+                        if not nav_is_busy:
+                            next_available_appointments.append(create_navigator_apt_entry(nav_info, appointment_time))
+                            break
 
-            end_of_next_b_day_date_time = earliest_available_date_time + BDay(1)
-            end_of_next_b_day_date_time = end_of_next_b_day_date_time.replace(hour=23, minute=0, second=0, microsecond=0)
+            if not next_available_appointments:
+                earliest_available_date_time = end_of_next_b_day_date_time + BDay(1)
+                earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
+
+                end_of_next_b_day_date_time = earliest_available_date_time + BDay(1)
+                end_of_next_b_day_date_time = end_of_next_b_day_date_time.replace(hour=23, minute=0, second=0, microsecond=0)
+    else:
+        post_errors.append("No Navigators with Authorized credentials to query from. Next Available Appointments will be empty.")
 
     return next_available_appointments
 
@@ -989,6 +993,11 @@ def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict):
                     nav_free_busy_dict[request_id].append(busy_entry)
 
     #build batch request
+    # Each HTTP connection that your application makes results in a certain amount of overhead. This library supports batching, to allow your application to put several API calls into a single HTTP request. Examples of situations when you might want to use batching:
+
+    # You have many small requests to make and would like to minimize HTTP request overhead.
+    # A user made changes to data while your application was offline, so your application needs to synchronize its local data with the server by sending a lot of updates and deletes.
+    # Note: You're limited to 1000 calls in a single batch request. If you need to make more calls than that, use multiple batch requests
     free_busy_batch = BatchHttpRequest()
 
     credentials_objects = list(CredentialsModel.objects.all())

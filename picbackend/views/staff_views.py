@@ -192,7 +192,7 @@ def handle_nav_appointments_api_request(request):
         if valid_rqst_preferred_times_timestamps:
             response_raw_data["Data"]["Preferred Appointments"] = get_preferred_nav_apts(rqst_preferred_times, valid_rqst_preferred_times_timestamps, post_errors)
         else:
-            response_raw_data["Data"]["Next Available Appointments"] = get_next_available_nav_apts()
+            response_raw_data["Data"]["Next Available Appointments"] = get_next_available_nav_apts(post_errors)
 
     # if a GET request is made, add error message to response data
     else:
