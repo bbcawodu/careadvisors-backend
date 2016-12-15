@@ -10,7 +10,7 @@ from picbackend.utils.base import clean_json_string_input, init_response_data, p
 from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff, check_or_create_navigator_google_cal
 from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_staff, retrieve_first_name_staff,\
     retrieve_last_name_staff, retrieve_id_staff, build_search_params, retrieve_county_staff,\
-    retrieve_region_staff, retrieve_mpn_staff, get_preferred_nav_apts, get_next_available_nav_apts
+    retrieve_region_staff, retrieve_mpn_staff, get_preferred_nav_apts, get_next_available_nav_apts, get_nav_scheduled_appointments
 
 from oauth2client.client import flow_from_clientsecrets
 from django.conf import settings
@@ -199,5 +199,36 @@ def handle_nav_appointments_api_request(request):
         post_errors.append("Request needs POST data")
 
     response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
+
+
+def handle_view_sched_apt_request(request):
+    response_raw_data, rqst_errors = init_response_data()
+    search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+    response_raw_data["Data"] = {"Scheduled Appointments": None}
+
+    if 'navigator id' in search_params and not rqst_errors:
+        nav_id = search_params["navigator id"]
+
+        try:
+            picstaff_object = PICStaff.objects.get(id=nav_id)
+            credentials_object = CredentialsModel.objects.get(id=picstaff_object)
+            nav_info = picstaff_object.return_values_dict()
+            response_raw_data["Data"]["Scheduled Appointments"] = get_nav_scheduled_appointments(nav_info,
+                                                                                                 credentials_object,
+                                                                                                 rqst_errors)
+
+
+        except PICStaff.DoesNotExist:
+            rqst_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(nav_id)))
+        except CredentialsModel.DoesNotExist:
+            rqst_errors.append('Google Credentials database entry does not exist for the navigator with id: {!s}'.format(str(nav_id)))
+
+    else:
+        rqst_errors.append("No valid parameters")
+
+    response_raw_data["Host"] = settings.HOSTURL
+    response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response

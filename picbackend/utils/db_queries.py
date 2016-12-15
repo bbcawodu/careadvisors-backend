@@ -43,6 +43,9 @@ def build_search_params(rqst_params, response_raw_data, rqst_errors):
             for indx, element in enumerate(list_of_ids):
                 list_of_ids[indx] = int(element)
             search_params['id list'] = list_of_ids
+
+            if not search_params['id list']:
+                rqst_errors.append('Invalid id, ids must be base 10 integers')
     if 'partnerid' in rqst_params:
         search_params['partnerid'] = rqst_params['partnerid']
         list_of_ids = re.findall("[@\w. '-_]+", search_params['partnerid'])
@@ -54,6 +57,9 @@ def build_search_params(rqst_params, response_raw_data, rqst_errors):
         for indx, element in enumerate(list_of_nav_ids):
             list_of_nav_ids[indx] = int(element)
         search_params['navigator id list'] = list_of_nav_ids
+
+        if not search_params['navigator id list']:
+            rqst_errors.append('Invalid navigator id, navigator ids must be base 10 integers')
     if 'page' in rqst_params:
         search_params['page number'] = int(rqst_params['page'])
     if "county" in rqst_params:
@@ -62,6 +68,9 @@ def build_search_params(rqst_params, response_raw_data, rqst_errors):
     if "zipcode" in rqst_params:
         search_params['zipcode'] = rqst_params['zipcode']
         search_params['zipcode list'] = re.findall(r"\d+", search_params['zipcode'])
+
+        if not search_params['zipcode list']:
+            rqst_errors.append('Invalid zipcode, zipcodes must be integers')
     if "time" in rqst_params:
         try:
             search_params['look up date'] = datetime.date.today() - datetime.timedelta(days=rqst_params['time'])
@@ -1032,3 +1041,46 @@ def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict):
         nav_free_busy_list.append([PICStaff.objects.get(id=int(key)).return_values_dict(), value])
 
     return nav_free_busy_list
+
+
+def get_nav_scheduled_appointments(nav_info, credentials_object, rqst_errors):
+    scheduled_appointment_list = []
+    credential = credentials_object.credential
+
+    http = httplib2.Http()
+    http = credential.authorize(http)
+    service = build("calendar", "v3", http=http)
+
+    nav_cal_list = service.calendarList().list(showHidden=True).execute()["items"]
+    nav_cal_id = None
+    for calendar in nav_cal_list:
+        calendar_name = calendar["summary"]
+        if calendar_name == "Navigator-Consumer Appointments (DO NOT CHANGE)":
+            nav_cal_id = calendar["id"]
+    if not nav_cal_id:
+        rqst_errors.append("Navigator-Consumer Appointments not found in Navigator's Google CalendarList")
+
+    if not rqst_errors:
+        http = httplib2.Http()
+        http = credential.authorize(http)
+        service = build("calendar", "v3", http=http)
+
+        nav_cal_events = service.events().list(calendarId=nav_cal_id,
+                                               orderBy="startTime",
+                                               showHiddenInvitations=True,
+                                               singleEvents=True,
+                                               timeMin=datetime.datetime.utcnow().isoformat() + 'Z').execute()["items"]
+
+        if nav_cal_events:
+            for cal_event in nav_cal_events:
+                scheduled_appointment_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"]),
+                                               "Navigator Database ID": nav_info["Database ID"],
+                                               "Appointment Date and Time": cal_event["start"]["dateTime"],
+                                               "Appointment Summary": None}
+                if "description" in cal_event:
+                    scheduled_appointment_entry["Appointment Summary"] = cal_event["description"]
+                scheduled_appointment_list.append(scheduled_appointment_entry)
+        else:
+            rqst_errors.append("No scheduled appointments in navigator's 'Navigator-Consumer Appointments' calendar")
+
+    return scheduled_appointment_list

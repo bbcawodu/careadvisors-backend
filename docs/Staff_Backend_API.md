@@ -288,7 +288,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
     
-### View Scheduled Consumer Appointments API (IN DEVELOPMENT)
+### View Scheduled Consumer Appointments API (IN TEST)
 #### ALL DATES AND TIMES ARE UTC
 
 To retrieve scheduled consumer appointments for a given navigator, submit a GET request to: http://picbackend.herokuapp.com/v1/viewscheduledappointments/? with the following MANDATORY parameter: "navid"
