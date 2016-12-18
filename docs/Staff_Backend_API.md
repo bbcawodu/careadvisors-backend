@@ -391,22 +391,18 @@ In response, a JSON document will be displayed with the following format:
                                                      "Navigator Database ID" : 1,
                                                      "Appointment Date and Time" : '2016-12-22T10:00:00'(All Appointments are 30 Minutes Long),
                                                      "Appointment Summary" : "alihihifhsjkdhfjkdsfhkjsdf",
-                                                 }
+                                                 },
+                        "Consumer ID" : Integer,
                     },
            }
 }
 ```
 
 - Data will be a dictionary with the following keys
-    - "Next Available Appointments"
-        - Will be empty if "Preferred Times" has at least one valid time
-        - An array of available appointments with navigators starting from the time the request was made
-    - "Preferred Appointments"
-        - Will be empty if "Preferred Times" is empty
-        - An array of arrays of available appointments with navigators
-        - Length of "Preferred Appointments" will EXACTLY match the length of the "Preferred Times" array in the request
-        - Array of navigator appointments at the index of the "Preferred Appointments" array corresponds to the  date and time at the same index of the "Preferred Times" array
-            - If no navigator appointments are found for the date and time at a given index of preferred times, the array of navigator appointments at that index of "Preferred Appointments" will be empty
+    - "Confirmed Appointment"
+        - Contains info for for the scheduled consumer appointment with navigator
+    - "Consumer ID"
+        - Database id of the consumer that the appointment was scheduled for
     
 - If there are errors in the POSTed JSON document:
     - "Error Code" will be 1.
