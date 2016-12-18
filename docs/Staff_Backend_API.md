@@ -54,12 +54,23 @@ In response, a JSON document will be displayed with the following format:
 ### Staff Data Retrieval API
 - To retrieve staff data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/staff? with the following optional parameters: "fname", "lname", "email", "mpn", "id"
     - "fname" corresponds to first name.
+        - Must be a string
+        - Can be multiple values separated by commas.
     - "lname" corresponds to last name.
+        - Must be a string
+        - Can be multiple values separated by commas.
     - "email" corresponds to email.
+        - Must be a string
+        - Can be multiple values separated by commas.
     - "mpn" corresponds to mpn.
-    - "county" corresponds to email.
+        - Must be a string
+        - Can be multiple values separated by commas.
+    - "county" corresponds to navigator county.
+        - Must be a string
+        - Can be multiple values separated by commas.
     - "id" corresponds to database id.
         - passing "all" as the value will return all staff members
+        - otherwise, must be a base 10 integer.
     - All parameters may have a single or multiple values separated by commas
     - One parameter is allowed at a time (only "fname" and "lname" can be grouped)
         - If "fname" and "lname" are given simultaneously as parameters, only one value each is permitted.
@@ -293,6 +304,8 @@ In response, a JSON document will be displayed with the following format:
 
 To retrieve scheduled consumer appointments for a given navigator, submit a GET request to: http://picbackend.herokuapp.com/v1/viewscheduledappointments/? with the following MANDATORY parameter: "navid"
 
+- "navid" must be a base 10 integer
+
 - The response will be a JSON document with the following format:
 ```
 {
@@ -305,19 +318,19 @@ To retrieve scheduled consumer appointments for a given navigator, submit a GET 
                                                         {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00'(All Appointments are 30 Minutes Long),
                                                             "Appointment Summary" : "alihihifhsjkdhfjkdsfhkjsdf",
                                                         },
                                                         {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00'(All Appointments are 30 Minutes Long),
                                                             "Appointment Summary" : "alihihifhsjkdhfjkdsfhkjsdf",
                                                         },
                                                         {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00'(All Appointments are 30 Minutes Long),
                                                             "Appointment Summary" : "alihihifhsjkdhfjkdsfhkjsdf",
                                                         },
                                                         ...
@@ -329,6 +342,71 @@ To retrieve scheduled consumer appointments for a given navigator, submit a GET 
 - Data will be a dictionary with the following keys
     - "Scheduled Appointments"
         - An array of scheduled consumer appointments.
+    
+- If there are errors in the POSTed JSON document:
+    - "Error Code" will be 1.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
+        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+    - No changes are made to the database.
+    
+    
+### Add Consumer Appointment with Navigator API (IN DEVELOPMENT)
+#### ALL DATES AND TIMES ARE UTC
+
+To add a phone appointment for a consumer with a navigator, submit a POST request to: http://picbackend.herokuapp.com/v1/add_consumer_appointment_with_nav/. The POST data a JSON document using the following template:
+
+```
+{
+"Navigator ID": Integer,
+"Consumer Info": {
+                    "First Name": String,
+                    "Middle Name": String (Can be empty),
+                    "Last Name": String,
+                    "Email": String (Can be empty),
+                    "Phone Number": String (Can be empty),
+                    "Household Size": Integer,
+                    "Plan": String (Can be empty),
+                    "Preferred Language": String (Can be empty),
+                    
+                    Address(Every field within address can be given as an empty string. Address will only be recorded/updated iff a full address is given)
+                    "Address Line 1": String (Can be empty),
+                    "Address Line 2": String (Can be empty),
+                    "City": String (Can be empty),
+                    "State": String (Can be empty),
+                    "Zipcode": String (Can be empty),
+                 }
+}
+```
+
+In response, a JSON document will be displayed with the following format:
+```
+{
+ "Status": {
+            "Error Code": Integer,
+            "Version": Float,
+            "Errors": Array,
+            "Data": {
+                        "Confirmed Appointment" :{
+                                                     "Navigator Name" : "Bradley Awodu",
+                                                     "Navigator Database ID" : 1,
+                                                     "Appointment Date and Time" : '2016-12-22T10:00:00'(All Appointments are 30 Minutes Long),
+                                                     "Appointment Summary" : "alihihifhsjkdhfjkdsfhkjsdf",
+                                                 }
+                    },
+           }
+}
+```
+
+- Data will be a dictionary with the following keys
+    - "Next Available Appointments"
+        - Will be empty if "Preferred Times" has at least one valid time
+        - An array of available appointments with navigators starting from the time the request was made
+    - "Preferred Appointments"
+        - Will be empty if "Preferred Times" is empty
+        - An array of arrays of available appointments with navigators
+        - Length of "Preferred Appointments" will EXACTLY match the length of the "Preferred Times" array in the request
+        - Array of navigator appointments at the index of the "Preferred Appointments" array corresponds to the  date and time at the same index of the "Preferred Times" array
+            - If no navigator appointments are found for the date and time at a given index of preferred times, the array of navigator appointments at that index of "Preferred Appointments" will be empty
     
 - If there are errors in the POSTed JSON document:
     - "Error Code" will be 1.

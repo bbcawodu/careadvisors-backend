@@ -7,7 +7,8 @@ from picmodels.models import PICStaff, CredentialsModel
 import json, base64
 from django.views.decorators.csrf import csrf_exempt
 from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors, clean_list_input
-from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff, check_or_create_navigator_google_cal
+from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff, check_or_create_navigator_google_cal,\
+    add_nav_apt_to_google_calendar
 from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_staff, retrieve_first_name_staff,\
     retrieve_last_name_staff, retrieve_id_staff, build_search_params, retrieve_county_staff,\
     retrieve_region_staff, retrieve_mpn_staff, get_preferred_nav_apts, get_next_available_nav_apts, get_nav_scheduled_appointments
@@ -230,5 +231,27 @@ def handle_view_sched_apt_request(request):
 
     response_raw_data["Host"] = settings.HOSTURL
     response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
+    response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+    return response
+
+
+@csrf_exempt
+def handle_add_consumer_apt_with_nav_request(request):
+    # initialize dictionary for response data, including parsing errors
+    response_raw_data, post_errors = init_response_data()
+
+    if request.method == 'POST' or request.is_ajax():
+        post_data = request.body.decode('utf-8')
+        post_json = json.loads(post_data)
+
+        response_raw_data["Data"] = {"Confirmed Appointment": None}
+
+        response_raw_data["Data"]["Confirmed Appointment"] = add_nav_apt_to_google_calendar(post_json, post_errors)
+
+    # if a GET request is made, add error message to response data
+    else:
+        post_errors.append("Request needs POST data")
+
+    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
     return response
