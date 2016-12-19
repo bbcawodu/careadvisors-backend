@@ -350,7 +350,7 @@ To retrieve scheduled consumer appointments for a given navigator, submit a GET 
     - No changes are made to the database.
     
     
-### Add Consumer Appointment with Navigator API (IN DEVELOPMENT)
+### Add Consumer Appointment with Navigator API (IN TEST)
 #### ALL DATES AND TIMES ARE UTC
 
 To add a phone appointment for a consumer with a navigator, submit a POST request to: http://picbackend.herokuapp.com/v1/add_consumer_appointment_with_nav/. The POST data a JSON document using the following template:
@@ -358,6 +358,7 @@ To add a phone appointment for a consumer with a navigator, submit a POST reques
 ```
 {
 "Navigator ID": Integer,
+"Appointment Date and Time" : '2016-12-22T10:00:00',
 "Consumer Info": {
                     "First Name": String,
                     "Middle Name": String (Can be empty),
@@ -375,6 +376,7 @@ To add a phone appointment for a consumer with a navigator, submit a POST reques
                     "State": String (Can be empty),
                     "Zipcode": String (Can be empty),
                  }
+ 
 }
 ```
 
@@ -390,6 +392,7 @@ In response, a JSON document will be displayed with the following format:
                                                      "Navigator Name" : "Bradley Awodu",
                                                      "Navigator Database ID" : 1,
                                                      "Appointment Date and Time" : '2016-12-22T10:00:00'(All Appointments are 30 Minutes Long),
+                                                     "Appointment Title" : "alihihifhsjkdhfjkdsfhkjsdf",
                                                      "Appointment Summary" : "alihihifhsjkdhfjkdsfhkjsdf",
                                                  },
                         "Consumer ID" : Integer,

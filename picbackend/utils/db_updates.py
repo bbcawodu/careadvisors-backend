@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.db import models, IntegrityError
 from picmodels.models import PICStaff, MetricsSubmission, PlanStat, PICConsumer, NavMetricsLocation, Country, ConsumerNote,\
     Address, CredentialsModel
-import datetime, json, httplib2
+import datetime, json, httplib2, pytz, dateutil.parser
 from picbackend.utils.base import clean_json_string_input, clean_json_int_input, clean_dict_input, clean_list_input,\
     parse_and_log_errors
 from googleapiclient.discovery import build
@@ -571,30 +571,34 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
 def check_or_create_navigator_google_cal(credential):
     service = build_authorized_cal_http_service_object(credential)
 
-    navigator_calendar_found = check_cal_objects_for_nav_cal(service)
+    navigator_calendar_found, _ = check_cal_objects_for_nav_cal(service)
 
     if not navigator_calendar_found:
         service = build_authorized_cal_http_service_object(credential)
-        add_nav_cal_to_google_cals(service)
+        cal_id = add_nav_cal_to_google_cals(service)
 
 
 def check_cal_objects_for_nav_cal(service):
     cal_list_entry_objects = service.calendarList().list(showHidden=True).execute()["items"]
 
     navigator_calendar_found = False
+    navigator_calendar_id = None
     for cal_list_entry in cal_list_entry_objects:
         calendar_title = cal_list_entry["summary"]
         if calendar_title == "Navigator-Consumer Appointments (DO NOT CHANGE)":
             navigator_calendar_found = True
+            navigator_calendar_id = cal_list_entry["id"]
             break
 
-    return navigator_calendar_found
+    return navigator_calendar_found, navigator_calendar_id
 
 
 def add_nav_cal_to_google_cals(service):
     insert_args = {"summary": "Navigator-Consumer Appointments (DO NOT CHANGE)",
                    "description": "DO NOT CHANGE THE TITLE OF THIS CALENDAR. IF YOU DO, YOU WILL NOT RECIEVE NEW CONSUMER APPOINTMENTS."}
     new_cal = service.calendars().insert(body=insert_args).execute()
+
+    return new_cal["id"]
 
 
 def build_authorized_cal_http_service_object(credential):
@@ -606,28 +610,124 @@ def build_authorized_cal_http_service_object(credential):
 
 
 def add_nav_apt_to_google_calendar(post_json, post_errors):
-    scheduled_appointment = []
+    scheduled_appointment = {}
     rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator ID", post_errors)
+    rqst_apt_datetime = clean_json_string_input(post_json, "root", "Appointment Date and Time", post_errors)
+    if not isinstance(rqst_apt_datetime, str):
+        post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(rqst_apt_datetime)))
 
     consumer_info = get_or_create_consumer_instance(rqst_nav_id, post_json, post_errors)
     try:
         picstaff_object = PICStaff.objects.get(id=rqst_nav_id)
         credentials_object = CredentialsModel.objects.get(id=picstaff_object)
         nav_info = picstaff_object.return_values_dict()
-        service = build_authorized_cal_http_service_object(credentials_object.credential)
+        if credentials_object.credential.invalid:
+            credentials_object.delete()
+            post_errors.append('Google Credentials database entry is invalid for the navigator with id: {!s}'.format(str(rqst_nav_id)))
+        else:
+            scheduled_appointment = send_add_apt_rqst_to_google(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors)
+
     except PICStaff.DoesNotExist:
         post_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(rqst_nav_id)))
     except CredentialsModel.DoesNotExist:
         post_errors.append('Google Credentials database entry does not exist for the navigator with id: {!s}'.format(str(rqst_nav_id)))
 
-    return scheduled_appointment
+    return scheduled_appointment, consumer_info["Database ID"]
 
 
 def get_or_create_consumer_instance(rqst_nav_id, post_json, post_errors):
     consumer_info = {}
     rqst_consumer_info = clean_dict_input(post_json, "root", "Consumer Info", post_errors)
 
-    if not post_errors:
-        pass
+    if not post_errors and rqst_consumer_info:
+        rqst_consumer_email = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Email", post_errors, empty_string_allowed=True)
+        rqst_consumer_f_name = clean_json_string_input(rqst_consumer_info, "Consumer Info", "First Name", post_errors)
+        rqst_consumer_m_name = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Middle Name", post_errors, empty_string_allowed=True)
+        rqst_consumer_l_name = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Last Name", post_errors)
+        rqst_consumer_plan = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Plan", post_errors, empty_string_allowed=True)
+        rqst_consumer_met_nav_at = "Patient Assist"
+        rqst_consumer_household_size = clean_json_int_input(rqst_consumer_info, "Consumer Info", "Household Size", post_errors)
+        rqst_consumer_phone = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Phone Number", post_errors)
+        rqst_consumer_pref_lang = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Preferred Language", post_errors, empty_string_allowed=True)
+
+        rqst_address_line_1 = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Address Line 1", post_errors, empty_string_allowed=True)
+        rqst_address_line_2 = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Address Line 2", post_errors, empty_string_allowed=True)
+        if rqst_address_line_2 is None:
+            rqst_address_line_2 = ''
+        rqst_city = clean_json_string_input(rqst_consumer_info, "Consumer Info", "City", post_errors, empty_string_allowed=True)
+        rqst_state = clean_json_string_input(rqst_consumer_info, "Consumer Info", "State", post_errors, empty_string_allowed=True)
+        rqst_zipcode = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Zipcode", post_errors, empty_string_allowed=True)
+        rqst_date_met_nav = datetime.datetime.utcnow()
+
+        if len(post_errors) == 0:
+            address_instance = None
+            if rqst_address_line_1 != '' and rqst_city != '' and rqst_state != '' and rqst_zipcode != '':
+                address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=rqst_address_line_1,
+                                                                                           address_line_2=rqst_address_line_2,
+                                                                                           city=rqst_city,
+                                                                                           state_province=rqst_state,
+                                                                                           zipcode=rqst_zipcode,
+                                                                                           country=Country.objects.all()[0])
+
+            consumer_rqst_values = {"plan": rqst_consumer_plan,
+                                    "met_nav_at": rqst_consumer_met_nav_at,
+                                    "household_size": rqst_consumer_household_size,
+                                    "preferred_language": rqst_consumer_pref_lang}
+
+            consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(email=rqst_consumer_email,
+                                                                                             first_name=rqst_consumer_f_name,
+                                                                                             middle_name=rqst_consumer_m_name,
+                                                                                             last_name=rqst_consumer_l_name,
+                                                                                             address=address_instance,
+                                                                                             phone=rqst_consumer_phone,
+                                                                                             date_met_nav=rqst_date_met_nav,
+                                                                                             defaults=consumer_rqst_values)
+
+            try:
+                nav_instance = PICStaff.objects.get(id=rqst_nav_id)
+                consumer_instance.navigator = nav_instance
+                consumer_instance.save()
+            except PICStaff.DoesNotExist:
+                post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
+
+            consumer_info = consumer_instance.return_values_dict()
 
     return consumer_info
+
+
+def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, nav_info, post_errors):
+    scheduled_appointment = {}
+    if not post_errors:
+        try:
+            apt_end_timestamp = dateutil.parser.parse(rqst_apt_datetime) + datetime.timedelta(minutes=30)
+            service = build_authorized_cal_http_service_object(credential)
+
+            navigator_calendar_found, navigator_calendar_id = check_cal_objects_for_nav_cal(service)
+            if not navigator_calendar_found:
+                post_errors.append("Navigator calendar not found for this navigator, creating it...")
+                navigator_calendar_id = add_nav_cal_to_google_cals(service)
+
+            service = build_authorized_cal_http_service_object(credential)
+            nav_apt_args = {"summary": "Navigator ({!s} {!s}) appointment with {!s} {!s}".format(nav_info["First Name"],
+                                                                                                 nav_info["Last Name"],
+                                                                                                 consumer_info["First Name"],
+                                                                                                 consumer_info["Last Name"]),
+                            "description": "Consumer will be expecting a call at {!s}\nOther Consumer Info:\nFirst Name: {!s}\nLast Name: {!s}\nEmail: {!s}".format(consumer_info["Phone Number"],
+                                                                                                                                                                    consumer_info["First Name"],
+                                                                                                                                                                    consumer_info["Last Name"],
+                                                                                                                                                                    consumer_info["Email"]),
+                            "start": {"dateTime": rqst_apt_datetime + 'Z'},
+                            "end": {"dateTime": apt_end_timestamp.isoformat() + 'Z'}
+                            }
+            navigator_appointment_object = service.events().insert(calendarId=navigator_calendar_id, body=nav_apt_args, sendNotifications=True).execute()
+
+            scheduled_appointment["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
+            scheduled_appointment["Navigator Database ID"] = nav_info["Database ID"]
+            scheduled_appointment["Appointment Date and Time"] = rqst_apt_datetime
+            scheduled_appointment["Appointment Title"] = navigator_appointment_object["summary"]
+            scheduled_appointment["Appointment Summary"] = navigator_appointment_object["description"]
+
+        except ValueError:
+            post_errors.append("{!s} is not a properly iso formatted date and time, Preferred Times must be a string iso formatted date and time".format(rqst_apt_datetime))
+
+    return scheduled_appointment

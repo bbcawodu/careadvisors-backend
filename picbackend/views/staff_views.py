@@ -220,7 +220,6 @@ def handle_view_sched_apt_request(request):
                                                                                                  credentials_object,
                                                                                                  rqst_errors)
 
-
         except PICStaff.DoesNotExist:
             rqst_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(nav_id)))
         except CredentialsModel.DoesNotExist:
@@ -246,7 +245,7 @@ def handle_add_consumer_apt_with_nav_request(request):
 
         response_raw_data["Data"] = {"Confirmed Appointment": None}
 
-        response_raw_data["Data"]["Confirmed Appointment"] = add_nav_apt_to_google_calendar(post_json, post_errors)
+        response_raw_data["Data"]["Confirmed Appointment"], response_raw_data["Data"]["Consumer ID"] = add_nav_apt_to_google_calendar(post_json, post_errors)
 
     # if a GET request is made, add error message to response data
     else:
