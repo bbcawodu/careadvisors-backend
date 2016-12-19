@@ -26,14 +26,15 @@ def add_nav_hub_location(response_raw_data, post_json, post_errors):
                                                                                    state_province=rqst_state,
                                                                                    zipcode=rqst_zipcode,
                                                                                    country=Country.objects.get(name=rqst_country))
-        location_rqst_values = {"name": rqst_location_name,
-                                "address": address_instance}
-        location_instance, location_instance_created = NavMetricsLocation.objects.get_or_create(name=rqst_location_name,
-                                                                                                defaults=location_rqst_values)
-        if not location_instance_created:
+
+        try:
+            location_instance = NavMetricsLocation.objects.get(name=rqst_location_name, address=address_instance)
             post_errors.append('Nav Hub Location database entry already exists for the name: {!s}'.format(rqst_location_name))
-        else:
-            response_raw_data['Data'] = {"Database ID": location_instance.id}
+        except NavMetricsLocation.DoesNotExist:
+            location_instance = NavMetricsLocation(name=rqst_location_name, address=address_instance)
+            location_instance.save()
+
+        response_raw_data['Data'] = {"Database ID": location_instance.id}
 
     response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
@@ -122,11 +123,11 @@ def add_staff(response_raw_data, post_json, post_errors):
                            "mpn": rqst_usr_mpn}
         user_instance, user_instance_created = PICStaff.objects.get_or_create(email=rqst_usr_email,
                                                                               defaults=usr_rqst_values)
-        user_instance.base_locations = base_location_objects
-        user_instance.save()
         if not user_instance_created:
             post_errors.append('Staff database entry already exists for the email: {!s}'.format(rqst_usr_email))
         else:
+            user_instance.base_locations = base_location_objects
+            user_instance.save()
             response_raw_data['Data'] = {"Database ID": user_instance.id}
 
     for location_error in location_errors:
@@ -270,16 +271,16 @@ def add_consumer(response_raw_data, post_json, post_errors):
                 consumer_instance.save()
             except PICStaff.DoesNotExist:
                 post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
+
+            if consumer_instance:
+                old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
+                for old_consumer_note in old_consumer_notes:
+                    old_consumer_note.delete()
+
+                for navigator_note in rqst_navigator_notes:
+                    consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
+                    consumer_note_object.save()
         response_raw_data['Data'] = {"Database ID": consumer_instance.id}
-
-        if consumer_instance:
-            old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
-            for old_consumer_note in old_consumer_notes:
-                old_consumer_note.delete()
-
-            for navigator_note in rqst_navigator_notes:
-                consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
-                consumer_note_object.save()
 
     response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
