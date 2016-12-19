@@ -731,3 +731,7 @@ def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, na
             post_errors.append("{!s} is not a properly iso formatted date and time, Preferred Times must be a string iso formatted date and time".format(rqst_apt_datetime))
 
     return scheduled_appointment
+
+
+def delete_nav_apt_from_google_calendar(post_json, post_errors):
+    pass

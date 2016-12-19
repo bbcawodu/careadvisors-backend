@@ -364,7 +364,7 @@ To add a phone appointment for a consumer with a navigator, submit a POST reques
                     "Middle Name": String (Can be empty),
                     "Last Name": String,
                     "Email": String (Can be empty),
-                    "Phone Number": String (Can be empty),
+                    "Phone Number": String,
                     "Household Size": Integer,
                     "Plan": String (Can be empty),
                     "Preferred Language": String (Can be empty),
@@ -406,6 +406,43 @@ In response, a JSON document will be displayed with the following format:
         - Contains info for for the scheduled consumer appointment with navigator
     - "Consumer ID"
         - Database id of the consumer that the appointment was scheduled for
+    
+- If there are errors in the POSTed JSON document:
+    - "Error Code" will be 1.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
+        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+    - No changes are made to the database.
+    
+    
+### Delete Consumer Appointment with Navigator API (IN DEVELOPMENT)
+#### ALL DATES AND TIMES ARE UTC
+
+To delete a phone appointment for a consumer with a navigator, submit a POST request to: http://picbackend.herokuapp.com/v1/delete_consumer_appointment_with_nav/. The POST data a JSON document using the following template:
+
+```
+{
+"Navigator ID": Integer,
+"Appointment Date and Time" : '2016-12-22T10:00:00',
+ 
+}
+```
+
+In response, a JSON document will be displayed with the following format:
+```
+{
+ "Status": {
+            "Error Code": Integer,
+            "Version": Float,
+            "Errors": Array,
+            "Data": {
+                        "Deleted" : Boolean
+                    },
+           }
+}
+```
+
+- Data will be a dictionary with the following keys
+    - "Deleted" will be a boolean declaring whether or not appointment was deleted
     
 - If there are errors in the POSTed JSON document:
     - "Error Code" will be 1.
