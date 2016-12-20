@@ -243,9 +243,13 @@ def handle_add_consumer_apt_with_nav_request(request):
         post_data = request.body.decode('utf-8')
         post_json = json.loads(post_data)
 
-        response_raw_data["Data"] = {"Confirmed Appointment": None}
+        response_raw_data["Data"] = {"Confirmed Appointment": None,
+                                     "Consumer ID": None}
 
-        response_raw_data["Data"]["Confirmed Appointment"], response_raw_data["Data"]["Consumer ID"] = add_nav_apt_to_google_calendar(post_json, post_errors)
+        confirmed_appointment, consumer_dict = add_nav_apt_to_google_calendar(post_json, post_errors)
+        response_raw_data["Data"]["Confirmed Appointment"] = confirmed_appointment
+        if consumer_dict:
+            response_raw_data["Data"]["Consumer ID"] = consumer_dict["Database ID"]
 
     # if a GET request is made, add error message to response data
     else:
@@ -265,7 +269,7 @@ def handle_delete_consumer_apt_with_nav_request(request):
         post_data = request.body.decode('utf-8')
         post_json = json.loads(post_data)
 
-        response_raw_data["Data"] = {"Deleted Appointment": None}
+        response_raw_data["Data"] = {"Deleted Appointment": False}
 
         response_raw_data["Data"]["Deleted Appointment"] = delete_nav_apt_from_google_calendar(post_json, post_errors)
 

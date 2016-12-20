@@ -392,8 +392,12 @@ In response, a JSON document will be displayed with the following format:
                                                      "Navigator Name" : "Bradley Awodu",
                                                      "Navigator Database ID" : 1,
                                                      "Appointment Date and Time" : '2016-12-22T10:00:00'(All Appointments are 30 Minutes Long),
-                                                     "Appointment Title" : "alihihifhsjkdhfjkdsfhkjsdf",
-                                                     "Appointment Summary" : "alihihifhsjkdhfjkdsfhkjsdf",
+                                                     "Appointment Title" : "Navigator (Bradley Awodu) appointment with calkfndy pophgfthcdfgcgh",
+                                                     "Appointment Summary" : "Consumer will be expecting a call at 2813308004
+                                                                              Other Consumer Info:
+                                                                              First Name: calkfndy
+                                                                              Last Name: pophgfthcdfgcgh
+                                                                              Email: kjashkjhd@kjashf.com",
                                                  },
                         "Consumer ID" : Integer,
                     },
@@ -414,7 +418,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
     
-### Delete Consumer Appointment with Navigator API (IN DEVELOPMENT)
+### Delete Consumer Appointment with Navigator API (IN TEST)
 #### ALL DATES AND TIMES ARE UTC
 
 To delete a phone appointment for a consumer with a navigator, submit a POST request to: http://picbackend.herokuapp.com/v1/delete_consumer_appointment_with_nav/. The POST data a JSON document using the following template:

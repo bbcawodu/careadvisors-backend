@@ -633,7 +633,7 @@ def add_nav_apt_to_google_calendar(post_json, post_errors):
     except CredentialsModel.DoesNotExist:
         post_errors.append('Google Credentials database entry does not exist for the navigator with id: {!s}'.format(str(rqst_nav_id)))
 
-    return scheduled_appointment, consumer_info["Database ID"]
+    return scheduled_appointment, consumer_info
 
 
 def get_or_create_consumer_instance(rqst_nav_id, post_json, post_errors):
@@ -700,39 +700,124 @@ def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, na
     scheduled_appointment = {}
     if not post_errors:
         try:
-            apt_end_timestamp = dateutil.parser.parse(rqst_apt_datetime) + datetime.timedelta(minutes=30)
-            service = build_authorized_cal_http_service_object(credential)
+            now_date_time = datetime.datetime.utcnow()
+            rqst_apt_timestamp = dateutil.parser.parse(rqst_apt_datetime)
+            if now_date_time < rqst_apt_timestamp:
+                apt_end_timestamp = dateutil.parser.parse(rqst_apt_datetime) + datetime.timedelta(minutes=30)
+                service = build_authorized_cal_http_service_object(credential)
+
+                navigator_calendar_found, navigator_calendar_id = check_cal_objects_for_nav_cal(service)
+                if not navigator_calendar_found:
+                    post_errors.append("Navigator calendar not found for this navigator, creating it...")
+                    navigator_calendar_id = add_nav_cal_to_google_cals(service)
+
+                service = build_authorized_cal_http_service_object(credential)
+                nav_apt_args = {"summary": "Navigator ({!s} {!s}) appointment with {!s} {!s}".format(nav_info["First Name"],
+                                                                                                     nav_info["Last Name"],
+                                                                                                     consumer_info["First Name"],
+                                                                                                     consumer_info["Last Name"]),
+                                "description": "Consumer will be expecting a call at {!s}\nOther Consumer Info:\nFirst Name: {!s}\nLast Name: {!s}\nEmail: {!s}".format(consumer_info["Phone Number"],
+                                                                                                                                                                        consumer_info["First Name"],
+                                                                                                                                                                        consumer_info["Last Name"],
+                                                                                                                                                                        consumer_info["Email"]),
+                                "start": {"dateTime": rqst_apt_datetime + 'Z'},
+                                "end": {"dateTime": apt_end_timestamp.isoformat() + 'Z'}
+                                }
+                navigator_appointment_object = service.events().insert(calendarId=navigator_calendar_id, body=nav_apt_args, sendNotifications=True).execute()
+
+                scheduled_appointment["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
+                scheduled_appointment["Navigator Database ID"] = nav_info["Database ID"]
+                scheduled_appointment["Appointment Date and Time"] = rqst_apt_datetime
+                scheduled_appointment["Appointment Title"] = navigator_appointment_object["summary"]
+                scheduled_appointment["Appointment Summary"] = navigator_appointment_object["description"]
+            else:
+                post_errors.append("{!s} is not a properly iso formatted date and time, Preferred Times must be a string iso formatted date and time".format(rqst_apt_datetime))
+
+        except ValueError:
+            post_errors.append("Requested appointment time must be after current time")
+
+    return scheduled_appointment
+
+
+def delete_nav_apt_from_google_calendar(post_json, post_errors):
+    google_apt_deleted = False
+
+    rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator ID", post_errors)
+    rqst_apt_datetime = clean_json_string_input(post_json, "root", "Appointment Date and Time", post_errors)
+    if not isinstance(rqst_apt_datetime, str):
+        post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(rqst_apt_datetime)))
+
+    try:
+        picstaff_object = PICStaff.objects.get(id=rqst_nav_id)
+        credentials_object = CredentialsModel.objects.get(id=picstaff_object)
+        nav_info = picstaff_object.return_values_dict()
+        if credentials_object.credential.invalid:
+            credentials_object.delete()
+            post_errors.append('Google Credentials database entry is invalid for the navigator with id: {!s}'.format(str(rqst_nav_id)))
+        else:
+            service = build_authorized_cal_http_service_object(credentials_object.credential)
 
             navigator_calendar_found, navigator_calendar_id = check_cal_objects_for_nav_cal(service)
             if not navigator_calendar_found:
                 post_errors.append("Navigator calendar not found for this navigator, creating it...")
                 navigator_calendar_id = add_nav_cal_to_google_cals(service)
 
-            service = build_authorized_cal_http_service_object(credential)
-            nav_apt_args = {"summary": "Navigator ({!s} {!s}) appointment with {!s} {!s}".format(nav_info["First Name"],
-                                                                                                 nav_info["Last Name"],
-                                                                                                 consumer_info["First Name"],
-                                                                                                 consumer_info["Last Name"]),
-                            "description": "Consumer will be expecting a call at {!s}\nOther Consumer Info:\nFirst Name: {!s}\nLast Name: {!s}\nEmail: {!s}".format(consumer_info["Phone Number"],
-                                                                                                                                                                    consumer_info["First Name"],
-                                                                                                                                                                    consumer_info["Last Name"],
-                                                                                                                                                                    consumer_info["Email"]),
-                            "start": {"dateTime": rqst_apt_datetime + 'Z'},
-                            "end": {"dateTime": apt_end_timestamp.isoformat() + 'Z'}
-                            }
-            navigator_appointment_object = service.events().insert(calendarId=navigator_calendar_id, body=nav_apt_args, sendNotifications=True).execute()
+            google_apt_id = check_google_cal_for_apt(credentials_object, rqst_apt_datetime, post_errors, navigator_calendar_id)
 
-            scheduled_appointment["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
-            scheduled_appointment["Navigator Database ID"] = nav_info["Database ID"]
-            scheduled_appointment["Appointment Date and Time"] = rqst_apt_datetime
-            scheduled_appointment["Appointment Title"] = navigator_appointment_object["summary"]
-            scheduled_appointment["Appointment Summary"] = navigator_appointment_object["description"]
+            if google_apt_id:
+                google_apt_deleted = send_delete_apt_rqst_to_google(credentials_object, google_apt_id, navigator_calendar_id, post_errors)
+            else:
+                post_errors.append('Appointment with consumer at {!s}, was not found in Navigator\'s Google Calendar'.format(rqst_apt_datetime))
 
-        except ValueError:
-            post_errors.append("{!s} is not a properly iso formatted date and time, Preferred Times must be a string iso formatted date and time".format(rqst_apt_datetime))
+    except PICStaff.DoesNotExist:
+        post_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(rqst_nav_id)))
+    except CredentialsModel.DoesNotExist:
+        post_errors.append('Google Credentials database entry does not exist for the navigator with id: {!s}'.format(str(rqst_nav_id)))
 
-    return scheduled_appointment
+    return google_apt_deleted
 
 
-def delete_nav_apt_from_google_calendar(post_json, post_errors):
-    pass
+def check_google_cal_for_apt(credentials_object, rqst_apt_datetime, post_errors, navigator_calendar_id):
+    google_apt_id = None
+
+    try:
+        apt_end_timestamp = dateutil.parser.parse(rqst_apt_datetime) + datetime.timedelta(minutes=30)
+
+        if navigator_calendar_id:
+            service = build_authorized_cal_http_service_object(credentials_object.credential)
+            event_objects = service.events().list(calendarId=navigator_calendar_id,
+                                                  orderBy="startTime",
+                                                  singleEvents=True,
+                                                  showHiddenInvitations=True,
+                                                  timeMin=rqst_apt_datetime + 'Z').execute()["items"]
+
+            google_apt_id = parse_google_events_for_nav_apt(event_objects, rqst_apt_datetime)
+
+    except ValueError:
+        post_errors.append("{!s} is not a properly iso formatted date and time, Preferred Times must be a string iso formatted date and time".format(rqst_apt_datetime))
+
+    return google_apt_id
+
+
+def parse_google_events_for_nav_apt(event_objects, rqst_apt_datetime):
+    google_apt_id = None
+
+    for event in event_objects:
+        if event["start"]["dateTime"] == rqst_apt_datetime + "Z":
+            google_apt_id = event["id"]
+            break
+
+    return google_apt_id
+
+
+def send_delete_apt_rqst_to_google(credentials_object, google_apt_id, navigator_calendar_id, post_errors):
+    google_apt_deleted = False
+
+    service = build_authorized_cal_http_service_object(credentials_object.credential)
+    try:
+        service.events().delete(calendarId=navigator_calendar_id, eventId=google_apt_id, sendNotifications=True).execute()
+        google_apt_deleted = True
+    except Exception:
+        post_errors.append("Delete Appointment request for Calendar ID: {!s} and Event ID: {!s} failed".format(navigator_calendar_id, google_apt_id))
+
+    return google_apt_deleted

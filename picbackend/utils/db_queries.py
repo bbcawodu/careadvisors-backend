@@ -1075,7 +1075,7 @@ def get_nav_scheduled_appointments(nav_info, credentials_object, rqst_errors):
             for cal_event in nav_cal_events:
                 scheduled_appointment_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"]),
                                                "Navigator Database ID": nav_info["Database ID"],
-                                               "Appointment Date and Time": cal_event["start"]["dateTime"],
+                                               "Appointment Date and Time": cal_event["start"]["dateTime"][:-1],
                                                "Appointment Summary": None}
                 if "description" in cal_event:
                     scheduled_appointment_entry["Appointment Summary"] = cal_event["description"]
