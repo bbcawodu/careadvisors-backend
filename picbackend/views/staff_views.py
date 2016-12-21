@@ -1,18 +1,36 @@
 """
-Defines views that are mapped to url configurations
+Defines views that handle Patient Innovation Center Staff based requests
 """
 
-from django.http import HttpResponse, HttpResponseRedirect
-from picmodels.models import PICStaff, CredentialsModel
-import json, base64
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from picmodels.models import PICStaff
+from picmodels.models import CredentialsModel
+import json
+import base64
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors, clean_list_input
-from picbackend.utils.db_updates import add_staff, modify_staff, delete_staff, check_or_create_navigator_google_cal,\
-    add_nav_apt_to_google_calendar, delete_nav_apt_from_google_calendar
-from picbackend.utils.db_queries import retrieve_f_l_name_staff, retrieve_email_staff, retrieve_first_name_staff,\
-    retrieve_last_name_staff, retrieve_id_staff, build_search_params, retrieve_county_staff,\
-    retrieve_region_staff, retrieve_mpn_staff, get_preferred_nav_apts, get_next_available_nav_apts, get_nav_scheduled_appointments
-
+from picbackend.utils import clean_json_string_input
+from picbackend.utils import init_response_data
+from picbackend.utils import parse_and_log_errors
+from picbackend.utils import clean_list_input
+from picbackend.utils import build_search_params
+from picbackend.utils import add_staff
+from picbackend.utils import modify_staff
+from picbackend.utils import delete_staff
+from picbackend.utils import retrieve_f_l_name_staff
+from picbackend.utils import retrieve_email_staff
+from picbackend.utils import retrieve_first_name_staff
+from picbackend.utils import retrieve_last_name_staff
+from picbackend.utils import retrieve_id_staff
+from picbackend.utils import retrieve_mpn_staff
+from picbackend.utils import retrieve_county_staff
+from picbackend.utils import retrieve_region_staff
+from picbackend.utils import check_or_create_navigator_google_cal
+from picbackend.utils import add_nav_apt_to_google_calendar
+from picbackend.utils import delete_nav_apt_from_google_calendar
+from picbackend.utils import get_preferred_nav_apts
+from picbackend.utils import get_next_available_nav_apts
+from picbackend.utils import get_nav_scheduled_appointments
 from oauth2client.client import flow_from_clientsecrets
 from django.conf import settings
 from oauth2client.contrib.django_util.storage import DjangoORMStorage

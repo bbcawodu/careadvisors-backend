@@ -1,5 +1,5 @@
 """
-This file defines the data models for the picproject app
+This package defines the data models for the picproject app
 """
 from .address_models import *
 from .nav_location_models import *

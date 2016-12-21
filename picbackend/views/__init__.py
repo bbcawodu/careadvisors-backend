@@ -1,5 +1,5 @@
 """
-Defines views that are mapped to url configurations
+Defines package for views that are mapped to url configurations
 """
 from .consumer_views import *
 from .metrics_views import *

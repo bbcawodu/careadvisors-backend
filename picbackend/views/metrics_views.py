@@ -1,15 +1,22 @@
 """
-Defines views that are mapped to url configurations
+Defines views that handle Patient Innovation Center consumer metrics based requests
 """
 
 from django.http import HttpResponse
 from picmodels.models import MetricsSubmission
 import json
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils.base import init_response_data, parse_and_log_errors
-from picbackend.utils.db_updates import add_or_update_metrics_entity
-from picbackend.utils.db_queries import build_search_params, group_metrics, retrieve_id_metrics, retrieve_f_l_name_metrics,\
-    retrieve_first_name_metrics, retrieve_last_name_metrics, retrieve_email_metrics, retrieve_mpn_metrics
+from picbackend.utils import init_response_data
+from picbackend.utils import parse_and_log_errors
+from picbackend.utils import build_search_params
+from picbackend.utils import add_or_update_metrics_entity
+from picbackend.utils import group_metrics
+from picbackend.utils import retrieve_id_metrics
+from picbackend.utils import retrieve_f_l_name_metrics
+from picbackend.utils import retrieve_first_name_metrics
+from picbackend.utils import retrieve_last_name_metrics
+from picbackend.utils import retrieve_email_metrics
+from picbackend.utils import retrieve_mpn_metrics
 
 
 @csrf_exempt

@@ -1,16 +1,24 @@
 """
-Defines views that are mapped to url configurations
+Defines views that handle Patient Innovation Center Staff based requests
 """
 
 from django.http import HttpResponse
 from picmodels.models import PICConsumer
 import json
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors
-from picbackend.utils.db_updates import add_consumer, modify_consumer, delete_consumer
-from picbackend.utils.db_queries import build_search_params, retrieve_f_l_name_consumers,\
-    retrieve_email_consumers, retrieve_first_name_consumers, retrieve_last_name_consumers, retrieve_id_consumers,\
-    break_results_into_pages
+from picbackend.utils import build_search_params
+from picbackend.utils import clean_json_string_input
+from picbackend.utils import init_response_data
+from picbackend.utils import parse_and_log_errors
+from picbackend.utils import add_consumer
+from picbackend.utils import modify_consumer
+from picbackend.utils import delete_consumer
+from picbackend.utils import retrieve_f_l_name_consumers
+from picbackend.utils import retrieve_email_consumers
+from picbackend.utils import retrieve_first_name_consumers
+from picbackend.utils import retrieve_last_name_consumers
+from picbackend.utils import retrieve_id_consumers
+from picbackend.utils import break_results_into_pages
 
 
 @csrf_exempt

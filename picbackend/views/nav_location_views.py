@@ -1,17 +1,21 @@
 """
-Defines views that are mapped to url configurations
+Defines views that handle Patient Innovation Center navigator location based requests
 """
 
 from django.http import HttpResponse
 from django.shortcuts import render
-from picmodels.models import  NavMetricsLocation
+from picmodels.models import NavMetricsLocation
 import json
 from picbackend.forms import NavMetricsLocationForm
 from django.contrib import messages
 from django.forms import modelformset_factory
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils.base import clean_json_string_input, init_response_data, parse_and_log_errors
-from picbackend.utils.db_updates import add_nav_hub_location, modify_nav_hub_location, delete_nav_hub_location
+from picbackend.utils import clean_json_string_input
+from picbackend.utils import init_response_data
+from picbackend.utils import parse_and_log_errors
+from picbackend.utils import add_nav_hub_location
+from picbackend.utils import modify_nav_hub_location
+from picbackend.utils import delete_nav_hub_location
 
 
 def handle_location_add_request(request):

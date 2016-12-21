@@ -3,10 +3,13 @@ Defines views that are responsible for accessing and supplying Pokitdok data
 """
 
 from django.http import HttpResponse
-import json, pokitdok
+import json
+import pokitdok
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils.base import init_response_data, parse_and_log_errors, fetch_and_parse_pokit_elig_data
-from picbackend.utils.db_queries import build_search_params
+from picbackend.utils import init_response_data
+from picbackend.utils import parse_and_log_errors
+from picbackend.utils import fetch_and_parse_pokit_elig_data
+from picbackend.utils import build_search_params
 
 
 @csrf_exempt
