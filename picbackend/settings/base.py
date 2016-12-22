@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'picbackend',
     'picmodels',
     "django_extensions",
     'corsheaders',
@@ -139,9 +140,5 @@ STATIC_ROOT = 'staticfiles'
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
-)
-
-FIXTURE_DIRS = (
-    os.path.join(BASE_DIR, 'fixtures'),
 )
 

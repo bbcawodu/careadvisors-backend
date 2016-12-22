@@ -21,6 +21,9 @@ from random import shuffle
 from pandas.tseries.offsets import BDay
 from pandas import bdate_range
 from bdateutil import isbday
+from django.core.validators import validate_email
+from django import forms
+from django.db import IntegrityError
 
 START_OF_BUSINESS_TIMESTAMP = datetime.time(hour=15, minute=0, second=0, microsecond=0)
 END_OF_BUSINESS_TIMESTAMP = datetime.time(hour=23, minute=0, second=0, microsecond=0)
@@ -98,7 +101,12 @@ def get_or_create_consumer_instance(rqst_nav_id, post_json, post_errors):
     rqst_consumer_info = clean_dict_input(post_json, "root", "Consumer Info", post_errors)
 
     if not post_errors and rqst_consumer_info:
-        rqst_consumer_email = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Email", post_errors, empty_string_allowed=True)
+        rqst_consumer_email = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Email", post_errors)
+        if rqst_consumer_email and not post_errors:
+            try:
+                validate_email(rqst_consumer_email)
+            except forms.ValidationError:
+                post_errors.append("{!s} must be a valid email address".format(rqst_consumer_email))
         rqst_consumer_f_name = clean_json_string_input(rqst_consumer_info, "Consumer Info", "First Name", post_errors)
         rqst_consumer_m_name = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Middle Name", post_errors, empty_string_allowed=True)
         rqst_consumer_l_name = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Last Name", post_errors)
@@ -128,25 +136,28 @@ def get_or_create_consumer_instance(rqst_nav_id, post_json, post_errors):
                                                                                            country=Country.objects.all()[0])
 
             consumer_rqst_values = {"plan": rqst_consumer_plan,
-                                    "met_nav_at": rqst_consumer_met_nav_at,
-                                    "household_size": rqst_consumer_household_size,
+                                    "middle_name": rqst_consumer_m_name,
+                                    "address": address_instance,
+                                    "date_met_nav": rqst_date_met_nav,
                                     "preferred_language": rqst_consumer_pref_lang}
 
-            consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(email=rqst_consumer_email,
-                                                                                             first_name=rqst_consumer_f_name,
-                                                                                             middle_name=rqst_consumer_m_name,
-                                                                                             last_name=rqst_consumer_l_name,
-                                                                                             address=address_instance,
-                                                                                             phone=rqst_consumer_phone,
-                                                                                             date_met_nav=rqst_date_met_nav,
-                                                                                             defaults=consumer_rqst_values)
-
             try:
-                nav_instance = PICStaff.objects.get(id=rqst_nav_id)
-                consumer_instance.navigator = nav_instance
-                consumer_instance.save()
-            except PICStaff.DoesNotExist:
-                post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
+                consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(email=rqst_consumer_email,
+                                                                                                 first_name=rqst_consumer_f_name,
+                                                                                                 last_name=rqst_consumer_l_name,
+                                                                                                 met_nav_at=rqst_consumer_met_nav_at,
+                                                                                                 household_size=rqst_consumer_household_size,
+                                                                                                 phone=rqst_consumer_phone,
+                                                                                                 defaults=consumer_rqst_values)
+
+                try:
+                    nav_instance = PICStaff.objects.get(id=rqst_nav_id)
+                    consumer_instance.navigator = nav_instance
+                    consumer_instance.save()
+                except PICStaff.DoesNotExist:
+                    post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
+            except IntegrityError:
+                consumer_instance = PICConsumer.objects.get(email=rqst_consumer_email)
 
             consumer_info = consumer_instance.return_values_dict()
 
@@ -187,6 +198,8 @@ def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, na
                 scheduled_appointment["Appointment Date and Time"] = rqst_apt_datetime
                 scheduled_appointment["Appointment Title"] = navigator_appointment_object["summary"]
                 scheduled_appointment["Appointment Summary"] = navigator_appointment_object["description"]
+
+                send_apt_info_email_to_consumer(consumer_info, scheduled_appointment, post_errors)
             else:
                 post_errors.append("{!s} is not a properly iso formatted date and time, Preferred Times must be a string iso formatted date and time".format(rqst_apt_datetime))
 
@@ -194,6 +207,10 @@ def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, na
             post_errors.append("Requested appointment time must be after current time")
 
     return scheduled_appointment
+
+
+def send_apt_info_email_to_consumer(consumer_info, scheduled_appointment, post_errors):
+    pass
 
 
 def delete_nav_apt_from_google_calendar(post_json, post_errors):

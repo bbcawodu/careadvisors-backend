@@ -4,5 +4,6 @@ stdout.txt
 .idea/
 idea/
 picbackend/settings/local.env
+picbackend/migrations/0001_load_intial_data_for_tests.py
 *.pyc
 staticfiles

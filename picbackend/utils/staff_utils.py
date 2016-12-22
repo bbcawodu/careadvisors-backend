@@ -9,10 +9,17 @@ from picbackend.utils import parse_and_log_errors
 from picmodels.models import NavMetricsLocation
 from picmodels.models import PICStaff
 from django.db import IntegrityError
+from django.core.validators import validate_email
+from django import forms
 
 
 def add_staff(response_raw_data, post_json, post_errors):
     rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+    if rqst_usr_email and not post_errors:
+        try:
+            validate_email(rqst_usr_email)
+        except forms.ValidationError:
+            post_errors.append("{!s} must be a valid email address".format(rqst_usr_email))
     rqst_usr_mpn = clean_json_string_input(post_json, "root", "MPN", post_errors, empty_string_allowed=True, none_allowed=True)
     if rqst_usr_mpn is None:
         rqst_usr_mpn = ''
@@ -49,7 +56,7 @@ def add_staff(response_raw_data, post_json, post_errors):
 
     for location_error in location_errors:
         post_errors.append(location_error)
-    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
+
     return response_raw_data
 
 
@@ -96,7 +103,7 @@ def modify_staff(response_raw_data, post_json, post_errors):
 
     for location_error in location_errors:
         post_errors.append(location_error)
-    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
+
     return response_raw_data
 
 
@@ -113,7 +120,6 @@ def delete_staff(response_raw_data, post_json, post_errors):
         except PICStaff.MultipleObjectsReturned:
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
 
-    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 

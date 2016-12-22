@@ -187,7 +187,6 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
         except models.ObjectDoesNotExist:
             post_errors.append("Staff database entry does not exist for email: {!s}".format(rqst_usr_email))
 
-    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 

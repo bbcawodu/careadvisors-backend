@@ -108,6 +108,8 @@ class PICStaff(models.Model):
         # maps model to the picmodels module
         app_label = 'picmodels'
 
+        unique_together = ("email",)
+
 
 # Maybe add some sort of authorization to our API? OAuth? OAuth2? Some shit?
 class CredentialsModel(models.Model):
@@ -144,15 +146,7 @@ class PICConsumer(models.Model):
         # maps model to the picmodels module
         app_label = 'picmodels'
 
-        unique_together = ("first_name",
-                           "middle_name",
-                           "last_name",
-                           "email",
-                           "phone",
-                           "address",
-                           "preferred_language",
-                           "best_contact_time",
-                           "date_met_nav")
+        unique_together = ("email",)
 
     def return_values_dict(self):
         valuesdict = {"First Name": self.first_name,

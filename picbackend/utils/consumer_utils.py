@@ -4,22 +4,28 @@ Defines utility functions and classes for consumer views
 
 import datetime
 import math
+import json
 from picbackend.utils import clean_json_string_input
 from picbackend.utils import clean_json_int_input
 from picbackend.utils import clean_list_input
 from picbackend.utils import clean_dict_input
-from picbackend.utils import parse_and_log_errors
-from picmodels.models import NavMetricsLocation
 from picmodels.models import PICStaff
 from picmodels.models import PICConsumer
 from picmodels.models import ConsumerNote
 from picmodels.models import Address
 from picmodels.models import Country
 from django.db import IntegrityError
+from django.core.validators import validate_email
+from django import forms
 
 
 def add_consumer(response_raw_data, post_json, post_errors):
     rqst_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors, empty_string_allowed=True)
+    if rqst_consumer_email and not post_errors:
+        try:
+            validate_email(rqst_consumer_email)
+        except forms.ValidationError:
+            post_errors.append("{!s} must be a valid email address".format(rqst_consumer_email))
     rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
     rqst_consumer_m_name = clean_json_string_input(post_json, "root", "Middle Name", post_errors, empty_string_allowed=True)
     rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
@@ -67,40 +73,47 @@ def add_consumer(response_raw_data, post_json, post_errors):
                                                                                        zipcode=rqst_zipcode,
                                                                                        country=Country.objects.all()[0])
 
-        consumer_rqst_values = {"plan": rqst_consumer_plan,
-                                "met_nav_at": rqst_consumer_met_nav_at,
-                                "household_size": rqst_consumer_household_size,
-                                "preferred_language": rqst_consumer_pref_lang}
+        consumer_rqst_values = {"email": rqst_consumer_email,
+                                "middle_name": rqst_consumer_m_name,
+                                "phone": rqst_consumer_phone,
+                                "plan": rqst_consumer_plan,
+                                "preferred_language": rqst_consumer_pref_lang,
+                                "address": address_instance,
+                                "date_met_nav": rqst_date_met_nav,}
 
-        consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(email=rqst_consumer_email,
-                                                                                         first_name=rqst_consumer_f_name,
-                                                                                         middle_name=rqst_consumer_m_name,
-                                                                                         last_name=rqst_consumer_l_name,
-                                                                                         address=address_instance,
-                                                                                         phone=rqst_consumer_phone,
-                                                                                         date_met_nav=rqst_date_met_nav,
-                                                                                         defaults=consumer_rqst_values)
-        if not consumer_instance_created:
-            post_errors.append('Consumer database entry already exists for the email: {!s}'.format(rqst_consumer_email))
-        else:
-            try:
-                nav_instance = PICStaff.objects.get(id=rqst_nav_id)
-                consumer_instance.navigator = nav_instance
-                consumer_instance.save()
-            except PICStaff.DoesNotExist:
-                post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
+        try:
+            consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(first_name=rqst_consumer_f_name,
+                                                                                             last_name=rqst_consumer_l_name,
+                                                                                             met_nav_at=rqst_consumer_met_nav_at,
+                                                                                             household_size=rqst_consumer_household_size,
+                                                                                             defaults=consumer_rqst_values)
+            if not consumer_instance_created:
+                query_params = {"first_name":rqst_consumer_f_name,
+                                 "last_name":rqst_consumer_l_name,
+                                 "met_nav_at":rqst_consumer_met_nav_at,
+                                 "household_size":rqst_consumer_household_size,}
+                post_errors.append('Consumer database entry already exists for the parameters: {!s}'.format(json.dumps(query_params)))
+            else:
+                try:
+                    nav_instance = PICStaff.objects.get(id=rqst_nav_id)
+                    consumer_instance.navigator = nav_instance
+                    consumer_instance.save()
+                except PICStaff.DoesNotExist:
+                    post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
 
-            if consumer_instance:
-                old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
-                for old_consumer_note in old_consumer_notes:
-                    old_consumer_note.delete()
+                if consumer_instance:
+                    old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
+                    for old_consumer_note in old_consumer_notes:
+                        old_consumer_note.delete()
 
-                for navigator_note in rqst_navigator_notes:
-                    consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
-                    consumer_note_object.save()
+                    for navigator_note in rqst_navigator_notes:
+                        consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
+                        consumer_note_object.save()
+        except IntegrityError:
+            post_errors.append('Consumer database entry already exists for the navigator email: {!s}'.format(rqst_consumer_email))
+            consumer_instance = PICConsumer.objects.get(email=rqst_consumer_email)
         response_raw_data['Data'] = {"Database ID": consumer_instance.id}
 
-    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 
@@ -192,7 +205,6 @@ def modify_consumer(response_raw_data, post_json, post_errors):
         except PICStaff.DoesNotExist:
             post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
 
-    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 
@@ -209,7 +221,6 @@ def delete_consumer(response_raw_data, post_json, post_errors):
         except PICConsumer.MultipleObjectsReturned:
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_consumer_id)))
 
-    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 

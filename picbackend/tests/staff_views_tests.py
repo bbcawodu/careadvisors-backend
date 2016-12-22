@@ -4,8 +4,6 @@ import json
 
 
 class StaffAPITests(BaseWithDBTests):
-    # fixtures = ["10_06_2016.json"]
-
     def setUp(self):
         self.base_url = "/v1/staff/?"
         self.client_object = Client()

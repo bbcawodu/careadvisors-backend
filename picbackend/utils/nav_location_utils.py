@@ -6,10 +6,10 @@ Defines utility functions and classes for navigator location views
 from django.db import IntegrityError
 from picbackend.utils import clean_json_string_input
 from picbackend.utils import clean_json_int_input
-from picbackend.utils import parse_and_log_errors
 from picmodels.models import NavMetricsLocation
 from picmodels.models import Address
 from picmodels.models import Country
+import json
 
 
 def add_nav_hub_location(response_raw_data, post_json, post_errors):
@@ -35,12 +35,15 @@ def add_nav_hub_location(response_raw_data, post_json, post_errors):
             location_instance = NavMetricsLocation.objects.get(name=rqst_location_name, address=address_instance)
             post_errors.append('Nav Hub Location database entry already exists for the name: {!s}'.format(rqst_location_name))
         except NavMetricsLocation.DoesNotExist:
-            location_instance = NavMetricsLocation(name=rqst_location_name, address=address_instance)
-            location_instance.save()
+            try:
+                location_instance = NavMetricsLocation(name=rqst_location_name, address=address_instance)
+                location_instance.save()
+            except IntegrityError:
+                location_instance = NavMetricsLocation.objects.get(address=address_instance)
+                post_errors.append('Nav Hub Location database entry already exists for the address: {!s}'.format(json.dumps(location_instance.return_values_dict())))
 
         response_raw_data['Data'] = {"Database ID": location_instance.id}
 
-    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 
@@ -77,7 +80,6 @@ def modify_nav_hub_location(response_raw_data, post_json, post_errors):
         except IntegrityError:
             post_errors.append('Database entry already exists for the name: {!s}'.format(rqst_location_name))
 
-    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
 
 
@@ -94,5 +96,4 @@ def delete_nav_hub_location(response_raw_data, post_json, post_errors):
         except NavMetricsLocation.MultipleObjectsReturned:
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_location_id)))
 
-    response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
     return response_raw_data
