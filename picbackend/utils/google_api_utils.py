@@ -1,5 +1,6 @@
 """
 Defines utility functions and classes for views that use the the Google API
+-Need to add some sort of exception catching for google API email calls
 """
 
 import httplib2
@@ -24,6 +25,7 @@ from bdateutil import isbday
 from django.core.validators import validate_email
 from django import forms
 from django.db import IntegrityError
+import mandrill
 
 START_OF_BUSINESS_TIMESTAMP = datetime.time(hour=15, minute=0, second=0, microsecond=0)
 END_OF_BUSINESS_TIMESTAMP = datetime.time(hour=23, minute=0, second=0, microsecond=0)
@@ -199,9 +201,16 @@ def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, na
                 scheduled_appointment["Appointment Title"] = navigator_appointment_object["summary"]
                 scheduled_appointment["Appointment Summary"] = navigator_appointment_object["description"]
 
-                send_apt_info_email_to_consumer(consumer_info, scheduled_appointment, post_errors)
+                if "Email" in consumer_info:
+                    try:
+                        validate_email(consumer_info["Email"])
+                        send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointment, post_errors)
+                    except forms.ValidationError:
+                        post_errors.append("Email: {!s} for consumer database id: {!s} must be a valid email address, email to consumer not sent".format(consumer_info["Email"], consumer_info["Database ID"]))
+                else:
+                    post_errors.append("Consumer with database id: {!s} does not have an email address specified, email to consumer not sent".format(consumer_info["Database ID"]))
             else:
-                post_errors.append("{!s} is not a properly iso formatted date and time, Preferred Times must be a string iso formatted date and time".format(rqst_apt_datetime))
+                post_errors.append("{!s} is not a valid datetime. It is before the current datetime".format(rqst_apt_datetime))
 
         except ValueError:
             post_errors.append("Requested appointment time must be after current time")
@@ -209,8 +218,34 @@ def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, na
     return scheduled_appointment
 
 
-def send_apt_info_email_to_consumer(consumer_info, scheduled_appointment, post_errors):
-    pass
+def send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointment, post_errors):
+    try:
+        mandrill_client = mandrill.Mandrill('1veuJ5Rt5CtLEDj64ijXIA')
+        message_content = "Hello, you have an appointment scheduled with {!s} {!s} at {!s}. They will be contacting you at {!s}. We look forward to speaking with you!".format(nav_info["First Name"], nav_info["Last Name"], scheduled_appointment["Appointment Date and Time"], consumer_info["Phone Number"])
+        message = {'auto_html': None,
+                     'auto_text': None,
+                     'from_email': 'tech@piccares.org',
+                     'from_name': 'Patient Innovation Center',
+                     'headers': {'Reply-To': nav_info["Email"]},
+                     'html': '<p>{!s}</p>'.format(message_content),
+                     'important': True,
+                     'subject': scheduled_appointment["Appointment Title"],
+                     # 'text': 'Example text content',
+                     'to': [{'email': consumer_info["Email"],
+                             'name': '{!s} {!s}'.format(consumer_info["First Name"], consumer_info["Last Name"]),
+                             'type': 'to'}],}
+        result = mandrill_client.messages.send(message=message)
+        '''
+        [{'_id': 'abc123abc123abc123abc123abc123',
+          'email': 'recipient.email@example.com',
+          'reject_reason': 'hard-bounce',
+          'status': 'sent'}]
+        '''
+
+    except mandrill.Error:
+        # Mandrill errors are thrown as exceptions
+        post_errors.append('A mandrill error occurred')
+        # A mandrill error occurred: <class 'mandrill.UnknownSubaccountError'> - No subaccount exists with the id 'customer-123'
 
 
 def delete_nav_apt_from_google_calendar(post_json, post_errors):
