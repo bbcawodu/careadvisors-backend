@@ -67,7 +67,7 @@ def handle_calendar_auth_request(request):
             else:
                 response_raw_data["Data"] = "Authorized!"
 
-                check_or_create_navigator_google_cal(credential)
+                check_or_create_navigator_google_cal(credential, rqst_errors)
 
         except PICStaff.DoesNotExist:
             rqst_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(nav_id)))
