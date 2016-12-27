@@ -38,7 +38,7 @@ def check_or_create_navigator_google_cal(credential, err_msg_list):
 
     if not navigator_calendar_found:
         service = build_authorized_cal_http_service_object(credential)
-        cal_id = add_nav_cal_to_google_cals(service, err_msg_list)
+        _ = add_nav_cal_to_google_cals(service, err_msg_list)
 
 
 def check_cal_objects_for_nav_cal(service, err_msg_list):
@@ -520,9 +520,7 @@ def get_nav_cal_lists(post_errors):
 
             #Obtain valid credential and use it to build authorized service object for given navigator
             credential = credentials_object.credential
-            http = httplib2.Http()
-            http = credential.authorize(http)
-            service = build("calendar", "v3", http=http)
+            service = build_authorized_cal_http_service_object(credential)
 
             cal_list_batch.add(service.calendarList().list(showHidden=True), callback=add_cal_list_entry, request_id=str(nav_object.id))
 
@@ -565,9 +563,7 @@ def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_e
 
             #Obtain valid credential and use it to build authorized service object for given navigator
             credential = credentials_object.credential
-            http = httplib2.Http()
-            http = credential.authorize(http)
-            service = build("calendar", "v3", http=http)
+            service = build_authorized_cal_http_service_object(credential)
 
             nav_cal_list_object = nav_cal_list_dict[str(nav_object.id)]
             items_list = []
@@ -595,9 +591,7 @@ def get_nav_scheduled_appointments(nav_info, credentials_object, rqst_errors):
     scheduled_appointment_list = []
     credential = credentials_object.credential
 
-    http = httplib2.Http()
-    http = credential.authorize(http)
-    service = build("calendar", "v3", http=http)
+    service = build_authorized_cal_http_service_object(credential)
 
     try:
         nav_cal_list = service.calendarList().list(showHidden=True).execute()["items"]
@@ -610,9 +604,7 @@ def get_nav_scheduled_appointments(nav_info, credentials_object, rqst_errors):
             rqst_errors.append("Navigator-Consumer Appointments not found in Navigator's Google CalendarList")
 
         if not rqst_errors:
-            http = httplib2.Http()
-            http = credential.authorize(http)
-            service = build("calendar", "v3", http=http)
+            service = build_authorized_cal_http_service_object(credential)
 
             try:
                 nav_cal_events = service.events().list(calendarId=nav_cal_id,
