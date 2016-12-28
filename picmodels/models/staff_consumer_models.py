@@ -146,7 +146,10 @@ class PICConsumer(models.Model):
         # maps model to the picmodels module
         app_label = 'picmodels'
 
-        unique_together = ("email",)
+        unique_together = ("first_name",
+                           "last_name",
+                           "met_nav_at",
+                           "household_size",)
 
     def return_values_dict(self):
         valuesdict = {"First Name": self.first_name,
