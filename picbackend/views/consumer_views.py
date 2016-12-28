@@ -21,29 +21,37 @@ from picbackend.utils import retrieve_id_consumers
 from picbackend.utils import break_results_into_pages
 
 
+CONSUMERS_PER_PAGE = 20
+
+
 @csrf_exempt
 def handle_consumer_edit_request(request):
-    # initialize dictionary for response data, including parsing errors
+    """
+    Defines view that handles Patient Innovation Center consumer instance edit requests
+    :param request: django request instance object
+    """
+
+    # Initialize dictionary for response data, initialize list for parsing errors
     response_raw_data, post_errors = init_response_data()
 
+    # If a POST request is made, parse consumer data
     if request.method == 'POST' or request.is_ajax():
-        post_data = request.body.decode('utf-8')
-        post_json = json.loads(post_data)
+        post_json = request.body.decode('utf-8')
+        post_data = json.loads(post_json)
 
-        # Code to parse POSTed json request
-        rqst_action = clean_json_string_input(post_json, "root", "Database Action", post_errors)
+        # Retrieve database action from post data
+        rqst_action = clean_json_string_input(post_data, "root", "Database Action", post_errors)
 
-        # if there are no parsing errors, get or create database entries for consumer
-        if len(post_errors) == 0 and rqst_action == "Consumer Addition":
-            response_raw_data = add_consumer(response_raw_data, post_json, post_errors)
+        # If there are no parsing errors, process POST data based on database action
+        if not post_errors:
+            if rqst_action == "Consumer Addition":
+                response_raw_data = add_consumer(response_raw_data, post_data, post_errors)
+            elif rqst_action == "Consumer Modification":
+                response_raw_data = modify_consumer(response_raw_data, post_data, post_errors)
+            elif rqst_action == "Consumer Deletion":
+                response_raw_data = delete_consumer(response_raw_data, post_data, post_errors)
 
-        elif len(post_errors) == 0 and rqst_action == "Consumer Modification":
-            response_raw_data = modify_consumer(response_raw_data, post_json, post_errors)
-
-        elif len(post_errors) == 0 and rqst_action == "Consumer Deletion":
-            response_raw_data = delete_consumer(response_raw_data, post_json, post_errors)
-
-    # if a GET request is made, add error message to response data
+    # If a POST is not made, add error message to parsing errors
     else:
         post_errors.append("Request needs POST data")
 
@@ -53,11 +61,21 @@ def handle_consumer_edit_request(request):
 
 
 def handle_consumer_api_request(request):
+    """
+    Defines view that handles Patient Innovation Center consumer instance api retrieval requests
+    :param request: django request instance object
+    """
+
+    # Initialize dictionary for response data, initialize list for parsing errors
     response_raw_data, rqst_errors = init_response_data()
+
+    # Build dictionary that contains valid Patient Innovation Center GET parameters
     search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
-    CONSUMERS_PER_PAGE = 20
+
+    # Retrieve all Patient Innovation Center consumer objects
     consumers = PICConsumer.objects.all()
 
+    # Filter consumer objects based on GET parameters
     if 'navigator id list' in search_params:
         list_of_nav_ids = search_params['navigator id list']
         consumers = consumers.filter(navigator__in=list_of_nav_ids)
@@ -92,6 +110,7 @@ def handle_consumer_api_request(request):
     else:
         rqst_errors.append('No Valid Parameters')
 
+    # Break consumer results into pages so that results aren't too unruly
     if "Data" in response_raw_data:
         rqst_page_no = search_params['page number'] if 'page number' in search_params else None
         response_raw_data = break_results_into_pages(request, response_raw_data, CONSUMERS_PER_PAGE, rqst_page_no)

@@ -110,7 +110,11 @@ def add_consumer(response_raw_data, post_json, post_errors):
                         consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
                         consumer_note_object.save()
         except IntegrityError:
-            post_errors.append('Consumer database entry already exists for the navigator email: {!s}'.format(rqst_consumer_email))
+            query_params = {"first_name":rqst_consumer_f_name,
+                                 "last_name":rqst_consumer_l_name,
+                                 "met_nav_at":rqst_consumer_met_nav_at,
+                                 "household_size":rqst_consumer_household_size,}
+            post_errors.append('Consumer database entry already exists for the parameters: {!s}'.format(json.dumps(query_params)))
             consumer_instance = PICConsumer.objects.get(email=rqst_consumer_email)
         response_raw_data['Data'] = {"Database ID": consumer_instance.id}
 

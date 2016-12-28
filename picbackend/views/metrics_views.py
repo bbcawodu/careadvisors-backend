@@ -21,7 +21,12 @@ from picbackend.utils import retrieve_mpn_metrics
 
 @csrf_exempt
 def handle_metrics_submission_request(request):
-    # initialize dictionary for response data, including parsing errors
+    """
+    Defines view that handles Patient Innovation Center metrics instance submission/edit requests
+    :param request: django request instance object
+    """
+
+    # initialize dictionary for response data, initialize list for parsing errors
     response_raw_data, post_errors = init_response_data()
 
     if request.method == 'POST' or request.is_ajax():
@@ -42,7 +47,15 @@ def handle_metrics_submission_request(request):
 
 # defines view for returning metrics data from api requests
 def handle_metrics_api_request(request):
+    """
+    Defines view that handles Patient Innovation Center consumer instance retrieval requests
+    :param request: django request instance object
+    """
+
+    # initialize dictionary for response data, initialize list for parsing errors
     response_raw_data, rqst_errors = init_response_data()
+
+    # Build dictionary that contains valid Patient Innovation Center GET parameters
     search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
     metrics_dict = {}
 
