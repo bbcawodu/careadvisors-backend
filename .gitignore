@@ -1,9 +1,9 @@
 venv
 stderr.txt
 stdout.txt
+picbackend/migrations/0001_load_initial_data_for_tests.py
 .idea/
 idea/
 picbackend/settings/local.env
-picbackend/migrations/0001_load_intial_data_for_tests.py
 *.pyc
 staticfiles
