@@ -1,5 +1,6 @@
 """
 Defines views that handle Patient Innovation Center Staff based requests
+API Version 1
 """
 
 from django.http import HttpResponse
@@ -25,6 +26,12 @@ from picbackend.utils import retrieve_region_staff
 
 @csrf_exempt
 def handle_staff_edit_request(request):
+    """
+    Defines view that handles Patient Innovation Center staff instance edit requests
+    :param request: django request instance object
+    :rtype: HttpResponse
+    """
+
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
 
@@ -57,6 +64,12 @@ def handle_staff_edit_request(request):
 
 # defines view for returning staff data from api requests
 def handle_staff_api_request(request):
+    """
+    Defines view that handles Patient Innovation Center staff instance retrieval requests
+    :param request: django request instance object
+    :rtype: HttpResponse
+    """
+
     response_raw_data, rqst_errors = init_response_data()
     search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
     staff_members = PICStaff.objects.all()

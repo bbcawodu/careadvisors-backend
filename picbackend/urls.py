@@ -50,6 +50,13 @@ urlpatterns = [
     # url for django admin page
     url(r'^admin/', include(admin.site.urls)),
 
+    # urls used to validate our application with Google. DO NOT REMOVE or API calls might be rejected
+    url(r'^google2a62fdb4823a96c9.html$', TemplateView.as_view(template_name="google2a62fdb4823a96c9.html"), name='google2a62fdb4823a96c9'),
+    url(r'^oauth2callback', views.auth_return),
+
+    ###################
+    #API Version 1 URLS
+    ###################
     # urls for staff views
     url(r"^editstaff/$", views.handle_staff_edit_request),
     url(r"^v1/staff/$", views.handle_staff_api_request),
@@ -73,11 +80,29 @@ urlpatterns = [
     url(r"^v1/tradingpartners/$", views.handle_trading_partner_request),
 
     # urls for patient assist scheduler views
-    url(r'^google2a62fdb4823a96c9.html$', TemplateView.as_view(template_name="google2a62fdb4823a96c9.html"), name='google2a62fdb4823a96c9'),
     url(r"^v1/calendar_auth/$", views.handle_calendar_auth_request),
-    url(r'^oauth2callback', views.auth_return),
     url(r"^v1/viewscheduledappointments/$", views.handle_view_sched_apt_request),
     url(r"^v1/getnavappointments/$", views.handle_nav_appointments_api_request),
     url(r"^v1/add_consumer_appointment_with_nav/$", views.handle_add_consumer_apt_with_nav_request),
     url(r"^v1/delete_consumer_appointment_with_nav/$", views.handle_delete_consumer_apt_with_nav_request),
+
+    ###################
+    #API Version 2 URLS
+    ###################
+
+    # urls for staff views
+    url(r"^v2/staff/$", views.StaffManagementView.as_view()),
+
+    # urls for consumer views
+    url(r"^v2/consumers/$", views.ConsumerManagementView.as_view()),
+
+    # urls for consumer metrics views
+    url(r"^v2/metrics/$", views.ConsumerMetricsManagementView.as_view()),
+
+    # urls for location views
+    url(r"^v2/navigator_hub_locations/$", views.NavHubLocationManagementView.as_view()),
+
+    # urls for pokitdok views
+
+    # urls for patient assist scheduler views
 ]

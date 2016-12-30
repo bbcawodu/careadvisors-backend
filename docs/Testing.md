@@ -15,3 +15,6 @@ python3 manage.py dumpdata --exclude contenttypes.ContentType > 12-21-2016.json
 
 -creating an empty migration
 python manage.py makemigrations --empty <yourapp> --name load_intial_data
+
+-command to print terminal history to text file
+history > history_for_print.txt

@@ -1,5 +1,6 @@
 """
 Defines views that handle Patient Innovation Center navigator location based requests
+API Version 1
 """
 
 from django.http import HttpResponse
@@ -19,6 +20,12 @@ from picbackend.utils import delete_nav_hub_location
 
 
 def handle_location_add_request(request):
+    """
+    Defines view that produces a web form that adds Patient Innovation Center navigator hub location instances to the db
+    :param request: django request instance object
+    :rtype: HttpResponse
+    """
+
     form = NavMetricsLocationForm(request.POST or None, request.FILES or None)
 
     # if this is a POST request we need to process the form data
@@ -36,6 +43,12 @@ def handle_location_add_request(request):
 
 
 def handle_manage_locations_request(request):
+    """
+    Defines view that produces a web form that edits Patient Innovation Center navigator hub location instances
+    :param request: django request instance object
+    :rtype: HttpResponse
+    """
+
     location_form_set = modelformset_factory(NavMetricsLocation, exclude=('country', ), extra=0)
     if request.method == 'POST':
         formset = location_form_set(request.POST, request.FILES)
@@ -51,6 +64,12 @@ def handle_manage_locations_request(request):
 
 @csrf_exempt
 def handle_hub_location_edit_api_request(request):
+    """
+    Defines view that handles Patient Innovation Center navigator hub location instance edit requests
+    :param request: django request instance object
+    :rtype: HttpResponse
+    """
+
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
 
@@ -83,6 +102,12 @@ def handle_hub_location_edit_api_request(request):
 
 # defines view for returning navigator location data from api requests
 def handle_nav_location_api_request(request):
+    """
+    Defines view that handles Patient Innovation Center navigator hub location instance retrieval requests
+    :param request: django request instance object
+    :rtype: HttpResponse
+    """
+
     response_raw_data, rqst_errors = init_response_data()
     # search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
     nav_location_list = []

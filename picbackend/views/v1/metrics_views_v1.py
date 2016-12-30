@@ -1,5 +1,6 @@
 """
 Defines views that handle Patient Innovation Center consumer metrics based requests
+API Version 1
 """
 
 from django.http import HttpResponse
@@ -24,6 +25,7 @@ def handle_metrics_submission_request(request):
     """
     Defines view that handles Patient Innovation Center metrics instance submission/edit requests
     :param request: django request instance object
+    :rtype: HttpResponse
     """
 
     # initialize dictionary for response data, initialize list for parsing errors
@@ -48,8 +50,9 @@ def handle_metrics_submission_request(request):
 # defines view for returning metrics data from api requests
 def handle_metrics_api_request(request):
     """
-    Defines view that handles Patient Innovation Center consumer instance retrieval requests
+    Defines view that handles Patient Innovation Center consumer metrics instance retrieval requests
     :param request: django request instance object
+    :rtype: HttpResponse
     """
 
     # initialize dictionary for response data, initialize list for parsing errors

@@ -1,5 +1,6 @@
 """
 Defines views that handle Patient Innovation Center Staff based requests
+API Version 1
 """
 
 from django.http import HttpResponse
@@ -29,6 +30,7 @@ def handle_consumer_edit_request(request):
     """
     Defines view that handles Patient Innovation Center consumer instance edit requests
     :param request: django request instance object
+    :rtype: HttpResponse
     """
 
     # Initialize dictionary for response data, initialize list for parsing errors
@@ -64,6 +66,7 @@ def handle_consumer_api_request(request):
     """
     Defines view that handles Patient Innovation Center consumer instance api retrieval requests
     :param request: django request instance object
+    :rtype: HttpResponse
     """
 
     # Initialize dictionary for response data, initialize list for parsing errors
