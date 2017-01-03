@@ -1,4 +1,5 @@
 venv
+.DS_Store
 stderr.txt
 stdout.txt
 picbackend/migrations/0001_load_initial_data_for_tests.py
