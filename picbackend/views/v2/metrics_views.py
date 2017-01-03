@@ -9,7 +9,7 @@ from django.utils.decorators import method_decorator
 from picmodels.models import MetricsSubmission
 import json
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils import init_response_data
+from picbackend.utils import init_v2_response_data
 from picbackend.utils import parse_and_log_errors
 from picbackend.utils import build_search_params
 from picbackend.utils import add_or_update_metrics_entity
@@ -25,7 +25,7 @@ from picbackend.utils import retrieve_mpn_metrics
 #Need to abstract common variables in get and post class methods into class attributes
 @method_decorator(csrf_exempt, name='dispatch')
 class ConsumerMetricsManagementView(View):
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         """
         Defines view that handles Patient Innovation Center metrics instance submission/edit requests
         :param request: django request instance object
@@ -33,13 +33,13 @@ class ConsumerMetricsManagementView(View):
         """
 
         # initialize dictionary for response data, initialize list for parsing errors
-        response_raw_data, post_errors = init_response_data()
+        response_raw_data, post_errors = init_v2_response_data()
 
-        post_data = request.body.decode('utf-8')
-        post_json = json.loads(post_data)
+        post_json = request.body.decode('utf-8')
+        post_data = json.loads(post_json)
 
         # Code to parse POSTed json request
-        response_raw_data = add_or_update_metrics_entity(response_raw_data, post_json, post_errors)
+        response_raw_data = add_or_update_metrics_entity(response_raw_data, post_data, post_errors)
 
         response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
         response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
@@ -53,7 +53,7 @@ class ConsumerMetricsManagementView(View):
         """
 
         # initialize dictionary for response data, initialize list for parsing errors
-        response_raw_data, rqst_errors = init_response_data()
+        response_raw_data, rqst_errors = init_v2_response_data()
 
         # Build dictionary that contains valid Patient Innovation Center GET parameters
         search_params = build_search_params(request.GET, response_raw_data, rqst_errors)

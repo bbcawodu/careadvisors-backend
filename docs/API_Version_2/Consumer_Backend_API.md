@@ -1,7 +1,7 @@
 ## Consumer Account Backend API
 
 ### Consumer Data Submission API
-To modify or add members of the PICConsumer class in the database, submit a POST request to: http://picbackend.herokuapp.com/editconsumer/. The body of the request should be a JSON document using the following template:
+To modify or add members of the PICConsumer class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/consumers/. The body of the request should be a JSON document using the following template:
 
 ```
 {
@@ -42,7 +42,7 @@ In response, a JSON document will be displayed with the following format:
 {
  "Status": {
             "Error Code": Integer,
-            "Version": 1.0,
+            "Version": 2.0,
             "Errors": Array
             "Data": Dictionary Object or "Deleted",
            }
@@ -72,7 +72,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Consumer Data Retrieval API
-- To retrieve consumer data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/consumers/ with the following parameters(at least one required)
+- To retrieve consumer data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/consumers/ with the following parameters(at least one required)
     - A maximum of 20 consumer records with full fields will be returned due to size constraints
         - The rest are consumer database IDs
         - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter
@@ -130,7 +130,7 @@ In response, a JSON document will be displayed with the following format:
             9
         ],
         "Status": {
-            "Version": 1.0,
+            "Version": 2.0,
             "Error Code": Integer,
             "Errors": Array
         },

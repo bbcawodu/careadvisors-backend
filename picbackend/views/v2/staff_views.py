@@ -10,7 +10,7 @@ from picmodels.models import PICStaff
 import json
 from django.views.decorators.csrf import csrf_exempt
 from picbackend.utils import clean_json_string_input
-from picbackend.utils import init_response_data
+from picbackend.utils import init_v2_response_data
 from picbackend.utils import parse_and_log_errors
 from picbackend.utils import build_search_params
 from picbackend.utils import add_staff
@@ -29,7 +29,7 @@ from picbackend.utils import retrieve_region_staff
 #Need to abstract common variables in get and post class methods into class attributes
 @method_decorator(csrf_exempt, name='dispatch')
 class StaffManagementView(View):
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         """
         Defines view that handles Patient Innovation Center staff instance edit requests
         :param request: django request instance object
@@ -37,24 +37,24 @@ class StaffManagementView(View):
         """
 
         # initialize dictionary for response data, including parsing errors
-        response_raw_data, post_errors = init_response_data()
+        response_raw_data, post_errors = init_v2_response_data()
 
-        post_data = request.body.decode('utf-8')
-        post_json = json.loads(post_data)
+        post_json = request.body.decode('utf-8')
+        post_data = json.loads(post_json)
 
         # Code to parse POSTed json request
-        rqst_action = clean_json_string_input(post_json, "root", "Database Action", post_errors)
+        rqst_action = clean_json_string_input(post_data, "root", "Database Action", post_errors)
 
         # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
         # create and save database entry for appointment
         if len(post_errors) == 0 and rqst_action == "Staff Addition":
-            response_raw_data = add_staff(response_raw_data, post_json, post_errors)
+            response_raw_data = add_staff(response_raw_data, post_data, post_errors)
 
         elif len(post_errors) == 0 and rqst_action == "Staff Modification":
-            response_raw_data = modify_staff(response_raw_data, post_json, post_errors)
+            response_raw_data = modify_staff(response_raw_data, post_data, post_errors)
 
         elif len(post_errors) == 0 and rqst_action == "Staff Deletion":
-            response_raw_data = delete_staff(response_raw_data, post_json, post_errors)
+            response_raw_data = delete_staff(response_raw_data, post_data, post_errors)
 
         response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
         response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
@@ -67,7 +67,7 @@ class StaffManagementView(View):
         :rtype: HttpResponse
         """
 
-        response_raw_data, rqst_errors = init_response_data()
+        response_raw_data, rqst_errors = init_v2_response_data()
         search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
         staff_members = PICStaff.objects.all()
 

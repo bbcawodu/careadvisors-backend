@@ -52,7 +52,6 @@ urlpatterns = [
 
     # urls used to validate our application with Google. DO NOT REMOVE or API calls might be rejected
     url(r'^google2a62fdb4823a96c9.html$', TemplateView.as_view(template_name="google2a62fdb4823a96c9.html"), name='google2a62fdb4823a96c9'),
-    url(r'^oauth2callback', views.auth_return),
 
     ###################
     #API Version 1 URLS
@@ -81,6 +80,7 @@ urlpatterns = [
 
     # urls for patient assist scheduler views
     url(r"^v1/calendar_auth/$", views.handle_calendar_auth_request),
+    url(r'^oauth2callback', views.auth_return),
     url(r"^v1/viewscheduledappointments/$", views.handle_view_sched_apt_request),
     url(r"^v1/getnavappointments/$", views.handle_nav_appointments_api_request),
     url(r"^v1/add_consumer_appointment_with_nav/$", views.handle_add_consumer_apt_with_nav_request),
@@ -102,7 +102,12 @@ urlpatterns = [
     # urls for location views
     url(r"^v2/navigator_hub_locations/$", views.NavHubLocationManagementView.as_view()),
 
-    # urls for pokitdok views
+    # urls for consumer health insurance views
+    url(r"^v2/consumer_health_insurance_benefits/$", views.ConsumerHealthInsuranceBenefitsView.as_view()),
+    url(r"^v2/health_insurance_trading_partners/$", views.TradingPartnerView.as_view()),
 
     # urls for patient assist scheduler views
+    url(r"^v2/calendar_auth/$", views.NavGoogleCalendarAccessRequestView.as_view()),
+    url(r'^v2/oauth2callback', views.GoogleCalendarAuthReturnView.as_view()),
+    url(r'^v2/patient_assist_apt_mgr', views.PatientAssistAptMgtView.as_view()),
 ]

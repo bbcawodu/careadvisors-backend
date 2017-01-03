@@ -35,6 +35,14 @@ FLOW.params["prompt"] = "consent"
 
 
 def handle_calendar_auth_request(request):
+    """
+    Defines view that requests authorization for Patient Innovation Center to access a given navigator's Google
+    calendar
+
+    :param request: django request instance object
+    :rtype: HttpResponse
+    """
+
     response_raw_data, rqst_errors = init_response_data()
     search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
     if 'navigator id' in search_params:
@@ -70,6 +78,14 @@ def handle_calendar_auth_request(request):
 
 
 def auth_return(request):
+    """
+    Defines view that handles redirect information from Google when authorizing access to a given navigator's
+    Google Calendar
+
+    :param request: django request instance object
+    :rtype: HttpResponse
+    """
+
     response_raw_data, rqst_errors = init_response_data()
     search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
 

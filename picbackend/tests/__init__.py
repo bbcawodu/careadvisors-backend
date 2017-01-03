@@ -1,3 +1,8 @@
-# from .pokitdok_views_tests import *
-from .staff_views_tests import *
-from .consumer_views_tests import *
+"""
+Defines package for tests of the picbackend app
+"""
+
+
+# Import all tests in the package
+from .v1 import *
+from .v2 import *

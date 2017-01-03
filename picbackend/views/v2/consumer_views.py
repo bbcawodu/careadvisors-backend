@@ -11,7 +11,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from picbackend.utils import build_search_params
 from picbackend.utils import clean_json_string_input
-from picbackend.utils import init_response_data
+from picbackend.utils import init_v2_response_data
 from picbackend.utils import parse_and_log_errors
 from picbackend.utils import add_consumer
 from picbackend.utils import modify_consumer
@@ -30,7 +30,7 @@ CONSUMERS_PER_PAGE = 20
 #Need to abstract common variables in get and post class methods into class attributes
 @method_decorator(csrf_exempt, name='dispatch')
 class ConsumerManagementView(View):
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         """
         Defines view that handles Patient Innovation Center consumer instance edit requests
         :param request: django request instance object
@@ -38,7 +38,7 @@ class ConsumerManagementView(View):
         """
 
         # Initialize dictionary for response data, initialize list for parsing errors
-        response_raw_data, post_errors = init_response_data()
+        response_raw_data, post_errors = init_v2_response_data()
 
         post_json = request.body.decode('utf-8')
         post_data = json.loads(post_json)
@@ -67,7 +67,7 @@ class ConsumerManagementView(View):
         """
 
         # Initialize dictionary for response data, initialize list for parsing errors
-        response_raw_data, rqst_errors = init_response_data()
+        response_raw_data, rqst_errors = init_v2_response_data()
 
         # Build dictionary that contains valid Patient Innovation Center GET parameters
         search_params = build_search_params(request.GET, response_raw_data, rqst_errors)

@@ -147,6 +147,10 @@ def init_response_data():
     return {'Status': {"Error Code": 0, "Version": 1.0, "Missing Parameters": []}}, []
 
 
+def init_v2_response_data():
+    return {'Status': {"Error Code": 0, "Warnings": [], "Version": 2.0, "Missing Parameters": []}}, []
+
+
 def parse_and_log_errors(response_raw_data, errors_list):
     if len(errors_list) > 0:
         if response_raw_data["Status"]["Error Code"] == 0:

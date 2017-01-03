@@ -1,7 +1,7 @@
 ## Navigator Hub Location Backend API
 
 ### Navigator Hub Location Submission URL
-- To add a hub location where navigators can submit metrics reports, visit http://picbackend.herokuapp.com/addlocation
+- To add a hub location where navigators can submit metrics reports, visit http://picbackend.herokuapp.com/addlocation/
 
 The following is a list of the current 2016 Navigator Hub Locations(As of 10/28/16):
 ```
@@ -90,11 +90,11 @@ The following is a list of the current 2016 Navigator Hub Locations(As of 10/28/
 
 
 ### Navigator Hub Location Management URL
-- To manage and edit hub locations where navigators can submit metrics reports, visit http://picbackend.herokuapp.com/managelocations
+- To manage and edit hub locations where navigators can submit metrics reports, visit http://picbackend.herokuapp.com/managelocations/
 
 
 ### Navigator Hub Location Data Modification API
-To modify or add navigator hub locations in the database programatically, submit a POST request to: http://picbackend.herokuapp.com/edithublocation/. The POST data a JSON document using the following template:
+To modify or add navigator hub locations in the database programatically, submit a POST request to: http://picbackend.herokuapp.com/edithublocation/. The body of the request should be a JSON document using the following template:
 
 ```
 {
@@ -115,7 +115,7 @@ In response, a JSON document will be displayed with the following format:
 {
  "Status": {
             "Error Code": Integer,
-            "Version": Float,
+            "Version": 1.0,
             "Errors": Array
             "Data": Dictionary Object or "Deleted",
            }
@@ -146,7 +146,7 @@ In response, a JSON document will be displayed with the following format:
     
     
 ### Navigator Location Data Retrieval API
-- To navigator location data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/navlocations
+- To navigator location data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/navlocations/
     
 - The response will be a JSON document with the following format:
     ```
@@ -164,7 +164,7 @@ In response, a JSON document will be displayed with the following format:
             ...,
         ],
         "Status": {
-            "Version": Integer,
+            "Version": 1.0,
             "Error Code": Integer,
             "Errors": Array
         }

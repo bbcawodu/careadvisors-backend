@@ -1,5 +1,6 @@
 """
-Defines views that are responsible for accessing and supplying Pokitdok data
+Defines views that are responsible for accessing consumer health insurance Related Information
+API Version 1
 """
 
 from django.http import HttpResponse
@@ -14,6 +15,12 @@ from picbackend.utils import build_search_params
 
 @csrf_exempt
 def handle_eligibility_request(request):
+    """
+    Defines view that retrieves consumer health insurance eligibility information
+    :param request: django request instance object
+    :rtype: HttpResponse
+    """
+
     # initialize dictionary for response data, including parsing errors
     response_raw_data, post_errors = init_response_data()
 
@@ -34,6 +41,12 @@ def handle_eligibility_request(request):
 
 @csrf_exempt
 def handle_trading_partner_request(request):
+    """
+    Defines view that retrieves health insurance trading partner information
+    :param request: django request instance object
+    :rtype: HttpResponse
+    """
+
     # initialize dictionary for response data, including parsing errors
     response_raw_data, rqst_errors = init_response_data()
     search_params = build_search_params(request.GET, response_raw_data, rqst_errors)

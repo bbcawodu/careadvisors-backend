@@ -1,7 +1,7 @@
 ## Staff Account Backend API
 
 ### Staff Data Submission API
-To modify or add members of the PICStaff class in the database, submit a POST request to: http://picbackend.herokuapp.com/editstaff/. The body of the request should be a JSON document using the following template:
+To modify or add members of the PICStaff class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/staff/. The body of the request should be a JSON document using the following template:
 
 ```
 {
@@ -22,7 +22,7 @@ In response, a JSON document will be displayed with the following format:
 {
  "Status": {
             "Error Code": Integer,
-            "Version": 1.0,
+            "Version": 2.0,
             "Errors": Array
             "Data": Dictionary Object or "Deleted",
            }
@@ -52,7 +52,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Staff Data Retrieval API
-- To retrieve staff data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/staff/ with the following optional parameters: "fname", "lname", "email", "mpn", "id"
+- To retrieve staff data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/staff/ with the following optional parameters: "fname", "lname", "email", "mpn", "id"
     - "fname" corresponds to first name.
         - Must be a string
         - Can be multiple values separated by commas.
@@ -119,7 +119,7 @@ In response, a JSON document will be displayed with the following format:
             ...,
         ],
         "Status": {
-            "Version": 1.0,
+            "Version": 2.0,
             "Error Code": Integer,
             "Errors": Array
         }

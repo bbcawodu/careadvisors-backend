@@ -1,7 +1,7 @@
 ## Consumer Metrics Backend API
 
 ### Consumer Metrics Submission API
-To submit an entry of consumer metrics data corresponding to a specific staff member, make a POST request to: http://picbackend.herokuapp.com/submitmetrics/. The body of the request should be a JSON document which has the following format:
+To submit an entry of consumer metrics data corresponding to a specific staff member, make a PUT request to: http://picbackend.herokuapp.com/v2/metrics/. The body of the request should be a JSON document which has the following format:
 
 ```
 {
@@ -239,7 +239,7 @@ In response, a JSON document will be displayed with the following format:
 {
  "Status": {
             "Error Code": Integer,
-            "Version": 1.0,
+            "Version": 2.0,
             "Errors": Array
            }
 }
@@ -258,7 +258,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Consumer Metrics Retrieval API.
-- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v1/metrics/ with the following optional parameters: "fname", "lname", "email", "mpn", "id", "time", "groupby", "startdate", "enddate", "time", "zipcode", "location", "fields"
+- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/metrics/ with the following optional parameters: "fname", "lname", "email", "mpn", "id", "time", "groupby", "startdate", "enddate", "time", "zipcode", "location", "fields"
     - "fname" corresponds to staff member first name.
     - "lname" corresponds to staff member last name.
     - "email" corresponds to staff member email.
@@ -327,7 +327,7 @@ In response, a JSON document will be displayed with the following format:
             ...,
         ],
         "Status": {
-            "Version": 1.0,
+            "Version": 2.0,
             "Error Code": Integer,
             "Errors": Array
         }
