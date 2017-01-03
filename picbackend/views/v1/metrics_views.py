@@ -7,17 +7,17 @@ from django.http import HttpResponse
 from picmodels.models import MetricsSubmission
 import json
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils import init_response_data
-from picbackend.utils import parse_and_log_errors
-from picbackend.utils import build_search_params
-from picbackend.utils import add_or_update_metrics_entity
-from picbackend.utils import group_metrics
-from picbackend.utils import retrieve_id_metrics
-from picbackend.utils import retrieve_f_l_name_metrics
-from picbackend.utils import retrieve_first_name_metrics
-from picbackend.utils import retrieve_last_name_metrics
-from picbackend.utils import retrieve_email_metrics
-from picbackend.utils import retrieve_mpn_metrics
+from .utils import init_response_data
+from .utils import parse_and_log_errors
+from .utils import build_search_params
+from .utils import add_or_update_metrics_entity
+from .utils import group_metrics
+from .utils import retrieve_id_metrics
+from .utils import retrieve_f_l_name_metrics
+from .utils import retrieve_first_name_metrics
+from .utils import retrieve_last_name_metrics
+from .utils import retrieve_email_metrics
+from .utils import retrieve_mpn_metrics
 
 
 @csrf_exempt

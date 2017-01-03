@@ -12,9 +12,10 @@ This app runs on a django installation hosted on Heroku. To install Heroku for c
 
 ## Patient Innovation Center Backend Library API Documentation
 
+[API Version 2](docs/API_Version_2/Index.md) (CURRENT VERSION)
+
 [API Version 1](docs/API_Version_1/Index.md)
 
-[API Version 2](docs/API_Version_2/Index.md)
 
 ## Writing and Running Tests README
 

@@ -7,21 +7,21 @@ from django.http import HttpResponse
 from picmodels.models import PICStaff
 import json
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils import clean_json_string_input
-from picbackend.utils import init_response_data
-from picbackend.utils import parse_and_log_errors
-from picbackend.utils import build_search_params
-from picbackend.utils import add_staff
-from picbackend.utils import modify_staff
-from picbackend.utils import delete_staff
-from picbackend.utils import retrieve_f_l_name_staff
-from picbackend.utils import retrieve_email_staff
-from picbackend.utils import retrieve_first_name_staff
-from picbackend.utils import retrieve_last_name_staff
-from picbackend.utils import retrieve_id_staff
-from picbackend.utils import retrieve_mpn_staff
-from picbackend.utils import retrieve_county_staff
-from picbackend.utils import retrieve_region_staff
+from .utils import clean_json_string_input
+from .utils import init_response_data
+from .utils import parse_and_log_errors
+from .utils import build_search_params
+from .utils import add_staff
+from .utils import modify_staff
+from .utils import delete_staff
+from .utils import retrieve_f_l_name_staff
+from .utils import retrieve_email_staff
+from .utils import retrieve_first_name_staff
+from .utils import retrieve_last_name_staff
+from .utils import retrieve_id_staff
+from .utils import retrieve_mpn_staff
+from .utils import retrieve_county_staff
+from .utils import retrieve_region_staff
 
 
 @csrf_exempt

@@ -3,7 +3,7 @@ Defines utility functions and classes for pokitdok views
 - Need to obtain valid NPI
 """
 
-from picbackend.utils import clean_json_string_input
+from .base import clean_json_string_input
 import pokitdok
 
 

@@ -9,12 +9,12 @@ from django.utils.decorators import method_decorator
 from picmodels.models import NavMetricsLocation
 import json
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils import clean_json_string_input
-from picbackend.utils import init_v2_response_data
-from picbackend.utils import parse_and_log_errors
-from picbackend.utils import add_nav_hub_location
-from picbackend.utils import modify_nav_hub_location
-from picbackend.utils import delete_nav_hub_location
+from .utils import clean_json_string_input
+from .utils import init_v2_response_data
+from .utils import parse_and_log_errors
+from .utils import add_nav_hub_location
+from .utils import modify_nav_hub_location
+from .utils import delete_nav_hub_location
 
 
 #Need to abstract common variables in get and post class methods into class attributes

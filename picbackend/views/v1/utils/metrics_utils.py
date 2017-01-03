@@ -5,11 +5,11 @@ Defines utility functions and classes for consumer metrics views
 import datetime
 import json
 from django.http import HttpResponse
-from picbackend.utils import clean_json_string_input
-from picbackend.utils import clean_json_int_input
-from picbackend.utils import clean_list_input
-from picbackend.utils import clean_dict_input
-from picbackend.utils import parse_and_log_errors
+from .base import clean_json_string_input
+from .base import clean_json_int_input
+from .base import clean_list_input
+from .base import clean_dict_input
+from .base import parse_and_log_errors
 from picmodels.models import MetricsSubmission
 from picmodels.models import PlanStat
 from picmodels.models import NavMetricsLocation

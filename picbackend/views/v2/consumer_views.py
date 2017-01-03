@@ -9,19 +9,19 @@ from django.utils.decorators import method_decorator
 from picmodels.models import PICConsumer
 import json
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils import build_search_params
-from picbackend.utils import clean_json_string_input
-from picbackend.utils import init_v2_response_data
-from picbackend.utils import parse_and_log_errors
-from picbackend.utils import add_consumer
-from picbackend.utils import modify_consumer
-from picbackend.utils import delete_consumer
-from picbackend.utils import retrieve_f_l_name_consumers
-from picbackend.utils import retrieve_email_consumers
-from picbackend.utils import retrieve_first_name_consumers
-from picbackend.utils import retrieve_last_name_consumers
-from picbackend.utils import retrieve_id_consumers
-from picbackend.utils import break_results_into_pages
+from .utils import build_search_params
+from .utils import clean_json_string_input
+from .utils import init_v2_response_data
+from .utils import parse_and_log_errors
+from .utils import add_consumer
+from .utils import modify_consumer
+from .utils import delete_consumer
+from .utils import retrieve_f_l_name_consumers
+from .utils import retrieve_email_consumers
+from .utils import retrieve_first_name_consumers
+from .utils import retrieve_last_name_consumers
+from .utils import retrieve_id_consumers
+from .utils import break_results_into_pages
 
 
 CONSUMERS_PER_PAGE = 20

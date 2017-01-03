@@ -9,10 +9,10 @@ from django.utils.decorators import method_decorator
 import json
 import pokitdok
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.utils import init_v2_response_data
-from picbackend.utils import parse_and_log_errors
-from picbackend.utils import fetch_and_parse_pokit_elig_data
-from picbackend.utils import build_search_params
+from .utils import init_v2_response_data
+from .utils import parse_and_log_errors
+from .utils import fetch_and_parse_pokit_elig_data
+from .utils import build_search_params
 
 
 @method_decorator(csrf_exempt, name='dispatch')

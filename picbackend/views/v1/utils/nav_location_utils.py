@@ -4,8 +4,8 @@ Defines utility functions and classes for navigator location views
 
 
 from django.db import IntegrityError
-from picbackend.utils import clean_json_string_input
-from picbackend.utils import clean_json_int_input
+from .base import clean_json_string_input
+from .base import clean_json_int_input
 from picmodels.models import NavMetricsLocation
 from picmodels.models import Address
 from picmodels.models import Country
