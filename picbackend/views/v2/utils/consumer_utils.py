@@ -5,10 +5,10 @@ Defines utility functions and classes for consumer views
 import datetime
 import math
 import json
-from .base import clean_json_string_input
-from .base import clean_json_int_input
-from .base import clean_list_input
-from .base import clean_dict_input
+from .base import clean_string_value_from_dict_object
+from .base import clean_int_value_from_dict_object
+from .base import clean_list_value_from_dict_object
+from .base import clean_dict_value_from_dict_object
 from picmodels.models import PICStaff
 from picmodels.models import PICConsumer
 from picmodels.models import ConsumerNote
@@ -20,43 +20,43 @@ from django import forms
 
 
 def add_consumer(response_raw_data, post_data, post_errors):
-    rqst_consumer_email = clean_json_string_input(post_data, "root", "Email", post_errors, empty_string_allowed=True)
+    rqst_consumer_email = clean_string_value_from_dict_object(post_data, "root", "Email", post_errors, empty_string_allowed=True)
     if rqst_consumer_email and not post_errors:
         try:
             validate_email(rqst_consumer_email)
         except forms.ValidationError:
             post_errors.append("{!s} must be a valid email address".format(rqst_consumer_email))
-    rqst_consumer_f_name = clean_json_string_input(post_data, "root", "First Name", post_errors)
-    rqst_consumer_m_name = clean_json_string_input(post_data, "root", "Middle Name", post_errors, empty_string_allowed=True)
-    rqst_consumer_l_name = clean_json_string_input(post_data, "root", "Last Name", post_errors)
-    rqst_consumer_plan = clean_json_string_input(post_data, "root", "Plan", post_errors, empty_string_allowed=True)
-    rqst_consumer_met_nav_at = clean_json_string_input(post_data, "root", "Met Navigator At", post_errors)
-    rqst_consumer_household_size = clean_json_int_input(post_data, "root", "Household Size", post_errors)
-    rqst_consumer_phone = clean_json_string_input(post_data, "root", "Phone Number", post_errors, empty_string_allowed=True)
-    rqst_consumer_pref_lang = clean_json_string_input(post_data, "root", "Preferred Language", post_errors, empty_string_allowed=True)
-    rqst_navigator_notes = clean_list_input(post_data, "root", "Navigator Notes", post_errors, empty_list_allowed=True)
-    rqst_nav_id = clean_json_int_input(post_data, "root", "Navigator Database ID", post_errors)
+    rqst_consumer_f_name = clean_string_value_from_dict_object(post_data, "root", "First Name", post_errors)
+    rqst_consumer_m_name = clean_string_value_from_dict_object(post_data, "root", "Middle Name", post_errors, empty_string_allowed=True)
+    rqst_consumer_l_name = clean_string_value_from_dict_object(post_data, "root", "Last Name", post_errors)
+    rqst_consumer_plan = clean_string_value_from_dict_object(post_data, "root", "Plan", post_errors, empty_string_allowed=True)
+    rqst_consumer_met_nav_at = clean_string_value_from_dict_object(post_data, "root", "Met Navigator At", post_errors)
+    rqst_consumer_household_size = clean_int_value_from_dict_object(post_data, "root", "Household Size", post_errors)
+    rqst_consumer_phone = clean_string_value_from_dict_object(post_data, "root", "Phone Number", post_errors, empty_string_allowed=True)
+    rqst_consumer_pref_lang = clean_string_value_from_dict_object(post_data, "root", "Preferred Language", post_errors, empty_string_allowed=True)
+    rqst_navigator_notes = clean_list_value_from_dict_object(post_data, "root", "Navigator Notes", post_errors, empty_list_allowed=True)
+    rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator Database ID", post_errors)
 
-    rqst_address_line_1 = clean_json_string_input(post_data, "root", "Address Line 1", post_errors, empty_string_allowed=True)
-    rqst_address_line_2 = clean_json_string_input(post_data, "root", "Address Line 2", post_errors, empty_string_allowed=True)
+    rqst_address_line_1 = clean_string_value_from_dict_object(post_data, "root", "Address Line 1", post_errors, empty_string_allowed=True)
+    rqst_address_line_2 = clean_string_value_from_dict_object(post_data, "root", "Address Line 2", post_errors, empty_string_allowed=True)
     if rqst_address_line_2 is None:
         rqst_address_line_2 = ''
-    rqst_city = clean_json_string_input(post_data, "root", "City", post_errors, empty_string_allowed=True)
-    rqst_state = clean_json_string_input(post_data, "root", "State", post_errors, empty_string_allowed=True)
-    rqst_zipcode = clean_json_string_input(post_data, "root", "Zipcode", post_errors, empty_string_allowed=True)
+    rqst_city = clean_string_value_from_dict_object(post_data, "root", "City", post_errors, empty_string_allowed=True)
+    rqst_state = clean_string_value_from_dict_object(post_data, "root", "State", post_errors, empty_string_allowed=True)
+    rqst_zipcode = clean_string_value_from_dict_object(post_data, "root", "Zipcode", post_errors, empty_string_allowed=True)
 
-    date_met_nav_dict = clean_dict_input(post_data, "root", "date_met_nav", post_errors, none_allowed=True)
+    date_met_nav_dict = clean_dict_value_from_dict_object(post_data, "root", "date_met_nav", post_errors, none_allowed=True)
     rqst_date_met_nav = None
     if date_met_nav_dict is not None:
-        month = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Month", post_errors)
+        month = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Month", post_errors)
         if month < 1 or month > 12:
             post_errors.append("Month must be between 1 and 12 inclusive")
 
-        day = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Day", post_errors)
+        day = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Day", post_errors)
         if day < 1 or day > 31:
             post_errors.append("Day must be between 1 and 31 inclusive")
 
-        year = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Year", post_errors)
+        year = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Year", post_errors)
         if year < 1 or year > 9999:
             post_errors.append("Year must be between 1 and 9999 inclusive")
 
@@ -121,40 +121,40 @@ def add_consumer(response_raw_data, post_data, post_errors):
     return response_raw_data
 
 
-def modify_consumer(response_raw_data, post_json, post_errors):
-    rqst_consumer_email = clean_json_string_input(post_json, "root", "Email", post_errors, empty_string_allowed=True)
-    rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
-    rqst_consumer_m_name = clean_json_string_input(post_json, "root", "Middle Name", post_errors, empty_string_allowed=True)
-    rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
-    rqst_consumer_plan = clean_json_string_input(post_json, "root", "Plan", post_errors, empty_string_allowed=True)
-    rqst_consumer_met_nav_at = clean_json_string_input(post_json, "root", "Met Navigator At", post_errors)
-    rqst_consumer_household_size = clean_json_int_input(post_json, "root", "Household Size", post_errors)
-    rqst_consumer_phone = clean_json_string_input(post_json, "root", "Phone Number", post_errors, empty_string_allowed=True)
-    rqst_consumer_pref_lang = clean_json_string_input(post_json, "root", "Preferred Language", post_errors, empty_string_allowed=True)
-    rqst_navigator_notes = clean_list_input(post_json, "root", "Navigator Notes", post_errors, empty_list_allowed=True)
-    rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator Database ID", post_errors)
-    rqst_consumer_id = clean_json_int_input(post_json, "root", "Consumer Database ID", post_errors)
+def modify_consumer(response_raw_data, post_data, post_errors):
+    rqst_consumer_email = clean_string_value_from_dict_object(post_data, "root", "Email", post_errors, empty_string_allowed=True)
+    rqst_consumer_f_name = clean_string_value_from_dict_object(post_data, "root", "First Name", post_errors)
+    rqst_consumer_m_name = clean_string_value_from_dict_object(post_data, "root", "Middle Name", post_errors, empty_string_allowed=True)
+    rqst_consumer_l_name = clean_string_value_from_dict_object(post_data, "root", "Last Name", post_errors)
+    rqst_consumer_plan = clean_string_value_from_dict_object(post_data, "root", "Plan", post_errors, empty_string_allowed=True)
+    rqst_consumer_met_nav_at = clean_string_value_from_dict_object(post_data, "root", "Met Navigator At", post_errors)
+    rqst_consumer_household_size = clean_int_value_from_dict_object(post_data, "root", "Household Size", post_errors)
+    rqst_consumer_phone = clean_string_value_from_dict_object(post_data, "root", "Phone Number", post_errors, empty_string_allowed=True)
+    rqst_consumer_pref_lang = clean_string_value_from_dict_object(post_data, "root", "Preferred Language", post_errors, empty_string_allowed=True)
+    rqst_navigator_notes = clean_list_value_from_dict_object(post_data, "root", "Navigator Notes", post_errors, empty_list_allowed=True)
+    rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator Database ID", post_errors)
+    rqst_consumer_id = clean_int_value_from_dict_object(post_data, "root", "Consumer Database ID", post_errors)
 
-    rqst_address_line_1 = clean_json_string_input(post_json, "root", "Address Line 1", post_errors, empty_string_allowed=True)
-    rqst_address_line_2 = clean_json_string_input(post_json, "root", "Address Line 2", post_errors, empty_string_allowed=True)
+    rqst_address_line_1 = clean_string_value_from_dict_object(post_data, "root", "Address Line 1", post_errors, empty_string_allowed=True)
+    rqst_address_line_2 = clean_string_value_from_dict_object(post_data, "root", "Address Line 2", post_errors, empty_string_allowed=True)
     if rqst_address_line_2 is None:
         rqst_address_line_2 = ''
-    rqst_city = clean_json_string_input(post_json, "root", "City", post_errors, empty_string_allowed=True)
-    rqst_state = clean_json_string_input(post_json, "root", "State", post_errors, empty_string_allowed=True)
-    rqst_zipcode = clean_json_string_input(post_json, "root", "Zipcode", post_errors, empty_string_allowed=True)
+    rqst_city = clean_string_value_from_dict_object(post_data, "root", "City", post_errors, empty_string_allowed=True)
+    rqst_state = clean_string_value_from_dict_object(post_data, "root", "State", post_errors, empty_string_allowed=True)
+    rqst_zipcode = clean_string_value_from_dict_object(post_data, "root", "Zipcode", post_errors, empty_string_allowed=True)
 
-    date_met_nav_dict = clean_dict_input(post_json, "root", "date_met_nav", post_errors, none_allowed=True)
+    date_met_nav_dict = clean_dict_value_from_dict_object(post_data, "root", "date_met_nav", post_errors, none_allowed=True)
     rqst_date_met_nav = None
     if date_met_nav_dict is not None:
-        month = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Month", post_errors)
+        month = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Month", post_errors)
         if month < 1 or month > 12:
             post_errors.append("Month must be between 1 and 12 inclusive")
 
-        day = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Day", post_errors)
+        day = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Day", post_errors)
         if day < 1 or day > 31:
             post_errors.append("Day must be between 1 and 31 inclusive")
 
-        year = clean_json_int_input(date_met_nav_dict, "date_met_nav", "Year", post_errors)
+        year = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Year", post_errors)
         if year < 1 or year > 9999:
             post_errors.append("Year must be between 1 and 9999 inclusive")
 
@@ -212,8 +212,8 @@ def modify_consumer(response_raw_data, post_json, post_errors):
     return response_raw_data
 
 
-def delete_consumer(response_raw_data, post_json, post_errors):
-    rqst_consumer_id = clean_json_int_input(post_json, "root", "Consumer Database ID", post_errors)
+def delete_consumer(response_raw_data, post_data, post_errors):
+    rqst_consumer_id = clean_int_value_from_dict_object(post_data, "root", "Consumer Database ID", post_errors)
 
     if len(post_errors) == 0:
         try:

@@ -4,58 +4,58 @@ import re
 import datetime
 
 
-def clean_json_string_input(json_dict, dict_name, dict_key, post_errors, empty_string_allowed=False,
-                            none_allowed=False):
-    if dict_key not in json_dict:
+def clean_string_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, empty_string_allowed=False,
+                                        none_allowed=False):
+    if dict_key not in dict_object:
         post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
-    elif json_dict[dict_key] == "" and empty_string_allowed is False:
+    elif dict_object[dict_key] == "" and empty_string_allowed is False:
         post_errors.append("Value for {!r} in {!r} dictionary is an empty string".format(dict_key, dict_name))
-    elif json_dict[dict_key] is None and none_allowed is False:
+    elif dict_object[dict_key] is None and none_allowed is False:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
     else:
-        if json_dict[dict_key] or json_dict[dict_key] == "":
-            return str(json_dict[dict_key])
+        if dict_object[dict_key] or dict_object[dict_key] == "":
+            return str(dict_object[dict_key])
         else:
             return None
 
 
-def clean_json_int_input(json_dict, dict_name, dict_key, post_errors):
-    if dict_key not in json_dict:
+def clean_int_value_from_dict_object(dict_object, dict_name, dict_key, post_errors):
+    if dict_key not in dict_object:
         post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
-    elif json_dict[dict_key] is None:
+    elif dict_object[dict_key] is None:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
     else:
-        return int(json_dict[dict_key])
+        return int(dict_object[dict_key])
 
 
-def clean_dict_input(json_dict, dict_name, dict_key, post_errors, none_allowed=False):
-    if dict_key not in json_dict:
+def clean_dict_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, none_allowed=False):
+    if dict_key not in dict_object:
         post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
-    elif json_dict[dict_key] is None and none_allowed == False:
+    elif dict_object[dict_key] is None and none_allowed == False:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
-    elif not isinstance(json_dict[dict_key], dict):
+    elif not isinstance(dict_object[dict_key], dict):
         post_errors.append("Value for {!r} in {!r} dictionary is not a dictionary".format(dict_key, dict_name))
-    elif json_dict[dict_key] == {}:
+    elif dict_object[dict_key] == {}:
         post_errors.append("Value for {!r} in {!r} dictionary is an empty dictionary".format(dict_key, dict_name))
     else:
-        return json_dict[dict_key]
+        return dict_object[dict_key]
     return None
 
 
-def clean_list_input(json_dict, dict_name, dict_key, post_errors, empty_list_allowed=False):
-    if dict_key not in json_dict:
+def clean_list_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, empty_list_allowed=False):
+    if dict_key not in dict_object:
         post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
-    elif json_dict[dict_key] is None:
+    elif dict_object[dict_key] is None:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
-    elif not isinstance(json_dict[dict_key], list):
+    elif not isinstance(dict_object[dict_key], list):
         post_errors.append("Value for {!r} in {!r} dictionary is not a list".format(dict_key, dict_name))
-    elif json_dict[dict_key] == []:
+    elif dict_object[dict_key] == []:
         if empty_list_allowed:
             return []
         else:
             post_errors.append("Value for {!r} in {!r} dictionary is an empty list".format(dict_key, dict_name))
     else:
-        return json_dict[dict_key]
+        return dict_object[dict_key]
     return None
 
 

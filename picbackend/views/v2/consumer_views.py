@@ -10,7 +10,7 @@ from picmodels.models import PICConsumer
 import json
 from django.views.decorators.csrf import csrf_exempt
 from .utils import build_search_params
-from .utils import clean_json_string_input
+from .utils import clean_string_value_from_dict_object
 from .utils import init_v2_response_data
 from .utils import parse_and_log_errors
 from .utils import add_consumer
@@ -44,7 +44,7 @@ class ConsumerManagementView(View):
         post_data = json.loads(post_json)
 
         # Retrieve database action from post data
-        rqst_action = clean_json_string_input(post_data, "root", "Database Action", post_errors)
+        rqst_action = clean_string_value_from_dict_object(post_data, "root", "Database Action", post_errors)
 
         # If there are no parsing errors, process POST data based on database action
         if not post_errors:

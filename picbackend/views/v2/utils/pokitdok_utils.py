@@ -3,19 +3,19 @@ Defines utility functions and classes for pokitdok views
 - Need to obtain valid NPI
 """
 
-from .base import clean_json_string_input
+from .base import clean_string_value_from_dict_object
 import pokitdok
 
 
-def fetch_and_parse_pokit_elig_data(post_json, response_raw_data, post_errors):
-    rqst_consumer_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors, none_allowed=True)
-    rqst_consumer_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors, none_allowed=True)
-    rqst_consumer_birth = clean_json_string_input(post_json, "root", "Birth Date", post_errors, none_allowed=True)
-    rqst_consumer_plan_id = clean_json_string_input(post_json, "root", "Consumer Plan ID", post_errors,
-                                                    none_allowed=True)
-    rqst_consumer_gender = clean_json_string_input(post_json, "root", "Gender", post_errors,
-                                                    none_allowed=True)
-    rqst_consumer_trading_partner = clean_json_string_input(post_json, "root", "Trading Partner ID", post_errors)
+def fetch_and_parse_pokit_elig_data(post_data, response_raw_data, post_errors):
+    rqst_consumer_f_name = clean_string_value_from_dict_object(post_data, "root", "First Name", post_errors, none_allowed=True)
+    rqst_consumer_l_name = clean_string_value_from_dict_object(post_data, "root", "Last Name", post_errors, none_allowed=True)
+    rqst_consumer_birth = clean_string_value_from_dict_object(post_data, "root", "Birth Date", post_errors, none_allowed=True)
+    rqst_consumer_plan_id = clean_string_value_from_dict_object(post_data, "root", "Consumer Plan ID", post_errors,
+                                                                none_allowed=True)
+    rqst_consumer_gender = clean_string_value_from_dict_object(post_data, "root", "Gender", post_errors,
+                                                               none_allowed=True)
+    rqst_consumer_trading_partner = clean_string_value_from_dict_object(post_data, "root", "Trading Partner ID", post_errors)
 
     # if no errors, make request to pokitdok
     if len(post_errors) == 0:

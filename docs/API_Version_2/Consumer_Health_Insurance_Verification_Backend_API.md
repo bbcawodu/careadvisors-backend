@@ -71,7 +71,12 @@
     
     
 ### Pokitdok Eligibility Retrieval API.
-- To retrieve parsed eligibility data from pokitdok for a consumer, submit a POST request to http://picbackend.herokuapp.com/v2/consumer_health_insurance_benefits/ The body of the request should be a JSON document using the following template:
+- To retrieve parsed eligibility data from pokitdok for a consumer, submit a POST request to http://picbackend.herokuapp.com/v2/consumer_health_insurance_benefits/. 
+
+- The headers of the request should include: 
+    - "Content-Type: "application/json""
+    
+The body of the request should be a JSON document using the following template:
 
 ```
 {

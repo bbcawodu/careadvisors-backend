@@ -1,7 +1,12 @@
 ## Staff Account Backend API
 
 ### Staff Data Submission API
-To modify or add members of the PICStaff class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/staff/. The body of the request should be a JSON document using the following template:
+To modify or add members of the PICStaff class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/staff/. 
+
+- The headers of the request should include: 
+    - "Content-Type: "application/json""
+    
+The body of the request should be a JSON document using the following template:
 
 ```
 {

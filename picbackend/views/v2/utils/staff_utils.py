@@ -2,9 +2,9 @@
 Defines utility functions and classes for staff views
 """
 
-from .base import clean_json_string_input
-from .base import clean_json_int_input
-from .base import clean_list_input
+from .base import clean_string_value_from_dict_object
+from .base import clean_int_value_from_dict_object
+from .base import clean_list_value_from_dict_object
 from picmodels.models import NavMetricsLocation
 from picmodels.models import PICStaff
 from django.db import IntegrityError
@@ -12,21 +12,21 @@ from django.core.validators import validate_email
 from django import forms
 
 
-def add_staff(response_raw_data, post_json, post_errors):
-    rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+def add_staff(response_raw_data, post_data, post_errors):
+    rqst_usr_email = clean_string_value_from_dict_object(post_data, "root", "Email", post_errors)
     if rqst_usr_email and not post_errors:
         try:
             validate_email(rqst_usr_email)
         except forms.ValidationError:
             post_errors.append("{!s} must be a valid email address".format(rqst_usr_email))
-    rqst_usr_mpn = clean_json_string_input(post_json, "root", "MPN", post_errors, empty_string_allowed=True, none_allowed=True)
+    rqst_usr_mpn = clean_string_value_from_dict_object(post_data, "root", "MPN", post_errors, empty_string_allowed=True, none_allowed=True)
     if rqst_usr_mpn is None:
         rqst_usr_mpn = ''
-    rqst_usr_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
-    rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
-    rqst_county = clean_json_string_input(post_json, "root", "User County", post_errors)
-    rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
-    rqst_base_locations = clean_list_input(post_json, "root", "Base Locations", post_errors, empty_list_allowed=True)
+    rqst_usr_f_name = clean_string_value_from_dict_object(post_data, "root", "First Name", post_errors)
+    rqst_usr_l_name = clean_string_value_from_dict_object(post_data, "root", "Last Name", post_errors)
+    rqst_county = clean_string_value_from_dict_object(post_data, "root", "User County", post_errors)
+    rqst_usr_type = clean_string_value_from_dict_object(post_data, "root", "User Type", post_errors)
+    rqst_base_locations = clean_list_value_from_dict_object(post_data, "root", "Base Locations", post_errors, empty_list_allowed=True)
     rqst_base_locations = list(set(rqst_base_locations))
     base_location_objects = []
     location_errors = []
@@ -59,17 +59,17 @@ def add_staff(response_raw_data, post_json, post_errors):
     return response_raw_data
 
 
-def modify_staff(response_raw_data, post_json, post_errors):
-    rqst_usr_id = clean_json_int_input(post_json, "root", "Database ID", post_errors)
-    rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
-    rqst_usr_mpn = clean_json_string_input(post_json, "root", "MPN", post_errors, empty_string_allowed=True, none_allowed=True)
+def modify_staff(response_raw_data, post_data, post_errors):
+    rqst_usr_id = clean_int_value_from_dict_object(post_data, "root", "Database ID", post_errors)
+    rqst_usr_email = clean_string_value_from_dict_object(post_data, "root", "Email", post_errors)
+    rqst_usr_mpn = clean_string_value_from_dict_object(post_data, "root", "MPN", post_errors, empty_string_allowed=True, none_allowed=True)
     if rqst_usr_mpn is None:
         rqst_usr_mpn = ''
-    rqst_usr_f_name = clean_json_string_input(post_json, "root", "First Name", post_errors)
-    rqst_usr_l_name = clean_json_string_input(post_json, "root", "Last Name", post_errors)
-    rqst_county = clean_json_string_input(post_json, "root", "User County", post_errors)
-    rqst_usr_type = clean_json_string_input(post_json, "root", "User Type", post_errors)
-    rqst_base_locations = clean_list_input(post_json, "root", "Base Locations", post_errors, empty_list_allowed=True)
+    rqst_usr_f_name = clean_string_value_from_dict_object(post_data, "root", "First Name", post_errors)
+    rqst_usr_l_name = clean_string_value_from_dict_object(post_data, "root", "Last Name", post_errors)
+    rqst_county = clean_string_value_from_dict_object(post_data, "root", "User County", post_errors)
+    rqst_usr_type = clean_string_value_from_dict_object(post_data, "root", "User Type", post_errors)
+    rqst_base_locations = clean_list_value_from_dict_object(post_data, "root", "Base Locations", post_errors, empty_list_allowed=True)
     rqst_base_locations = list(set(rqst_base_locations))
     base_location_objects = []
     location_errors = []
@@ -106,8 +106,8 @@ def modify_staff(response_raw_data, post_json, post_errors):
     return response_raw_data
 
 
-def delete_staff(response_raw_data, post_json, post_errors):
-    rqst_usr_id = clean_json_int_input(post_json, "root", "Database ID", post_errors)
+def delete_staff(response_raw_data, post_data, post_errors):
+    rqst_usr_id = clean_int_value_from_dict_object(post_data, "root", "Database ID", post_errors)
 
     if len(post_errors) == 0:
         try:

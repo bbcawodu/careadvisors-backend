@@ -5,10 +5,10 @@ Defines utility functions and classes for consumer metrics views
 import datetime
 import json
 from django.http import HttpResponse
-from .base import clean_json_string_input
-from .base import clean_json_int_input
-from .base import clean_list_input
-from .base import clean_dict_input
+from .base import clean_string_value_from_dict_object
+from .base import clean_int_value_from_dict_object
+from .base import clean_list_value_from_dict_object
+from .base import clean_dict_value_from_dict_object
 from .base import parse_and_log_errors
 from picmodels.models import MetricsSubmission
 from picmodels.models import PlanStat
@@ -17,70 +17,70 @@ from picmodels.models import PICStaff
 from django.db import models
 
 
-def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
-    rqst_usr_email = clean_json_string_input(post_json, "root", "Email", post_errors)
+def add_or_update_metrics_entity(response_raw_data, post_data, post_errors):
+    rqst_usr_email = clean_string_value_from_dict_object(post_data, "root", "Email", post_errors)
 
-    consumer_metrics = clean_dict_input(post_json, "root", "Consumer Metrics", post_errors)
+    consumer_metrics = clean_dict_value_from_dict_object(post_data, "root", "Consumer Metrics", post_errors)
     if consumer_metrics is not None:
-        consumer_metrics = post_json["Consumer Metrics"]
+        consumer_metrics = post_data["Consumer Metrics"]
 
-        rqst_no_general_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_general_assis",
-                                                 post_errors)
-        rqst_no_plan_usage_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_plan_usage_assis",
-                                                 post_errors)
-        rqst_no_locating_provider_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_locating_provider_assis",
-                                                 post_errors)
-        rqst_no_billing_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_billing_assis",
-                                                 post_errors)
-        rqst_no_enroll_apps_started = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_enroll_apps_started",
-                                                 post_errors)
-        rqst_no_enroll_qhp = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_enroll_qhp",
-                                                 post_errors)
-        rqst_no_enroll_abe_chip = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_enroll_abe_chip",
-                                                 post_errors)
-        rqst_no_enroll_shop = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_enroll_shop",
-                                                 post_errors)
-        rqst_no_referrals_agents_brokers = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_referrals_agents_brokers",
-                                                 post_errors)
-        rqst_no_referrals_ship_medicare = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_referrals_ship_medicare",
-                                                 post_errors)
-        rqst_no_referrals_other_assis_programs = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_referrals_other_assis_programs",
-                                                 post_errors)
-        rqst_no_referrals_issuers = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_referrals_issuers",
-                                                 post_errors)
-        rqst_no_referrals_doi = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_referrals_doi",
-                                                 post_errors)
-        rqst_no_mplace_tax_form_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_mplace_tax_form_assis",
-                                                 post_errors)
-        rqst_no_mplace_exempt_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_mplace_exempt_assis",
-                                                 post_errors)
-        rqst_no_qhp_abe_appeals = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_qhp_abe_appeals",
-                                                 post_errors)
-        rqst_no_data_matching_mplace_issues = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_data_matching_mplace_issues",
-                                                 post_errors)
-        rqst_no_sep_eligible = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_sep_eligible",
-                                                 post_errors)
-        rqst_no_employ_spons_cov_issues = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_employ_spons_cov_issues",
-                                                 post_errors)
-        rqst_no_aptc_csr_assis = clean_json_int_input(consumer_metrics, "Consumer Metrics", "no_aptc_csr_assis",
-                                                 post_errors)
-        rqst_cmplx_cases_mplace_issues = clean_json_string_input(consumer_metrics, "Consumer Metrics", "cmplx_cases_mplace_issues", post_errors,
-                                                   empty_string_allowed=True)
+        rqst_no_general_assis = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_general_assis",
+                                                                 post_errors)
+        rqst_no_plan_usage_assis = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_plan_usage_assis",
+                                                                    post_errors)
+        rqst_no_locating_provider_assis = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_locating_provider_assis",
+                                                                           post_errors)
+        rqst_no_billing_assis = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_billing_assis",
+                                                                 post_errors)
+        rqst_no_enroll_apps_started = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_enroll_apps_started",
+                                                                       post_errors)
+        rqst_no_enroll_qhp = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_enroll_qhp",
+                                                              post_errors)
+        rqst_no_enroll_abe_chip = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_enroll_abe_chip",
+                                                                   post_errors)
+        rqst_no_enroll_shop = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_enroll_shop",
+                                                               post_errors)
+        rqst_no_referrals_agents_brokers = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_referrals_agents_brokers",
+                                                                            post_errors)
+        rqst_no_referrals_ship_medicare = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_referrals_ship_medicare",
+                                                                           post_errors)
+        rqst_no_referrals_other_assis_programs = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_referrals_other_assis_programs",
+                                                                                  post_errors)
+        rqst_no_referrals_issuers = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_referrals_issuers",
+                                                                     post_errors)
+        rqst_no_referrals_doi = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_referrals_doi",
+                                                                 post_errors)
+        rqst_no_mplace_tax_form_assis = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_mplace_tax_form_assis",
+                                                                         post_errors)
+        rqst_no_mplace_exempt_assis = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_mplace_exempt_assis",
+                                                                       post_errors)
+        rqst_no_qhp_abe_appeals = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_qhp_abe_appeals",
+                                                                   post_errors)
+        rqst_no_data_matching_mplace_issues = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_data_matching_mplace_issues",
+                                                                               post_errors)
+        rqst_no_sep_eligible = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_sep_eligible",
+                                                                post_errors)
+        rqst_no_employ_spons_cov_issues = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_employ_spons_cov_issues",
+                                                                           post_errors)
+        rqst_no_aptc_csr_assis = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_aptc_csr_assis",
+                                                                  post_errors)
+        rqst_cmplx_cases_mplace_issues = clean_string_value_from_dict_object(consumer_metrics, "Consumer Metrics", "cmplx_cases_mplace_issues", post_errors,
+                                                                             empty_string_allowed=True)
 
-        rqst_metrics_county = clean_json_string_input(consumer_metrics, "Consumer Metrics", "County", post_errors)
-        rqst_metrics_location = clean_json_string_input(consumer_metrics, "Consumer Metrics", "Location", post_errors)
+        rqst_metrics_county = clean_string_value_from_dict_object(consumer_metrics, "Consumer Metrics", "County", post_errors)
+        rqst_metrics_location = clean_string_value_from_dict_object(consumer_metrics, "Consumer Metrics", "Location", post_errors)
 
-        metrics_date_dict = clean_dict_input(consumer_metrics, "Consumer Metrics", "Metrics Date", post_errors)
+        metrics_date_dict = clean_dict_value_from_dict_object(consumer_metrics, "Consumer Metrics", "Metrics Date", post_errors)
         if metrics_date_dict is not None:
-            month = clean_json_int_input(metrics_date_dict, "Metrics Date", "Month", post_errors)
+            month = clean_int_value_from_dict_object(metrics_date_dict, "Metrics Date", "Month", post_errors)
             if month < 1 or month > 12:
                 post_errors.append("Month must be between 1 and 12 inclusive")
 
-            day = clean_json_int_input(metrics_date_dict, "Metrics Date", "Day", post_errors)
+            day = clean_int_value_from_dict_object(metrics_date_dict, "Metrics Date", "Day", post_errors)
             if day < 1 or day > 31:
                 post_errors.append("Day must be between 1 and 31 inclusive")
 
-            year = clean_json_int_input(metrics_date_dict, "Metrics Date", "Year", post_errors)
+            year = clean_int_value_from_dict_object(metrics_date_dict, "Metrics Date", "Year", post_errors)
             if year < 1 or year > 9999:
                 post_errors.append("Year must be between 1 and 9999 inclusive")
 
@@ -147,17 +147,17 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
                 response_raw_data["Status"]["Message"] = [metrics_instance_message]
                 metrics_instance.save()
 
-                rqst_plan_stats = clean_list_input(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors)
+                rqst_plan_stats = clean_list_value_from_dict_object(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors)
                 metrics_instance_plan_stats = PlanStat.objects.filter(metrics_submission=metrics_instance.id)
                 for instance_plan_stat in metrics_instance_plan_stats:
                     instance_plan_stat.delete()
                 if rqst_plan_stats is not None:
                     for rqst_plan_stat_dict in rqst_plan_stats:
                         planstatobject = PlanStat()
-                        planstatobject.plan_name = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Issuer Name", post_errors)
-                        planstatobject.premium_type = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Premium Type", post_errors)
-                        planstatobject.metal_level = clean_json_string_input(rqst_plan_stat_dict, "Plans Dict", "Metal Level", post_errors)
-                        planstatobject.enrollments = clean_json_int_input(rqst_plan_stat_dict, "Plans Dict", "Enrollments", post_errors)
+                        planstatobject.plan_name = clean_string_value_from_dict_object(rqst_plan_stat_dict, "Plans Dict", "Issuer Name", post_errors)
+                        planstatobject.premium_type = clean_string_value_from_dict_object(rqst_plan_stat_dict, "Plans Dict", "Premium Type", post_errors)
+                        planstatobject.metal_level = clean_string_value_from_dict_object(rqst_plan_stat_dict, "Plans Dict", "Metal Level", post_errors)
+                        planstatobject.enrollments = clean_int_value_from_dict_object(rqst_plan_stat_dict, "Plans Dict", "Enrollments", post_errors)
 
                         plan_name_valid = planstatobject.check_plan_choices()
                         premium_type_valid = planstatobject.check_premium_choices()
@@ -176,7 +176,7 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
                     #     planstatobject = PlanStat()
                     #     planstatobject.plan_name = plan
                     #     if planstatobject.check_plan_choices():
-                    #         rqst_plan_enrollments = clean_json_int_input(rqst_plan_stats, "Plan Stats", plan, post_errors)
+                    #         rqst_plan_enrollments = clean_int_value_from_dict_object(rqst_plan_stats, "Plan Stats", plan, post_errors)
                     #         if rqst_plan_enrollments is not None:
                     #             planstatobject.enrollments = rqst_plan_enrollments
                     #             planstatobject.save()

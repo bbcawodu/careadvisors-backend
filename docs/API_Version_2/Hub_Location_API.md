@@ -2,7 +2,12 @@
 
 
 ### Navigator Hub Location Data Modification API
-To modify or add navigator hub locations in the database programatically, submit a PUT request to: http://picbackend.herokuapp.com/v2/navigator_hub_locations/. The body of the request should be a JSON document using the following template:
+To modify or add navigator hub locations in the database programatically, submit a PUT request to: http://picbackend.herokuapp.com/v2/navigator_hub_locations/.
+
+- The headers of the request should include: 
+    - "Content-Type: "application/json""
+    
+The body of the request should be a JSON document using the following template:
 
 ```
 {

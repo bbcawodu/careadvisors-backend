@@ -176,7 +176,7 @@ def add_or_update_metrics_entity(response_raw_data, post_json, post_errors):
                     #     planstatobject = PlanStat()
                     #     planstatobject.plan_name = plan
                     #     if planstatobject.check_plan_choices():
-                    #         rqst_plan_enrollments = clean_json_int_input(rqst_plan_stats, "Plan Stats", plan, post_errors)
+                    #         rqst_plan_enrollments = clean_int_value_from_dict_object(rqst_plan_stats, "Plan Stats", plan, post_errors)
                     #         if rqst_plan_enrollments is not None:
                     #             planstatobject.enrollments = rqst_plan_enrollments
                     #             planstatobject.save()

@@ -10,9 +10,9 @@ import dateutil.parser
 from dateutil.tz import tzutc
 from googleapiclient.discovery import build
 from googleapiclient.http import BatchHttpRequest
-from .base import clean_json_int_input
-from .base import clean_json_string_input
-from .base import clean_dict_input
+from .base import clean_int_value_from_dict_object
+from .base import clean_string_value_from_dict_object
+from .base import clean_dict_value_from_dict_object
 from picmodels.models import PICStaff
 from picmodels.models import PICConsumer
 from picmodels.models import CredentialsModel
@@ -81,14 +81,14 @@ def build_authorized_cal_http_service_object(credential):
     return service
 
 
-def add_nav_apt_to_google_calendar(post_json, post_errors):
+def add_nav_apt_to_google_calendar(post_data, post_errors):
     scheduled_appointment = {}
-    rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator ID", post_errors)
-    rqst_apt_datetime = clean_json_string_input(post_json, "root", "Appointment Date and Time", post_errors)
+    rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator ID", post_errors)
+    rqst_apt_datetime = clean_string_value_from_dict_object(post_data, "root", "Appointment Date and Time", post_errors)
     if not isinstance(rqst_apt_datetime, str):
         post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(rqst_apt_datetime)))
 
-    consumer_info = get_or_create_consumer_instance(rqst_nav_id, post_json, post_errors)
+    consumer_info = get_or_create_consumer_instance(rqst_nav_id, post_data, post_errors)
     try:
         picstaff_object = PICStaff.objects.get(id=rqst_nav_id)
         credentials_object = CredentialsModel.objects.get(id=picstaff_object)
@@ -107,33 +107,33 @@ def add_nav_apt_to_google_calendar(post_json, post_errors):
     return scheduled_appointment, consumer_info
 
 
-def get_or_create_consumer_instance(rqst_nav_id, post_json, post_errors):
+def get_or_create_consumer_instance(rqst_nav_id, post_data, post_errors):
     consumer_info = {}
-    rqst_consumer_info = clean_dict_input(post_json, "root", "Consumer Info", post_errors)
+    rqst_consumer_info = clean_dict_value_from_dict_object(post_data, "root", "Consumer Info", post_errors)
 
     if not post_errors and rqst_consumer_info:
-        rqst_consumer_email = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Email", post_errors)
+        rqst_consumer_email = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Email", post_errors)
         if rqst_consumer_email and not post_errors:
             try:
                 validate_email(rqst_consumer_email)
             except forms.ValidationError:
                 post_errors.append("{!s} must be a valid email address".format(rqst_consumer_email))
-        rqst_consumer_f_name = clean_json_string_input(rqst_consumer_info, "Consumer Info", "First Name", post_errors)
-        rqst_consumer_m_name = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Middle Name", post_errors, empty_string_allowed=True)
-        rqst_consumer_l_name = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Last Name", post_errors)
-        rqst_consumer_plan = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Plan", post_errors, empty_string_allowed=True)
+        rqst_consumer_f_name = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "First Name", post_errors)
+        rqst_consumer_m_name = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Middle Name", post_errors, empty_string_allowed=True)
+        rqst_consumer_l_name = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Last Name", post_errors)
+        rqst_consumer_plan = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Plan", post_errors, empty_string_allowed=True)
         rqst_consumer_met_nav_at = "Patient Assist"
-        rqst_consumer_household_size = clean_json_int_input(rqst_consumer_info, "Consumer Info", "Household Size", post_errors)
-        rqst_consumer_phone = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Phone Number", post_errors)
-        rqst_consumer_pref_lang = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Preferred Language", post_errors, empty_string_allowed=True)
+        rqst_consumer_household_size = clean_int_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Household Size", post_errors)
+        rqst_consumer_phone = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Phone Number", post_errors)
+        rqst_consumer_pref_lang = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Preferred Language", post_errors, empty_string_allowed=True)
 
-        rqst_address_line_1 = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Address Line 1", post_errors, empty_string_allowed=True)
-        rqst_address_line_2 = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Address Line 2", post_errors, empty_string_allowed=True)
+        rqst_address_line_1 = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Address Line 1", post_errors, empty_string_allowed=True)
+        rqst_address_line_2 = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Address Line 2", post_errors, empty_string_allowed=True)
         if rqst_address_line_2 is None:
             rqst_address_line_2 = ''
-        rqst_city = clean_json_string_input(rqst_consumer_info, "Consumer Info", "City", post_errors, empty_string_allowed=True)
-        rqst_state = clean_json_string_input(rqst_consumer_info, "Consumer Info", "State", post_errors, empty_string_allowed=True)
-        rqst_zipcode = clean_json_string_input(rqst_consumer_info, "Consumer Info", "Zipcode", post_errors, empty_string_allowed=True)
+        rqst_city = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "City", post_errors, empty_string_allowed=True)
+        rqst_state = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "State", post_errors, empty_string_allowed=True)
+        rqst_zipcode = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Zipcode", post_errors, empty_string_allowed=True)
         rqst_date_met_nav = datetime.datetime.utcnow()
 
         if len(post_errors) == 0:
@@ -260,11 +260,11 @@ def send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointme
         # A mandrill error occurred: <class 'mandrill.UnknownSubaccountError'> - No subaccount exists with the id 'customer-123'
 
 
-def delete_nav_apt_from_google_calendar(post_json, post_errors):
+def delete_nav_apt_from_google_calendar(post_data, post_errors):
     google_apt_deleted = False
 
-    rqst_nav_id = clean_json_int_input(post_json, "root", "Navigator ID", post_errors)
-    rqst_apt_datetime = clean_json_string_input(post_json, "root", "Appointment Date and Time", post_errors)
+    rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator ID", post_errors)
+    rqst_apt_datetime = clean_string_value_from_dict_object(post_data, "root", "Appointment Date and Time", post_errors)
     if not isinstance(rqst_apt_datetime, str):
         post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(rqst_apt_datetime)))
 

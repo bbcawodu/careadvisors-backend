@@ -14,7 +14,7 @@ import base64
 from django.views.decorators.csrf import csrf_exempt
 from .utils import init_v2_response_data
 from .utils import parse_and_log_errors
-from .utils import clean_list_input
+from .utils import clean_list_value_from_dict_object
 from .utils import build_search_params
 from .utils import check_or_create_navigator_google_cal
 from .utils import add_nav_apt_to_google_calendar
@@ -161,7 +161,7 @@ class PatientAssistAptMgtView(View):
         response_raw_data["Data"]["Next Available Appointments"] = []
         response_raw_data["Data"]["Preferred Appointments"] = []
 
-        rqst_preferred_times = clean_list_input(post_data, "root", "Preferred Times", post_errors, empty_list_allowed=True)
+        rqst_preferred_times = clean_list_value_from_dict_object(post_data, "root", "Preferred Times", post_errors, empty_list_allowed=True)
 
         valid_rqst_preferred_times_timestamps = []
         for preferred_time_iso_string in rqst_preferred_times:

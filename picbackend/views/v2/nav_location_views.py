@@ -9,7 +9,7 @@ from django.utils.decorators import method_decorator
 from picmodels.models import NavMetricsLocation
 import json
 from django.views.decorators.csrf import csrf_exempt
-from .utils import clean_json_string_input
+from .utils import clean_string_value_from_dict_object
 from .utils import init_v2_response_data
 from .utils import parse_and_log_errors
 from .utils import add_nav_hub_location
@@ -34,7 +34,7 @@ class NavHubLocationManagementView(View):
         post_data = json.loads(post_json)
 
         # Code to parse POSTed json request
-        rqst_action = clean_json_string_input(post_json, "root", "Database Action", post_errors)
+        rqst_action = clean_string_value_from_dict_object(post_json, "root", "Database Action", post_errors)
 
         # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
         # create and save database entry for appointment

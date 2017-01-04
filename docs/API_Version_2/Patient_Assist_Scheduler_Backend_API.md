@@ -11,7 +11,7 @@
 - The response will be a JSON document with the following format:
     ```
     {
-        "Data": "Authorized!" (Only if there is authorized navigator credentials in database),
+        "Data": "Authorized!" (Only if there are authorized navigator credentials in database),
         "Status": {
             "Version": 2.0,
             "Error Code": Integer,
@@ -31,10 +31,15 @@
     
     
 ### Available Navigator Appointments API (IN TEST)
-#### (Need to add available navigator number for various time slots)
+#### (Need to add number of available navigators for various time slots)
 #### ALL DATES AND TIMES ARE UTC
 
-To retrieve available navigator appointments for a given dictionary of consumer preferences, submit a POST request to: http://picbackend.herokuapp.com/v2/patient_assist_apt_mgr/. The body of the request should be a JSON document using the following template:
+To retrieve available navigator appointments for a given dictionary of consumer preferences, submit a POST request to: http://picbackend.herokuapp.com/v2/patient_assist_apt_mgr/.
+
+- The headers of the request should include: 
+    - "Content-Type: "application/json""
+    
+The body of the request should be a JSON document using the following template:
 
 ```
 {
@@ -218,7 +223,12 @@ To retrieve scheduled consumer appointments for a given navigator, submit a GET 
 ### Add Consumer Appointment with Navigator API (IN TEST)
 #### ALL DATES AND TIMES ARE UTC
 
-To add a phone appointment for a consumer with a navigator, submit a PUT request to: http://picbackend.herokuapp.com/v2/patient_assist_apt_mgr/. The body of the request should be a JSON document using the following template:
+To add a phone appointment for a consumer with a navigator, submit a PUT request to: http://picbackend.herokuapp.com/v2/patient_assist_apt_mgr/.
+
+- The headers of the request should include: 
+    - "Content-Type: "application/json""
+    
+The body of the request should be a JSON document using the following template:
 
 ```
 {
@@ -286,7 +296,12 @@ In response, a JSON document will be displayed with the following format:
 ### Delete Consumer Appointment with Navigator API (IN TEST)
 #### ALL DATES AND TIMES ARE UTC
 
-To delete a phone appointment for a consumer with a navigator, submit a DELETE request to: http://picbackend.herokuapp.com/v2/patient_assist_apt_mgr/. The body of the request should be a JSON document using the following template:
+To delete a phone appointment for a consumer with a navigator, submit a DELETE request to: http://picbackend.herokuapp.com/v2/patient_assist_apt_mgr/.
+
+- The headers of the request should include: 
+    - "Content-Type: "application/json""
+    
+The body of the request should be a JSON document using the following template:
 
 ```
 {

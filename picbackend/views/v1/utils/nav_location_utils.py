@@ -48,7 +48,7 @@ def add_nav_hub_location(response_raw_data, post_json, post_errors):
 
 
 def modify_nav_hub_location(response_raw_data, post_json, post_errors):
-    # rqst_location_id = clean_json_int_input(post_json, "root", "Database ID", post_errors)
+    # rqst_location_id = clean_int_value_from_dict_object(post_json, "root", "Database ID", post_errors)
     rqst_location_name = clean_json_string_input(post_json, "root", "Location Name", post_errors)
     rqst_address_line_1 = clean_json_string_input(post_json, "root", "Address Line 1", post_errors)
     rqst_address_line_2 = clean_json_string_input(post_json, "root", "Address Line 2", post_errors, empty_string_allowed=True)

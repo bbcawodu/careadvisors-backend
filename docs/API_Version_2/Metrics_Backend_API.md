@@ -1,7 +1,12 @@
 ## Consumer Metrics Backend API
 
 ### Consumer Metrics Submission API
-To submit an entry of consumer metrics data corresponding to a specific staff member, make a PUT request to: http://picbackend.herokuapp.com/v2/metrics/. The body of the request should be a JSON document which has the following format:
+To submit an entry of consumer metrics data corresponding to a specific staff member, make a PUT request to: http://picbackend.herokuapp.com/v2/metrics/.
+
+- The headers of the request should include: 
+    - "Content-Type: "application/json""
+    
+The body of the request should be a JSON document which has the following format:
 
 ```
 {
