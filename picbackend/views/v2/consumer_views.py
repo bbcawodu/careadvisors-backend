@@ -3,16 +3,12 @@ Defines views that handle Patient Innovation Center consumer based requests
 API Version 2
 """
 
-from django.http import HttpResponse
+
 from django.views import View
 from django.utils.decorators import method_decorator
 from picmodels.models import PICConsumer
-import json
 from django.views.decorators.csrf import csrf_exempt
-from .utils import build_search_params
 from .utils import clean_string_value_from_dict_object
-from .utils import init_v2_response_data
-from .utils import parse_and_log_errors
 from .utils import add_consumer
 from .utils import modify_consumer
 from .utils import delete_consumer
@@ -22,27 +18,21 @@ from .utils import retrieve_first_name_consumers
 from .utils import retrieve_last_name_consumers
 from .utils import retrieve_id_consumers
 from .utils import break_results_into_pages
+from .base import JSONPUTRspMixin
+from .base import JSONGETRspMixin
 
 
 CONSUMERS_PER_PAGE = 20
 
 
-#Need to abstract common variables in get and post class methods into class attributes
+# Need to abstract common variables in get and post class methods into class attributes
 @method_decorator(csrf_exempt, name='dispatch')
-class ConsumerManagementView(View):
-    def put(self, request, *args, **kwargs):
-        """
-        Defines view that handles Patient Innovation Center consumer instance edit requests
-        :param request: django request instance object
-        :rtype: HttpResponse
-        """
+class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
+    """
+    Defines views that handles Patient Innovation Center consumer instance related requests
+    """
 
-        # Initialize dictionary for response data, initialize list for parsing errors
-        response_raw_data, post_errors = init_v2_response_data()
-
-        post_json = request.body.decode('utf-8')
-        post_data = json.loads(post_json)
-
+    def consumer_management_put_logic(self, post_data, response_raw_data, post_errors):
         # Retrieve database action from post data
         rqst_action = clean_string_value_from_dict_object(post_data, "root", "Database Action", post_errors)
 
@@ -55,23 +45,9 @@ class ConsumerManagementView(View):
             elif rqst_action == "Consumer Deletion":
                 response_raw_data = delete_consumer(response_raw_data, post_data, post_errors)
 
-        response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        return response
+        return response_raw_data, post_errors
 
-    def get(self, request, *args, **kwargs):
-        """
-        Defines view that handles Patient Innovation Center consumer instance api retrieval requests
-        :param request: django request instance object
-        :rtype: HttpResponse
-        """
-
-        # Initialize dictionary for response data, initialize list for parsing errors
-        response_raw_data, rqst_errors = init_v2_response_data()
-
-        # Build dictionary that contains valid Patient Innovation Center GET parameters
-        search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
-
+    def consumer_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         # Retrieve all Patient Innovation Center consumer objects
         consumers = PICConsumer.objects.all()
 
@@ -115,6 +91,7 @@ class ConsumerManagementView(View):
             rqst_page_no = search_params['page number'] if 'page number' in search_params else None
             response_raw_data = break_results_into_pages(request, response_raw_data, CONSUMERS_PER_PAGE, rqst_page_no)
 
-        response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        return response
+        return response_raw_data, rqst_errors
+
+    put_logic_function = consumer_management_put_logic
+    get_logic_function = consumer_management_get_logic

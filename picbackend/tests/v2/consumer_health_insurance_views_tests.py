@@ -7,6 +7,12 @@ from django.test import TestCase
 from django.test import Client
 import json
 import datetime
+from .base_v2_api_tests import BaseV2APITests
+
+
+class HealthInsuranceTradingPartnersAPITests(TestCase, BaseV2APITests):
+    def setUp(self):
+        self.base_url += "health_insurance_trading_partners/"
 
 
 def validate_date(date_text):

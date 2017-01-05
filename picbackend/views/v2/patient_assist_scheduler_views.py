@@ -28,6 +28,11 @@ from oauth2client.contrib.django_util.storage import DjangoORMStorage
 from oauth2client.contrib import xsrfutil
 from django.http import HttpResponseBadRequest
 import dateutil.parser
+from .base import JSONPUTRspMixin
+from .base import JSONGETRspMixin
+from .base import JSONPOSTRspMixin
+from .base import JSONDELETERspMixin
+
 
 FLOW = flow_from_clientsecrets(
     settings.GOOGLE_OAUTH2_CLIENT_SECRETS_JSON,
@@ -106,18 +111,14 @@ class GoogleCalendarAuthReturnView(View):
         return HttpResponseRedirect("/v2/calendar_auth/?navid={!s}".format(state_dict["navid"]))
 
 
-#Need to abstract common variables in get and post class methods into class attributes
+#N eed to abstract common variables in get and post class methods into class attributes
 @method_decorator(csrf_exempt, name='dispatch')
-class PatientAssistAptMgtView(View):
-    def get(self, request, *args, **kwargs):
-        """
-        Defines view that retrieves scheduled consumer appointments for a given navigator
-        :param request: django request instance object
-        :rtype: HttpResponse
-        """
+class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin, JSONDELETERspMixin, View):
+    """
+    Defines views that manage scheduled consumer appointments for the Patient Assist Plugin
+    """
 
-        response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+    def nav_scheduled_appointments_logic(self, request, search_params, response_raw_data, rqst_errors):
         response_raw_data["Data"] = {"Scheduled Appointments": None}
 
         if 'navigator id' in search_params and not rqst_errors:
@@ -140,23 +141,10 @@ class PatientAssistAptMgtView(View):
             rqst_errors.append("No valid parameters")
 
         response_raw_data["Host"] = settings.HOSTURL
-        response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        return response
 
-    def post(self, request, *args, **kwargs):
-        """
-        Defines view that retrieves available appointment slots with navigators.
-        :param request: django request instance object
-        :rtype: HttpResponse
-        """
+        return response_raw_data, rqst_errors
 
-        # initialize dictionary for response data, including parsing errors
-        response_raw_data, post_errors = init_v2_response_data()
-
-        post_json = request.body.decode('utf-8')
-        post_data = json.loads(post_json)
-
+    def available_nav_appointments_logic(self, post_data, response_raw_data, post_errors):
         response_raw_data["Data"] = {}
         response_raw_data["Data"]["Next Available Appointments"] = []
         response_raw_data["Data"]["Preferred Appointments"] = []
@@ -176,23 +164,9 @@ class PatientAssistAptMgtView(View):
         else:
             response_raw_data["Data"]["Next Available Appointments"] = get_next_available_nav_apts(post_errors)
 
-        response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        return response
+        return response_raw_data, post_errors
 
-    def put(self, request, *args, **kwargs):
-        """
-        Defines view that adds an appointment with a consumer with a specified navigator
-        :param request: django request instance object
-        :rtype: HttpResponse
-        """
-
-        # initialize dictionary for response data, including parsing errors
-        response_raw_data, post_errors = init_v2_response_data()
-
-        post_json = request.body.decode('utf-8')
-        post_data = json.loads(post_json)
-
+    def add_nav_scheduled_appointment_logic(self, post_data, response_raw_data, post_errors):
         response_raw_data["Data"] = {"Confirmed Appointment": None,
                                      "Consumer ID": None}
 
@@ -201,27 +175,16 @@ class PatientAssistAptMgtView(View):
         if consumer_dict:
             response_raw_data["Data"]["Consumer ID"] = consumer_dict["Database ID"]
 
-        response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        return response
+        return response_raw_data, post_errors
 
-    def delete(self, request, *args, **kwargs):
-        """
-        Defines view that deletes a scheduled appointment with a consumer with a specified navigator
-        :param request: django request instance object
-        :rtype: HttpResponse
-        """
-
-        # initialize dictionary for response data, including parsing errors
-        response_raw_data, post_errors = init_v2_response_data()
-
-        post_json = request.body.decode('utf-8')
-        post_data = json.loads(post_json)
-
+    def delete_nav_scheduled_appointment_logic(self, post_data, response_raw_data, post_errors):
         response_raw_data["Data"] = {"Deleted Appointment": False}
 
         response_raw_data["Data"]["Deleted Appointment"] = delete_nav_apt_from_google_calendar(post_data, post_errors)
 
-        response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        return response
+        return response_raw_data, post_errors
+
+    put_logic_function = add_nav_scheduled_appointment_logic
+    get_logic_function = nav_scheduled_appointments_logic
+    post_logic_function = available_nav_appointments_logic
+    delete_logic_function = delete_nav_scheduled_appointment_logic

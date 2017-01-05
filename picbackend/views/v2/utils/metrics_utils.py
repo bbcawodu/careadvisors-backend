@@ -147,11 +147,13 @@ def add_or_update_metrics_entity(response_raw_data, post_data, post_errors):
                 response_raw_data["Status"]["Message"] = [metrics_instance_message]
                 metrics_instance.save()
 
-                rqst_plan_stats = clean_list_value_from_dict_object(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors)
-                metrics_instance_plan_stats = PlanStat.objects.filter(metrics_submission=metrics_instance.id)
-                for instance_plan_stat in metrics_instance_plan_stats:
-                    instance_plan_stat.delete()
-                if rqst_plan_stats is not None:
+                rqst_plan_stats = clean_list_value_from_dict_object(consumer_metrics, "Consumer Metrics", "Plan Stats", post_errors, empty_list_allowed=True)
+
+                if rqst_plan_stats:
+                    metrics_instance_plan_stats = PlanStat.objects.filter(metrics_submission=metrics_instance.id)
+                    for instance_plan_stat in metrics_instance_plan_stats:
+                        instance_plan_stat.delete()
+
                     for rqst_plan_stat_dict in rqst_plan_stats:
                         planstatobject = PlanStat()
                         planstatobject.plan_name = clean_string_value_from_dict_object(rqst_plan_stat_dict, "Plans Dict", "Issuer Name", post_errors)

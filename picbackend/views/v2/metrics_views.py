@@ -3,15 +3,10 @@ Defines views that handle Patient Innovation Center consumer metrics based reque
 API Version 2
 """
 
-from django.http import HttpResponse
 from django.views import View
 from django.utils.decorators import method_decorator
 from picmodels.models import MetricsSubmission
-import json
 from django.views.decorators.csrf import csrf_exempt
-from .utils import init_v2_response_data
-from .utils import parse_and_log_errors
-from .utils import build_search_params
 from .utils import add_or_update_metrics_entity
 from .utils import group_metrics
 from .utils import retrieve_id_metrics
@@ -20,43 +15,25 @@ from .utils import retrieve_first_name_metrics
 from .utils import retrieve_last_name_metrics
 from .utils import retrieve_email_metrics
 from .utils import retrieve_mpn_metrics
+from .base import JSONPUTRspMixin
+from .base import JSONGETRspMixin
 
 
 #Need to abstract common variables in get and post class methods into class attributes
 @method_decorator(csrf_exempt, name='dispatch')
-class ConsumerMetricsManagementView(View):
-    def put(self, request, *args, **kwargs):
-        """
-        Defines view that handles Patient Innovation Center metrics instance submission/edit requests
-        :param request: django request instance object
-        :rtype: HttpResponse
-        """
+class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
+    """
+    Defines views that handles Patient Innovation Center metrics instance related requests
+    """
 
-        # initialize dictionary for response data, initialize list for parsing errors
-        response_raw_data, post_errors = init_v2_response_data()
-
-        post_json = request.body.decode('utf-8')
-        post_data = json.loads(post_json)
-
-        # Code to parse POSTed json request
+    def metrics_management_put_logic(self, post_data, response_raw_data, post_errors):
+        # Parse BODY data and add or update metrics entry
         response_raw_data = add_or_update_metrics_entity(response_raw_data, post_data, post_errors)
 
-        response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        return response
+        return response_raw_data, post_errors
 
-    def get(self, request, *args, **kwargs):
-        """
-        Defines view that handles Patient Innovation Center consumer metrics instance retrieval requests
-        :param request: django request instance object
-        :rtype: HttpResponse
-        """
-
-        # initialize dictionary for response data, initialize list for parsing errors
-        response_raw_data, rqst_errors = init_v2_response_data()
-
-        # Build dictionary that contains valid Patient Innovation Center GET parameters
-        search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+    def metrics_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
+        # Parse GET params and retreive metrics entries
         metrics_dict = {}
 
         metrics_fields = ["Metrics Date",
@@ -176,6 +153,7 @@ class ConsumerMetricsManagementView(View):
             response_raw_data["Data"] = metrics_list
             # response_raw_data["Data"] = metrics_dict
 
-        response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
-        response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
-        return response
+        return response_raw_data, rqst_errors
+
+    put_logic_function = metrics_management_put_logic
+    get_logic_function = metrics_management_get_logic
