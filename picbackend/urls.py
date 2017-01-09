@@ -22,6 +22,8 @@ from django.contrib import admin
 from picbackend import views
 from presencescheduler import urls as scheduler_urls
 from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
 
 # enables django admin page
 admin.autodiscover()
@@ -110,4 +112,4 @@ urlpatterns = [
     url(r"^v2/calendar_auth/$", views.NavGoogleCalendarAccessRequestView.as_view()),
     url(r'^v2/oauth2callback', views.GoogleCalendarAuthReturnView.as_view()),
     url(r'^v2/patient_assist_apt_mgr', views.PatientAssistAptMgtView.as_view()),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

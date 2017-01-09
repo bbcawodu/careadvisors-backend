@@ -10,11 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
 import os
+import dj_database_url
+import environ
+
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
 # Use 12factor inspired environment variables or from a file
-import environ
 env = environ.Env(DEBUG=(bool, True),)
 
 # Ideally move env file should be outside the git repo
@@ -101,8 +105,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-
 STATIC_URL = '/static/'
+
+# MEDIA_ROOT is the folder where every files uploaded with an FileField will go
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+MEDIA_URL = '/media/'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 's!=a^t83cuz95n16m6s0*-r!ad%m3s8)t_tw9u0=4928vu1f$i'
@@ -113,8 +120,6 @@ The dj-database-url module will parse the value of the DATABASE_URL environment 
 and convert them to something Django can understand. dj-database-url must be in requirements.txt.
 """
 # Parse database configuration from $DATABASE_URL
-import dj_database_url
-
 # DATABASES['default'] = dj_database_url.config(
 #     default='postgres://ngklalieajpptd:Day5uAny5L-cI0OB3L2nUmfHhh@ec2-54-197-224-173.compute-1.amazonaws.com:5432/dehaud8hlr9iqq')
 DATABASES = {

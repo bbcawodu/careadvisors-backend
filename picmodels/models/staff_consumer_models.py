@@ -6,6 +6,7 @@ from django.db import models
 from picmodels.models import NavMetricsLocation, Address
 from django.contrib import admin
 from oauth2client.contrib.django_util.models import CredentialsField
+from django.conf import settings
 
 
 class PICStaff(models.Model):
@@ -54,6 +55,7 @@ class PICStaff(models.Model):
     county = models.CharField(blank=True, null=True, max_length=1000, default="")
     region = models.CharField(blank=True, null=True, max_length=1000, default="")
     mpn = models.CharField(blank=True, max_length=1000, default="")
+    staff_pic = models.ImageField(upload_to='staff_pics/', default='staff_pics/None/default_staff.jpg')
     base_locations = models.ManyToManyField(NavMetricsLocation, blank=True)
 
     def return_values_dict(self):
@@ -70,6 +72,7 @@ class PICStaff(models.Model):
                       "Database ID": self.id,
                       "County": self.county,
                       "Region": None,
+                      "Picture": settings.HOSTURL + self.staff_pic.url,
                       "Base Locations": [],
                       "Consumers": consumer_list}
 
