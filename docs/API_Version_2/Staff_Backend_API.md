@@ -93,6 +93,7 @@ In response, a JSON document will be displayed with the following format:
                 "First Name": String,
                 "Last Name": String,
                 "Authorized Credentials": Boolean,
+                "Picture": Link,
                 "Base Location": [{
                                     "Location Name": String,
                                     "Address Line 1": String,
@@ -139,3 +140,7 @@ In response, a JSON document will be displayed with the following format:
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
     - Array corresponding to the "Data" key will be empty.
+
+
+### Staff Picture Edit Page
+- To view/change the profile picture for a given staff member, submit a GET request to http://picbackend.herokuapp.com/v2/staff_pic/ with the following Mandatory parameters: "id",
