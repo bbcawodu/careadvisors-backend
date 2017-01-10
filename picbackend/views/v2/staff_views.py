@@ -8,6 +8,8 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from picmodels.models import PICStaff
 from django.views.decorators.csrf import csrf_exempt
+from .utils import build_search_params
+from .utils import init_v2_response_data
 from .utils import clean_string_value_from_dict_object
 from .utils import add_staff
 from .utils import modify_staff
@@ -22,6 +24,11 @@ from .utils import retrieve_county_staff
 from .utils import retrieve_region_staff
 from .base import JSONPUTRspMixin
 from .base import JSONGETRspMixin
+from picmodels.forms import StaffImageUploadForm
+from django.http import HttpResponse
+from django.http import HttpResponseForbidden
+from django.shortcuts import render
+from .utils import parse_and_log_errors
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -100,3 +107,27 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
     put_logic_function = staff_management_put_logic
     get_logic_function = staff_management_get_logic
+
+
+def upload_staff_pic(request):
+    if request.method == 'GET':
+        response_raw_data, rqst_errors = init_v2_response_data()
+        search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+        if 'id' in search_params:
+            rqst_staff_id = search_params['id']
+            try:
+                staff_object = PICStaff.objects.get(pk=rqst_staff_id)
+                form = StaffImageUploadForm(initial={'staff_id': staff_object.id,
+                                                     'staff_pic': staff_object.staff_pic})
+                return render(request, 'staff_image_upload_form.html', {'form': form})
+            except PICStaff.DoesNotExist:
+                return HttpResponseForbidden("Staff member not found for given id: {!s}".format(str(rqst_staff_id)))
+        else:
+            return HttpResponseForbidden("'id' must be in search parameters")
+    if request.method == 'POST':
+        form = StaffImageUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            staff_object = PICStaff.objects.get(id=form.cleaned_data['staff_id'])
+            staff_object.staff_pic = form.cleaned_data['staff_pic']
+            staff_object.save()
+            return HttpResponse('image upload success')

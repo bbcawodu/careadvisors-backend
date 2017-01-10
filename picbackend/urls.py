@@ -94,6 +94,7 @@ urlpatterns = [
 
     # urls for staff views
     url(r"^v2/staff/$", views.StaffManagementView.as_view()),
+    url(r"^v2/staff_pic/$", views.upload_staff_pic),
 
     # urls for consumer views
     url(r"^v2/consumers/$", views.ConsumerManagementView.as_view()),

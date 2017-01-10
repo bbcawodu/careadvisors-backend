@@ -111,8 +111,6 @@ class PICStaff(models.Model):
         # maps model to the picmodels module
         app_label = 'picmodels'
 
-        unique_together = ("email",)
-
 
 # Maybe add some sort of authorization to our API? OAuth? OAuth2? Some shit?
 class CredentialsModel(models.Model):
