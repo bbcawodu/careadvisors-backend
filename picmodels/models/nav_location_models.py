@@ -14,8 +14,7 @@ class NavMetricsLocation(models.Model):
     class Meta:
         app_label = 'picmodels'
         verbose_name_plural = "Navigator Metrics Locations"
-        unique_together = ("name",
-                           "address",)
+        unique_together = ("address", "name")
 
     def return_values_dict(self):
         valuesdict = {"Name": self.name,

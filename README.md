@@ -10,35 +10,11 @@ This app runs on a django installation hosted on Heroku. To install Heroku for c
 
 
 
-## Presence Healthcare Appointment Scheduler Backend
+## Patient Innovation Center Backend Library API Documentation
 
-[Presence Healthcare Backend README](docs/Presence.md)
+[API Version 2](docs/API_Version_2/Index.md) (CURRENT VERSION)
 
-
-
-## Staff Account Backend API
-
-[Staff Account Backend API README](docs/Staff_Backend_API.md)
-
-
-## Consumer Account Backend API
-
-[Consumer Account Backend API README](docs/Consumer_Backend_API.md)
-    
-
-## Consumer Metrics Backend API
-
-[Consumer Metrics Backend API README](docs/Metrics_Backend_API.md)
-    
-
-## Navigator Hub Location Backend API
-
-[Navigator Hub Location Backend API README](docs/Hub_Location_API.md)
-
-
-## Pokitdok Backend API
-
-[Pokitdok Backend API README](docs/Pokitdok_Backend_API.md)
+[API Version 1](docs/API_Version_1/Index.md)
 
 
 ## Writing and Running Tests README

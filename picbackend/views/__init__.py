@@ -1,9 +1,9 @@
 """
-Defines views that are mapped to url configurations
+Defines package for views that are mapped to url configurations
 """
-from .consumer_views import *
-from .metrics_views import *
-from .nav_location_views import *
-from .pokitdok_views import *
-from .staff_views import *
+
+# Load all modules into views package
+from .v1 import *
+from .v2 import *
 from .index_view import *
+
