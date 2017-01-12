@@ -9,4 +9,3 @@ idea/
 picbackend/settings/local.env
 *.pyc
 staticfiles
-picbackend/wsgi.py
