@@ -5,6 +5,6 @@ Defines settings for running the project on our development host url via a Herok
 from picbackend.settings.base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 HOSTURL = "https://picbackend-dev.herokuapp.com"
