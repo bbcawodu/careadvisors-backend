@@ -29,6 +29,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from .utils import parse_and_log_errors
+from django.conf import settings
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -102,6 +103,8 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             response_raw_data, rqst_errors = retrieve_id_staff(response_raw_data, rqst_errors, rqst_staff_id, list_of_ids)
         else:
             rqst_errors.append('No Valid Parameters')
+
+        response_raw_data["s3_url"] = settings.AWS_S3_CUSTOM_DOMAIN
 
         return response_raw_data, rqst_errors
 

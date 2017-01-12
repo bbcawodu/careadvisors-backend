@@ -87,7 +87,7 @@ In response, a JSON document will be displayed with the following format:
     - "email" corresponds to consumer email.
     - "region" corresponds to consumer region.
     - "id" corresponds to consumer class database id.
-        - passing "all" as the value will return all staff members
+        - passing "all" as the value will return all consumer enteties
     - "navid" corresponds to staff member class database id. (Can be combined with any of the above parameters)
     - "page" corresponds to the current page of consumer instances to be displayed with full fields. 
         - if this parameter is missing, the first 20 consumer instances will be displayed with full fields.

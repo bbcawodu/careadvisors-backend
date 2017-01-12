@@ -72,7 +72,7 @@ class PICStaff(models.Model):
                       "Database ID": self.id,
                       "County": self.county,
                       "Region": None,
-                      "Picture": settings.HOSTURL + self.staff_pic.url,
+                      "Picture": self.staff_pic.url,
                       "Base Locations": [],
                       "Consumers": consumer_list}
 
