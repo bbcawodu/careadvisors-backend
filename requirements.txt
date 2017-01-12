@@ -16,3 +16,5 @@ bdateutil
 python-dateutil
 mandrill
 Pillow
+django-storages
+boto
