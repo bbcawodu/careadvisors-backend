@@ -6,6 +6,7 @@ from django.db import models
 from picmodels.models import NavMetricsLocation, Address
 from django.contrib import admin
 from oauth2client.contrib.django_util.models import CredentialsField
+from django.dispatch import receiver
 from django.conf import settings
 
 
@@ -55,7 +56,7 @@ class PICStaff(models.Model):
     county = models.CharField(blank=True, null=True, max_length=1000, default="")
     region = models.CharField(blank=True, null=True, max_length=1000, default="")
     mpn = models.CharField(blank=True, max_length=1000, default="")
-    staff_pic = models.ImageField(upload_to='staff_pics/', default='staff_pics/None/default_staff.jpg')
+    staff_pic = models.ImageField(upload_to='staff_pics/', default=settings.DEFAULT_STAFF_PIC_URL)
     base_locations = models.ManyToManyField(NavMetricsLocation, blank=True)
 
     def return_values_dict(self):
@@ -110,6 +111,11 @@ class PICStaff(models.Model):
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
+
+
+@receiver(models.signals.post_delete, sender=PICStaff)
+def remove_file_from_s3(sender, instance, using, **kwargs):
+    instance.staff_pic.delete(save=False)
 
 
 # Maybe add some sort of authorization to our API? OAuth? OAuth2? Some shit?

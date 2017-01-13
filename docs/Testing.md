@@ -48,3 +48,8 @@ class Migration(migrations.Migration):
         migrations.RunPython(load_fixture),
     ]
 ```
+
+
+# Command to load data to database from json file
+
+python manage.py loaddata [file]
