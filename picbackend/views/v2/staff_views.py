@@ -131,6 +131,12 @@ def upload_staff_pic(request):
         form = StaffImageUploadForm(request.POST, request.FILES)
         if form.is_valid():
             staff_object = PICStaff.objects.get(id=form.cleaned_data['staff_id'])
+
+            # Delete old pic
+            if staff_object.staff_pic.url != (settings.MEDIA_URL + settings.DEFAULT_STAFF_PIC_URL):
+                staff_object.staff_pic.delete()
+
+            # Add new pic
             staff_object.staff_pic = form.cleaned_data['staff_pic']
             staff_object.save()
             return HttpResponse('image upload success')
