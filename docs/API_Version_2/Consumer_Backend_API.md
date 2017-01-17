@@ -36,6 +36,33 @@ Address(Every field within address can be given as an empty string. Address will
 "date_met_nav":(Can be Null) or {"Day": Integer,
                                 "Month": Integer,
                                 "Year": Integer,},
+                                
+"cps_consumer": Boolean (Whether or not this consumer is a CPS consumer)(Key can be omitted),
+"cps_info": {
+                "primary_dependent": {
+                                        "first_name": String,
+                                        "last_name": String,
+                                     },
+                "cps_location": String (Must be the name of a NavMetricsLocation instance with cps_location=True),
+                "apt_date"{
+                                "Day": Integer,
+                                "Month": Integer,
+                                "Year": Integer,
+                          },
+                "target_list": Boolean,
+                "phone_apt": Boolean,
+                "case_mgmt_type": String,
+                "case_mgmt_status": String (Must be one of these choices: "Open", "Resolved", "Not Available"),
+                "secondary_dependents": [
+                                             {
+                                                "first_name": String,
+                                                "last_name": String,
+                                             },
+                                             ...
+                                        ](Key can be omitted)(If key present, must not be present),
+                "app_type": String (Must be one of these choices: "Medicaid", "SNAP", "Not Available"),
+                "app_status": String (Must be one of these choices: "Submitted", "Pending", "Approved", "Denied", "Not Available"),
+            }(Must be present when, and contains relevant CPS info if cps_consumer is True)(Key can be omitted),
 
 "Consumer Database ID": Integer(Required when "Database Action" == "Consumer Modification" or "Consumer Deletion"),
 "Database Action": String,
@@ -48,9 +75,10 @@ In response, a JSON document will be displayed with the following format:
  "Status": {
             "Error Code": Integer,
             "Version": 2.0,
-            "Errors": Array
-            "Data": Dictionary Object or "Deleted",
-           }
+            "Errors": Array,
+            "Warnings": Array,
+           },
+ "Data": Dictionary Object or "Deleted",
 }
 ```
 
@@ -124,7 +152,34 @@ In response, a JSON document will be displayed with the following format:
                             "State": String,
                             "Zipcode": String,
                             "Country": String,
-                           }
+                           },
+                           
+                "cps_consumer": Boolean,
+                "cps_info": {
+                                "primary_dependent": {
+                                                        "first_name": String,
+                                                        "last_name": String,
+                                                     },
+                                "cps_location": String,
+                                "apt_date"{
+                                                "Day": Integer,
+                                                "Month": Integer,
+                                                "Year": Integer,
+                                          },
+                                "target_list": Boolean,
+                                "phone_apt": Boolean,
+                                "case_mgmt_type": String,
+                                "case_mgmt_status": String,
+                                "secondary_dependents": [
+                                                             {
+                                                                "first_name": String,
+                                                                "last_name": String,
+                                                             },
+                                                             ...
+                                                        ],
+                                "app_type": String,
+                                "app_status": String,
+                            },
             },
             ...,
             ...,
@@ -137,6 +192,7 @@ In response, a JSON document will be displayed with the following format:
         "Status": {
             "Version": 2.0,
             "Error Code": Integer,
+            "Warnings": Array,
             "Errors": Array
         },
         "Page URLs": Array of strings (Will be missing if "page" parameter is given OR less than 20 consumers in results)

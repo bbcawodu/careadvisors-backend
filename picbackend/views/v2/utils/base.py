@@ -151,6 +151,9 @@ def build_search_params(rqst_params, response_raw_data, rqst_errors):
             rqst_errors.append('enddate parameter must be a valid integer. Metrics returned without enddate parameter.')
     if "groupby" in rqst_params:
         search_params['group by'] = rqst_params['groupby']
+    if 'nav_location_tags' in rqst_params:
+        search_params['nav_location_tags'] = rqst_params['nav_location_tags']
+        search_params['nav_location_tags list'] = re.findall(r"[@\w. '-]+", search_params['region'])
 
     return search_params
 

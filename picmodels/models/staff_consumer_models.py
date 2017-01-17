@@ -149,6 +149,8 @@ class PICConsumer(models.Model):
     met_nav_at = models.CharField(max_length=1000)
     date_met_nav = models.DateField(blank=True, null=True)
 
+    cps_consumer = models.BooleanField(default=False)
+
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
@@ -196,6 +198,54 @@ class PICConsumer(models.Model):
 class ConsumerNote(models.Model):
     consumer = models.ForeignKey(PICConsumer, on_delete=models.CASCADE)
     navigator_notes = models.TextField(blank=True, default="")
+
+    class Meta:
+        # maps model to the picmodels module
+        app_label = 'picmodels'
+
+
+class ConsumerCPSInfoEntry(models.Model):
+    """
+    Need to validate ALL form data before creating PICConsumer entries and by extention, ConsumerCPSInfoEntry
+    """
+
+    N_A = "Not Available"
+    OPEN = "Open"
+    RESOLVED = "Resloved"
+    CASE_MGMT_STATUS_CHOICES = ((OPEN, "Open"),
+                                (RESOLVED, "Resolved"),
+                                (N_A, "Not Available"))
+
+    MEDICAID = "Medicaid"
+    SNAP = "SNAP"
+    APP_TYPE_CHOICES = ((MEDICAID, "Medicaid"),
+                        (SNAP, "SNAP"),
+                        (N_A, "Not Available"))
+
+    SUBMITTED = "Submitted"
+    PENDING = "Pending"
+    APPROVED = "Approved"
+    DENIED = "Denied"
+    APP_STATUS_CHOICES = ((SUBMITTED, "Submitted"),
+                          (PENDING, "Pending"),
+                          (APPROVED, "Approved"),
+                          (DENIED, "Denied"),
+                          (N_A, "Not Available"))
+
+    consumer = models.OneToOneField(PICConsumer, on_delete=models.CASCADE, related_name='cps_info')
+
+    primary_dependent = models.ForeignKey(PICConsumer, blank=True, null=True, related_name='primary_guardian')
+    secondary_dependents = models.ManyToManyField(PICConsumer, blank=True, related_name='secondary_guardians')
+
+    cps_location = models.ForeignKey(NavMetricsLocation, blank=True, null=True)
+
+    apt_date = models.DateField(blank=True, null=True)
+    target_list = models.BooleanField(default=False)
+    phone_apt = models.BooleanField(default=False)
+    case_mgmt_type = models.CharField(max_length=1000, blank=True, null=True)
+    case_mgmt_status = models.CharField(max_length=1000, blank=True, null=True, choices=CASE_MGMT_STATUS_CHOICES, default=N_A)
+    app_type = models.CharField(max_length=1000, blank=True, null=True, choices=APP_TYPE_CHOICES, default=N_A)
+    app_status = models.CharField(max_length=1000, blank=True, null=True, choices=APP_STATUS_CHOICES, default=N_A)
 
     class Meta:
         # maps model to the picmodels module
