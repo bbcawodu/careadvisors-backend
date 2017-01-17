@@ -59,7 +59,7 @@ Address(Every field within address can be given as an empty string. Address will
                                                 "last_name": String,
                                              },
                                              ...
-                                        ](Key can be omitted)(If key present, must not be present),
+                                        ](Key can be omitted)(If key present, must not be empty),
                 "app_type": String (Must be one of these choices: "Medicaid", "SNAP", "Not Available"),
                 "app_status": String (Must be one of these choices: "Submitted", "Pending", "Approved", "Denied", "Not Available"),
             }(Must be present when, and contains relevant CPS info if cps_consumer is True)(Key can be omitted),
