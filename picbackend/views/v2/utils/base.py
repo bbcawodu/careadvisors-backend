@@ -59,6 +59,18 @@ def clean_list_value_from_dict_object(dict_object, dict_name, dict_key, post_err
     return None
 
 
+def clean_bool_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, no_key_allowed=False):
+    if dict_key not in dict_object and not no_key_allowed:
+        post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
+    elif dict_object[dict_key] is None:
+        post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
+    else:
+        if no_key_allowed:
+            return dict_object[dict_key]
+        else:
+            return None
+
+
 def build_search_params(rqst_params, response_raw_data, rqst_errors):
     search_params = {}
     if 'location' in rqst_params:

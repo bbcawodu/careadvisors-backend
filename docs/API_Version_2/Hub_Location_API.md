@@ -19,6 +19,8 @@ The body of the request should be a JSON document using the following template:
 "Zipcode": String,
 "Country": String,
 "Database Action": String
+
+"cps_location": Boolean (Key may be omitted)
 "Database ID": Integer(Required when "Database Action" == "Staff Modification" or "Staff Deletion"),
 }
 ```
@@ -71,7 +73,8 @@ In response, a JSON document will be displayed with the following format:
              "Address Line 1": "2900 N Lake Shore Dr.",
              "Address Line 2": "",
              "Country": "United States of America",
-             "City": "Chicago"},
+             "City": "Chicago",
+             "cps_location": False},
             ...,
             ...,
             ...,

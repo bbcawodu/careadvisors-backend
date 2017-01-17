@@ -6,6 +6,7 @@ Defines utility functions and classes for navigator location views
 from django.db import IntegrityError
 from .base import clean_string_value_from_dict_object
 from .base import clean_int_value_from_dict_object
+from .base import clean_bool_value_from_dict_object
 from picmodels.models import NavMetricsLocation
 from picmodels.models import Address
 from picmodels.models import Country
@@ -23,6 +24,10 @@ def add_nav_hub_location(response_raw_data, post_data, post_errors):
     rqst_zipcode = clean_string_value_from_dict_object(post_data, "root", "Zipcode", post_errors)
     rqst_country = clean_string_value_from_dict_object(post_data, "root", "Country", post_errors)
 
+    rqst_cps_location = clean_bool_value_from_dict_object(post_data, "root", "cps_location", post_errors, no_key_allowed=True)
+    if not rqst_cps_location:
+        rqst_cps_location = False
+
     if len(post_errors) == 0:
         address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=rqst_address_line_1,
                                                                                    address_line_2=rqst_address_line_2,
@@ -36,7 +41,7 @@ def add_nav_hub_location(response_raw_data, post_data, post_errors):
             post_errors.append('Nav Hub Location database entry already exists for the name: {!s}'.format(rqst_location_name))
         except NavMetricsLocation.DoesNotExist:
             try:
-                location_instance = NavMetricsLocation(name=rqst_location_name, address=address_instance)
+                location_instance = NavMetricsLocation(name=rqst_location_name, address=address_instance, cps_location=rqst_cps_location)
                 location_instance.save()
             except IntegrityError:
                 location_instance = NavMetricsLocation.objects.get(address=address_instance)
@@ -60,6 +65,11 @@ def modify_nav_hub_location(response_raw_data, post_data, post_errors):
     rqst_country = clean_string_value_from_dict_object(post_data, "root", "Country", post_errors)
     rqst_location_id = clean_int_value_from_dict_object(post_data, "root", "Database ID", post_errors)
 
+    rqst_cps_location = clean_bool_value_from_dict_object(post_data, "root", "cps_location", post_errors,
+                                                          no_key_allowed=True)
+    if not rqst_cps_location:
+        rqst_cps_location = False
+
     if len(post_errors) == 0:
         address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=rqst_address_line_1,
                                                                                    address_line_2=rqst_address_line_2,
@@ -70,6 +80,7 @@ def modify_nav_hub_location(response_raw_data, post_data, post_errors):
         try:
             location_instance = NavMetricsLocation.objects.get(id=rqst_location_id)
             location_instance.name = rqst_location_name
+            location_instance.cps_location = rqst_cps_location
             location_instance.address = address_instance
             location_instance.save()
             response_raw_data['Data'] = {"Database ID": location_instance.id}
