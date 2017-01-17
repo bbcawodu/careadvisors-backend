@@ -250,3 +250,21 @@ class ConsumerCPSInfoEntry(models.Model):
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
+
+    def check_case_mgmt_status_choices(self,):
+        for plan_tuple in self.CASE_MGMT_STATUS_CHOICES:
+            if plan_tuple[1].lower() == self.plan_name.lower():
+                return True
+        return False
+
+    def check_app_type_choices(self,):
+        for plan_tuple in self.APP_TYPE_CHOICES:
+            if plan_tuple[1].lower() == self.plan_name.lower():
+                return True
+        return False
+
+    def check_app_status_choices(self,):
+        for plan_tuple in self.APP_STATUS_CHOICES:
+            if plan_tuple[1].lower() == self.plan_name.lower():
+                return True
+        return False

@@ -40,8 +40,9 @@ Address(Every field within address can be given as an empty string. Address will
 "cps_consumer": Boolean (Whether or not this consumer is a CPS consumer)(Key can be omitted),
 "cps_info": {
                 "primary_dependent": {
-                                        "first_name": String,
-                                        "last_name": String,
+                                        "first_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
+                                        "last_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
+                                        "Consumer Database ID": Integer (Key can be omitted)(Required when "first_name" and "last_name" are omitted)
                                      },
                 "cps_location": String (Must be the name of a NavMetricsLocation instance with cps_location=True),
                 "apt_date"{
@@ -55,8 +56,9 @@ Address(Every field within address can be given as an empty string. Address will
                 "case_mgmt_status": String (Must be one of these choices: "Open", "Resolved", "Not Available"),
                 "secondary_dependents": [
                                              {
-                                                "first_name": String,
-                                                "last_name": String,
+                                                "first_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
+                                                "last_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
+                                                "Consumer Database ID": Integer (Key can be omitted)(Required when "first_name" and "last_name" are omitted)
                                              },
                                              ...
                                         ](Key can be omitted)(If key present, must not be empty),

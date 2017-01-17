@@ -28,8 +28,8 @@ def clean_int_value_from_dict_object(dict_object, dict_name, dict_key, post_erro
         return int(dict_object[dict_key])
 
 
-def clean_dict_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, none_allowed=False):
-    if dict_key not in dict_object:
+def clean_dict_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, none_allowed=False, no_key_allowed=False):
+    if dict_key not in dict_object and not no_key_allowed:
         post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
     elif dict_object[dict_key] is None and none_allowed == False:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
@@ -38,12 +38,13 @@ def clean_dict_value_from_dict_object(dict_object, dict_name, dict_key, post_err
     elif dict_object[dict_key] == {}:
         post_errors.append("Value for {!r} in {!r} dictionary is an empty dictionary".format(dict_key, dict_name))
     else:
-        return dict_object[dict_key]
+        if not no_key_allowed:
+            return dict_object[dict_key]
     return None
 
 
-def clean_list_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, empty_list_allowed=False):
-    if dict_key not in dict_object:
+def clean_list_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, empty_list_allowed=False, no_key_allowed=False):
+    if dict_key not in dict_object and not no_key_allowed:
         post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
     elif dict_object[dict_key] is None:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
@@ -55,7 +56,8 @@ def clean_list_value_from_dict_object(dict_object, dict_name, dict_key, post_err
         else:
             post_errors.append("Value for {!r} in {!r} dictionary is an empty list".format(dict_key, dict_name))
     else:
-        return dict_object[dict_key]
+        if not no_key_allowed:
+            return dict_object[dict_key]
     return None
 
 
@@ -64,8 +66,10 @@ def clean_bool_value_from_dict_object(dict_object, dict_name, dict_key, post_err
         post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
     elif dict_object[dict_key] is None:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
+    elif not isinstance(dict_object[dict_key], bool):
+        post_errors.append("Value for {!r} in {!r} dictionary is not type boolean".format(dict_key, dict_name))
     else:
-        if no_key_allowed:
+        if not no_key_allowed:
             return dict_object[dict_key]
         else:
             return None

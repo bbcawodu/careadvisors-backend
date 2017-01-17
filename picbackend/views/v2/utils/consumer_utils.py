@@ -9,6 +9,7 @@ from .base import clean_string_value_from_dict_object
 from .base import clean_int_value_from_dict_object
 from .base import clean_list_value_from_dict_object
 from .base import clean_dict_value_from_dict_object
+from .base import clean_bool_value_from_dict_object
 from picmodels.models import PICStaff
 from picmodels.models import PICConsumer
 from picmodels.models import ConsumerNote
@@ -63,6 +64,21 @@ def add_consumer(response_raw_data, post_data, post_errors):
         if len(post_errors) == 0:
             rqst_date_met_nav = datetime.date(year, month, day)
 
+    rqst_cps_consumer = clean_bool_value_from_dict_object(post_data,
+                                                          "root",
+                                                          "cps_location",
+                                                          post_errors,
+                                                          no_key_allowed=True)
+    if not rqst_cps_consumer:
+        rqst_cps_consumer = False
+
+    if rqst_cps_consumer:
+        rqst_cps_info_dict = clean_dict_value_from_dict_object(post_data,
+                                                               "root",
+                                                               "cps_info",
+                                                               post_errors,
+                                                               no_key_allowed=True)
+
     if len(post_errors) == 0:
         address_instance = None
         if rqst_address_line_1 != '' and rqst_city != '' and rqst_state != '' and rqst_zipcode != '':
@@ -99,6 +115,8 @@ def add_consumer(response_raw_data, post_data, post_errors):
                     consumer_instance.navigator = nav_instance
                     consumer_instance.save()
                 except PICStaff.DoesNotExist:
+                    consumer_instance.delete()
+                    consumer_instance = None
                     post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
 
                 if consumer_instance:
@@ -109,6 +127,12 @@ def add_consumer(response_raw_data, post_data, post_errors):
                     for navigator_note in rqst_navigator_notes:
                         consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
                         consumer_note_object.save()
+
+                    if rqst_cps_consumer:
+                        add_cps_info_to_consumer_instance(response_raw_data, consumer_instance, rqst_cps_info_dict, post_errors)
+                    else:
+                        response_raw_data['Status']['Warnings'].append('Consumer instance created without cps_info')
+
         except IntegrityError:
             query_params = {"first_name":rqst_consumer_f_name,
                              "last_name":rqst_consumer_l_name,
@@ -119,6 +143,67 @@ def add_consumer(response_raw_data, post_data, post_errors):
         response_raw_data['Data'] = {"Database ID": consumer_instance.id}
 
     return response_raw_data
+
+
+def add_cps_info_to_consumer_instance(response_raw_data, consumer_instance, rqst_cps_info_dict, post_errors):
+    rqst_primary_dependent_dict = clean_dict_value_from_dict_object(rqst_cps_info_dict,
+                                                                    "cps_info",
+                                                                    "primary_dependent",
+                                                                    post_errors)
+    rqst_cps_location = clean_string_value_from_dict_object(rqst_cps_info_dict, "cps_info", "cps_location", post_errors)
+
+    apt_date_dict = clean_dict_value_from_dict_object(rqst_cps_info_dict,
+                                                      "cps_info",
+                                                      "apt_date",
+                                                      post_errors)
+    rqst_apt_date = None
+    if apt_date_dict is not None:
+        month = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Month", post_errors)
+        if month < 1 or month > 12:
+            post_errors.append("Month must be between 1 and 12 inclusive")
+
+        day = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Day", post_errors)
+        if day < 1 or day > 31:
+            post_errors.append("Day must be between 1 and 31 inclusive")
+
+        year = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Year", post_errors)
+        if year < 1 or year > 9999:
+            post_errors.append("Year must be between 1 and 9999 inclusive")
+
+        if len(post_errors) == 0:
+            rqst_apt_date = datetime.date(year, month, day)
+
+    rqst_target_list = clean_bool_value_from_dict_object(rqst_cps_info_dict,
+                                                         "cps_info",
+                                                         "target_list",
+                                                         post_errors)
+    rqst_phone_apt = clean_bool_value_from_dict_object(rqst_cps_info_dict,
+                                                       "cps_info",
+                                                       "phone_apt",
+                                                       post_errors)
+    rqst_case_mgmt_type = clean_string_value_from_dict_object(rqst_cps_info_dict,
+                                                              "cps_info",
+                                                              "case_mgmt_type",
+                                                              post_errors)
+    rqst_case_mgmt_status = clean_string_value_from_dict_object(rqst_cps_info_dict,
+                                                                "cps_info",
+                                                                "case_mgmt_status",
+                                                                post_errors)
+    rqst_secondary_dependents = clean_list_value_from_dict_object(rqst_cps_info_dict,
+                                                                  "cps_info",
+                                                                  "secondary_dependents",
+                                                                  post_errors,
+                                                                  no_key_allowed=True)
+    rqst_app_type = clean_string_value_from_dict_object(rqst_cps_info_dict,
+                                                        "cps_info",
+                                                        "app_type",
+                                                        post_errors)
+    rqst_app_status = clean_string_value_from_dict_object(rqst_cps_info_dict,
+                                                          "cps_info",
+                                                          "app_status",
+                                                          post_errors)
+    if len(post_errors) == 0:
+        pass
 
 
 def modify_consumer(response_raw_data, post_data, post_errors):
