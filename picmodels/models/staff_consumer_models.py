@@ -172,9 +172,11 @@ class PICConsumer(models.Model):
                       "Plan": self.plan,
                       "Met Navigator At": self.met_nav_at,
                       "Best Contact Time": self.best_contact_time,
-                      "Navigator": "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name),
+                      "Navigator": None,
                       "Navigator Notes": None,
                       "date_met_nav": None,
+                      "cps_consumer": self.cps_consumer,
+                      "cps_info": None,
                       "Database ID": self.id}
 
         if self.date_met_nav is not None:
@@ -191,6 +193,14 @@ class PICConsumer(models.Model):
             address_values = self.address.return_values_dict()
             for key in address_values:
                 valuesdict["address"][key] = address_values[key]
+
+        if self.navigator is not None:
+            valuesdict['Navigator'] = "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name)
+
+        try:
+            valuesdict['cps_info'] = self.cps_info.return_values_dict()
+        except ConsumerCPSInfoEntry.DoesNotExist:
+            pass
 
         return valuesdict
 
@@ -253,18 +263,55 @@ class ConsumerCPSInfoEntry(models.Model):
 
     def check_case_mgmt_status_choices(self,):
         for plan_tuple in self.CASE_MGMT_STATUS_CHOICES:
-            if plan_tuple[1].lower() == self.plan_name.lower():
+            if plan_tuple[1].lower() == self.case_mgmt_status.lower():
                 return True
         return False
 
     def check_app_type_choices(self,):
         for plan_tuple in self.APP_TYPE_CHOICES:
-            if plan_tuple[1].lower() == self.plan_name.lower():
+            if plan_tuple[1].lower() == self.app_type.lower():
                 return True
         return False
 
     def check_app_status_choices(self,):
         for plan_tuple in self.APP_STATUS_CHOICES:
-            if plan_tuple[1].lower() == self.plan_name.lower():
+            if plan_tuple[1].lower() == self.app_status.lower():
                 return True
         return False
+
+    def return_values_dict(self):
+        valuesdict = {"apt_date": None,
+                      "target_list": self.target_list,
+                      "phone_apt": self.phone_apt,
+                      "case_mgmt_type": self.case_mgmt_type,
+                      "case_mgmt_status": self.case_mgmt_status,
+                      "app_type": self.app_type,
+                      "app_status": self.app_status,
+                      "cps_location": None,
+                      "primary_dependent": None,
+                      "secondary_dependents": None,
+                      "Consumer Database ID": self.consumer.id,
+                      "Database ID": self.id}
+
+        if self.apt_date is not None:
+            valuesdict["apt_date"] = self.apt_date.isoformat()
+
+        if self.cps_location is not None:
+            valuesdict["cps_location"] = self.cps_location.name
+
+        if self.primary_dependent is not None:
+            primary_dependent_entry = {"first_name": self.primary_dependent.first_name,
+                                       "last_name": self.primary_dependent.last_name,
+                                       "Database ID": self.primary_dependent.id}
+            valuesdict["primary_dependent"] = primary_dependent_entry
+
+        if self.secondary_dependents is not None:
+            secondary_dependent_list = []
+            for secondary_dependent in self.secondary_dependents.all():
+                dependent_entry = {"first_name": secondary_dependent.first_name,
+                                   "last_name": secondary_dependent.last_name,
+                                   "Database ID": secondary_dependent.id}
+                secondary_dependent_list.append(dependent_entry)
+            valuesdict["secondary_dependents"] = secondary_dependent_list
+
+        return valuesdict

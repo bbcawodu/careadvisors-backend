@@ -45,7 +45,7 @@ Address(Every field within address can be given as an empty string. Address will
                                         "Consumer Database ID": Integer (Key can be omitted)(Required when "first_name" and "last_name" are omitted)
                                      },
                 "cps_location": String (Must be the name of a NavMetricsLocation instance with cps_location=True),
-                "apt_date"{
+                "apt_date": {
                                 "Day": Integer,
                                 "Month": Integer,
                                 "Year": Integer,
@@ -93,6 +93,7 @@ In response, a JSON document will be displayed with the following format:
     - To modify a consumer database entry, the value for "Database Action" in the POST request must equal "Consumer Modification".
     - All other fields must be filled.
     - All key value pairs in the POSTed JSON document correspond to updated fields for specified "Consumer Database ID"
+    - 'cps_consumer' key must be present in order to modify cps consumer info
     - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the updated database entry.
 
 - Deleting a consumer database entry.

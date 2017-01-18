@@ -37,15 +37,15 @@ def add_nav_hub_location(response_raw_data, post_data, post_errors):
                                                                                    country=Country.objects.get(name=rqst_country))
 
         try:
-            location_instance = NavMetricsLocation.objects.get(name=rqst_location_name, address=address_instance)
-            post_errors.append('Nav Hub Location database entry already exists for the name: {!s}'.format(rqst_location_name))
+            location_instance = NavMetricsLocation.objects.get(address=address_instance)
+            post_errors.append('Nav Hub Location database entry already exists for the address: {!s}'.format(address_instance.return_values_dict()))
         except NavMetricsLocation.DoesNotExist:
             try:
                 location_instance = NavMetricsLocation(name=rqst_location_name, address=address_instance, cps_location=rqst_cps_location)
                 location_instance.save()
             except IntegrityError:
                 location_instance = NavMetricsLocation.objects.get(address=address_instance)
-                post_errors.append('Nav Hub Location database entry already exists for the address: {!s}'.format(json.dumps(location_instance.return_values_dict())))
+                post_errors.append('Nav Hub Location database entry already exists for the location: {!s}'.format(json.dumps(location_instance.return_values_dict())))
 
         response_raw_data['Data'] = {"Database ID": location_instance.id}
 

@@ -27,7 +27,8 @@ class NavMetricsLocation(models.Model):
         if self.address:
             address_values = self.address.return_values_dict()
             for key in address_values:
-                valuesdict[key] = address_values[key]
+                if key != "Database ID":
+                    valuesdict[key] = address_values[key]
         return valuesdict
 
 
