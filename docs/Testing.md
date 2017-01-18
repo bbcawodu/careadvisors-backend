@@ -53,3 +53,8 @@ class Migration(migrations.Migration):
 # Command to load data to database from json file
 
 python manage.py loaddata [file]
+
+
+git update-index --assume-unchanged picbackend/wsgi.py
+
+git update-index --no-assume-unchanged picbackend/wsgi.py

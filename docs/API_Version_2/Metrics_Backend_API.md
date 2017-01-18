@@ -250,16 +250,16 @@ In response, a JSON document will be displayed with the following format:
 }
 ```
 
-- If there are no errors in the POSTed JSON doc:
+- If there are no errors in the JSON Body doc:
     - "Error Code" will be 0.
     - There will be no "Errors" key in the "Status" dictionary.
-    - An instance of the MetricsSubmission class corresponding to the POSTed JSON doc will be created and saved in the database.
+    - An instance of the MetricsSubmission class corresponding to the JSON Body doc will be created and saved in the database.
         - Only one metrics submission is allowed per day.
     
-- If there are errors in the POSTed JSON doc:
+- If there are errors in the JSON Body doc:
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        - Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        - Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
     
 ### Consumer Metrics Retrieval API.
@@ -345,5 +345,5 @@ In response, a JSON document will be displayed with the following format:
 - If metrics reports are not found,
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - Array corresponding to the "Data" key will be empty.
