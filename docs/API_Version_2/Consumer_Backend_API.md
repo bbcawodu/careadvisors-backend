@@ -64,7 +64,7 @@ Address(Every field within address can be given as an empty string. Address will
                                         ](Key can be omitted)(If key present, must not be empty),
                 "app_type": String (Must be one of these choices: "Medicaid", "SNAP", "Not Available"),
                 "app_status": String (Must be one of these choices: "Submitted", "Pending", "Approved", "Denied", "Not Available"),
-            }(Must be present when, and contains relevant CPS info if cps_consumer is True)(Key can be omitted),
+            }(Must be present and is only red when if cps_consumer is True)(contains relevant CPS info)(Key can be omitted),
 
 "Consumer Database ID": Integer(Required when "Database Action" == "Consumer Modification" or "Consumer Deletion"),
 "Database Action": String,
@@ -94,6 +94,13 @@ In response, a JSON document will be displayed with the following format:
     - All other fields must be filled.
     - All key value pairs in the POSTed JSON document correspond to updated fields for specified "Consumer Database ID"
     - 'cps_consumer' key must be present in order to modify cps consumer info
+        - If 'cps_consumer' key is not present
+            - no change to 'cps_consumer' and 'cps_info' fields for related consumer
+        - If 'cps_consumer'=False
+            - And there is existing 'cps_info' for the consumer, it will be deleted
+            - And there is no 'cps_info' for the consumer, no change
+        - If 'cps_consumer'=True
+            - 'cps_consumer' and 'cps_info' fields for related consumer will be modified
     - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the updated database entry.
 
 - Deleting a consumer database entry.
