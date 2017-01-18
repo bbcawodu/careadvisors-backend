@@ -176,7 +176,7 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
         else:
             try:
                 primary_dependent_object = PICConsumer.objects.get(id=rqst_primary_dependent_database_id)
-            except NavMetricsLocation.DoesNotExists:
+            except NavMetricsLocation.DoesNotExist:
                 post_errors.append("PICConsumer object does not exist for primary_dependent Database ID: {!s}".format(str(rqst_primary_dependent_database_id)))
 
     rqst_cps_location = clean_string_value_from_dict_object(rqst_cps_info_dict, "cps_info", "cps_location", post_errors)
@@ -255,7 +255,7 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
                 else:
                     try:
                         secondary_dependent_object = PICConsumer.objects.get(id=rqst_secondary_dependent_database_id)
-                    except NavMetricsLocation.DoesNotExists:
+                    except NavMetricsLocation.DoesNotExist:
                         post_errors.append(
                             "PICConsumer object does not exist for secondary_dependent with index({!s}) and Database ID: {!s}".format(str(dependent_index),
                                 str(rqst_secondary_dependent_database_id)))
@@ -279,7 +279,7 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
                 post_errors.append("{!s} is not a cps_location".format(rqst_cps_location))
             else:
                 cps_info_object.cps_location = cps_location_object
-        except NavMetricsLocation.DoesNotExists:
+        except NavMetricsLocation.DoesNotExist:
             post_errors.append("NavMetricsLocation object does not exist for name: {!s}".format(rqst_cps_location))
 
         cps_info_object.apt_date = rqst_apt_date
@@ -492,7 +492,7 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
         else:
             try:
                 primary_dependent_object = PICConsumer.objects.get(id=rqst_primary_dependent_database_id)
-            except NavMetricsLocation.DoesNotExists:
+            except NavMetricsLocation.DoesNotExist:
                 post_errors.append("PICConsumer object does not exist for primary_dependent Database ID: {!s}".format(
                     str(rqst_primary_dependent_database_id)))
 
@@ -574,7 +574,7 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
                 else:
                     try:
                         secondary_dependent_object = PICConsumer.objects.get(id=rqst_secondary_dependent_database_id)
-                    except NavMetricsLocation.DoesNotExists:
+                    except NavMetricsLocation.DoesNotExist:
                         post_errors.append(
                             "PICConsumer object does not exist for secondary_dependent with index({!s}) and Database ID: {!s}".format(
                                 str(dependent_index),
@@ -604,7 +604,7 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
                 post_errors.append("{!s} is not a cps_location".format(rqst_cps_location))
             else:
                 cps_info_object.cps_location = cps_location_object
-        except NavMetricsLocation.DoesNotExists:
+        except NavMetricsLocation.DoesNotExist:
             post_errors.append("NavMetricsLocation object does not exist for name: {!s}".format(rqst_cps_location))
 
         cps_info_object.apt_date = rqst_apt_date
