@@ -169,7 +169,7 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
                                                            household_size=consumer_instance.household_size,
                                                            navigator=consumer_instance.navigator
                                                            )
-                except PICConsumer.IntegrityError:
+                except IntegrityError:
                     post_errors.append("Error creating primary_dependent database entry for params: {!s}".format(json.dumps(rqst_primary_dependent_dict)))
             else:
                 post_errors.append("The following PICConsumer objects were found for given primary_dependent: {!s}".format(json.dumps(primary_dependent_found_PICConsumer_entries)))
@@ -244,7 +244,7 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
                                                                      met_nav_at=consumer_instance.met_nav_at,
                                                                      household_size=consumer_instance.household_size,
                                                                      navigator=consumer_instance.navigator)
-                        except PICConsumer.IntegrityError:
+                        except IntegrityError:
                             post_errors.append(
                                 "Error creating secondary_dependent database entry for params: {!s}".format(
                                     json.dumps(rqst_secondary_dependent_dict)))
@@ -482,7 +482,7 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
                                                            household_size=consumer_instance.household_size,
                                                            navigator=consumer_instance.navigator
                                                            )
-                except PICConsumer.IntegrityError:
+                except IntegrityError:
                     post_errors.append("Error creating primary_dependent database entry for params: {!s}".format(
                         json.dumps(rqst_primary_dependent_dict)))
             else:
@@ -562,7 +562,7 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
                                 met_nav_at=consumer_instance.met_nav_at,
                                 household_size=consumer_instance.household_size,
                                 navigator=consumer_instance.navigator)
-                        except PICConsumer.IntegrityError:
+                        except IntegrityError:
                             post_errors.append(
                                 "Error creating secondary_dependent database entry for params: {!s}".format(
                                     json.dumps(rqst_secondary_dependent_dict)))
@@ -591,12 +591,10 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
                                                           "app_status",
                                                           post_errors)
     if len(post_errors) == 0:
-        cps_info_object_created = False
         try:
             cps_info_object = consumer_instance.cps_info
         except ConsumerCPSInfoEntry.DoesNotExist:
             cps_info_object = ConsumerCPSInfoEntry(consumer=consumer_instance)
-            cps_info_object_created = True
 
         try:
             cps_location_object = NavMetricsLocation.objects.get(name=rqst_cps_location)
@@ -629,20 +627,22 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
 
             if primary_dependent_object._state.adding:
                 primary_dependent_object.save()
+            if cps_info_object.primary_dependent:
+                current_primary_dependent_object = cps_info_object.primary_dependent
+                cps_info_object.primary_dependent.remove(current_primary_dependent_object)
             cps_info_object.primary_dependent = primary_dependent_object
 
             cps_info_object.save()
 
+            if cps_info_object.secondary_dependents:
+                cps_info_object.secondary_dependents.clear()
             if secondary_dependents_list:
                 for secondary_dependent_instance in secondary_dependents_list:
                     if secondary_dependent_instance._state.adding:
                         secondary_dependent_instance.save()
                 cps_info_object.secondary_dependents = secondary_dependents_list
-        else:
-            if cps_info_object_created:
-                consumer_instance.delete()
-    else:
-        consumer_instance.delete()
+
+            cps_info_object.save()
 
 
 def delete_consumer(response_raw_data, post_data, post_errors):
