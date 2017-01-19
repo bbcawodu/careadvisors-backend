@@ -627,9 +627,6 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
 
             if primary_dependent_object._state.adding:
                 primary_dependent_object.save()
-            if cps_info_object.primary_dependent:
-                current_primary_dependent_object = cps_info_object.primary_dependent
-                cps_info_object.primary_dependent.remove(current_primary_dependent_object)
             cps_info_object.primary_dependent = primary_dependent_object
 
             cps_info_object.save()
