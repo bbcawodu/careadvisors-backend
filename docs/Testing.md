@@ -53,3 +53,18 @@ class Migration(migrations.Migration):
 # Command to load data to database from json file
 
 python manage.py loaddata [file]
+
+
+git update-index --assume-unchanged picbackend/wsgi.py
+
+git update-index --no-assume-unchanged picbackend/wsgi.py
+
+# Please enter a commit message to explain why this merge is necessary,especially if it merges an updated upstream into a topic branch
+
+To solve this:
+
+- press "i"
+- write your merge message
+- press "esc"
+- write ":wq"
+- then press enter

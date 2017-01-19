@@ -54,18 +54,18 @@ In response, a JSON document will be displayed with the following format:
 }
 ```
 
-- If there are no errors in the POSTed JSON doc:
+- If there are no errors in the JSON Body doc:
     - "Error Code" will be 0.
     - There will be no "Errors" key in the "Status" dictionary.
-    - An instance of the Appointment class corresponding to the POSTed JSON doc will be created and saved in the database.
+    - An instance of the Appointment class corresponding to the JSON Body doc will be created and saved in the database.
         - If there isn't a consumer database entry with an email field corresponding to the POST, one is created.
         - If there isn't a location database entry with a name field corresponding to the POST, one is created.
         - If there isn't a staff database entry with an email field corresponding to the POST, one is created.
     
-- If there are errors in the POSTed JSON doc:
+- If there are errors in the JSON Body doc:
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        - Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        - Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
 
 

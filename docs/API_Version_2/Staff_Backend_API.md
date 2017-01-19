@@ -42,7 +42,7 @@ In response, a JSON document will be displayed with the following format:
 - Modifying a staff member database entry.
     - To modify a staff member database entry, the value for "Database Action" in the POST request must equal "Staff Modification".
     - All other fields must be filled.
-    - All key value pairs in the POSTed JSON document correspond to updated fields for specified "Database ID"
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "Database ID"
     - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the updated database entry.
 
 - Deleting a staff member database entry.
@@ -50,10 +50,10 @@ In response, a JSON document will be displayed with the following format:
     - The only other field should be "Database ID".
     - The response JSON document will have a "Deleted" as the value for the "Data" key.
     
-- If there are errors in the POSTed JSON document:
+- If there are errors in the JSON Body document:
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
     
 ### Staff Data Retrieval API
@@ -138,7 +138,7 @@ In response, a JSON document will be displayed with the following format:
 - If staff members are not found,
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - Array corresponding to the "Data" key will be empty.
 
 
