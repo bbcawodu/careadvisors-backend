@@ -392,77 +392,77 @@ class EligibilityValidPostTestBase(object):
             self.assertIsInstance(benefit_amount_info["currency"], str)
 
 
-class UnitedHealthcareTestsWithValidPost(TestCase, EligibilityValidPostTestBase):
-    @classmethod
-    def setUpClass(cls):
-        TestCase.setUpClass()
-        EligibilityValidPostTestBase.setUpClass()
-        cls.post_data["Birth Date"] = "1989-05-01"
-        cls.post_data["First Name"] = "Nicole"
-        cls.post_data["Last Name"] = "Mahan"
-        cls.post_data["Consumer Plan ID"] = None
-        cls.post_data["Gender"] = None
-        cls.post_data["Trading Partner ID"] = "united_health_care"
-        json_post_data = json.dumps(cls.post_data)
-
-        c = Client()
-        cls.response = c.post('/v1/eligibility/', json_post_data, content_type="application/json")
-
-        response_data_json = cls.response.content.decode('utf-8')
-        cls.response_data = json.loads(response_data_json)
-
-        cls.status_data = cls.response_data["Status"]
-
-        cls.elig_data = cls.response_data["Data"]
-
-    def test_middle_name_in_consumer_info(self):
-        consumer_data = self.elig_data["Consumer Info"]
-
-        self.assertIn("middle_name", consumer_data)
-
-    def test_middle_name_is_string(self):
-        consumer_data = self.elig_data["Consumer Info"]
-
-        self.assertIsInstance(consumer_data["middle_name"], str)
-
-    def test_copay_info_in_eligibility_data(self):
-        self.assertIn("Copay", self.elig_data)
-
-    def test_copay_info_is_list(self):
-        self.assertIsInstance(self.elig_data["Copay"], list)
-
-    def test_copay_info_is_not_empty(self):
-        copay_list = self.elig_data["Copay"]
-
-        self.assertTrue(copay_list)
-
-    def test_elements_in_copay_info(self):
-        copay_list = self.elig_data["Copay"]
-
-        for elem in copay_list:
-            copayment_info = elem["copayment"]
-            self.assertIn("amount", copayment_info)
-            self.assertIsInstance(copayment_info["amount"], str)
-            self.assertIn("currency", copayment_info)
-            self.assertIsInstance(copayment_info["currency"], str)
-
-            self.assertIn("service_type_codes", elem)
-            self.assertIsInstance(elem["service_type_codes"], list)
-            self.assertTrue(elem["service_type_codes"])
-
-            self.assertIn("coverage_level", elem)
-            self.assertIsInstance(elem["coverage_level"], str)
-
-            self.assertIn("service_types", elem)
-            self.assertIsInstance(elem["service_types"], list)
-            self.assertTrue(elem["service_types"])
-
-            self.assertIn("in_plan_network", elem)
-            self.assertIsInstance(elem["in_plan_network"], str)
-            self.assertIn(elem["in_plan_network"], ["yes", "no", "not_applicable"])
-
-    def test_insurance_type_in_eligibility_data(self):
-        self.assertIn("Insurance Type", self.elig_data)
-
-    def test_insurance_type_is_string(self):
+# class UnitedHealthcareTestsWithValidPost(TestCase, EligibilityValidPostTestBase):
+#     @classmethod
+#     def setUpClass(cls):
+#         TestCase.setUpClass()
+#         EligibilityValidPostTestBase.setUpClass()
+#         cls.post_data["Birth Date"] = "1989-05-01"
+#         cls.post_data["First Name"] = "Nicole"
+#         cls.post_data["Last Name"] = "Mahan"
+#         cls.post_data["Consumer Plan ID"] = None
+#         cls.post_data["Gender"] = None
+#         cls.post_data["Trading Partner ID"] = "united_health_care"
+#         json_post_data = json.dumps(cls.post_data)
+#
+#         c = Client()
+#         cls.response = c.post('/v1/eligibility/', json_post_data, content_type="application/json")
+#
+#         response_data_json = cls.response.content.decode('utf-8')
+#         cls.response_data = json.loads(response_data_json)
+#
+#         cls.status_data = cls.response_data["Status"]
+#
+#         cls.elig_data = cls.response_data["Data"]
+#
+#     def test_middle_name_in_consumer_info(self):
+#         consumer_data = self.elig_data["Consumer Info"]
+#
+#         self.assertIn("middle_name", consumer_data)
+#
+#     def test_middle_name_is_string(self):
+#         consumer_data = self.elig_data["Consumer Info"]
+#
+#         self.assertIsInstance(consumer_data["middle_name"], str)
+#
+#     def test_copay_info_in_eligibility_data(self):
+#         self.assertIn("Copay", self.elig_data)
+#
+#     def test_copay_info_is_list(self):
+#         self.assertIsInstance(self.elig_data["Copay"], list)
+#
+#     def test_copay_info_is_not_empty(self):
+#         copay_list = self.elig_data["Copay"]
+#
+#         self.assertTrue(copay_list)
+#
+#     def test_elements_in_copay_info(self):
+#         copay_list = self.elig_data["Copay"]
+#
+#         for elem in copay_list:
+#             copayment_info = elem["copayment"]
+#             self.assertIn("amount", copayment_info)
+#             self.assertIsInstance(copayment_info["amount"], str)
+#             self.assertIn("currency", copayment_info)
+#             self.assertIsInstance(copayment_info["currency"], str)
+#
+#             self.assertIn("service_type_codes", elem)
+#             self.assertIsInstance(elem["service_type_codes"], list)
+#             self.assertTrue(elem["service_type_codes"])
+#
+#             self.assertIn("coverage_level", elem)
+#             self.assertIsInstance(elem["coverage_level"], str)
+#
+#             self.assertIn("service_types", elem)
+#             self.assertIsInstance(elem["service_types"], list)
+#             self.assertTrue(elem["service_types"])
+#
+#             self.assertIn("in_plan_network", elem)
+#             self.assertIsInstance(elem["in_plan_network"], str)
+#             self.assertIn(elem["in_plan_network"], ["yes", "no", "not_applicable"])
+#
+#     def test_insurance_type_in_eligibility_data(self):
+#         self.assertIn("Insurance Type", self.elig_data)
+#
+#     def test_insurance_type_is_string(self):
         self.assertIsInstance(self.elig_data["Insurance Type"], str)

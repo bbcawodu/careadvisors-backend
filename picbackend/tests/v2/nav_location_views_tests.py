@@ -14,8 +14,8 @@ class NavHubLocationAPITests(TestCase, BaseV2APITests):
 
     def test_add_or_update_nav_hub_location_view(self):
         post_data = {
-                      "Location Name": "Mariano's Bridgeport",
-                      "Address Line 1": "3145 S Ashland Ave",
+                      "Location Name": "CandyLand",
+                      "Address Line 1": "3133 S Ashland Ave",
                       "Address Line 2": "",
                       "City": "Chicago",
                       "State": "IL",

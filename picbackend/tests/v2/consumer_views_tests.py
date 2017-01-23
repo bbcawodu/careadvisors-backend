@@ -13,13 +13,13 @@ class ConsumerAPITests(TestCase, BaseConsumerStaffMetricsTests):
         self.base_url += "consumers/"
 
     def test_add_consumer_view(self):
-        post_data = {"First Name": "John",
+        post_data = {"First Name": "Johnsafsa",
                      "Middle Name": "",
-                     "Last Name": "Consumer",
+                     "Last Name": "Consumerfasfsa",
                      "Email": "",
                      "Phone Number": "",
                      "Met Navigator At": "Mariano's Bridgeport",
-                     "Household Size": 0,
+                     "Household Size": 3,
                      "Plan": "",
                      "Preferred Language": "",
                      "Navigator Notes": [
@@ -33,7 +33,7 @@ class ConsumerAPITests(TestCase, BaseConsumerStaffMetricsTests):
 
                      "date_met_nav": {"Day": 31,
                                       "Month": 10,
-                                      "Year": 2016,
+                                      "Year": 2018,
                                       },
                      "Navigator Database ID": 1,
                      "Database Action": "Consumer Addition",}

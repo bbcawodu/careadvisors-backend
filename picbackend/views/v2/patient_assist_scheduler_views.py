@@ -5,7 +5,7 @@ API Version 2
 
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from django.views import View
+from django.views.generic import View
 from django.utils.decorators import method_decorator
 from picmodels.models import PICStaff
 from picmodels.models import CredentialsModel
@@ -111,12 +111,15 @@ class GoogleCalendarAuthReturnView(View):
         return HttpResponseRedirect("/v2/calendar_auth/?navid={!s}".format(state_dict["navid"]))
 
 
-#N eed to abstract common variables in get and post class methods into class attributes
-@method_decorator(csrf_exempt, name='dispatch')
+# Need to abstract common variables in get and post class methods into class attributes
 class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin, JSONDELETERspMixin, View):
     """
     Defines views that manage scheduled consumer appointments for the Patient Assist Plugin
     """
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(PatientAssistAptMgtView, self).dispatch(request, *args, **kwargs)
 
     def nav_scheduled_appointments_logic(self, request, search_params, response_raw_data, rqst_errors):
         response_raw_data["Data"] = {"Scheduled Appointments": None}

@@ -4,7 +4,7 @@ API Version 2
 """
 
 
-from django.views import View
+from django.views.generic import View
 from django.utils.decorators import method_decorator
 from picmodels.models import NavMetricsLocation
 from django.views.decorators.csrf import csrf_exempt
@@ -17,11 +17,14 @@ from .base import JSONGETRspMixin
 
 
 # Need to abstract common variables in get and post class methods into class attributes
-@method_decorator(csrf_exempt, name='dispatch')
 class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
     Defines views that handles Patient Innovation Center navigator hub location instance related requests
     """
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(NavHubLocationManagementView, self).dispatch(request, *args, **kwargs)
 
     def nav_hub_location_management_put_logic(self, post_data, response_raw_data, post_errors):
         # Parse BODY data and add or update navigator hub location entry
