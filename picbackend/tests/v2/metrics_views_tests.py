@@ -59,8 +59,6 @@ class ConsumerMetricsAPITests(TestCase, BaseConsumerStaffMetricsTests):
         self.assertIsNotNone(status_data)
         self.assertNotIn("Errors", status_data)
         self.assertEqual(status_data["Error Code"], 0)
-        self.assertIn("Data", response_data)
-        self.assertNotEqual(len(response_data["Data"]), 0)
 
         # Test decoded JSON data for correct API version
         self.assertEqual(status_data["Version"], 2.0)
