@@ -13,13 +13,13 @@ class ConsumerAPITests(TestCase, BaseConsumerStaffMetricsTests):
         self.base_url += "consumers/"
 
     def test_add_consumer_view(self):
-        post_data = {"First Name": "John",
+        post_data = {"First Name": "Johnsafsa",
                      "Middle Name": "",
-                     "Last Name": "Consumer",
+                     "Last Name": "Consumerfasfsa",
                      "Email": "",
                      "Phone Number": "",
                      "Met Navigator At": "Mariano's Bridgeport",
-                     "Household Size": 0,
+                     "Household Size": 3,
                      "Plan": "",
                      "Preferred Language": "",
                      "Navigator Notes": [
@@ -33,9 +33,89 @@ class ConsumerAPITests(TestCase, BaseConsumerStaffMetricsTests):
 
                      "date_met_nav": {"Day": 31,
                                       "Month": 10,
-                                      "Year": 2016,
+                                      "Year": 2018,
                                       },
                      "Navigator Database ID": 1,
+                     "Database Action": "Consumer Addition",}
+
+        post_json = json.dumps(post_data)
+        response = self.client_object.put(self.base_url, post_json, content_type="application/json")
+        response_json = response.content.decode('utf-8')
+        response_data = json.loads(response_json)
+
+        # Test for valid decoded json data from response body
+        self.assertIsNotNone(response_data)
+
+        status_data = response_data["Status"]
+
+        # Test decoded JSON data for "Status" key
+        self.assertIsNotNone(status_data)
+        self.assertNotIn("Errors", status_data)
+        self.assertEqual(status_data["Error Code"], 0)
+        self.assertIn("Data", response_data)
+        self.assertNotEqual(len(response_data["Data"]), 0)
+
+        # Test decoded JSON data for correct API version
+        self.assertEqual(status_data["Version"], 2.0)
+
+        # Test decoded JSON data for non empty "Next Available Appointments" data
+        consumer_data = response_data["Data"]
+
+        self.assertIn("Database ID", consumer_data)
+
+    def test_add_cps_consumer_view(self):
+        post_data = {"First Name": "Johnsafsa",
+                     "Middle Name": "",
+                     "Last Name": "Consumerfasfsa",
+                     "Email": "",
+                     "Phone Number": "",
+                     "Met Navigator At": "Mariano's Bridgeport",
+                     "Household Size": 3,
+                     "Plan": "",
+                     "Preferred Language": "",
+                     "Navigator Notes": [
+                     ],
+
+                     "Address Line 1": "",
+                     "Address Line 2": "",
+                     "City": "",
+                     "State": "",
+                     "Zipcode": "",
+
+                     "date_met_nav": {"Day": 31,
+                                      "Month": 10,
+                                      "Year": 2018,
+                                      },
+                     "Navigator Database ID": 1,
+
+                     "cps_consumer": True,
+                     "cps_info": {
+                         "primary_dependent": {
+                             "first_name": "Kensdgset",
+                             "last_name": "Massdgdsfsdeters",
+                             # "Consumer Database ID": 134,
+                         },
+                         "cps_location": "Marquette Elementary School",
+                         "apt_date": {
+                             "Day": 22,
+                             "Month": 2,
+                             "Year": 2017,
+                         },
+                         "target_list": True,
+                         "phone_apt": True,
+                         "case_mgmt_type": "String",
+                         "case_mgmt_status": "Open",
+                         "secondary_dependents": [
+                             {
+                                 "first_name": "Brstdsdyan",
+                                 "last_name": "Furgsdfdsy",
+                                 # "Consumer Database ID": 135,
+                             },
+                         ],
+                         "app_type": "SNAP",
+                         "app_status": "Pending",
+                     },
+
                      "Database Action": "Consumer Addition",}
 
         post_json = json.dumps(post_data)

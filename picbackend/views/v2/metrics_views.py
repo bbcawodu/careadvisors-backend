@@ -3,7 +3,7 @@ Defines views that handle Patient Innovation Center consumer metrics based reque
 API Version 2
 """
 
-from django.views import View
+from django.views.generic import View
 from django.utils.decorators import method_decorator
 from picmodels.models import MetricsSubmission
 from django.views.decorators.csrf import csrf_exempt
@@ -20,11 +20,14 @@ from .base import JSONGETRspMixin
 
 
 #Need to abstract common variables in get and post class methods into class attributes
-@method_decorator(csrf_exempt, name='dispatch')
 class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
     Defines views that handles Patient Innovation Center metrics instance related requests
     """
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ConsumerMetricsManagementView, self).dispatch(request, *args, **kwargs)
 
     def metrics_management_put_logic(self, post_data, response_raw_data, post_errors):
         # Parse BODY data and add or update metrics entry

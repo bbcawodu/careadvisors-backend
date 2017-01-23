@@ -3,7 +3,7 @@ Defines views that are responsible for accessing consumer health insurance Relat
 API Version 2
 """
 
-from django.views import View
+from django.views.generic import View
 from django.utils.decorators import method_decorator
 import pokitdok
 from django.views.decorators.csrf import csrf_exempt
@@ -12,11 +12,14 @@ from .base import JSONPOSTRspMixin
 from .base import JSONGETRspMixin
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class ConsumerHealthInsuranceBenefitsView(JSONPOSTRspMixin, View):
     """
     Defines view that retrieves consumer health insurance benefits information
     """
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ConsumerHealthInsuranceBenefitsView, self).dispatch(request, *args, **kwargs)
 
     def insurance_benefits_logic(self, post_data, response_raw_data, post_errors):
         # Fetch eligibility data from Pokitdok

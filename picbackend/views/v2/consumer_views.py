@@ -4,7 +4,7 @@ API Version 2
 """
 
 
-from django.views import View
+from django.views.generic import View
 from django.utils.decorators import method_decorator
 from picmodels.models import PICConsumer
 from django.views.decorators.csrf import csrf_exempt
@@ -26,11 +26,14 @@ CONSUMERS_PER_PAGE = 20
 
 
 # Need to abstract common variables in get and post class methods into class attributes
-@method_decorator(csrf_exempt, name='dispatch')
 class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
     Defines views that handles Patient Innovation Center consumer instance related requests
     """
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ConsumerManagementView, self).dispatch(request, *args, **kwargs)
 
     def consumer_management_put_logic(self, post_data, response_raw_data, post_errors):
         # Retrieve database action from post data

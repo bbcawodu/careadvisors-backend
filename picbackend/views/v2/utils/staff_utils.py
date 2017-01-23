@@ -90,7 +90,10 @@ def modify_staff(response_raw_data, post_data, post_errors):
             staff_instance.county = rqst_county
             staff_instance.email = rqst_usr_email
             staff_instance.mpn = rqst_usr_mpn
+
+            staff_instance.base_locations.clear()
             staff_instance.base_locations = base_location_objects
+
             staff_instance.save()
             response_raw_data['Data'] = {"Database ID": staff_instance.id}
         except PICStaff.DoesNotExist:

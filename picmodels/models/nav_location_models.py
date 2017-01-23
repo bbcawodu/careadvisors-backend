@@ -11,6 +11,8 @@ class NavMetricsLocation(models.Model):
     name = models.CharField(max_length=200, unique=True)
     address = models.ForeignKey(Address, blank=True, null=True)
 
+    cps_location = models.BooleanField(default=False)
+
     class Meta:
         app_label = 'picmodels'
         verbose_name_plural = "Navigator Metrics Locations"
@@ -19,10 +21,15 @@ class NavMetricsLocation(models.Model):
     def return_values_dict(self):
         valuesdict = {"Name": self.name,
                       "Database ID": self.id,
+                      "CPS Location": self.cps_location,
                       }
 
         if self.address:
             address_values = self.address.return_values_dict()
             for key in address_values:
-                valuesdict[key] = address_values[key]
+                if key != "Database ID":
+                    valuesdict[key] = address_values[key]
         return valuesdict
+
+
+

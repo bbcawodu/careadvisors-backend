@@ -26,7 +26,7 @@
 - If staff members are not found,
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - Array corresponding to the "Data" key will be empty.
     
     
@@ -162,10 +162,10 @@ In response, a JSON document will be displayed with the following format:
         - Array of navigator appointments at the index of the "Preferred Appointments" array corresponds to the  date and time at the same index of the "Preferred Times" array
             - If no navigator appointments are found for the date and time at a given index of preferred times, the array of navigator appointments at that index of "Preferred Appointments" will be empty
     
-- If there are errors in the POSTed JSON document:
+- If there are errors in the JSON Body document:
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
     
     
@@ -213,10 +213,10 @@ To retrieve scheduled consumer appointments for a given navigator, submit a GET 
     - "Scheduled Appointments"
         - An array of scheduled consumer appointments.
     
-- If there are errors in the POSTed JSON document:
+- If there are errors in the JSON Body document:
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
     
     
@@ -286,10 +286,10 @@ In response, a JSON document will be displayed with the following format:
     - "Consumer ID"
         - Database id of the consumer that the appointment was scheduled for
     
-- If there are errors in the POSTed JSON document:
+- If there are errors in the JSON Body document:
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
     
     
@@ -328,8 +328,8 @@ In response, a JSON document will be displayed with the following format:
 - Data will be a dictionary with the following keys
     - "Deleted" will be a boolean declaring whether or not appointment was deleted
     
-- If there are errors in the POSTed JSON document:
+- If there are errors in the JSON Body document:
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.

@@ -149,14 +149,14 @@ class PICConsumer(models.Model):
     met_nav_at = models.CharField(max_length=1000)
     date_met_nav = models.DateField(blank=True, null=True)
 
+    cps_consumer = models.BooleanField(default=False)
+
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
 
         unique_together = ("first_name",
-                           "last_name",
-                           "met_nav_at",
-                           "household_size",)
+                           "last_name",)
 
     def return_values_dict(self):
         valuesdict = {"First Name": self.first_name,
@@ -170,9 +170,11 @@ class PICConsumer(models.Model):
                       "Plan": self.plan,
                       "Met Navigator At": self.met_nav_at,
                       "Best Contact Time": self.best_contact_time,
-                      "Navigator": "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name),
+                      "Navigator": None,
                       "Navigator Notes": None,
                       "date_met_nav": None,
+                      "cps_consumer": self.cps_consumer,
+                      "cps_info": None,
                       "Database ID": self.id}
 
         if self.date_met_nav is not None:
@@ -190,6 +192,14 @@ class PICConsumer(models.Model):
             for key in address_values:
                 valuesdict["address"][key] = address_values[key]
 
+        if self.navigator is not None:
+            valuesdict['Navigator'] = "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name)
+
+        try:
+            valuesdict['cps_info'] = self.cps_info.return_values_dict()
+        except ConsumerCPSInfoEntry.DoesNotExist:
+            pass
+
         return valuesdict
 
 
@@ -200,3 +210,106 @@ class ConsumerNote(models.Model):
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
+
+
+class ConsumerCPSInfoEntry(models.Model):
+    """
+    Need to validate ALL form data before creating PICConsumer entries and by extention, ConsumerCPSInfoEntry
+    """
+
+    N_A = "Not Available"
+    OPEN = "Open"
+    RESOLVED = "Resloved"
+    CASE_MGMT_STATUS_CHOICES = ((OPEN, "Open"),
+                                (RESOLVED, "Resolved"),
+                                (N_A, "Not Available"))
+
+    MEDICAID = "Medicaid"
+    SNAP = "SNAP"
+    APP_TYPE_CHOICES = ((MEDICAID, "Medicaid"),
+                        (SNAP, "SNAP"),
+                        (N_A, "Not Available"))
+
+    SUBMITTED = "Submitted"
+    PENDING = "Pending"
+    APPROVED = "Approved"
+    DENIED = "Denied"
+    APP_STATUS_CHOICES = ((SUBMITTED, "Submitted"),
+                          (PENDING, "Pending"),
+                          (APPROVED, "Approved"),
+                          (DENIED, "Denied"),
+                          (N_A, "Not Available"))
+
+    consumer = models.OneToOneField(PICConsumer, on_delete=models.CASCADE, related_name='cps_info')
+
+    primary_dependent = models.ForeignKey(PICConsumer, blank=True, null=True, related_name='primary_guardian')
+    secondary_dependents = models.ManyToManyField(PICConsumer, blank=True, related_name='secondary_guardians')
+
+    cps_location = models.ForeignKey(NavMetricsLocation, blank=True, null=True)
+
+    apt_date = models.DateField(blank=True, null=True)
+    target_list = models.BooleanField(default=False)
+    phone_apt = models.BooleanField(default=False)
+    case_mgmt_type = models.CharField(max_length=1000, blank=True, null=True)
+    case_mgmt_status = models.CharField(max_length=1000, blank=True, null=True, choices=CASE_MGMT_STATUS_CHOICES, default=N_A)
+    app_type = models.CharField(max_length=1000, blank=True, null=True, choices=APP_TYPE_CHOICES, default=N_A)
+    app_status = models.CharField(max_length=1000, blank=True, null=True, choices=APP_STATUS_CHOICES, default=N_A)
+
+    class Meta:
+        # maps model to the picmodels module
+        app_label = 'picmodels'
+
+    def check_case_mgmt_status_choices(self,):
+        for plan_tuple in self.CASE_MGMT_STATUS_CHOICES:
+            if plan_tuple[1].lower() == self.case_mgmt_status.lower():
+                return True
+        return False
+
+    def check_app_type_choices(self,):
+        for plan_tuple in self.APP_TYPE_CHOICES:
+            if plan_tuple[1].lower() == self.app_type.lower():
+                return True
+        return False
+
+    def check_app_status_choices(self,):
+        for plan_tuple in self.APP_STATUS_CHOICES:
+            if plan_tuple[1].lower() == self.app_status.lower():
+                return True
+        return False
+
+    def return_values_dict(self):
+        valuesdict = {"apt_date": None,
+                      "target_list": self.target_list,
+                      "phone_apt": self.phone_apt,
+                      "case_mgmt_type": self.case_mgmt_type,
+                      "case_mgmt_status": self.case_mgmt_status,
+                      "app_type": self.app_type,
+                      "app_status": self.app_status,
+                      "cps_location": None,
+                      "primary_dependent": None,
+                      "secondary_dependents": None,
+                      "Consumer Database ID": self.consumer.id,
+                      "Database ID": self.id}
+
+        if self.apt_date is not None:
+            valuesdict["apt_date"] = self.apt_date.isoformat()
+
+        if self.cps_location is not None:
+            valuesdict["cps_location"] = self.cps_location.name
+
+        if self.primary_dependent is not None:
+            primary_dependent_entry = {"first_name": self.primary_dependent.first_name,
+                                       "last_name": self.primary_dependent.last_name,
+                                       "Database ID": self.primary_dependent.id}
+            valuesdict["primary_dependent"] = primary_dependent_entry
+
+        if self.secondary_dependents is not None:
+            secondary_dependent_list = []
+            for secondary_dependent in self.secondary_dependents.all():
+                dependent_entry = {"first_name": secondary_dependent.first_name,
+                                   "last_name": secondary_dependent.last_name,
+                                   "Database ID": secondary_dependent.id}
+                secondary_dependent_list.append(dependent_entry)
+            valuesdict["secondary_dependents"] = secondary_dependent_list
+
+        return valuesdict

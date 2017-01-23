@@ -19,6 +19,8 @@ The body of the request should be a JSON document using the following template:
 "Zipcode": String,
 "Country": String,
 "Database Action": String
+
+"cps_location": Boolean (Key may be omitted)
 "Database ID": Integer(Required when "Database Action" == "Staff Modification" or "Staff Deletion"),
 }
 ```
@@ -36,25 +38,25 @@ In response, a JSON document will be displayed with the following format:
 ```
 
 - Adding a navigator hub location database entry.
-    - To add a navigator hub location database entry, the value for "Database Action" in the POST request must equal "Location Addition".
+    - To add a navigator hub location database entry, the value for "Database Action" in the JSON Body must equal "Location Addition".
     - All other fields except "Database ID" must be filled.
     - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the added database entry.
     
 - Modifying a navigator hub location database entry.
-    - To modify a navigator hub location database entry, the value for "Database Action" in the POST request must equal "Location Modification".
+    - To modify a navigator hub location database entry, the value for "Database Action" in the JSON Body must equal "Location Modification".
     - All other fields must be filled.
-    - All key value pairs in the POSTed JSON document correspond to updated fields for specified "Database ID"
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "Database ID"
     - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the updated database entry.
 
 - Deleting a navigator hub location database entry.
-    - To delete a navigator hub location database entry, the value for "Database Action" in the POST request must equal "Location Deletion".
+    - To delete a navigator hub location database entry, the value for "Database Action" in the JSON Body must equal "Location Deletion".
     - The only other field should be "Database ID".
     - The response JSON document will have a "Deleted" as the value for the "Data" key.
     
-- If there are errors in the POSTed JSON document:
+- If there are errors in the JSON Body document:
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
     
     
@@ -71,7 +73,8 @@ In response, a JSON document will be displayed with the following format:
              "Address Line 1": "2900 N Lake Shore Dr.",
              "Address Line 2": "",
              "Country": "United States of America",
-             "City": "Chicago"},
+             "City": "Chicago",
+             "cps_location": False},
             ...,
             ...,
             ...,
@@ -90,5 +93,5 @@ In response, a JSON document will be displayed with the following format:
 - If navigator locationss are not found,
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - Array corresponding to the "Data" key will be empty.

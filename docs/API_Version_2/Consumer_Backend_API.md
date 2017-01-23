@@ -36,6 +36,35 @@ Address(Every field within address can be given as an empty string. Address will
 "date_met_nav":(Can be Null) or {"Day": Integer,
                                 "Month": Integer,
                                 "Year": Integer,},
+                                
+"cps_consumer": Boolean (Whether or not this consumer is a CPS consumer)(Key can be omitted),
+"cps_info": {
+                "primary_dependent": {
+                                        "first_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
+                                        "last_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
+                                        "Consumer Database ID": Integer (Key can be omitted)(Required when "first_name" and "last_name" are omitted)
+                                     },
+                "cps_location": String (Must be the name of a NavMetricsLocation instance with cps_location=True),
+                "apt_date": {
+                                "Day": Integer,
+                                "Month": Integer,
+                                "Year": Integer,
+                          },
+                "target_list": Boolean,
+                "phone_apt": Boolean,
+                "case_mgmt_type": String,
+                "case_mgmt_status": String (Must be one of these choices: "Open", "Resolved", "Not Available"),
+                "secondary_dependents": [
+                                             {
+                                                "first_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
+                                                "last_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
+                                                "Consumer Database ID": Integer (Key can be omitted)(Required when "first_name" and "last_name" are omitted)
+                                             },
+                                             ...
+                                        ](Key can be omitted)(If key present, must not be empty),
+                "app_type": String (Must be one of these choices: "Medicaid", "SNAP", "Not Available"),
+                "app_status": String (Must be one of these choices: "Submitted", "Pending", "Approved", "Denied", "Not Available"),
+            }(Must be present and is only red when if cps_consumer is True)(contains relevant CPS info)(Key can be omitted),
 
 "Consumer Database ID": Integer(Required when "Database Action" == "Consumer Modification" or "Consumer Deletion"),
 "Database Action": String,
@@ -48,32 +77,41 @@ In response, a JSON document will be displayed with the following format:
  "Status": {
             "Error Code": Integer,
             "Version": 2.0,
-            "Errors": Array
-            "Data": Dictionary Object or "Deleted",
-           }
+            "Errors": Array,
+            "Warnings": Array,
+           },
+ "Data": Dictionary Object or "Deleted",
 }
 ```
 
 - Adding a consumer database entry.
-    - To add a consumer database entry, the value for "Database Action" in the POST request must equal "Consumer Addition".
+    - To add a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Addition".
     - All other fields except "Consumer Database ID" must be filled.
     - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the added database entry.
     
 - Modifying a consumer database entry.
-    - To modify a consumer database entry, the value for "Database Action" in the POST request must equal "Consumer Modification".
+    - To modify a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Modification".
     - All other fields must be filled.
-    - All key value pairs in the POSTed JSON document correspond to updated fields for specified "Consumer Database ID"
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "Consumer Database ID"
+    - 'cps_consumer' key must be present in order to modify cps consumer info
+        - If 'cps_consumer' key is not present
+            - no change to 'cps_consumer' and 'cps_info' fields for related consumer
+        - If 'cps_consumer'=False
+            - And there is existing 'cps_info' for the consumer, it will be deleted
+            - And there is no 'cps_info' for the consumer, no change
+        - If 'cps_consumer'=True
+            - 'cps_consumer' and 'cps_info' fields for related consumer will be modified
     - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the updated database entry.
 
 - Deleting a consumer database entry.
-    - To delete a consumer database entry, the value for "Database Action" in the POST request must equal "Consumer Deletion".
+    - To delete a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Deletion".
     - The only other field should be "Consumer Database ID".
     - The response JSON document will have a "Deleted" as the value for the "Data" key.
     
-- If there are errors in the POSTed JSON document:
+- If there are errors in the JSON Body document:
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
     
 ### Consumer Data Retrieval API
@@ -124,7 +162,34 @@ In response, a JSON document will be displayed with the following format:
                             "State": String,
                             "Zipcode": String,
                             "Country": String,
-                           }
+                           },
+                           
+                "cps_consumer": Boolean,
+                "cps_info": {
+                                "primary_dependent": {
+                                                        "first_name": String,
+                                                        "last_name": String,
+                                                     },
+                                "cps_location": String,
+                                "apt_date"{
+                                                "Day": Integer,
+                                                "Month": Integer,
+                                                "Year": Integer,
+                                          },
+                                "target_list": Boolean,
+                                "phone_apt": Boolean,
+                                "case_mgmt_type": String,
+                                "case_mgmt_status": String,
+                                "secondary_dependents": [
+                                                             {
+                                                                "first_name": String,
+                                                                "last_name": String,
+                                                             },
+                                                             ...
+                                                        ],
+                                "app_type": String,
+                                "app_status": String,
+                            },
             },
             ...,
             ...,
@@ -137,6 +202,7 @@ In response, a JSON document will be displayed with the following format:
         "Status": {
             "Version": 2.0,
             "Error Code": Integer,
+            "Warnings": Array,
             "Errors": Array
         },
         "Page URLs": Array of strings (Will be missing if "page" parameter is given OR less than 20 consumers in results)
@@ -149,7 +215,7 @@ In response, a JSON document will be displayed with the following format:
 - If consumers are not found,
     - "Error Code" will be 1.
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the POSTed JSON doc.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - Array corresponding to the "Data" key will be empty.
 - If "page" parameter is missing and there is more than one page of customer instances to display with all fields, "Page
     URLs" key will be present in the root response dictionary.
