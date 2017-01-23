@@ -36,7 +36,7 @@ from django.db import migrations, models
 
 from django.core.management import call_command
 
-fixture = '12-27-2016.json'
+fixture = '01-23-2017.json'
 
 
 def load_fixture(apps, schema_editor):
@@ -46,7 +46,7 @@ def load_fixture(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('picmodels', '0032_auto_20161222_2106'),
+        ('picmodels', '0005_auto_20170117_1652'),
     ]
 
     operations = [
