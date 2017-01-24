@@ -156,7 +156,8 @@ class PICConsumer(models.Model):
         app_label = 'picmodels'
 
         unique_together = ("first_name",
-                           "last_name",)
+                           "last_name",
+                           "navigator",)
 
     def return_values_dict(self):
         valuesdict = {"First Name": self.first_name,
