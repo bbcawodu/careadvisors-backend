@@ -97,54 +97,70 @@ def add_consumer(response_raw_data, post_data, post_errors):
                                 "plan": rqst_consumer_plan,
                                 "preferred_language": rqst_consumer_pref_lang,
                                 "address": address_instance,
-                                "date_met_nav": rqst_date_met_nav,}
+                                "date_met_nav": rqst_date_met_nav,
+                                "met_nav_at": rqst_consumer_met_nav_at,
+                                "household_size": rqst_consumer_household_size,
+                                }
 
         try:
             consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(first_name=rqst_consumer_f_name,
                                                                                              last_name=rqst_consumer_l_name,
-                                                                                             met_nav_at=rqst_consumer_met_nav_at,
-                                                                                             household_size=rqst_consumer_household_size,
                                                                                              defaults=consumer_rqst_values)
             if not consumer_instance_created:
                 query_params = {"first_name":rqst_consumer_f_name,
-                                 "last_name":rqst_consumer_l_name,
-                                 "met_nav_at":rqst_consumer_met_nav_at,
-                                 "household_size":rqst_consumer_household_size,}
-                post_errors.append('Consumer database entry already exists for the parameters: {!s}'.format(json.dumps(query_params)))
+                                "last_name":rqst_consumer_l_name,}
+                post_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(json.dumps(query_params)))
+                get_dupe_consumers(rqst_consumer_f_name, rqst_consumer_l_name, response_raw_data)
             else:
                 try:
                     nav_instance = PICStaff.objects.get(id=rqst_nav_id)
                     consumer_instance.navigator = nav_instance
                     consumer_instance.save()
+
+                    if consumer_instance:
+                        old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
+                        for old_consumer_note in old_consumer_notes:
+                            old_consumer_note.delete()
+
+                        for navigator_note in rqst_navigator_notes:
+                            consumer_note_object = ConsumerNote(consumer=consumer_instance,
+                                                                navigator_notes=navigator_note)
+                            consumer_note_object.save()
+
+                        if rqst_cps_consumer:
+                            add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, post_errors)
+                        else:
+                            response_raw_data['Status']['Warnings'].append('Consumer instance created without cps_info')
+
+                        response_raw_data['Data'] = {"Database ID": consumer_instance.id}
                 except PICStaff.DoesNotExist:
                     consumer_instance.delete()
-                    consumer_instance = None
                     post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
-
-                if consumer_instance:
-                    old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
-                    for old_consumer_note in old_consumer_notes:
-                        old_consumer_note.delete()
-
-                    for navigator_note in rqst_navigator_notes:
-                        consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
-                        consumer_note_object.save()
-
-                    if rqst_cps_consumer:
-                        add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, post_errors)
-                    else:
-                        response_raw_data['Status']['Warnings'].append('Consumer instance created without cps_info')
+                except IntegrityError:
+                    query_params = {"first_name": rqst_consumer_f_name,
+                                    "last_name": rqst_consumer_l_name,
+                                    "Navigator Database ID": rqst_nav_id}
+                    post_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(
+                        json.dumps(query_params)))
+                    get_dupe_consumers(rqst_consumer_f_name, rqst_consumer_l_name, response_raw_data)
 
         except IntegrityError:
             query_params = {"first_name":rqst_consumer_f_name,
-                             "last_name":rqst_consumer_l_name,
-                             "met_nav_at":rqst_consumer_met_nav_at,
-                             "household_size":rqst_consumer_household_size,}
-            post_errors.append('Consumer database entry already exists for the parameters: {!s}'.format(json.dumps(query_params)))
-            consumer_instance = PICConsumer.objects.get(email=rqst_consumer_email)
-        response_raw_data['Data'] = {"Database ID": consumer_instance.id}
+                            "last_name":rqst_consumer_l_name,
+                            "Navigator Database ID": rqst_nav_id}
+            post_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(json.dumps(query_params)))
+            get_dupe_consumers(rqst_consumer_f_name, rqst_consumer_l_name, response_raw_data)
 
     return response_raw_data
+
+
+def get_dupe_consumers(rqst_consumer_f_name, rqst_consumer_l_name, response_raw_data):
+    dupe_consumer_objects = PICConsumer.objects.filter(first_name=rqst_consumer_f_name,
+                                                       last_name=rqst_consumer_l_name)
+
+    response_raw_data['Data']['Possible Consumer Matches'] = []
+    for consumer in dupe_consumer_objects:
+        response_raw_data['Data']['Possible Consumer Matches'].append(consumer.return_values_dict())
 
 
 def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, post_errors):
