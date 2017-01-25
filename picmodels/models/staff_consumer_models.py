@@ -8,6 +8,8 @@ from django.contrib import admin
 from oauth2client.contrib.django_util.models import CredentialsField
 from django.dispatch import receiver
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 
 class PICStaff(models.Model):
@@ -132,7 +134,18 @@ class CredentialsAdmin(admin.ModelAdmin):
     pass
 
 
-class PICConsumer(models.Model):
+class PICConsumerBaseQuerySet(models.QuerySet):
+
+    def delete(self, *args, **kwargs):
+        for obj in self:
+            if obj.cps_info:
+                obj.cps_info.delete()
+        super(PICConsumerBaseQuerySet, self).delete(*args, **kwargs)
+
+
+class PICConsumerBase(models.Model):
+    objects = PICConsumerBaseQuerySet.as_manager()
+
     # fields for PICConsumer model
     first_name = models.CharField(max_length=1000)
     middle_name = models.CharField(max_length=1000, blank=True, null=True)
@@ -150,14 +163,12 @@ class PICConsumer(models.Model):
     date_met_nav = models.DateField(blank=True, null=True)
 
     cps_consumer = models.BooleanField(default=False)
+    cps_info = models.ForeignKey('ConsumerCPSInfoEntry', on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
-
-        unique_together = ("first_name",
-                           "last_name",
-                           "navigator",)
+        abstract = True
 
     def return_values_dict(self):
         valuesdict = {"First Name": self.first_name,
@@ -196,12 +207,27 @@ class PICConsumer(models.Model):
         if self.navigator is not None:
             valuesdict['Navigator'] = "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name)
 
-        try:
+        if self.cps_info:
             valuesdict['cps_info'] = self.cps_info.return_values_dict()
-        except ConsumerCPSInfoEntry.DoesNotExist:
-            pass
 
         return valuesdict
+
+    def delete(self, *args, **kwargs):
+        if self.cps_info:
+            self.cps_info.delete()
+        super(PICConsumerBase, self).delete(*args, **kwargs)
+
+
+class PICConsumer(PICConsumerBase):
+
+    class Meta(PICConsumerBase.Meta):
+        unique_together = ("first_name",
+                           "last_name",
+                           "navigator",)
+
+
+class PICConsumerBackup(PICConsumerBase):
+    pass
 
 
 class ConsumerNote(models.Model):
@@ -241,9 +267,7 @@ class ConsumerCPSInfoEntry(models.Model):
                           (DENIED, "Denied"),
                           (N_A, "Not Available"))
 
-    consumer = models.OneToOneField(PICConsumer, on_delete=models.CASCADE, related_name='cps_info')
-
-    primary_dependent = models.ForeignKey(PICConsumer, blank=True, null=True, related_name='primary_guardian')
+    primary_dependent = models.ForeignKey(PICConsumer, on_delete=models.SET_NULL, blank=True, null=True, related_name='primary_guardian')
     secondary_dependents = models.ManyToManyField(PICConsumer, blank=True, related_name='secondary_guardians')
 
     cps_location = models.ForeignKey(NavMetricsLocation, blank=True, null=True)
@@ -289,7 +313,6 @@ class ConsumerCPSInfoEntry(models.Model):
                       "cps_location": None,
                       "primary_dependent": None,
                       "secondary_dependents": None,
-                      "Consumer Database ID": self.consumer.id,
                       "Database ID": self.id}
 
         if self.apt_date is not None:

@@ -22,6 +22,9 @@ python3 manage.py dumpdata --exclude contenttypes.ContentType > 12-21-2016.json
 this command will create a fixture with current data from the database which can be used to load data from migration
 python3 manage.py dumpdata --exclude sessions.Session > 01-23-2017.json
 
+this command will create a fixture with current data from the database which can be loaded from the command line
+python3 manage.py dumpdata --exclude contenttypes.ContentType --exclude sessions.Session --exclude auth.Permission > 01-24-2017.json
+
 
 -creating an empty migration
 python manage.py makemigrations --empty <yourapp> --name load_intial_data

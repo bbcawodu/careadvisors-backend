@@ -271,7 +271,7 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
                                                           "app_status",
                                                           post_errors)
     if len(post_errors) == 0:
-        cps_info_object = ConsumerCPSInfoEntry(consumer=consumer_instance)
+        cps_info_object = ConsumerCPSInfoEntry()
 
         try:
             cps_location_object = NavMetricsLocation.objects.get(name=rqst_cps_location)
@@ -305,7 +305,6 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
             if primary_dependent_object._state.adding:
                 primary_dependent_object.save()
             cps_info_object.primary_dependent = primary_dependent_object
-
             cps_info_object.save()
 
             if secondary_dependents_list:
@@ -313,6 +312,10 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
                     if secondary_dependent_instance._state.adding:
                         secondary_dependent_instance.save()
                 cps_info_object.secondary_dependents = secondary_dependents_list
+            cps_info_object.save()
+
+            consumer_instance.cps_info = cps_info_object
+            consumer_instance.save()
         else:
             consumer_instance.delete()
     else:
@@ -594,7 +597,7 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
         try:
             cps_info_object = consumer_instance.cps_info
         except ConsumerCPSInfoEntry.DoesNotExist:
-            cps_info_object = ConsumerCPSInfoEntry(consumer=consumer_instance)
+            cps_info_object = ConsumerCPSInfoEntry()
 
         try:
             cps_location_object = NavMetricsLocation.objects.get(name=rqst_cps_location)
@@ -640,6 +643,9 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
                 cps_info_object.secondary_dependents = secondary_dependents_list
 
             cps_info_object.save()
+
+            consumer_instance.cps_info = cps_info_object
+            consumer_instance.save()
 
 
 def delete_consumer(response_raw_data, post_data, post_errors):
