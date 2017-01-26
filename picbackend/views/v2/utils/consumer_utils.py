@@ -12,6 +12,7 @@ from .base import clean_dict_value_from_dict_object
 from .base import clean_bool_value_from_dict_object
 from picmodels.models import PICStaff
 from picmodels.models import PICConsumer
+from picmodels.models import PICConsumerBackup
 from picmodels.models import ConsumerNote
 from picmodels.models import Address
 from picmodels.models import Country
@@ -80,6 +81,11 @@ def add_consumer(response_raw_data, post_data, post_errors):
                                                                "cps_info",
                                                                post_errors,
                                                                no_key_allowed=True)
+    rqst_create_backup = clean_bool_value_from_dict_object(post_data,
+                                                           "root",
+                                                           "create_backup",
+                                                           post_errors,
+                                                           no_key_allowed=True)
 
     if len(post_errors) == 0:
         address_instance = None
@@ -131,6 +137,12 @@ def add_consumer(response_raw_data, post_data, post_errors):
                             add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, post_errors)
                         else:
                             response_raw_data['Status']['Warnings'].append('Consumer instance created without cps_info')
+
+                        if len(post_errors) == 0 and rqst_create_backup:
+                            backup_consumer_obj = create_backup_consumer_obj(consumer_instance, response_raw_data,
+                                                                             post_errors)
+                            if backup_consumer_obj:
+                                response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
 
                         response_raw_data['Data'] = {"Database ID": consumer_instance.id}
                 except PICStaff.DoesNotExist:
@@ -412,6 +424,12 @@ def modify_consumer(response_raw_data, post_data, post_errors):
                                                                post_errors,
                                                                no_key_allowed=True)
 
+    rqst_create_backup = clean_bool_value_from_dict_object(post_data,
+                                                           "root",
+                                                           "create_backup",
+                                                           post_errors,
+                                                           no_key_allowed=True)
+
     if len(post_errors) == 0:
         address_instance = None
         if rqst_address_line_1 != '' and rqst_city != '' and rqst_state != '' and rqst_zipcode != '':
@@ -455,15 +473,18 @@ def modify_consumer(response_raw_data, post_data, post_errors):
 
             if len(post_errors) == 0:
                 consumer_instance.save()
+                old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
+                for old_consumer_note in old_consumer_notes:
+                    old_consumer_note.delete()
 
-                if consumer_instance:
-                    old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
-                    for old_consumer_note in old_consumer_notes:
-                        old_consumer_note.delete()
+                for navigator_note in rqst_navigator_notes:
+                    consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
+                    consumer_note_object.save()
 
-                    for navigator_note in rqst_navigator_notes:
-                        consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
-                        consumer_note_object.save()
+                if rqst_create_backup:
+                    backup_consumer_obj = create_backup_consumer_obj(consumer_instance, response_raw_data, post_errors)
+                    if backup_consumer_obj:
+                        response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
 
             response_raw_data['Data'] = {"Database ID": consumer_instance.id}
         except PICConsumer.DoesNotExist:
@@ -666,18 +687,80 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
 
 def delete_consumer(response_raw_data, post_data, post_errors):
     rqst_consumer_id = clean_int_value_from_dict_object(post_data, "root", "Consumer Database ID", post_errors)
+    rqst_create_backup = clean_bool_value_from_dict_object(post_data,
+                                                          "root",
+                                                          "create_backup",
+                                                          post_errors,
+                                                          no_key_allowed=True)
 
     if len(post_errors) == 0:
         try:
             consumer_instance = PICConsumer.objects.get(id=rqst_consumer_id)
+            response_raw_data['Data'] = {}
+
+            if rqst_create_backup:
+                backup_consumer_obj = create_backup_consumer_obj(consumer_instance, response_raw_data, post_errors)
+                if backup_consumer_obj:
+                    response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
+
             consumer_instance.delete()
-            response_raw_data['Data'] = {"Database ID": "Deleted"}
+            response_raw_data['Data']["Database ID"] = "Deleted"
         except PICConsumer.DoesNotExist:
             post_errors.append('Consumer database entry does not exist for the id: {!s}'.format(str(rqst_consumer_id)))
         except PICConsumer.MultipleObjectsReturned:
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_consumer_id)))
 
     return response_raw_data
+
+
+# getattr(object, field_name)
+# need to manually copy consumer notes
+def create_backup_consumer_obj(consumer_instance, response_raw_data, post_errors):
+    consumer_instance_fields = consumer_instance._meta.get_fields()
+    non_null_field_name_list = []
+    for field in consumer_instance_fields:
+        try:
+            if getattr(consumer_instance, field.name) is not None and field.name != 'id':
+                non_null_field_name_list.append(field.name)
+        except AttributeError:
+            pass
+
+    backup_consumer_obj = PICConsumerBackup()
+    for orig_field in non_null_field_name_list:
+        orig_field_value = getattr(consumer_instance, orig_field)
+        if orig_field == "cps_info":
+            pass
+        else:
+            setattr(backup_consumer_obj, orig_field, orig_field_value)
+    backup_consumer_obj.save()
+
+    if "cps_info" in non_null_field_name_list:
+        cps_info_copy = ConsumerCPSInfoEntry()
+        cps_info_orig = getattr(consumer_instance, "cps_info")
+        cps_info_orig_fields = cps_info_orig._meta.get_fields()
+
+        for cps_info_orig_field in cps_info_orig_fields:
+            try:
+                cps_info_orig_field_value = getattr(cps_info_orig, cps_info_orig_field.name)
+                if cps_info_orig_field.name == 'secondary_dependents':
+                    pass
+                elif cps_info_orig_field.name != 'id':
+                    setattr(cps_info_copy, cps_info_orig_field.name, cps_info_orig_field_value)
+            except AttributeError:
+                pass
+        cps_info_copy.save()
+
+        setattr(backup_consumer_obj, "cps_info", cps_info_copy)
+        backup_consumer_obj.save()
+
+    orig_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
+    for consumer_note in orig_consumer_notes:
+        consumer_note_copy_object = ConsumerNote(consumer_backup=backup_consumer_obj,
+                                                 navigator_notes=consumer_note.navigator_notes)
+        consumer_note_copy_object.save()
+
+    return backup_consumer_obj
+
 
 
 def retrieve_f_l_name_consumers(response_raw_data, rqst_errors, consumers, rqst_first_name, rqst_last_name):

@@ -8,8 +8,6 @@ from django.contrib import admin
 from oauth2client.contrib.django_util.models import CredentialsField
 from django.dispatch import receiver
 from django.conf import settings
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 
 
 class PICStaff(models.Model):
@@ -227,11 +225,22 @@ class PICConsumer(PICConsumerBase):
 
 
 class PICConsumerBackup(PICConsumerBase):
-    pass
+    def return_values_dict(self):
+        valuesdict = super(PICConsumerBackup, self).return_values_dict()
+        valuesdict["Navigator Notes"] = None
+
+        navigator_note_objects = ConsumerNote.objects.filter(consumer_backup=self.id)
+        navigator_note_list = []
+        for navigator_note in navigator_note_objects:
+            navigator_note_list.append(navigator_note.navigator_notes)
+        valuesdict["Navigator Notes"] = navigator_note_list
+
+        return valuesdict
 
 
 class ConsumerNote(models.Model):
     consumer = models.ForeignKey(PICConsumer, on_delete=models.CASCADE)
+    consumer_backup = models.ForeignKey(PICConsumerBackup, on_delete=models.CASCADE, blank=True, null=True)
     navigator_notes = models.TextField(blank=True, default="")
 
     class Meta:
