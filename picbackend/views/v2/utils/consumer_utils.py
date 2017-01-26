@@ -25,6 +25,8 @@ from django import forms
 
 def add_consumer(response_raw_data, post_data, post_errors):
     add_consumer_params = get_consumer_mgmt_put_params(post_data, post_errors)
+    if not add_consumer_params['rqst_cps_consumer']:
+        add_consumer_params['rqst_cps_consumer'] = False
 
     if len(post_errors) == 0:
         address_instance = None
@@ -634,8 +636,6 @@ def get_consumer_mgmt_put_params(post_data, post_errors):
                                                           "cps_consumer",
                                                           post_errors,
                                                           no_key_allowed=True)
-    if not rqst_cps_consumer:
-        rqst_cps_consumer = False
 
     rqst_cps_info_dict = None
     if rqst_cps_consumer:
