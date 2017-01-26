@@ -24,102 +24,43 @@ from django import forms
 
 
 def add_consumer(response_raw_data, post_data, post_errors):
-    rqst_consumer_email = clean_string_value_from_dict_object(post_data, "root", "Email", post_errors, empty_string_allowed=True)
-    if rqst_consumer_email and not post_errors:
-        try:
-            validate_email(rqst_consumer_email)
-        except forms.ValidationError:
-            post_errors.append("{!s} must be a valid email address".format(rqst_consumer_email))
-    rqst_consumer_f_name = clean_string_value_from_dict_object(post_data, "root", "First Name", post_errors)
-    rqst_consumer_m_name = clean_string_value_from_dict_object(post_data, "root", "Middle Name", post_errors, empty_string_allowed=True)
-    rqst_consumer_l_name = clean_string_value_from_dict_object(post_data, "root", "Last Name", post_errors)
-    rqst_consumer_plan = clean_string_value_from_dict_object(post_data, "root", "Plan", post_errors, empty_string_allowed=True)
-    rqst_consumer_met_nav_at = clean_string_value_from_dict_object(post_data, "root", "Met Navigator At", post_errors)
-    rqst_consumer_household_size = clean_int_value_from_dict_object(post_data, "root", "Household Size", post_errors)
-    rqst_consumer_phone = clean_string_value_from_dict_object(post_data, "root", "Phone Number", post_errors, empty_string_allowed=True)
-    rqst_consumer_pref_lang = clean_string_value_from_dict_object(post_data, "root", "Preferred Language", post_errors, empty_string_allowed=True)
-    rqst_navigator_notes = clean_list_value_from_dict_object(post_data, "root", "Navigator Notes", post_errors, empty_list_allowed=True)
-    rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator Database ID", post_errors)
-
-    rqst_address_line_1 = clean_string_value_from_dict_object(post_data, "root", "Address Line 1", post_errors, empty_string_allowed=True)
-    rqst_address_line_2 = clean_string_value_from_dict_object(post_data, "root", "Address Line 2", post_errors, empty_string_allowed=True)
-    if rqst_address_line_2 is None:
-        rqst_address_line_2 = ''
-    rqst_city = clean_string_value_from_dict_object(post_data, "root", "City", post_errors, empty_string_allowed=True)
-    rqst_state = clean_string_value_from_dict_object(post_data, "root", "State", post_errors, empty_string_allowed=True)
-    rqst_zipcode = clean_string_value_from_dict_object(post_data, "root", "Zipcode", post_errors, empty_string_allowed=True)
-
-    date_met_nav_dict = clean_dict_value_from_dict_object(post_data, "root", "date_met_nav", post_errors, none_allowed=True)
-    rqst_date_met_nav = None
-    if date_met_nav_dict is not None:
-        month = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Month", post_errors)
-        if month < 1 or month > 12:
-            post_errors.append("Month must be between 1 and 12 inclusive")
-
-        day = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Day", post_errors)
-        if day < 1 or day > 31:
-            post_errors.append("Day must be between 1 and 31 inclusive")
-
-        year = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Year", post_errors)
-        if year < 1 or year > 9999:
-            post_errors.append("Year must be between 1 and 9999 inclusive")
-
-        if len(post_errors) == 0:
-            rqst_date_met_nav = datetime.date(year, month, day)
-
-    rqst_cps_consumer = clean_bool_value_from_dict_object(post_data,
-                                                          "root",
-                                                          "cps_consumer",
-                                                          post_errors,
-                                                          no_key_allowed=True)
-    if not rqst_cps_consumer:
-        rqst_cps_consumer = False
-
-    if rqst_cps_consumer:
-        rqst_cps_info_dict = clean_dict_value_from_dict_object(post_data,
-                                                               "root",
-                                                               "cps_info",
-                                                               post_errors,
-                                                               no_key_allowed=True)
-    rqst_create_backup = clean_bool_value_from_dict_object(post_data,
-                                                           "root",
-                                                           "create_backup",
-                                                           post_errors,
-                                                           no_key_allowed=True)
+    add_consumer_params = get_consumer_mgmt_put_params(post_data, post_errors)
 
     if len(post_errors) == 0:
         address_instance = None
-        if rqst_address_line_1 != '' and rqst_city != '' and rqst_state != '' and rqst_zipcode != '':
-            address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=rqst_address_line_1,
-                                                                                       address_line_2=rqst_address_line_2,
-                                                                                       city=rqst_city,
-                                                                                       state_province=rqst_state,
-                                                                                       zipcode=rqst_zipcode,
+        if add_consumer_params['rqst_address_line_1'] != '' and add_consumer_params['rqst_city'] != '' and add_consumer_params['rqst_state'] != '' and add_consumer_params['rqst_zipcode'] != '':
+            address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=add_consumer_params['rqst_address_line_1'],
+                                                                                       address_line_2=add_consumer_params['rqst_address_line_2'],
+                                                                                       city=add_consumer_params['rqst_city'],
+                                                                                       state_province=add_consumer_params['rqst_state'],
+                                                                                       zipcode=add_consumer_params['rqst_zipcode'],
                                                                                        country=Country.objects.all()[0])
 
-        consumer_rqst_values = {"email": rqst_consumer_email,
-                                "middle_name": rqst_consumer_m_name,
-                                "phone": rqst_consumer_phone,
-                                "plan": rqst_consumer_plan,
-                                "preferred_language": rqst_consumer_pref_lang,
+        consumer_rqst_values = {"email": add_consumer_params['rqst_consumer_email'],
+                                "middle_name": add_consumer_params['rqst_consumer_m_name'],
+                                "phone": add_consumer_params['rqst_consumer_phone'],
+                                "plan": add_consumer_params['rqst_consumer_plan'],
+                                "preferred_language": add_consumer_params['rqst_consumer_pref_lang'],
                                 "address": address_instance,
-                                "date_met_nav": rqst_date_met_nav,
-                                "met_nav_at": rqst_consumer_met_nav_at,
-                                "household_size": rqst_consumer_household_size,
+                                "date_met_nav": add_consumer_params['rqst_date_met_nav'],
+                                "met_nav_at": add_consumer_params['rqst_consumer_met_nav_at'],
+                                "household_size": add_consumer_params['rqst_consumer_household_size'],
                                 }
 
         try:
-            consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(first_name=rqst_consumer_f_name,
-                                                                                             last_name=rqst_consumer_l_name,
+            consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(first_name=add_consumer_params['rqst_consumer_f_name'],
+                                                                                             last_name=add_consumer_params['rqst_consumer_l_name'],
                                                                                              defaults=consumer_rqst_values)
             if not consumer_instance_created:
-                query_params = {"first_name":rqst_consumer_f_name,
-                                "last_name":rqst_consumer_l_name,}
+                query_params = {"first_name":add_consumer_params['rqst_consumer_f_name'],
+                                "last_name":add_consumer_params['rqst_consumer_l_name'],}
                 post_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(json.dumps(query_params)))
-                get_dupe_consumers(rqst_consumer_f_name, rqst_consumer_l_name, response_raw_data)
+                get_dupe_consumers(add_consumer_params['rqst_consumer_f_name'],
+                                   add_consumer_params['rqst_consumer_l_name'],
+                                   response_raw_data)
             else:
                 try:
-                    nav_instance = PICStaff.objects.get(id=rqst_nav_id)
+                    nav_instance = PICStaff.objects.get(id=add_consumer_params['rqst_nav_id'])
                     consumer_instance.navigator = nav_instance
                     consumer_instance.save()
 
@@ -128,40 +69,44 @@ def add_consumer(response_raw_data, post_data, post_errors):
                         for old_consumer_note in old_consumer_notes:
                             old_consumer_note.delete()
 
-                        for navigator_note in rqst_navigator_notes:
+                        for navigator_note in add_consumer_params['rqst_navigator_notes']:
                             consumer_note_object = ConsumerNote(consumer=consumer_instance,
                                                                 navigator_notes=navigator_note)
                             consumer_note_object.save()
 
-                        if rqst_cps_consumer:
-                            add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, post_errors)
+                        if add_consumer_params['rqst_cps_consumer']:
+                            add_cps_info_to_consumer_instance(consumer_instance, add_consumer_params['rqst_cps_info_dict'], post_errors)
                         else:
                             response_raw_data['Status']['Warnings'].append('Consumer instance created without cps_info')
 
-                        if len(post_errors) == 0 and rqst_create_backup:
+                        if len(post_errors) == 0 and add_consumer_params['rqst_create_backup']:
                             backup_consumer_obj = create_backup_consumer_obj(consumer_instance, response_raw_data,
                                                                              post_errors)
                             if backup_consumer_obj:
                                 response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
 
-                        response_raw_data['Data'] = {"Database ID": consumer_instance.id}
+                        response_raw_data['Data']["Database ID"] = consumer_instance.id
                 except PICStaff.DoesNotExist:
                     consumer_instance.delete()
-                    post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
+                    post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(add_consumer_params['rqst_nav_id'])))
                 except IntegrityError:
-                    query_params = {"first_name": rqst_consumer_f_name,
-                                    "last_name": rqst_consumer_l_name,
-                                    "Navigator Database ID": rqst_nav_id}
+                    query_params = {"first_name": add_consumer_params['rqst_consumer_f_name'],
+                                    "last_name": add_consumer_params['rqst_consumer_l_name'],
+                                    "Navigator Database ID": add_consumer_params['rqst_nav_id']}
                     post_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(
                         json.dumps(query_params)))
-                    get_dupe_consumers(rqst_consumer_f_name, rqst_consumer_l_name, response_raw_data)
+                    get_dupe_consumers(add_consumer_params['rqst_consumer_f_name'],
+                                       add_consumer_params['rqst_consumer_l_name'],
+                                       response_raw_data)
 
         except IntegrityError:
-            query_params = {"first_name":rqst_consumer_f_name,
-                            "last_name":rqst_consumer_l_name,
-                            "Navigator Database ID": rqst_nav_id}
+            query_params = {"first_name":add_consumer_params['rqst_consumer_f_name'],
+                            "last_name":add_consumer_params['rqst_consumer_l_name'],
+                            "Navigator Database ID": add_consumer_params['rqst_nav_id']}
             post_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(json.dumps(query_params)))
-            get_dupe_consumers(rqst_consumer_f_name, rqst_consumer_l_name, response_raw_data)
+            get_dupe_consumers(add_consumer_params['rqst_consumer_f_name'],
+                               add_consumer_params['rqst_consumer_l_name'],
+                               response_raw_data)
 
     return response_raw_data
 
@@ -683,6 +628,103 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
 
             consumer_instance.cps_info = cps_info_object
             consumer_instance.save()
+
+
+def get_consumer_mgmt_put_params(post_data, post_errors):
+    rqst_consumer_email = clean_string_value_from_dict_object(post_data, "root", "Email", post_errors,
+                                                              empty_string_allowed=True)
+    if rqst_consumer_email and not post_errors:
+        try:
+            validate_email(rqst_consumer_email)
+        except forms.ValidationError:
+            post_errors.append("{!s} must be a valid email address".format(rqst_consumer_email))
+    rqst_consumer_f_name = clean_string_value_from_dict_object(post_data, "root", "First Name", post_errors)
+    rqst_consumer_m_name = clean_string_value_from_dict_object(post_data, "root", "Middle Name", post_errors,
+                                                               empty_string_allowed=True)
+    rqst_consumer_l_name = clean_string_value_from_dict_object(post_data, "root", "Last Name", post_errors)
+    rqst_consumer_plan = clean_string_value_from_dict_object(post_data, "root", "Plan", post_errors,
+                                                             empty_string_allowed=True)
+    rqst_consumer_met_nav_at = clean_string_value_from_dict_object(post_data, "root", "Met Navigator At", post_errors)
+    rqst_consumer_household_size = clean_int_value_from_dict_object(post_data, "root", "Household Size", post_errors)
+    rqst_consumer_phone = clean_string_value_from_dict_object(post_data, "root", "Phone Number", post_errors,
+                                                              empty_string_allowed=True)
+    rqst_consumer_pref_lang = clean_string_value_from_dict_object(post_data, "root", "Preferred Language", post_errors,
+                                                                  empty_string_allowed=True)
+    rqst_navigator_notes = clean_list_value_from_dict_object(post_data, "root", "Navigator Notes", post_errors,
+                                                             empty_list_allowed=True)
+    rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator Database ID", post_errors)
+
+    rqst_address_line_1 = clean_string_value_from_dict_object(post_data, "root", "Address Line 1", post_errors,
+                                                              empty_string_allowed=True)
+    rqst_address_line_2 = clean_string_value_from_dict_object(post_data, "root", "Address Line 2", post_errors,
+                                                              empty_string_allowed=True)
+    if rqst_address_line_2 is None:
+        rqst_address_line_2 = ''
+    rqst_city = clean_string_value_from_dict_object(post_data, "root", "City", post_errors, empty_string_allowed=True)
+    rqst_state = clean_string_value_from_dict_object(post_data, "root", "State", post_errors, empty_string_allowed=True)
+    rqst_zipcode = clean_string_value_from_dict_object(post_data, "root", "Zipcode", post_errors,
+                                                       empty_string_allowed=True)
+
+    date_met_nav_dict = clean_dict_value_from_dict_object(post_data, "root", "date_met_nav", post_errors,
+                                                          none_allowed=True)
+    rqst_date_met_nav = None
+    if date_met_nav_dict is not None:
+        month = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Month", post_errors)
+        if month < 1 or month > 12:
+            post_errors.append("Month must be between 1 and 12 inclusive")
+
+        day = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Day", post_errors)
+        if day < 1 or day > 31:
+            post_errors.append("Day must be between 1 and 31 inclusive")
+
+        year = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Year", post_errors)
+        if year < 1 or year > 9999:
+            post_errors.append("Year must be between 1 and 9999 inclusive")
+
+        if len(post_errors) == 0:
+            rqst_date_met_nav = datetime.date(year, month, day)
+
+    rqst_cps_consumer = clean_bool_value_from_dict_object(post_data,
+                                                          "root",
+                                                          "cps_consumer",
+                                                          post_errors,
+                                                          no_key_allowed=True)
+    if not rqst_cps_consumer:
+        rqst_cps_consumer = False
+
+    rqst_cps_info_dict = None
+    if rqst_cps_consumer:
+        rqst_cps_info_dict = clean_dict_value_from_dict_object(post_data,
+                                                               "root",
+                                                               "cps_info",
+                                                               post_errors,
+                                                               no_key_allowed=True)
+    rqst_create_backup = clean_bool_value_from_dict_object(post_data,
+                                                           "root",
+                                                           "create_backup",
+                                                           post_errors,
+                                                           no_key_allowed=True)
+
+    return {"rqst_consumer_email": rqst_consumer_email,
+            "rqst_consumer_f_name": rqst_consumer_f_name,
+            "rqst_consumer_m_name": rqst_consumer_m_name,
+            "rqst_consumer_l_name": rqst_consumer_l_name,
+            "rqst_consumer_plan": rqst_consumer_plan,
+            "rqst_consumer_met_nav_at": rqst_consumer_met_nav_at,
+            "rqst_consumer_household_size": rqst_consumer_household_size,
+            "rqst_consumer_phone": rqst_consumer_phone,
+            "rqst_consumer_pref_lang": rqst_consumer_pref_lang,
+            "rqst_navigator_notes": rqst_navigator_notes,
+            "rqst_nav_id": rqst_nav_id,
+            "rqst_address_line_1": rqst_address_line_1,
+            "rqst_address_line_2": rqst_address_line_2,
+            "rqst_city": rqst_city,
+            "rqst_state": rqst_state,
+            "rqst_zipcode": rqst_zipcode,
+            "rqst_date_met_nav": rqst_date_met_nav,
+            "rqst_cps_consumer": rqst_cps_consumer,
+            "rqst_cps_info_dict": rqst_cps_info_dict,
+            "rqst_create_backup": rqst_create_backup}
 
 
 def delete_consumer(response_raw_data, post_data, post_errors):
