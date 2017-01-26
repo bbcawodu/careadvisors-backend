@@ -15,11 +15,13 @@ def clean_string_value_from_dict_object(dict_object, dict_name, dict_key, post_e
         post_errors.append("Value for {!r} in {!r} dictionary is an empty string".format(dict_key, dict_name))
     elif dict_object[dict_key] is None and none_allowed is False:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
-    elif not isinstance(dict_object[dict_key], str):
+    elif not none_allowed and not isinstance(dict_object[dict_key], str):
         post_errors.append("Value for {!r} in {!r} dictionary is not a string".format(dict_key, dict_name))
     else:
         if dict_object[dict_key] or dict_object[dict_key] == "":
             return str(dict_object[dict_key])
+        else:
+            return None
 
 
 def clean_int_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, no_key_allowed=False):
@@ -44,7 +46,7 @@ def clean_dict_value_from_dict_object(dict_object, dict_name, dict_key, post_err
             post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
     elif dict_object[dict_key] is None and none_allowed == False:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
-    elif not isinstance(dict_object[dict_key], dict):
+    elif not none_allowed and not isinstance(dict_object[dict_key], dict):
         post_errors.append("Value for {!r} in {!r} dictionary is not a dictionary".format(dict_key, dict_name))
     elif dict_object[dict_key] == {}:
         post_errors.append("Value for {!r} in {!r} dictionary is an empty dictionary".format(dict_key, dict_name))
