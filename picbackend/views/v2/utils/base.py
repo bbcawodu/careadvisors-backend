@@ -175,7 +175,8 @@ def build_search_params(rqst_params, response_raw_data, rqst_errors):
 
 
 def init_v2_response_data():
-    return {'Status': {"Error Code": 0, "Warnings": [], "Version": 2.0, "Missing Parameters": []}}, []
+    return {'Status': {"Error Code": 0, "Warnings": [], "Version": 2.0, "Missing Parameters": []},
+            'Data': {}}, []
 
 
 def parse_and_log_errors(response_raw_data, errors_list):
