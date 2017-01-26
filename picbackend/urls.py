@@ -98,6 +98,7 @@ urlpatterns = [
 
     # urls for consumer views
     url(r"^v2/consumers/$", views.ConsumerManagementView.as_view()),
+    url(r"^v2/backup_consumers/$", views.ConsumerBackupManagementView.as_view()),
 
     # urls for consumer metrics views
     url(r"^v2/metrics/$", views.ConsumerMetricsManagementView.as_view()),
