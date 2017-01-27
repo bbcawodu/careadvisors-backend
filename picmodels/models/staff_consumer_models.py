@@ -219,9 +219,7 @@ class PICConsumerBase(models.Model):
 class PICConsumer(PICConsumerBase):
 
     class Meta(PICConsumerBase.Meta):
-        unique_together = ("first_name",
-                           "last_name",
-                           "navigator",)
+        unique_together = ()
 
 
 class PICConsumerBackup(PICConsumerBase):
