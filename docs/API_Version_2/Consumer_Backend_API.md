@@ -69,6 +69,7 @@ Address(Every field within address can be given as an empty string. Address will
 "Consumer Database ID": Integer(Required when "Database Action" == "Consumer Modification" or "Consumer Deletion"),
 "Database Action": String,
 "create_backup": Boolean (Whether or not to create a backup instance of this consumer)(Key can be omitted),
+"force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db)(Key can be omitted),
 }
 ```
 
