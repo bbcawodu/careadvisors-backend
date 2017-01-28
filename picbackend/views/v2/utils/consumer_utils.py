@@ -27,99 +27,74 @@ def add_consumer(response_raw_data, post_data, post_errors):
     add_consumer_params = get_consumer_mgmt_put_params(post_data, post_errors)
     if not add_consumer_params['rqst_cps_consumer']:
         add_consumer_params['rqst_cps_consumer'] = False
+    add_consumer_params['force_create_consumer'] = clean_bool_value_from_dict_object(post_data,
+                                                                                     "root",
+                                                                                     "force_create_consumer",
+                                                                                     post_errors,
+                                                                                     no_key_allowed=True)
 
     if len(post_errors) == 0:
-        address_instance = None
-        if add_consumer_params['rqst_address_line_1'] != '' and add_consumer_params['rqst_city'] != '' and add_consumer_params['rqst_state'] != '' and add_consumer_params['rqst_zipcode'] != '':
-            address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=add_consumer_params['rqst_address_line_1'],
-                                                                                       address_line_2=add_consumer_params['rqst_address_line_2'],
-                                                                                       city=add_consumer_params['rqst_city'],
-                                                                                       state_province=add_consumer_params['rqst_state'],
-                                                                                       zipcode=add_consumer_params['rqst_zipcode'],
-                                                                                       country=Country.objects.all()[0])
+        found_consumers = PICConsumer.objects.filter(first_name=add_consumer_params['rqst_consumer_f_name'],
+                                                     last_name=add_consumer_params['rqst_consumer_l_name'])
 
-        consumer_rqst_values = {"email": add_consumer_params['rqst_consumer_email'],
-                                "middle_name": add_consumer_params['rqst_consumer_m_name'],
-                                "phone": add_consumer_params['rqst_consumer_phone'],
-                                "plan": add_consumer_params['rqst_consumer_plan'],
-                                "preferred_language": add_consumer_params['rqst_consumer_pref_lang'],
-                                "address": address_instance,
-                                "date_met_nav": add_consumer_params['rqst_date_met_nav'],
-                                "met_nav_at": add_consumer_params['rqst_consumer_met_nav_at'],
-                                "household_size": add_consumer_params['rqst_consumer_household_size'],
-                                }
+        if found_consumers and not add_consumer_params['force_create_consumer']:
+            query_params = {"first_name": add_consumer_params['rqst_consumer_f_name'],
+                            "last_name": add_consumer_params['rqst_consumer_l_name'], }
+            post_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(
+                json.dumps(query_params)))
 
-        try:
-            consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(first_name=add_consumer_params['rqst_consumer_f_name'],
-                                                                                             last_name=add_consumer_params['rqst_consumer_l_name'],
-                                                                                             defaults=consumer_rqst_values)
-            if not consumer_instance_created:
-                query_params = {"first_name":add_consumer_params['rqst_consumer_f_name'],
-                                "last_name":add_consumer_params['rqst_consumer_l_name'],}
-                post_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(json.dumps(query_params)))
-                get_dupe_consumers(add_consumer_params['rqst_consumer_f_name'],
-                                   add_consumer_params['rqst_consumer_l_name'],
-                                   response_raw_data)
-            else:
-                try:
-                    nav_instance = PICStaff.objects.get(id=add_consumer_params['rqst_nav_id'])
-                    consumer_instance.navigator = nav_instance
-                    consumer_instance.save()
+            response_raw_data['Data']['Possible Consumer Matches'] = []
+            for consumer in found_consumers:
+                response_raw_data['Data']['Possible Consumer Matches'].append(consumer.return_values_dict())
+        else:
+            address_instance = None
+            if add_consumer_params['rqst_address_line_1'] != '' and add_consumer_params['rqst_city'] != '' and add_consumer_params['rqst_state'] != '' and add_consumer_params['rqst_zipcode'] != '':
+                address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=add_consumer_params['rqst_address_line_1'],
+                                                                                           address_line_2=add_consumer_params['rqst_address_line_2'],
+                                                                                           city=add_consumer_params['rqst_city'],
+                                                                                           state_province=add_consumer_params['rqst_state'],
+                                                                                           zipcode=add_consumer_params['rqst_zipcode'],
+                                                                                           country=Country.objects.all()[0])
 
-                    if consumer_instance:
-                        old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
-                        for old_consumer_note in old_consumer_notes:
-                            old_consumer_note.delete()
+            consumer_instance = PICConsumer(first_name=add_consumer_params['rqst_consumer_f_name'],
+                                            middle_name=add_consumer_params['rqst_consumer_m_name'],
+                                            last_name=add_consumer_params['rqst_consumer_l_name'],
+                                            email=add_consumer_params['rqst_consumer_email'],
+                                            phone=add_consumer_params['rqst_consumer_phone'],
+                                            plan=add_consumer_params['rqst_consumer_plan'],
+                                            preferred_language=add_consumer_params['rqst_consumer_pref_lang'],
+                                            address=address_instance,
+                                            date_met_nav=add_consumer_params['rqst_date_met_nav'],
+                                            met_nav_at=add_consumer_params['rqst_consumer_met_nav_at'],
+                                            household_size=add_consumer_params['rqst_consumer_household_size'],
+                                            )
 
-                        for navigator_note in add_consumer_params['rqst_navigator_notes']:
-                            consumer_note_object = ConsumerNote(consumer=consumer_instance,
-                                                                navigator_notes=navigator_note)
-                            consumer_note_object.save()
+            try:
+                nav_instance = PICStaff.objects.get(id=add_consumer_params['rqst_nav_id'])
+                consumer_instance.navigator = nav_instance
+                consumer_instance.save()
 
-                        if add_consumer_params['rqst_cps_consumer']:
-                            add_cps_info_to_consumer_instance(consumer_instance, add_consumer_params['rqst_cps_info_dict'], post_errors)
-                        else:
-                            response_raw_data['Status']['Warnings'].append('Consumer instance created without cps_info')
+                for navigator_note in add_consumer_params['rqst_navigator_notes']:
+                    consumer_note_object = ConsumerNote(consumer=consumer_instance,
+                                                        navigator_notes=navigator_note)
+                    consumer_note_object.save()
 
-                        if len(post_errors) == 0 and add_consumer_params['rqst_create_backup']:
-                            backup_consumer_obj = create_backup_consumer_obj(consumer_instance, response_raw_data,
-                                                                             post_errors)
-                            if backup_consumer_obj:
-                                response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
+                if add_consumer_params['rqst_cps_consumer']:
+                    add_cps_info_to_consumer_instance(consumer_instance, add_consumer_params['rqst_cps_info_dict'], post_errors)
+                else:
+                    response_raw_data['Status']['Warnings'].append('Consumer instance created without cps_info')
 
-                        response_raw_data['Data']["Database ID"] = consumer_instance.id
-                except PICStaff.DoesNotExist:
-                    consumer_instance.delete()
-                    post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(add_consumer_params['rqst_nav_id'])))
-                except IntegrityError:
-                    query_params = {"first_name": add_consumer_params['rqst_consumer_f_name'],
-                                    "last_name": add_consumer_params['rqst_consumer_l_name'],
-                                    "Navigator Database ID": add_consumer_params['rqst_nav_id']}
-                    post_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(
-                        json.dumps(query_params)))
-                    get_dupe_consumers(add_consumer_params['rqst_consumer_f_name'],
-                                       add_consumer_params['rqst_consumer_l_name'],
-                                       response_raw_data)
+                if len(post_errors) == 0 and add_consumer_params['rqst_create_backup']:
+                    backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
+                    if backup_consumer_obj:
+                        response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
 
-        except IntegrityError:
-            query_params = {"first_name":add_consumer_params['rqst_consumer_f_name'],
-                            "last_name":add_consumer_params['rqst_consumer_l_name'],
-                            "Navigator Database ID": add_consumer_params['rqst_nav_id']}
-            post_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(json.dumps(query_params)))
-            get_dupe_consumers(add_consumer_params['rqst_consumer_f_name'],
-                               add_consumer_params['rqst_consumer_l_name'],
-                               response_raw_data)
+                response_raw_data['Data']["Database ID"] = consumer_instance.id
+            except PICStaff.DoesNotExist:
+                consumer_instance.delete()
+                post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(add_consumer_params['rqst_nav_id'])))
 
     return response_raw_data
-
-
-def get_dupe_consumers(rqst_consumer_f_name, rqst_consumer_l_name, response_raw_data):
-    dupe_consumer_objects = PICConsumer.objects.filter(first_name=rqst_consumer_f_name,
-                                                       last_name=rqst_consumer_l_name)
-
-    response_raw_data['Data']['Possible Consumer Matches'] = []
-    for consumer in dupe_consumer_objects:
-        response_raw_data['Data']['Possible Consumer Matches'].append(consumer.return_values_dict())
 
 
 def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, post_errors):
@@ -374,7 +349,7 @@ def modify_consumer(response_raw_data, post_data, post_errors):
                     consumer_note_object.save()
 
                 if modify_consumer_params['rqst_create_backup']:
-                    backup_consumer_obj = create_backup_consumer_obj(consumer_instance, response_raw_data, post_errors)
+                    backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
                     if backup_consumer_obj:
                         response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
 
@@ -686,7 +661,7 @@ def delete_consumer(response_raw_data, post_data, post_errors):
             response_raw_data['Data'] = {}
 
             if rqst_create_backup:
-                backup_consumer_obj = create_backup_consumer_obj(consumer_instance, response_raw_data, post_errors)
+                backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
                 if backup_consumer_obj:
                     response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
 
@@ -702,7 +677,7 @@ def delete_consumer(response_raw_data, post_data, post_errors):
 
 # getattr(object, field_name)
 # need to manually copy consumer notes
-def create_backup_consumer_obj(consumer_instance, response_raw_data, post_errors):
+def create_backup_consumer_obj(consumer_instance):
     consumer_instance_fields = consumer_instance._meta.get_fields()
     non_null_field_name_list = []
     for field in consumer_instance_fields:
@@ -747,7 +722,6 @@ def create_backup_consumer_obj(consumer_instance, response_raw_data, post_errors
         consumer_note_copy_object.save()
 
     return backup_consumer_obj
-
 
 
 def retrieve_f_l_name_consumers(response_raw_data, rqst_errors, consumers, rqst_first_name, rqst_last_name):
