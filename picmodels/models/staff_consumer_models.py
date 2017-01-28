@@ -237,7 +237,7 @@ class PICConsumerBackup(PICConsumerBase):
 
 
 class ConsumerNote(models.Model):
-    consumer = models.ForeignKey(PICConsumer, on_delete=models.CASCADE)
+    consumer = models.ForeignKey(PICConsumer, on_delete=models.CASCADE, blank=True, null=True)
     consumer_backup = models.ForeignKey(PICConsumerBackup, on_delete=models.CASCADE, blank=True, null=True)
     navigator_notes = models.TextField(blank=True, default="")
 
