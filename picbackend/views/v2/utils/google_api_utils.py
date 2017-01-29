@@ -13,18 +13,17 @@ from googleapiclient.http import BatchHttpRequest
 from .base import clean_int_value_from_dict_object
 from .base import clean_string_value_from_dict_object
 from .base import clean_dict_value_from_dict_object
+from .base import init_v2_response_data
+from .consumer_utils import add_consumer
 from picmodels.models import PICStaff
 from picmodels.models import PICConsumer
 from picmodels.models import CredentialsModel
-from picmodels.models import Address
-from picmodels.models import Country
 from random import shuffle
 from pandas.tseries.offsets import BDay
 from pandas import bdate_range
 from bdateutil import isbday
 from django.core.validators import validate_email
 from django import forms
-from django.db import IntegrityError
 import mandrill
 
 START_OF_BUSINESS_TIMESTAMP = datetime.time(hour=15, minute=0, second=0, microsecond=0)
@@ -112,65 +111,19 @@ def get_or_create_consumer_instance(rqst_nav_id, post_data, post_errors):
     rqst_consumer_info = clean_dict_value_from_dict_object(post_data, "root", "Consumer Info", post_errors)
 
     if not post_errors and rqst_consumer_info:
-        rqst_consumer_email = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Email", post_errors)
-        if rqst_consumer_email and not post_errors:
-            try:
-                validate_email(rqst_consumer_email)
-            except forms.ValidationError:
-                post_errors.append("{!s} must be a valid email address".format(rqst_consumer_email))
-        rqst_consumer_f_name = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "First Name", post_errors)
-        rqst_consumer_m_name = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Middle Name", post_errors, empty_string_allowed=True)
-        rqst_consumer_l_name = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Last Name", post_errors)
-        rqst_consumer_plan = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Plan", post_errors, empty_string_allowed=True)
-        rqst_consumer_met_nav_at = "Patient Assist"
-        rqst_consumer_household_size = clean_int_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Household Size", post_errors)
-        rqst_consumer_phone = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Phone Number", post_errors)
-        rqst_consumer_pref_lang = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Preferred Language", post_errors, empty_string_allowed=True)
+        rqst_consumer_info['Database Action'] = "Consumer Addition"
+        now_date_time = datetime.datetime.utcnow()
+        rqst_consumer_info['date_met_nav'] = {"Day": now_date_time.day, "Month": now_date_time.month, "Year": now_date_time.year}
+        rqst_consumer_info['Met Navigator At'] = "Patient Assist"
+        rqst_consumer_info["Navigator Notes"] = []
+        rqst_consumer_info['force_create_consumer'] = True
+        rqst_consumer_info['Navigator Database ID'] = rqst_nav_id
 
-        rqst_address_line_1 = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Address Line 1", post_errors, empty_string_allowed=True)
-        rqst_address_line_2 = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Address Line 2", post_errors, empty_string_allowed=True)
-        if rqst_address_line_2 is None:
-            rqst_address_line_2 = ''
-        rqst_city = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "City", post_errors, empty_string_allowed=True)
-        rqst_state = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "State", post_errors, empty_string_allowed=True)
-        rqst_zipcode = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Zipcode", post_errors, empty_string_allowed=True)
-        rqst_date_met_nav = datetime.datetime.utcnow()
+        consumer_info_response, consumer_info_errors = init_v2_response_data()
+        consumer_info_response = add_consumer(consumer_info_response, rqst_consumer_info, post_errors)
+        consumer_instance = PICConsumer.objects.get(id=consumer_info_response['Data']["Database ID"])
 
-        if len(post_errors) == 0:
-            address_instance = None
-            if rqst_address_line_1 != '' and rqst_city != '' and rqst_state != '' and rqst_zipcode != '':
-                address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=rqst_address_line_1,
-                                                                                           address_line_2=rqst_address_line_2,
-                                                                                           city=rqst_city,
-                                                                                           state_province=rqst_state,
-                                                                                           zipcode=rqst_zipcode,
-                                                                                           country=Country.objects.all()[0])
-
-            consumer_rqst_values = {"plan": rqst_consumer_plan,
-                                    "middle_name": rqst_consumer_m_name,
-                                    "address": address_instance,
-                                    "date_met_nav": rqst_date_met_nav,
-                                    "preferred_language": rqst_consumer_pref_lang}
-
-            try:
-                consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(email=rqst_consumer_email,
-                                                                                                 first_name=rqst_consumer_f_name,
-                                                                                                 last_name=rqst_consumer_l_name,
-                                                                                                 met_nav_at=rqst_consumer_met_nav_at,
-                                                                                                 household_size=rqst_consumer_household_size,
-                                                                                                 phone=rqst_consumer_phone,
-                                                                                                 defaults=consumer_rqst_values)
-
-                try:
-                    nav_instance = PICStaff.objects.get(id=rqst_nav_id)
-                    consumer_instance.navigator = nav_instance
-                    consumer_instance.save()
-                except PICStaff.DoesNotExist:
-                    post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
-            except IntegrityError:
-                consumer_instance = PICConsumer.objects.get(email=rqst_consumer_email)
-
-            consumer_info = consumer_instance.return_values_dict()
+        consumer_info = consumer_instance.return_values_dict()
 
     return consumer_info
 
