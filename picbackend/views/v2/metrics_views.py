@@ -39,7 +39,7 @@ class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         # Parse GET params and retreive metrics entries
         metrics_dict = {}
 
-        metrics_fields = ["Metrics Date",
+        metrics_fields = ["Submission Date",
                           "County",
                           "Location",
                           "no_general_assis",
