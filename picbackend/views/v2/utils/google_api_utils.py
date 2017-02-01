@@ -87,7 +87,7 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
     if not isinstance(rqst_apt_datetime, str):
         post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(rqst_apt_datetime)))
 
-    consumer_info = get_or_create_consumer_instance(rqst_nav_id, post_data, post_errors)
+    consumer_info = create_consumer_instance(rqst_nav_id, post_data, post_errors)
     try:
         picstaff_object = PICStaff.objects.get(id=rqst_nav_id)
         credentials_object = CredentialsModel.objects.get(id=picstaff_object)
@@ -106,7 +106,7 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
     return scheduled_appointment, consumer_info
 
 
-def get_or_create_consumer_instance(rqst_nav_id, post_data, post_errors):
+def create_consumer_instance(rqst_nav_id, post_data, post_errors):
     consumer_info = {}
     rqst_consumer_info = clean_dict_value_from_dict_object(post_data, "root", "Consumer Info", post_errors)
 
