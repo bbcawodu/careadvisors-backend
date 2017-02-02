@@ -148,7 +148,7 @@ def build_search_params(rqst_params, response_raw_data, rqst_errors):
             rqst_errors.append('Invalid zipcode, zipcodes must be integers')
     if "time" in rqst_params:
         try:
-            search_params['look up date'] = datetime.date.today() - datetime.timedelta(days=rqst_params['time'])
+            search_params['look up date'] = datetime.date.today() - datetime.timedelta(days=int(rqst_params['time']))
             search_params['time'] = rqst_params['time']
         except ValueError:
             response_raw_data['Status']['Error Code'] = 1
