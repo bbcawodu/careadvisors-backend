@@ -1,3 +1,7 @@
+"""
+This module defines utility functions that are used throughout the project
+"""
+
 import sys
 import urllib
 import re
@@ -6,6 +10,20 @@ import datetime
 
 def clean_string_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, empty_string_allowed=False,
                                         none_allowed=False, no_key_allowed=False):
+    """
+    This function takes a target dictionary and returns the string value given by the given key.
+    Returns None if key if not found and appends any error messages to the post_errors list
+
+    :param dict_object: (type: dictionary) target object to get string from
+    :param dict_name: (type: string) name of target dictionary
+    :param dict_key: (type: string) target dictionary key
+    :param post_errors: (type: list) list of error messages
+    :param empty_string_allowed: (type: boolean) whether an empty string allowed for given key, default is False
+    :param none_allowed: (type: boolean) whether Null values are allowed for given key, default is False
+    :param no_key_allowed: (type: boolean) whether the or not to allow for absence of target key in target dictionary,
+                           default is False
+    :return: (type: string or None) String type value for given target key, or None
+    """
     if dict_key not in dict_object:
         if no_key_allowed:
             return None
@@ -25,6 +43,18 @@ def clean_string_value_from_dict_object(dict_object, dict_name, dict_key, post_e
 
 
 def clean_int_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, no_key_allowed=False):
+    """
+    This function takes a target dictionary and returns the integer value given by the given key.
+    Returns None if key if not found and appends any error messages to the post_errors list
+
+    :param dict_object: (type: dictionary) target object to get integer from
+    :param dict_name: (type: string) name of target dictionary
+    :param dict_key: (type: string) target dictionary key
+    :param post_errors: (type: list) list of error messages
+    :param no_key_allowed: (type: boolean) whether the or not to allow for absence of target key in target dictionary,
+                           default is False
+    :return: (type: integer or None) Integer type value for given target key, or None
+    """
     if dict_key not in dict_object:
         if no_key_allowed:
             return None
@@ -39,6 +69,19 @@ def clean_int_value_from_dict_object(dict_object, dict_name, dict_key, post_erro
 
 
 def clean_dict_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, none_allowed=False, no_key_allowed=False):
+    """
+    This function takes a target dictionary and returns the dictionary value given by the given key.
+    Returns None if key if not found and appends any error messages to the post_errors list
+
+    :param dict_object: (type: dictionary) target object to get dictionary from
+    :param dict_name: (type: string) name of target dictionary
+    :param dict_key: (type: string) target dictionary key
+    :param post_errors: (type: list) list of error messages
+    :param none_allowed: (type: boolean) whether Null values are allowed for given key, default is False
+    :param no_key_allowed: (type: boolean) whether the or not to allow for absence of target key in target dictionary,
+                           default is False
+    :return: (type: dictionary or None) dictionary type value for given target key, or None
+    """
     if dict_key not in dict_object:
         if no_key_allowed:
             return None
@@ -56,6 +99,19 @@ def clean_dict_value_from_dict_object(dict_object, dict_name, dict_key, post_err
 
 
 def clean_list_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, empty_list_allowed=False, no_key_allowed=False):
+    """
+    This function takes a target dictionary and returns the list value given by the given key.
+    Returns None if key if not found and appends any error messages to the post_errors list
+
+    :param dict_object: (type: dictionary) target object to get list from
+    :param dict_name: (type: string) name of target dictionary
+    :param dict_key: (type: string) target dictionary key
+    :param post_errors: (type: list) list of error messages
+    :param empty_list_allowed: (type: boolean) whether an empty list is allowed for given key, default is False
+    :param no_key_allowed: (type: boolean) whether the or not to allow for absence of target key in target dictionary,
+                           default is False
+    :return: (type: list or None) list type value for given target key, or None
+    """
     if dict_key not in dict_object:
         if no_key_allowed:
             return None
@@ -76,6 +132,18 @@ def clean_list_value_from_dict_object(dict_object, dict_name, dict_key, post_err
 
 
 def clean_bool_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, no_key_allowed=False):
+    """
+    This function takes a target dictionary and returns the boolean value given by the given key.
+    Returns None if key if not found and appends any error messages to the post_errors list
+
+    :param dict_object: (type: dictionary) target object to get boolean from
+    :param dict_name: (type: string) name of target dictionary
+    :param dict_key: (type: string) target dictionary key
+    :param post_errors: (type: list) list of error messages
+    :param no_key_allowed: (type: boolean) whether the or not to allow for absence of target key in target dictionary,
+                           default is False
+    :return: (type: boolean or None) boolean type value for given target key, or None
+    """
     if dict_key not in dict_object:
         if no_key_allowed:
             return None
@@ -89,7 +157,15 @@ def clean_bool_value_from_dict_object(dict_object, dict_name, dict_key, post_err
         return dict_object[dict_key]
 
 
-def build_search_params(rqst_params, response_raw_data, rqst_errors):
+def build_search_params(rqst_params, rqst_errors):
+    """
+    This function takes a Django request.Get object, and parses it for any paramaters relevant to the PIC
+    API
+
+    :param rqst_params: (type: Django QueryDict object) dictionary like object that represents request GET parameters
+    :param rqst_errors: (type: list) list of error messages
+    :return: (type: dictionary) dictionary populated with key value paramaters from GET request
+    """
     search_params = {}
     if 'location' in rqst_params:
         search_params['location'] = urllib.parse.unquote(rqst_params['location'])
@@ -151,21 +227,18 @@ def build_search_params(rqst_params, response_raw_data, rqst_errors):
             search_params['look up date'] = datetime.date.today() - datetime.timedelta(days=int(rqst_params['time']))
             search_params['time'] = rqst_params['time']
         except ValueError:
-            response_raw_data['Status']['Error Code'] = 1
             rqst_errors.append('time parameter must be a valid integer. Metrics returned without time parameter.')
     if "startdate" in rqst_params:
         try:
             datetime.datetime.strptime(rqst_params["startdate"], '%Y-%m-%d')
             search_params['start date'] = rqst_params["startdate"]
         except ValueError:
-            response_raw_data['Status']['Error Code'] = 1
             rqst_errors.append('startdate parameter must be a valid date. Metrics returned without startdate parameter.')
     if "enddate" in rqst_params:
         try:
             datetime.datetime.strptime(rqst_params["enddate"], '%Y-%m-%d')
             search_params['end date'] = rqst_params["enddate"]
         except ValueError:
-            response_raw_data['Status']['Error Code'] = 1
             rqst_errors.append('enddate parameter must be a valid integer. Metrics returned without enddate parameter.')
     if "groupby" in rqst_params:
         search_params['group by'] = rqst_params['groupby']
@@ -177,11 +250,24 @@ def build_search_params(rqst_params, response_raw_data, rqst_errors):
 
 
 def init_v2_response_data():
+    """
+    This function returns a skelleton dictionary that can be used for PIC JSON responses
+
+    :return: (type: dictionary) dictionary that can be used in PIC JSON responses
+    """
     return {'Status': {"Error Code": 0, "Warnings": [], "Version": 2.0, "Missing Parameters": []},
             'Data': {}}, []
 
 
 def parse_and_log_errors(response_raw_data, errors_list):
+    """
+    This function takes a list of error messages, adds them to a PIC API response dictionary, and adds the
+    correct error code
+
+    :param response_raw_data: (type: dictionary) dictionary that can be used in PIC JSON responses
+    :param errors_list: (type: list) list of error messages
+    :return: (type: dictionary) dictionary that can be used in PIC JSON responses with errors logged
+    """
     if len(errors_list) > 0:
         if response_raw_data["Status"]["Error Code"] == 0:
             response_raw_data["Status"]["Error Code"] = 1

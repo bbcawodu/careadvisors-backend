@@ -118,7 +118,7 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 def upload_staff_pic(request):
     if request.method == 'GET':
         response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+        search_params = build_search_params(request.GET, rqst_errors)
         if 'id' in search_params:
             rqst_staff_id = search_params['id']
             try:

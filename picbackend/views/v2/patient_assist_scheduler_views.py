@@ -53,7 +53,7 @@ class NavGoogleCalendarAccessRequestView(View):
         """
 
         response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+        search_params = build_search_params(request.GET, rqst_errors)
         if 'navigator id' in search_params:
             nav_id = search_params["navigator id"]
             try:
@@ -97,7 +97,7 @@ class GoogleCalendarAuthReturnView(View):
         """
 
         response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+        search_params = build_search_params(request.GET, rqst_errors)
 
         state_string = request.GET['state']
         state_dict = json.loads(base64.urlsafe_b64decode(state_string).decode('ascii'))
