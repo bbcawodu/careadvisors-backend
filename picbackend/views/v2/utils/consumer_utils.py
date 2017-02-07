@@ -23,11 +23,21 @@ from django.core.validators import validate_email
 from django import forms
 
 
-def add_consumer(response_raw_data, post_data, post_errors):
-    add_consumer_params = get_consumer_mgmt_put_params(post_data, post_errors)
+def add_consumer(response_raw_data, rqst_consumer_info, post_errors):
+    """
+    This function takes dictionary populated with PIC consumer info, parses for errors, adds the consumer
+    to the database if there are none, and adds the consumer info to given response data.
+
+    :param response_raw_data: (type: dictionary) dictionary that contains response data
+    :param rqst_consumer_info: (type: dictionary) dictionary that contains consumer info
+    :param post_errors: (type: list) list of error messages
+    :return: (type: dictionary) dictionary that contains response data
+    """
+
+    add_consumer_params = get_consumer_mgmt_put_params(rqst_consumer_info, post_errors)
     if not add_consumer_params['rqst_cps_consumer']:
         add_consumer_params['rqst_cps_consumer'] = False
-    add_consumer_params['force_create_consumer'] = clean_bool_value_from_dict_object(post_data,
+    add_consumer_params['force_create_consumer'] = clean_bool_value_from_dict_object(rqst_consumer_info,
                                                                                      "root",
                                                                                      "force_create_consumer",
                                                                                      post_errors,
@@ -98,6 +108,16 @@ def add_consumer(response_raw_data, post_data, post_errors):
 
 
 def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, post_errors):
+    """
+    This function takes a consumer database instance and a dictionary populated with CPS consumer info, parses the info
+    for errors, and adds the CPS to the consumer info if there are no errors.
+
+    :param consumer_instance: (type: PICConsumer) PICConsumer instance to add CPS info to
+    :param rqst_cps_info_dict: (type: dictionary) CPS info to parse
+    :param post_errors: (type: list) list of error messages
+    :return: None
+    """
+
     rqst_primary_dependent_dict = clean_dict_value_from_dict_object(rqst_cps_info_dict,
                                                                     "cps_info",
                                                                     "primary_dependent",
@@ -110,7 +130,7 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
                                                                       post_errors,
                                                                       no_key_allowed=True)
         if not rqst_primary_dependent_database_id:
-            primary_dependent_found_PICConsumer_entries = check_consumer_entries_for_dependent_info(rqst_primary_dependent_dict, post_errors)
+            primary_dependent_found_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(rqst_primary_dependent_dict, post_errors)
             if not primary_dependent_found_PICConsumer_entries:
                 try:
                     primary_dependent_object = PICConsumer(first_name=rqst_primary_dependent_dict["first_name"],
@@ -126,7 +146,7 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
         else:
             try:
                 primary_dependent_object = PICConsumer.objects.get(id=rqst_primary_dependent_database_id)
-            except NavMetricsLocation.DoesNotExist:
+            except PICConsumer.DoesNotExist:
                 post_errors.append("PICConsumer object does not exist for primary_dependent Database ID: {!s}".format(str(rqst_primary_dependent_database_id)))
 
     rqst_cps_location = clean_string_value_from_dict_object(rqst_cps_info_dict, "cps_info", "cps_location", post_errors)
@@ -185,7 +205,7 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
                                                                                         post_errors,
                                                                                         no_key_allowed=True)
                 if not rqst_secondary_dependent_database_id:
-                    secondary_dependent_found_PICConsumer_entries = check_consumer_entries_for_dependent_info(
+                    secondary_dependent_found_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
                         rqst_secondary_dependent_dict, post_errors)
                     if not secondary_dependent_found_PICConsumer_entries:
                         try:
@@ -272,15 +292,24 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
         consumer_instance.delete()
 
 
-def check_consumer_entries_for_dependent_info(rqst_primary_dependent_dict, post_errors):
+def check_consumer_db_entries_for_dependent_info(rqst_dependent_dict, post_errors):
+    """
+    This function takes a dictionary populated with dependent information and checks to see if there are any PICConsumer
+    database entries that exist for it.
+
+    :param rqst_dependent_dict: (type: dictionary) dependent information
+    :param post_errors: (type: list) list of error messages
+    :return: (type: list) list of id's for found PICConsumer entries
+    """
+
     found_consumer_entries = []
 
-    rqst_dependent_f_name = clean_string_value_from_dict_object(rqst_primary_dependent_dict,
-                                                                "primary_dependent",
+    rqst_dependent_f_name = clean_string_value_from_dict_object(rqst_dependent_dict,
+                                                                "dependent_info",
                                                                 "first_name",
                                                                 post_errors)
-    rqst_dependent_l_name = clean_string_value_from_dict_object(rqst_primary_dependent_dict,
-                                                                "primary_dependent",
+    rqst_dependent_l_name = clean_string_value_from_dict_object(rqst_dependent_dict,
+                                                                "dependent_info",
                                                                 "last_name",
                                                                 post_errors)
 
@@ -294,6 +323,16 @@ def check_consumer_entries_for_dependent_info(rqst_primary_dependent_dict, post_
 
 
 def modify_consumer(response_raw_data, post_data, post_errors):
+    """
+    This function takes dictionary populated with PIC consumer info, parses for errors, and modifies the consumer
+    instance if there are none.
+
+    :param response_raw_data: (type: dictionary) dictionary that contains response data
+    :param post_data: (type: dictionary) dictionary with PIC consumer info
+    :param post_errors: (type: list) list of error messages
+    :return: (type: dictionary) dictionary that contains response data
+    """
+
     modify_consumer_params = get_consumer_mgmt_put_params(post_data, post_errors)
     modify_consumer_params['rqst_consumer_id'] = clean_int_value_from_dict_object(post_data, "root", "Consumer Database ID", post_errors)
 
@@ -367,6 +406,16 @@ def modify_consumer(response_raw_data, post_data, post_errors):
 
 
 def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors):
+    """
+    This function takes a consumer database instance and a dictionary populated with CPS consumer info, parses the info
+    for errors, and modifies the CPS info for that consumer if there are no errors.
+
+    :param consumer_instance: (type: PICConsumer) PICConsumer instance to add CPS info to
+    :param rqst_cps_info_dict: (type: dictionary) CPS info to parse
+    :param post_errors: (type: list) list of error messages
+    :return: None
+    """
+
     rqst_primary_dependent_dict = clean_dict_value_from_dict_object(rqst_cps_info_dict,
                                                                     "cps_info",
                                                                     "primary_dependent",
@@ -379,7 +428,7 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
                                                                               post_errors,
                                                                               no_key_allowed=True)
         if not rqst_primary_dependent_database_id:
-            primary_dependent_found_PICConsumer_entries = check_consumer_entries_for_dependent_info(
+            primary_dependent_found_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
                 rqst_primary_dependent_dict, post_errors)
             if not primary_dependent_found_PICConsumer_entries:
                 try:
@@ -459,7 +508,7 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
                                                                                         post_errors,
                                                                                         no_key_allowed=True)
                 if not rqst_secondary_dependent_database_id:
-                    secondary_dependent_found_PICConsumer_entries = check_consumer_entries_for_dependent_info(
+                    secondary_dependent_found_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
                         rqst_secondary_dependent_dict, post_errors)
                     if not secondary_dependent_found_PICConsumer_entries:
                         try:
@@ -553,6 +602,15 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
 
 
 def get_consumer_mgmt_put_params(post_data, post_errors):
+    """
+    This function parses the BODY of requests for PIC consumer management PUT requests, checks for errors, and returns
+    relevant information as a dictionary
+
+    :param post_data: (type: dictionary) PUT information to be parsed
+    :param post_errors: (type: list) list of error messages
+    :return: (type: dictionary) dictionary with relevant consumer information
+    """
+
     rqst_consumer_email = clean_string_value_from_dict_object(post_data, "root", "Email", post_errors,
                                                               empty_string_allowed=True)
     if rqst_consumer_email and not post_errors:
@@ -648,6 +706,16 @@ def get_consumer_mgmt_put_params(post_data, post_errors):
 
 
 def delete_consumer(response_raw_data, post_data, post_errors):
+    """
+    This function takes dictionary populated with PIC consumer info, parses for errors, and deletes the consumer
+    instance if there are none.
+
+    :param response_raw_data: (type: dictionary) dictionary that contains response data
+    :param post_data: (type: dictionary) dictionary with PIC consumer info
+    :param post_errors: (type: list) list of error messages
+    :return: (type: dictionary) dictionary that contains response data
+    """
+
     rqst_consumer_id = clean_int_value_from_dict_object(post_data, "root", "Consumer Database ID", post_errors)
     rqst_create_backup = clean_bool_value_from_dict_object(post_data,
                                                           "root",
@@ -678,6 +746,14 @@ def delete_consumer(response_raw_data, post_data, post_errors):
 # getattr(object, field_name)
 # need to manually copy consumer notes
 def create_backup_consumer_obj(consumer_instance):
+    """
+    This function takes a PICConsumer instance, creates a PICConsumerBackup instance with the same information as the
+    given PICConsumer instance and returns the PICConsumerBackup instance.
+
+    :param consumer_instance: (type: PICConsumer) PICConsumer instance to be copied
+    :return: (type: PICConsumerBackup) copied PICConsumerBackup instance
+    """
+
     consumer_instance_fields = consumer_instance._meta.get_fields()
     non_null_field_name_list = []
     for field in consumer_instance_fields:
@@ -725,6 +801,18 @@ def create_backup_consumer_obj(consumer_instance):
 
 
 def retrieve_f_l_name_consumers(response_raw_data, rqst_errors, consumers, rqst_first_name, rqst_last_name):
+    """
+    This function takes first and last name consumer parameters as well as a QueryList of PICConsumer instances,
+    filters the database with the parameters, and adds the consumer info the given dictionary of response data
+
+    :param response_raw_data: (type: dictionary) response data
+    :param rqst_errors: (type: list) list of error messages
+    :param consumers: (type: QueryList) QueryList of consumers
+    :param rqst_first_name: (type: string) consumer first name
+    :param rqst_last_name: (type: string) consumer last name
+    :return: (type: dictionary and list) response data and list of error messages
+    """
+
     consumers = consumers.filter(first_name__iexact=rqst_first_name, last_name__iexact=rqst_last_name)
     if len(consumers) > 0:
         consumer_dict = {}
@@ -747,6 +835,18 @@ def retrieve_f_l_name_consumers(response_raw_data, rqst_errors, consumers, rqst_
 
 
 def retrieve_email_consumers(response_raw_data, rqst_errors, consumers, rqst_email, list_of_emails):
+    """
+    This function takes an email consumer parameter and a QueryList of PICConsumer instances,
+    filters the database with the parameters, and adds the consumer info the given dictionary of response data
+
+    :param response_raw_data: (type: dictionary) response data
+    :param rqst_errors: (type: list) list of error messages
+    :param consumers: (type: QueryList) QueryList of consumers
+    :param rqst_email: (type: string) consumer email
+    :param list_of_emails: (type: list) list of consumer emails
+    :return: (type: dictionary and list) response data and list of error messages
+    """
+
     consumer_dict = {}
     consumers_object = consumers
     for email in list_of_emails:
@@ -773,6 +873,18 @@ def retrieve_email_consumers(response_raw_data, rqst_errors, consumers, rqst_ema
 
 
 def retrieve_first_name_consumers(response_raw_data, rqst_errors, consumers, rqst_first_name, list_of_first_names):
+    """
+    This function takes a first name consumer parameter and a QueryList of PICConsumer instances,
+    filters the database with the parameters, and adds the consumer info the given dictionary of response data
+
+    :param response_raw_data: (type: dictionary) response data
+    :param rqst_errors: (type: list) list of error messages
+    :param consumers: (type: QueryList) QueryList of consumers
+    :param rqst_first_name: (type: string) consumer first name
+    :param list_of_first_names: (type: list) list of consumer first names
+    :return: (type: dictionary and list) response data and list of error messages
+    """
+
     consumer_dict = {}
     consumers_object = consumers
     for first_name in list_of_first_names:
@@ -799,6 +911,18 @@ def retrieve_first_name_consumers(response_raw_data, rqst_errors, consumers, rqs
 
 
 def retrieve_last_name_consumers(response_raw_data, rqst_errors, consumers, rqst_last_name, list_of_last_names):
+    """
+    This function takes a last name consumer parameter and a QueryList of PICConsumer instances,
+    filters the database with the parameters, and adds the consumer info the given dictionary of response data
+
+    :param response_raw_data: (type: dictionary) response data
+    :param rqst_errors: (type: list) list of error messages
+    :param consumers: (type: QueryList) QueryList of consumers
+    :param rqst_last_name: (type: string) consumer last name
+    :param list_of_last_names: (type: list) list of consumer last names
+    :return: (type: dictionary and list) response data and list of error messages
+    """
+
     consumer_dict = {}
     consumers_object = consumers
     for last_name in list_of_last_names:
@@ -825,6 +949,18 @@ def retrieve_last_name_consumers(response_raw_data, rqst_errors, consumers, rqst
 
 
 def retrieve_id_consumers(response_raw_data, rqst_errors, consumers, rqst_consumer_id, list_of_ids):
+    """
+    This function takes an id consumer parameter and a QueryList of PICConsumer instances,
+    filters the database with the parameters, and adds the consumer info the given dictionary of response data
+
+    :param response_raw_data: (type: dictionary) response data
+    :param rqst_errors: (type: list) list of error messages
+    :param consumers: (type: QueryList) QueryList of consumers
+    :param rqst_consumer_id: (type: integer) consumer id
+    :param list_of_ids: (type: list) list of consumer ids
+    :return: (type: dictionary and list) response data and list of error messages
+    """
+
     if rqst_consumer_id == "all":
         all_consumers = consumers
         consumer_dict = {}
@@ -864,6 +1000,17 @@ def retrieve_id_consumers(response_raw_data, rqst_errors, consumers, rqst_consum
 
 
 def break_results_into_pages(request, response_raw_data, CONSUMERS_PER_PAGE, rqst_page_no):
+    """
+    This function takes a dictionary of response data for a PIC Consumer GET API request, replaces excess consumer info
+    with ids, and adds a key value pair of urls for subsequent pages of full PIC consumer info
+
+    :param request: (type: Django request object) current request
+    :param response_raw_data: (type: dictionary) response data
+    :param CONSUMERS_PER_PAGE: (type: integer) number of full consumer info entries per page
+    :param rqst_page_no: (type: integer) current page number
+    :return: (type: dictionary) response data
+    """
+
     consumer_list = response_raw_data["Data"]
     if len(consumer_list) > CONSUMERS_PER_PAGE:
         if rqst_page_no:
