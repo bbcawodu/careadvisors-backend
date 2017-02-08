@@ -1,6 +1,6 @@
 """
 Defines utility functions and classes for views that use the the Google API
--Need to update exception catching for google API email calls to make them more specific
+- Need to update exception catching for google API email calls to make them more specific
 """
 
 import httplib2
@@ -31,6 +31,14 @@ END_OF_BUSINESS_TIMESTAMP = datetime.time(hour=23, minute=0, second=0, microseco
 
 
 def check_or_create_navigator_google_cal(credential, err_msg_list):
+    """
+    This function checks a navigator's list of google calendars for the 'Navigator-Consumer Appointments (DO NOT CHANGE)'
+    calendar. If it not present, it adds it.
+
+    :param credential:
+    :param err_msg_list:
+    :return:
+    """
     service = build_authorized_cal_http_service_object(credential)
 
     navigator_calendar_found, _ = check_cal_objects_for_nav_cal(service, err_msg_list)
@@ -41,6 +49,14 @@ def check_or_create_navigator_google_cal(credential, err_msg_list):
 
 
 def check_cal_objects_for_nav_cal(service, err_msg_list):
+    """
+    This function checks a navigator's list of google calendars for the 'Navigator-Consumer Appointments (DO NOT CHANGE)'
+    calendar. Returns True if calendar is found and False otherwise. Returns calendar id if calendar is found.
+
+    :param service:
+    :param err_msg_list:
+    :return:
+    """
     navigator_calendar_found = False
     navigator_calendar_id = None
 
@@ -60,6 +76,14 @@ def check_cal_objects_for_nav_cal(service, err_msg_list):
 
 
 def add_nav_cal_to_google_cals(service, err_msg_list):
+    """
+    This function adds the 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar to the list of a given navigator's
+    google calendars.
+
+    :param service:
+    :param err_msg_list:
+    :return:
+    """
     cal_id = None
     try:
         insert_args = {"summary": "Navigator-Consumer Appointments (DO NOT CHANGE)",
@@ -73,6 +97,13 @@ def add_nav_cal_to_google_cals(service, err_msg_list):
 
 
 def build_authorized_cal_http_service_object(credential):
+    """
+    This function takes a valid credentials object and returns a service object which can be used to make requests
+    to the Google Calendar API
+
+    :param credential:
+    :return:
+    """
     http = httplib2.Http()
     http = credential.authorize(http)
     service = build("calendar", "v3", http=http)
@@ -81,6 +112,12 @@ def build_authorized_cal_http_service_object(credential):
 
 
 def add_nav_apt_to_google_calendar(post_data, post_errors):
+    """
+
+    :param post_data:
+    :param post_errors:
+    :return:
+    """
     scheduled_appointment = {}
     rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator ID", post_errors)
     rqst_apt_datetime = clean_string_value_from_dict_object(post_data, "root", "Appointment Date and Time", post_errors)
@@ -107,6 +144,13 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
 
 
 def create_consumer_instance(rqst_nav_id, post_data, post_errors):
+    """
+
+    :param rqst_nav_id:
+    :param post_data:
+    :param post_errors:
+    :return:
+    """
     consumer_info = {}
     rqst_consumer_info = clean_dict_value_from_dict_object(post_data, "root", "Consumer Info", post_errors)
 
@@ -129,6 +173,15 @@ def create_consumer_instance(rqst_nav_id, post_data, post_errors):
 
 
 def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, nav_info, post_errors):
+    """
+
+    :param credential:
+    :param rqst_apt_datetime:
+    :param consumer_info:
+    :param nav_info:
+    :param post_errors:
+    :return:
+    """
     scheduled_appointment = {}
     if not post_errors:
         try:
@@ -184,6 +237,14 @@ def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, na
 
 
 def send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointment, post_errors):
+    """
+
+    :param consumer_info:
+    :param nav_info:
+    :param scheduled_appointment:
+    :param post_errors:
+    :return:
+    """
     try:
         mandrill_client = mandrill.Mandrill('1veuJ5Rt5CtLEDj64ijXIA')
         message_content = "Hello, you have an appointment scheduled with {!s} {!s} at {!s}. They will be contacting you at {!s}. We look forward to speaking with you!".format(nav_info["First Name"], nav_info["Last Name"], scheduled_appointment["Appointment Date and Time"], consumer_info["Phone Number"])
@@ -214,6 +275,12 @@ def send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointme
 
 
 def delete_nav_apt_from_google_calendar(post_data, post_errors):
+    """
+
+    :param post_data:
+    :param post_errors:
+    :return:
+    """
     google_apt_deleted = False
 
     rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator ID", post_errors)
@@ -252,6 +319,14 @@ def delete_nav_apt_from_google_calendar(post_data, post_errors):
 
 
 def check_google_cal_for_apt(credentials_object, rqst_apt_datetime, post_errors, navigator_calendar_id):
+    """
+
+    :param credentials_object:
+    :param rqst_apt_datetime:
+    :param post_errors:
+    :param navigator_calendar_id:
+    :return:
+    """
     google_apt_id = None
 
     try:
@@ -277,6 +352,12 @@ def check_google_cal_for_apt(credentials_object, rqst_apt_datetime, post_errors,
 
 
 def parse_google_events_for_nav_apt(event_objects, rqst_apt_datetime):
+    """
+
+    :param event_objects:
+    :param rqst_apt_datetime:
+    :return:
+    """
     google_apt_id = None
 
     for event in event_objects:
@@ -288,6 +369,14 @@ def parse_google_events_for_nav_apt(event_objects, rqst_apt_datetime):
 
 
 def send_delete_apt_rqst_to_google(credentials_object, google_apt_id, navigator_calendar_id, post_errors):
+    """
+
+    :param credentials_object:
+    :param google_apt_id:
+    :param navigator_calendar_id:
+    :param post_errors:
+    :return:
+    """
     google_apt_deleted = False
 
     service = build_authorized_cal_http_service_object(credentials_object.credential)
@@ -301,6 +390,13 @@ def send_delete_apt_rqst_to_google(credentials_object, google_apt_id, navigator_
 
 
 def get_preferred_nav_apts(rqst_preferred_times, valid_rqst_preferred_times_timestamps, post_errors):
+    """
+
+    :param rqst_preferred_times:
+    :param valid_rqst_preferred_times_timestamps:
+    :param post_errors:
+    :return:
+    """
     preferred_appointments = []
     oldest_preferred_time_timestamp = min(valid_rqst_preferred_times_timestamps)
     max_preferred_time_timestamp = max(valid_rqst_preferred_times_timestamps) + datetime.timedelta(hours=1)
@@ -345,6 +441,11 @@ def get_preferred_nav_apts(rqst_preferred_times, valid_rqst_preferred_times_time
 
 
 def get_next_available_nav_apts(post_errors):
+    """
+
+    :param post_errors:
+    :return:
+    """
     next_available_appointments = []
 
     now_date_time = datetime.datetime.utcnow()
@@ -394,6 +495,12 @@ def get_next_available_nav_apts(post_errors):
 
 
 def create_navigator_apt_entry(nav_info, appointment_timestamp):
+    """
+
+    :param nav_info:
+    :param appointment_timestamp:
+    :return:
+    """
     next_available_apt_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"]),
                                 "Navigator Database ID": nav_info["Database ID"],
                                 "Appointment Date and Time": appointment_timestamp.isoformat()[:-6],
@@ -404,6 +511,11 @@ def create_navigator_apt_entry(nav_info, appointment_timestamp):
 
 
 def get_earliest_available_apt_datetime(now_date_time):
+    """
+
+    :param now_date_time:
+    :return:
+    """
     if not isbday(now_date_time):
         earliest_available_date_time = now_date_time + BDay(1)
         earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
@@ -422,6 +534,12 @@ def get_earliest_available_apt_datetime(now_date_time):
 
 
 def get_possible_appointments_range(earliest_available_date_time, end_of_next_b_day_date_time):
+    """
+
+    :param earliest_available_date_time:
+    :param end_of_next_b_day_date_time:
+    :return:
+    """
     earliest_available_time = datetime.time(hour=earliest_available_date_time.hour, minute=earliest_available_date_time.minute, second=earliest_available_date_time.second, microsecond=earliest_available_date_time.microsecond)
     possible_appointment_times = []
 
@@ -445,6 +563,13 @@ def get_possible_appointments_range(earliest_available_date_time, end_of_next_b_
 
 
 def get_nav_free_busy_times(start_timestamp, end_timestamp, post_errors):
+    """
+
+    :param start_timestamp:
+    :param end_timestamp:
+    :param post_errors:
+    :return:
+    """
     nav_cal_list_dict = get_nav_cal_lists(post_errors)
 
     nav_free_busy_list = get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_errors)
@@ -453,12 +578,17 @@ def get_nav_free_busy_times(start_timestamp, end_timestamp, post_errors):
 
 
 def get_nav_cal_lists(post_errors):
+    """
+
+    :param post_errors:
+    :return:
+    """
     nav_cal_list_dict = {}
 
     def add_cal_list_entry(request_id, response, exception):
         nav_cal_list_dict[request_id] = response["items"]
 
-    #build batch request
+    # build batch request
     cal_list_batch = BatchHttpRequest()
 
     credentials_objects = list(CredentialsModel.objects.all())
@@ -471,7 +601,7 @@ def get_nav_cal_lists(post_errors):
         else:
             nav_cal_list_dict[str(nav_object.id)] = []
 
-            #Obtain valid credential and use it to build authorized service object for given navigator
+            # Obtain valid credential and use it to build authorized service object for given navigator
             credential = credentials_object.credential
             service = build_authorized_cal_http_service_object(credential)
 
@@ -486,6 +616,14 @@ def get_nav_cal_lists(post_errors):
 
 
 def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_errors):
+    """
+
+    :param start_timestamp:
+    :param end_timestamp:
+    :param nav_cal_list_dict:
+    :param post_errors:
+    :return:
+    """
     nav_free_busy_dict = {}
     nav_free_busy_list = []
 
@@ -496,12 +634,16 @@ def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_e
                 for busy_entry in busy_list:
                     nav_free_busy_dict[request_id].append(busy_entry)
 
-    #build batch request
-    # Each HTTP connection that your application makes results in a certain amount of overhead. This library supports batching, to allow your application to put several API calls into a single HTTP request. Examples of situations when you might want to use batching:
+    # build batch request
+    # Each HTTP connection that your application makes results in a certain amount of overhead. This library supports
+    # batching, to allow your application to put several API calls into a single HTTP request. Examples of situations
+    # when you might want to use batching:
 
     # You have many small requests to make and would like to minimize HTTP request overhead.
-    # A user made changes to data while your application was offline, so your application needs to synchronize its local data with the server by sending a lot of updates and deletes.
-    # Note: You're limited to 1000 calls in a single batch request. If you need to make more calls than that, use multiple batch requests
+    # A user made changes to data while your application was offline, so your application needs to synchronize its
+    # local data with the server by sending a lot of updates and deletes.
+    # Note: You're limited to 1000 calls in a single batch request. If you need to make more calls than that, use
+    # multiple batch requests
     free_busy_batch = BatchHttpRequest()
 
     credentials_objects = list(CredentialsModel.objects.all())
@@ -541,6 +683,13 @@ def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_e
 
 
 def get_nav_scheduled_appointments(nav_info, credentials_object, rqst_errors):
+    """
+
+    :param nav_info:
+    :param credentials_object:
+    :param rqst_errors:
+    :return:
+    """
     scheduled_appointment_list = []
     credential = credentials_object.credential
 
