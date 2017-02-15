@@ -33,12 +33,13 @@ END_OF_BUSINESS_TIMESTAMP = datetime.time(hour=23, minute=0, second=0, microseco
 def check_or_create_navigator_google_cal(credential, err_msg_list):
     """
     This function checks a navigator's list of google calendars for the 'Navigator-Consumer Appointments (DO NOT CHANGE)'
-    calendar. If it not present, it adds it.
+    calendar. If it's not present, it adds it.
 
-    :param credential:
-    :param err_msg_list:
-    :return:
+    :param credential: (type: CredentialsField) Google OAuth2 Credentials object
+    :param err_msg_list: (type: list) list of error messages
+    :return: None
     """
+
     service = build_authorized_cal_http_service_object(credential)
 
     navigator_calendar_found, _ = check_cal_objects_for_nav_cal(service, err_msg_list)
@@ -53,10 +54,11 @@ def check_cal_objects_for_nav_cal(service, err_msg_list):
     This function checks a navigator's list of google calendars for the 'Navigator-Consumer Appointments (DO NOT CHANGE)'
     calendar. Returns True if calendar is found and False otherwise. Returns calendar id if calendar is found.
 
-    :param service:
-    :param err_msg_list:
+    :param service: (type: request object) Authenticated Google Calendar API request object
+    :param err_msg_list: (type: list) list of error messages
     :return:
     """
+
     navigator_calendar_found = False
     navigator_calendar_id = None
 
@@ -81,9 +83,10 @@ def add_nav_cal_to_google_cals(service, err_msg_list):
     google calendars.
 
     :param service:
-    :param err_msg_list:
+    :param err_msg_list: (type: list) list of error messages
     :return:
     """
+
     cal_id = None
     try:
         insert_args = {"summary": "Navigator-Consumer Appointments (DO NOT CHANGE)",
@@ -101,9 +104,10 @@ def build_authorized_cal_http_service_object(credential):
     This function takes a valid credentials object and returns a service object which can be used to make requests
     to the Google Calendar API
 
-    :param credential:
+    :param credential: (type: CredentialsField) Google OAuth2 Credentials object
     :return:
     """
+
     http = httplib2.Http()
     http = credential.authorize(http)
     service = build("calendar", "v3", http=http)
@@ -113,11 +117,15 @@ def build_authorized_cal_http_service_object(credential):
 
 def add_nav_apt_to_google_calendar(post_data, post_errors):
     """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator, adds it to the
+    navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar, and sends an email notification to the
+    consumer
 
     :param post_data:
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :return:
     """
+
     scheduled_appointment = {}
     rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator ID", post_errors)
     rqst_apt_datetime = clean_string_value_from_dict_object(post_data, "root", "Appointment Date and Time", post_errors)
@@ -133,7 +141,7 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
             credentials_object.delete()
             post_errors.append('Google Credentials database entry is invalid for the navigator with id: {!s}'.format(str(rqst_nav_id)))
         else:
-            scheduled_appointment = send_add_apt_rqst_to_google(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors)
+            scheduled_appointment = send_add_apt_rqst_to_google_and_email_consumer(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors)
 
     except PICStaff.DoesNotExist:
         post_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(rqst_nav_id)))
@@ -145,12 +153,15 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
 
 def create_consumer_instance(rqst_nav_id, post_data, post_errors):
     """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator and creates a new
+    PICConsumer database instance from that data
 
     :param rqst_nav_id:
     :param post_data:
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :return:
     """
+
     consumer_info = {}
     rqst_consumer_info = clean_dict_value_from_dict_object(post_data, "root", "Consumer Info", post_errors)
 
@@ -172,16 +183,20 @@ def create_consumer_instance(rqst_nav_id, post_data, post_errors):
     return consumer_info
 
 
-def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, nav_info, post_errors):
+def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime, consumer_info, nav_info, post_errors):
     """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator, adds the appointment
+    to the navigators 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar, and sends an email to the corresponding
+    consumer
 
-    :param credential:
+    :param credential: (type: CredentialsField) Google OAuth2 Credentials object
     :param rqst_apt_datetime:
     :param consumer_info:
     :param nav_info:
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :return:
     """
+
     scheduled_appointment = {}
     if not post_errors:
         try:
@@ -238,13 +253,16 @@ def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, na
 
 def send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointment, post_errors):
     """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator, and sends a
+    confirmation email to the consumer.
 
     :param consumer_info:
     :param nav_info:
     :param scheduled_appointment:
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :return:
     """
+
     try:
         mandrill_client = mandrill.Mandrill('1veuJ5Rt5CtLEDj64ijXIA')
         message_content = "Hello, you have an appointment scheduled with {!s} {!s} at {!s}. They will be contacting you at {!s}. We look forward to speaking with you!".format(nav_info["First Name"], nav_info["Last Name"], scheduled_appointment["Appointment Date and Time"], consumer_info["Phone Number"])
@@ -276,11 +294,14 @@ def send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointme
 
 def delete_nav_apt_from_google_calendar(post_data, post_errors):
     """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator and deletes it
+    from the navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar.
 
     :param post_data:
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :return:
     """
+
     google_apt_deleted = False
 
     rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator ID", post_errors)
@@ -320,13 +341,16 @@ def delete_nav_apt_from_google_calendar(post_data, post_errors):
 
 def check_google_cal_for_apt(credentials_object, rqst_apt_datetime, post_errors, navigator_calendar_id):
     """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator and searches the
+    navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar for the appointment id.
 
-    :param credentials_object:
+    :param credentials_object: (type: CredentialsModel) picmodels instance that contains Google OAuth2 Credentials object
     :param rqst_apt_datetime:
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :param navigator_calendar_id:
     :return:
     """
+
     google_apt_id = None
 
     try:
@@ -353,11 +377,14 @@ def check_google_cal_for_apt(credentials_object, rqst_apt_datetime, post_errors,
 
 def parse_google_events_for_nav_apt(event_objects, rqst_apt_datetime):
     """
+    This function takes a list of Google event objects from the navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)'
+    calendar and returns the appointment id whose start time matches the given datetime.
 
     :param event_objects:
     :param rqst_apt_datetime:
     :return:
     """
+
     google_apt_id = None
 
     for event in event_objects:
@@ -370,13 +397,16 @@ def parse_google_events_for_nav_apt(event_objects, rqst_apt_datetime):
 
 def send_delete_apt_rqst_to_google(credentials_object, google_apt_id, navigator_calendar_id, post_errors):
     """
+    This function takes a given appointment id and deletes it from the calendar corresponding to the given calendar
+    id
 
-    :param credentials_object:
+    :param credentials_object: (type: CredentialsModel) picmodels instance that contains Google OAuth2 Credentials object
     :param google_apt_id:
     :param navigator_calendar_id:
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :return:
     """
+
     google_apt_deleted = False
 
     service = build_authorized_cal_http_service_object(credentials_object.credential)
@@ -391,12 +421,15 @@ def send_delete_apt_rqst_to_google(credentials_object, google_apt_id, navigator_
 
 def get_preferred_nav_apts(rqst_preferred_times, valid_rqst_preferred_times_timestamps, post_errors):
     """
+    This function takes a list of preferred appointment times and returns a list of appointment objects that correspond
+    to the given times.
 
     :param rqst_preferred_times:
     :param valid_rqst_preferred_times_timestamps:
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :return:
     """
+
     preferred_appointments = []
     oldest_preferred_time_timestamp = min(valid_rqst_preferred_times_timestamps)
     max_preferred_time_timestamp = max(valid_rqst_preferred_times_timestamps) + datetime.timedelta(hours=1)
@@ -442,10 +475,13 @@ def get_preferred_nav_apts(rqst_preferred_times, valid_rqst_preferred_times_time
 
 def get_next_available_nav_apts(post_errors):
     """
+    This function returns an list containing appointment objects that correspond to the next available times starting
+    from when the function gets called.
 
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :return:
     """
+
     next_available_appointments = []
 
     now_date_time = datetime.datetime.utcnow()
@@ -496,11 +532,14 @@ def get_next_available_nav_apts(post_errors):
 
 def create_navigator_apt_entry(nav_info, appointment_timestamp):
     """
+    This function takes a dictionary popluated with navigator information and an appointment timestamp and creates
+    an dictionary containing appointment information corresponding to the information given.
 
     :param nav_info:
     :param appointment_timestamp:
     :return:
     """
+
     next_available_apt_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"]),
                                 "Navigator Database ID": nav_info["Database ID"],
                                 "Appointment Date and Time": appointment_timestamp.isoformat()[:-6],
@@ -512,10 +551,13 @@ def create_navigator_apt_entry(nav_info, appointment_timestamp):
 
 def get_earliest_available_apt_datetime(now_date_time):
     """
+    This function takes a datetime object and returns the earliest possible business datetime starting from the given
+    datetime object.
 
     :param now_date_time:
     :return:
     """
+
     if not isbday(now_date_time):
         earliest_available_date_time = now_date_time + BDay(1)
         earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
@@ -535,11 +577,14 @@ def get_earliest_available_apt_datetime(now_date_time):
 
 def get_possible_appointments_range(earliest_available_date_time, end_of_next_b_day_date_time):
     """
+    This function takes a start and an end of next business day datetime, and returns a list of datetimes in 15 min
+    intervals that are within business time.
 
     :param earliest_available_date_time:
     :param end_of_next_b_day_date_time:
     :return:
     """
+
     earliest_available_time = datetime.time(hour=earliest_available_date_time.hour, minute=earliest_available_date_time.minute, second=earliest_available_date_time.second, microsecond=earliest_available_date_time.microsecond)
     possible_appointment_times = []
 
@@ -564,12 +609,15 @@ def get_possible_appointments_range(earliest_available_date_time, end_of_next_b_
 
 def get_nav_free_busy_times(start_timestamp, end_timestamp, post_errors):
     """
+    This function takes a start and an end timestamp and returns an object which contains intervals where the
+    navigators who have authorized credentials are busy.
 
     :param start_timestamp:
     :param end_timestamp:
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :return:
     """
+
     nav_cal_list_dict = get_nav_cal_lists(post_errors)
 
     nav_free_busy_list = get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_errors)
@@ -579,10 +627,12 @@ def get_nav_free_busy_times(start_timestamp, end_timestamp, post_errors):
 
 def get_nav_cal_lists(post_errors):
     """
+    This function retrieves the list of Google calendars for all navigators who have authorized google credentials.
 
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :return:
     """
+
     nav_cal_list_dict = {}
 
     def add_cal_list_entry(request_id, response, exception):
@@ -617,13 +667,16 @@ def get_nav_cal_lists(post_errors):
 
 def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_errors):
     """
+    This function retrieves the busy times for a given interval for all navigators who have authorized credentials from
+    Google.
 
     :param start_timestamp:
     :param end_timestamp:
     :param nav_cal_list_dict:
-    :param post_errors:
+    :param post_errors: (type: list) list of error messages
     :return:
     """
+
     nav_free_busy_dict = {}
     nav_free_busy_list = []
 
@@ -684,12 +737,15 @@ def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_e
 
 def get_nav_scheduled_appointments(nav_info, credentials_object, rqst_errors):
     """
+    This function retrieves all the scheduled appointments from a given navigator's '"Navigator-Consumer Appointments (DO NOT CHANGE)"'
+    Google calendar.
 
     :param nav_info:
-    :param credentials_object:
-    :param rqst_errors:
+    :param credentials_object: (type: CredentialsModel) picmodels instance that contains Google OAuth2 Credentials object
+    :param rqst_errors: (type: list) list of error messages
     :return:
     """
+
     scheduled_appointment_list = []
     credential = credentials_object.credential
 

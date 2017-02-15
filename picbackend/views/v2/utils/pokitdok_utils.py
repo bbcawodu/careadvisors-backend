@@ -36,6 +36,7 @@ def fetch_and_parse_pokit_elig_data(post_data, response_raw_data, post_errors):
 
         pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
         eligibility_results = pd.eligibility(eligibility_data)
+        response_raw_data["Pokitdok Raw Results"] = eligibility_results
         eligibility_results = check_elig_results_for_errors(eligibility_results, post_errors)
 
         parsed_elig_dict = {}
