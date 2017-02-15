@@ -100,7 +100,8 @@ The body of the request should be a JSON document using the following template:
                     "Version": 2.0,
                     "Error Code": Integer,
                     "Errors": Array
-                  }
+                  },
+        "Pokitdok Raw Results": Dictionary object(Raw Pokitdok results for debug purposes),
         "Data": {
                     "Plan Start Date": "YYYY-MM-DD",
                     "Consumer Info": {
