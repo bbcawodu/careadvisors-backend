@@ -42,7 +42,7 @@ class MetricsSubmission(models.Model):
                       "no_locating_provider_assis": self.no_locating_provider_assis,
                       "no_billing_assis": self.no_billing_assis,
                       "no_enroll_apps_started": self.no_enroll_apps_started,
-                      "no_enroll_qhp": self.no_enroll_apps_started,
+                      "no_enroll_qhp": self.no_enroll_qhp,
                       "no_enroll_abe_chip": self.no_enroll_abe_chip,
                       "no_enroll_shop": self.no_enroll_shop,
                       "no_referrals_agents_brokers": self.no_referrals_agents_brokers,
