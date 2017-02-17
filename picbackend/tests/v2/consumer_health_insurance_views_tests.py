@@ -9,6 +9,11 @@ import json
 import datetime
 from .base_v2_api_tests import BaseV2APITests
 
+try:
+    medicaid_json = open('picbackend/static/medi_sample_data.json')
+except Exception:
+    medicaid_json = None
+
 
 class HealthInsuranceTradingPartnersAPITests(TestCase, BaseV2APITests):
     def setUp(self):
@@ -24,6 +29,8 @@ def validate_date(date_text):
 
 
 class EligibilityValidPostTestBase(object):
+    medicaid_data = json.load(medicaid_json)
+
     @classmethod
     def setUpClass(cls):
         cls.post_data = {"Birth Date": None,
