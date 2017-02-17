@@ -10,3 +10,4 @@ picbackend/settings/local.env
 *.pyc
 staticfiles
 picbackend/wsgi.py
+picbackend/static/medi_sample_data.json
