@@ -54,7 +54,7 @@ def check_cal_objects_for_nav_cal(service, err_msg_list):
     This function checks a navigator's list of google calendars for the 'Navigator-Consumer Appointments (DO NOT CHANGE)'
     calendar. Returns True if calendar is found and False otherwise. Returns calendar id if calendar is found.
 
-    :param service: (type: request object) Authenticated Google Calendar API request object
+    :param service: (type: service object) Authenticated Google Calendar API service object
     :param err_msg_list: (type: list) list of error messages
     :return:
     """
@@ -82,7 +82,7 @@ def add_nav_cal_to_google_cals(service, err_msg_list):
     This function adds the 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar to the list of a given navigator's
     google calendars.
 
-    :param service:
+    :param service: (type: service object) Authenticated Google Calendar API service object
     :param err_msg_list: (type: list) list of error messages
     :return:
     """
@@ -121,7 +121,7 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
     navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar, and sends an email notification to the
     consumer
 
-    :param post_data:
+    :param post_data: (type: dictionary) dictionary with Patient Assist appointment info
     :param post_errors: (type: list) list of error messages
     :return:
     """
@@ -157,7 +157,7 @@ def create_consumer_instance(rqst_nav_id, post_data, post_errors):
     PICConsumer database instance from that data
 
     :param rqst_nav_id:
-    :param post_data:
+    :param post_data: (type: dictionary) dictionary with PIC consumer info
     :param post_errors: (type: list) list of error messages
     :return:
     """
@@ -297,7 +297,7 @@ def delete_nav_apt_from_google_calendar(post_data, post_errors):
     This function takes a dictionary populated with data about a consumer appointment with a navigator and deletes it
     from the navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar.
 
-    :param post_data:
+    :param post_data: (type: dictionary) dictionary with Patient Assist appointment info
     :param post_errors: (type: list) list of error messages
     :return:
     """
