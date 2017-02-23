@@ -1,6 +1,6 @@
 """
 Defines utility functions and classes for views that use the the Google API
--Need to update exception catching for google API email calls to make them more specific
+- Need to update exception catching for google API email calls to make them more specific
 """
 
 import httplib2
@@ -13,18 +13,17 @@ from googleapiclient.http import BatchHttpRequest
 from .base import clean_int_value_from_dict_object
 from .base import clean_string_value_from_dict_object
 from .base import clean_dict_value_from_dict_object
+from .base import init_v2_response_data
+from .consumer_utils import add_consumer
 from picmodels.models import PICStaff
 from picmodels.models import PICConsumer
 from picmodels.models import CredentialsModel
-from picmodels.models import Address
-from picmodels.models import Country
 from random import shuffle
 from pandas.tseries.offsets import BDay
 from pandas import bdate_range
 from bdateutil import isbday
 from django.core.validators import validate_email
 from django import forms
-from django.db import IntegrityError
 import mandrill
 
 START_OF_BUSINESS_TIMESTAMP = datetime.time(hour=15, minute=0, second=0, microsecond=0)
@@ -32,6 +31,15 @@ END_OF_BUSINESS_TIMESTAMP = datetime.time(hour=23, minute=0, second=0, microseco
 
 
 def check_or_create_navigator_google_cal(credential, err_msg_list):
+    """
+    This function checks a navigator's list of google calendars for the 'Navigator-Consumer Appointments (DO NOT CHANGE)'
+    calendar. If it's not present, it adds it.
+
+    :param credential: (type: CredentialsField) Google OAuth2 Credentials object
+    :param err_msg_list: (type: list) list of error messages
+    :return: None
+    """
+
     service = build_authorized_cal_http_service_object(credential)
 
     navigator_calendar_found, _ = check_cal_objects_for_nav_cal(service, err_msg_list)
@@ -42,6 +50,15 @@ def check_or_create_navigator_google_cal(credential, err_msg_list):
 
 
 def check_cal_objects_for_nav_cal(service, err_msg_list):
+    """
+    This function checks a navigator's list of google calendars for the 'Navigator-Consumer Appointments (DO NOT CHANGE)'
+    calendar. Returns True if calendar is found and False otherwise. Returns calendar id if calendar is found.
+
+    :param service: (type: service object) Authenticated Google Calendar API service object
+    :param err_msg_list: (type: list) list of error messages
+    :return:
+    """
+
     navigator_calendar_found = False
     navigator_calendar_id = None
 
@@ -61,6 +78,15 @@ def check_cal_objects_for_nav_cal(service, err_msg_list):
 
 
 def add_nav_cal_to_google_cals(service, err_msg_list):
+    """
+    This function adds the 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar to the list of a given navigator's
+    google calendars.
+
+    :param service: (type: service object) Authenticated Google Calendar API service object
+    :param err_msg_list: (type: list) list of error messages
+    :return:
+    """
+
     cal_id = None
     try:
         insert_args = {"summary": "Navigator-Consumer Appointments (DO NOT CHANGE)",
@@ -74,6 +100,14 @@ def add_nav_cal_to_google_cals(service, err_msg_list):
 
 
 def build_authorized_cal_http_service_object(credential):
+    """
+    This function takes a valid credentials object and returns a service object which can be used to make requests
+    to the Google Calendar API
+
+    :param credential: (type: CredentialsField) Google OAuth2 Credentials object
+    :return:
+    """
+
     http = httplib2.Http()
     http = credential.authorize(http)
     service = build("calendar", "v3", http=http)
@@ -82,13 +116,23 @@ def build_authorized_cal_http_service_object(credential):
 
 
 def add_nav_apt_to_google_calendar(post_data, post_errors):
+    """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator, adds it to the
+    navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar, and sends an email notification to the
+    consumer
+
+    :param post_data: (type: dictionary) dictionary with Patient Assist appointment info
+    :param post_errors: (type: list) list of error messages
+    :return:
+    """
+
     scheduled_appointment = {}
     rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator ID", post_errors)
     rqst_apt_datetime = clean_string_value_from_dict_object(post_data, "root", "Appointment Date and Time", post_errors)
     if not isinstance(rqst_apt_datetime, str):
         post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(rqst_apt_datetime)))
 
-    consumer_info = get_or_create_consumer_instance(rqst_nav_id, post_data, post_errors)
+    consumer_info = create_consumer_instance(rqst_nav_id, post_data, post_errors)
     try:
         picstaff_object = PICStaff.objects.get(id=rqst_nav_id)
         credentials_object = CredentialsModel.objects.get(id=picstaff_object)
@@ -97,7 +141,7 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
             credentials_object.delete()
             post_errors.append('Google Credentials database entry is invalid for the navigator with id: {!s}'.format(str(rqst_nav_id)))
         else:
-            scheduled_appointment = send_add_apt_rqst_to_google(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors)
+            scheduled_appointment = send_add_apt_rqst_to_google_and_email_consumer(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors)
 
     except PICStaff.DoesNotExist:
         post_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(rqst_nav_id)))
@@ -107,75 +151,52 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
     return scheduled_appointment, consumer_info
 
 
-def get_or_create_consumer_instance(rqst_nav_id, post_data, post_errors):
+def create_consumer_instance(rqst_nav_id, post_data, post_errors):
+    """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator and creates a new
+    PICConsumer database instance from that data
+
+    :param rqst_nav_id:
+    :param post_data: (type: dictionary) dictionary with PIC consumer info
+    :param post_errors: (type: list) list of error messages
+    :return:
+    """
+
     consumer_info = {}
     rqst_consumer_info = clean_dict_value_from_dict_object(post_data, "root", "Consumer Info", post_errors)
 
     if not post_errors and rqst_consumer_info:
-        rqst_consumer_email = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Email", post_errors)
-        if rqst_consumer_email and not post_errors:
-            try:
-                validate_email(rqst_consumer_email)
-            except forms.ValidationError:
-                post_errors.append("{!s} must be a valid email address".format(rqst_consumer_email))
-        rqst_consumer_f_name = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "First Name", post_errors)
-        rqst_consumer_m_name = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Middle Name", post_errors, empty_string_allowed=True)
-        rqst_consumer_l_name = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Last Name", post_errors)
-        rqst_consumer_plan = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Plan", post_errors, empty_string_allowed=True)
-        rqst_consumer_met_nav_at = "Patient Assist"
-        rqst_consumer_household_size = clean_int_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Household Size", post_errors)
-        rqst_consumer_phone = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Phone Number", post_errors)
-        rqst_consumer_pref_lang = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Preferred Language", post_errors, empty_string_allowed=True)
+        rqst_consumer_info['Database Action'] = "Consumer Addition"
+        now_date_time = datetime.datetime.utcnow()
+        rqst_consumer_info['date_met_nav'] = {"Day": now_date_time.day, "Month": now_date_time.month, "Year": now_date_time.year}
+        rqst_consumer_info['Met Navigator At'] = "Patient Assist"
+        rqst_consumer_info["Navigator Notes"] = []
+        rqst_consumer_info['force_create_consumer'] = True
+        rqst_consumer_info['Navigator Database ID'] = rqst_nav_id
 
-        rqst_address_line_1 = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Address Line 1", post_errors, empty_string_allowed=True)
-        rqst_address_line_2 = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Address Line 2", post_errors, empty_string_allowed=True)
-        if rqst_address_line_2 is None:
-            rqst_address_line_2 = ''
-        rqst_city = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "City", post_errors, empty_string_allowed=True)
-        rqst_state = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "State", post_errors, empty_string_allowed=True)
-        rqst_zipcode = clean_string_value_from_dict_object(rqst_consumer_info, "Consumer Info", "Zipcode", post_errors, empty_string_allowed=True)
-        rqst_date_met_nav = datetime.datetime.utcnow()
+        consumer_info_response, consumer_info_errors = init_v2_response_data()
+        consumer_info_response = add_consumer(consumer_info_response, rqst_consumer_info, post_errors)
+        consumer_instance = PICConsumer.objects.get(id=consumer_info_response['Data']["Database ID"])
 
-        if len(post_errors) == 0:
-            address_instance = None
-            if rqst_address_line_1 != '' and rqst_city != '' and rqst_state != '' and rqst_zipcode != '':
-                address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=rqst_address_line_1,
-                                                                                           address_line_2=rqst_address_line_2,
-                                                                                           city=rqst_city,
-                                                                                           state_province=rqst_state,
-                                                                                           zipcode=rqst_zipcode,
-                                                                                           country=Country.objects.all()[0])
-
-            consumer_rqst_values = {"plan": rqst_consumer_plan,
-                                    "middle_name": rqst_consumer_m_name,
-                                    "address": address_instance,
-                                    "date_met_nav": rqst_date_met_nav,
-                                    "preferred_language": rqst_consumer_pref_lang}
-
-            try:
-                consumer_instance, consumer_instance_created = PICConsumer.objects.get_or_create(email=rqst_consumer_email,
-                                                                                                 first_name=rqst_consumer_f_name,
-                                                                                                 last_name=rqst_consumer_l_name,
-                                                                                                 met_nav_at=rqst_consumer_met_nav_at,
-                                                                                                 household_size=rqst_consumer_household_size,
-                                                                                                 phone=rqst_consumer_phone,
-                                                                                                 defaults=consumer_rqst_values)
-
-                try:
-                    nav_instance = PICStaff.objects.get(id=rqst_nav_id)
-                    consumer_instance.navigator = nav_instance
-                    consumer_instance.save()
-                except PICStaff.DoesNotExist:
-                    post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(rqst_nav_id)))
-            except IntegrityError:
-                consumer_instance = PICConsumer.objects.get(email=rqst_consumer_email)
-
-            consumer_info = consumer_instance.return_values_dict()
+        consumer_info = consumer_instance.return_values_dict()
 
     return consumer_info
 
 
-def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, nav_info, post_errors):
+def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime, consumer_info, nav_info, post_errors):
+    """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator, adds the appointment
+    to the navigators 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar, and sends an email to the corresponding
+    consumer
+
+    :param credential: (type: CredentialsField) Google OAuth2 Credentials object
+    :param rqst_apt_datetime:
+    :param consumer_info:
+    :param nav_info:
+    :param post_errors: (type: list) list of error messages
+    :return:
+    """
+
     scheduled_appointment = {}
     if not post_errors:
         try:
@@ -231,6 +252,17 @@ def send_add_apt_rqst_to_google(credential, rqst_apt_datetime, consumer_info, na
 
 
 def send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointment, post_errors):
+    """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator, and sends a
+    confirmation email to the consumer.
+
+    :param consumer_info:
+    :param nav_info:
+    :param scheduled_appointment:
+    :param post_errors: (type: list) list of error messages
+    :return:
+    """
+
     try:
         mandrill_client = mandrill.Mandrill('1veuJ5Rt5CtLEDj64ijXIA')
         message_content = "Hello, you have an appointment scheduled with {!s} {!s} at {!s}. They will be contacting you at {!s}. We look forward to speaking with you!".format(nav_info["First Name"], nav_info["Last Name"], scheduled_appointment["Appointment Date and Time"], consumer_info["Phone Number"])
@@ -261,6 +293,15 @@ def send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointme
 
 
 def delete_nav_apt_from_google_calendar(post_data, post_errors):
+    """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator and deletes it
+    from the navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar.
+
+    :param post_data: (type: dictionary) dictionary with Patient Assist appointment info
+    :param post_errors: (type: list) list of error messages
+    :return:
+    """
+
     google_apt_deleted = False
 
     rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator ID", post_errors)
@@ -299,6 +340,17 @@ def delete_nav_apt_from_google_calendar(post_data, post_errors):
 
 
 def check_google_cal_for_apt(credentials_object, rqst_apt_datetime, post_errors, navigator_calendar_id):
+    """
+    This function takes a dictionary populated with data about a consumer appointment with a navigator and searches the
+    navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar for the appointment id.
+
+    :param credentials_object: (type: CredentialsModel) picmodels instance that contains Google OAuth2 Credentials object
+    :param rqst_apt_datetime:
+    :param post_errors: (type: list) list of error messages
+    :param navigator_calendar_id:
+    :return:
+    """
+
     google_apt_id = None
 
     try:
@@ -324,6 +376,15 @@ def check_google_cal_for_apt(credentials_object, rqst_apt_datetime, post_errors,
 
 
 def parse_google_events_for_nav_apt(event_objects, rqst_apt_datetime):
+    """
+    This function takes a list of Google event objects from the navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)'
+    calendar and returns the appointment id whose start time matches the given datetime.
+
+    :param event_objects:
+    :param rqst_apt_datetime:
+    :return:
+    """
+
     google_apt_id = None
 
     for event in event_objects:
@@ -335,6 +396,17 @@ def parse_google_events_for_nav_apt(event_objects, rqst_apt_datetime):
 
 
 def send_delete_apt_rqst_to_google(credentials_object, google_apt_id, navigator_calendar_id, post_errors):
+    """
+    This function takes a given appointment id and deletes it from the calendar corresponding to the given calendar
+    id
+
+    :param credentials_object: (type: CredentialsModel) picmodels instance that contains Google OAuth2 Credentials object
+    :param google_apt_id:
+    :param navigator_calendar_id:
+    :param post_errors: (type: list) list of error messages
+    :return:
+    """
+
     google_apt_deleted = False
 
     service = build_authorized_cal_http_service_object(credentials_object.credential)
@@ -348,6 +420,16 @@ def send_delete_apt_rqst_to_google(credentials_object, google_apt_id, navigator_
 
 
 def get_preferred_nav_apts(rqst_preferred_times, valid_rqst_preferred_times_timestamps, post_errors):
+    """
+    This function takes a list of preferred appointment times and returns a list of appointment objects that correspond
+    to the given times.
+
+    :param rqst_preferred_times:
+    :param valid_rqst_preferred_times_timestamps:
+    :param post_errors: (type: list) list of error messages
+    :return:
+    """
+
     preferred_appointments = []
     oldest_preferred_time_timestamp = min(valid_rqst_preferred_times_timestamps)
     max_preferred_time_timestamp = max(valid_rqst_preferred_times_timestamps) + datetime.timedelta(hours=1)
@@ -392,6 +474,14 @@ def get_preferred_nav_apts(rqst_preferred_times, valid_rqst_preferred_times_time
 
 
 def get_next_available_nav_apts(post_errors):
+    """
+    This function returns an list containing appointment objects that correspond to the next available times starting
+    from when the function gets called.
+
+    :param post_errors: (type: list) list of error messages
+    :return:
+    """
+
     next_available_appointments = []
 
     now_date_time = datetime.datetime.utcnow()
@@ -441,6 +531,15 @@ def get_next_available_nav_apts(post_errors):
 
 
 def create_navigator_apt_entry(nav_info, appointment_timestamp):
+    """
+    This function takes a dictionary popluated with navigator information and an appointment timestamp and creates
+    an dictionary containing appointment information corresponding to the information given.
+
+    :param nav_info:
+    :param appointment_timestamp:
+    :return:
+    """
+
     next_available_apt_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"]),
                                 "Navigator Database ID": nav_info["Database ID"],
                                 "Appointment Date and Time": appointment_timestamp.isoformat()[:-6],
@@ -451,6 +550,14 @@ def create_navigator_apt_entry(nav_info, appointment_timestamp):
 
 
 def get_earliest_available_apt_datetime(now_date_time):
+    """
+    This function takes a datetime object and returns the earliest possible business datetime starting from the given
+    datetime object.
+
+    :param now_date_time:
+    :return:
+    """
+
     if not isbday(now_date_time):
         earliest_available_date_time = now_date_time + BDay(1)
         earliest_available_date_time = earliest_available_date_time.replace(hour=15, minute=0, second=0, microsecond=0)
@@ -469,6 +576,15 @@ def get_earliest_available_apt_datetime(now_date_time):
 
 
 def get_possible_appointments_range(earliest_available_date_time, end_of_next_b_day_date_time):
+    """
+    This function takes a start and an end of next business day datetime, and returns a list of datetimes in 15 min
+    intervals that are within business time.
+
+    :param earliest_available_date_time:
+    :param end_of_next_b_day_date_time:
+    :return:
+    """
+
     earliest_available_time = datetime.time(hour=earliest_available_date_time.hour, minute=earliest_available_date_time.minute, second=earliest_available_date_time.second, microsecond=earliest_available_date_time.microsecond)
     possible_appointment_times = []
 
@@ -492,6 +608,16 @@ def get_possible_appointments_range(earliest_available_date_time, end_of_next_b_
 
 
 def get_nav_free_busy_times(start_timestamp, end_timestamp, post_errors):
+    """
+    This function takes a start and an end timestamp and returns an object which contains intervals where the
+    navigators who have authorized credentials are busy.
+
+    :param start_timestamp:
+    :param end_timestamp:
+    :param post_errors: (type: list) list of error messages
+    :return:
+    """
+
     nav_cal_list_dict = get_nav_cal_lists(post_errors)
 
     nav_free_busy_list = get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_errors)
@@ -500,12 +626,19 @@ def get_nav_free_busy_times(start_timestamp, end_timestamp, post_errors):
 
 
 def get_nav_cal_lists(post_errors):
+    """
+    This function retrieves the list of Google calendars for all navigators who have authorized google credentials.
+
+    :param post_errors: (type: list) list of error messages
+    :return:
+    """
+
     nav_cal_list_dict = {}
 
     def add_cal_list_entry(request_id, response, exception):
         nav_cal_list_dict[request_id] = response["items"]
 
-    #build batch request
+    # build batch request
     cal_list_batch = BatchHttpRequest()
 
     credentials_objects = list(CredentialsModel.objects.all())
@@ -518,7 +651,7 @@ def get_nav_cal_lists(post_errors):
         else:
             nav_cal_list_dict[str(nav_object.id)] = []
 
-            #Obtain valid credential and use it to build authorized service object for given navigator
+            # Obtain valid credential and use it to build authorized service object for given navigator
             credential = credentials_object.credential
             service = build_authorized_cal_http_service_object(credential)
 
@@ -533,6 +666,17 @@ def get_nav_cal_lists(post_errors):
 
 
 def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_errors):
+    """
+    This function retrieves the busy times for a given interval for all navigators who have authorized credentials from
+    Google.
+
+    :param start_timestamp:
+    :param end_timestamp:
+    :param nav_cal_list_dict:
+    :param post_errors: (type: list) list of error messages
+    :return:
+    """
+
     nav_free_busy_dict = {}
     nav_free_busy_list = []
 
@@ -543,12 +687,16 @@ def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_e
                 for busy_entry in busy_list:
                     nav_free_busy_dict[request_id].append(busy_entry)
 
-    #build batch request
-    # Each HTTP connection that your application makes results in a certain amount of overhead. This library supports batching, to allow your application to put several API calls into a single HTTP request. Examples of situations when you might want to use batching:
+    # build batch request
+    # Each HTTP connection that your application makes results in a certain amount of overhead. This library supports
+    # batching, to allow your application to put several API calls into a single HTTP request. Examples of situations
+    # when you might want to use batching:
 
     # You have many small requests to make and would like to minimize HTTP request overhead.
-    # A user made changes to data while your application was offline, so your application needs to synchronize its local data with the server by sending a lot of updates and deletes.
-    # Note: You're limited to 1000 calls in a single batch request. If you need to make more calls than that, use multiple batch requests
+    # A user made changes to data while your application was offline, so your application needs to synchronize its
+    # local data with the server by sending a lot of updates and deletes.
+    # Note: You're limited to 1000 calls in a single batch request. If you need to make more calls than that, use
+    # multiple batch requests
     free_busy_batch = BatchHttpRequest()
 
     credentials_objects = list(CredentialsModel.objects.all())
@@ -588,6 +736,16 @@ def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_e
 
 
 def get_nav_scheduled_appointments(nav_info, credentials_object, rqst_errors):
+    """
+    This function retrieves all the scheduled appointments from a given navigator's '"Navigator-Consumer Appointments (DO NOT CHANGE)"'
+    Google calendar.
+
+    :param nav_info:
+    :param credentials_object: (type: CredentialsModel) picmodels instance that contains Google OAuth2 Credentials object
+    :param rqst_errors: (type: list) list of error messages
+    :return:
+    """
+
     scheduled_appointment_list = []
     credential = credentials_object.credential
 

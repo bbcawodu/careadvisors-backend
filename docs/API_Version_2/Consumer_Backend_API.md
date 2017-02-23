@@ -68,6 +68,8 @@ Address(Every field within address can be given as an empty string. Address will
 
 "Consumer Database ID": Integer(Required when "Database Action" == "Consumer Modification" or "Consumer Deletion"),
 "Database Action": String,
+"create_backup": Boolean (Whether or not to create a backup instance of this consumer)(Key can be omitted),
+"force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db)(Key can be omitted),
 }
 ```
 
@@ -116,6 +118,113 @@ In response, a JSON document will be displayed with the following format:
     
 ### Consumer Data Retrieval API
 - To retrieve consumer data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/consumers/ with the following parameters(at least one required)
+    - A maximum of 20 consumer records with full fields will be returned due to size constraints
+        - The rest are consumer database IDs
+        - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter
+    - "fname" corresponds to consumer first name.
+    - "lname" corresponds to consumer last name.
+        - "fname" and "lname" can be given simultaneously as parameters. If so, only one value each is permitted.
+    - "email" corresponds to consumer email.
+    - "region" corresponds to consumer region.
+    - "id" corresponds to consumer class database id.
+        - passing "all" as the value will return all consumer enteties
+    - "navid" corresponds to staff member class database id. (Can be combined with any of the above parameters)
+    - "page" corresponds to the current page of consumer instances to be displayed with full fields. 
+        - if this parameter is missing, the first 20 consumer instances will be displayed with full fields.
+        
+- The response will be a JSON document with the following format:
+    ```
+    {
+        "Data": [
+            {
+                "Email": String,
+                "Phone Number": String,
+                "Database ID": Integer,
+                "Preferred Language": String,
+                "First Name": String,
+                "Middle Name": String,
+                "Last Name": String,
+                "date_met_nav": String (Can be Null),
+                "Navigator": String,
+                "Navigator Notes": [
+                                        "These are",
+                                        "sample notes",
+                                        "navigators write about consumers",
+                                        ...
+                                    ],
+                "Met Navigator At": String,
+                "Household Size": Integer,
+                "Plan": String,
+                "Best Contact Time": String,
+                "address": Will either be None or a dictionary of the following form:
+                           {
+                            "Address Line 1": String,
+                            "Address Line 2": String,
+                            "City": String,
+                            "State": String,
+                            "Zipcode": String,
+                            "Country": String,
+                           },
+                           
+                "cps_consumer": Boolean,
+                "cps_info": {
+                                "primary_dependent": {
+                                                        "first_name": String,
+                                                        "last_name": String,
+                                                     },
+                                "cps_location": String,
+                                "apt_date"{
+                                                "Day": Integer,
+                                                "Month": Integer,
+                                                "Year": Integer,
+                                          },
+                                "target_list": Boolean,
+                                "phone_apt": Boolean,
+                                "case_mgmt_type": String,
+                                "case_mgmt_status": String,
+                                "secondary_dependents": [
+                                                             {
+                                                                "first_name": String,
+                                                                "last_name": String,
+                                                             },
+                                                             ...
+                                                        ],
+                                "app_type": String,
+                                "app_status": String,
+                            },
+            },
+            ...,
+            ...,
+            ...,
+            up to 20 full record consumer entries,
+            2(Database IDs for the rest),
+            6,
+            9
+        ],
+        "Status": {
+            "Version": 2.0,
+            "Error Code": Integer,
+            "Warnings": Array,
+            "Errors": Array
+        },
+        "Page URLs": Array of strings (Will be missing if "page" parameter is given OR less than 20 consumers in results)
+    }
+    ```
+
+- If consumers are found,
+    - "Error Code" will be 0
+    - Array corresponding to the "Data" key will be non empty.
+- If consumers are not found,
+    - "Error Code" will be 1.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
+    - Array corresponding to the "Data" key will be empty.
+- If "page" parameter is missing and there is more than one page of customer instances to display with all fields, "Page
+    URLs" key will be present in the root response dictionary.
+    
+    
+### Consumer Backup Data Retrieval API
+- To retrieve backup consumer data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/backup_consumers/ with the following parameters(at least one required)
     - A maximum of 20 consumer records with full fields will be returned due to size constraints
         - The rest are consumer database IDs
         - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter

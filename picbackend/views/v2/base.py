@@ -25,7 +25,7 @@ class JSONGETRspMixin(object):
             response_raw_data, rqst_errors = init_v2_response_data()
 
             # Build dictionary that contains valid Patient Innovation Center GET parameters
-            search_params = build_search_params(request.GET, response_raw_data, rqst_errors)
+            search_params = build_search_params(request.GET, rqst_errors)
 
             response_raw_data, rqst_errors = self.get_logic_function(request, search_params, response_raw_data, rqst_errors)
 

@@ -465,4 +465,4 @@ class EligibilityValidPostTestBase(object):
 #         self.assertIn("Insurance Type", self.elig_data)
 #
 #     def test_insurance_type_is_string(self):
-        self.assertIsInstance(self.elig_data["Insurance Type"], str)
+#         self.assertIsInstance(self.elig_data["Insurance Type"], str)
