@@ -21,6 +21,8 @@ def fetch_and_parse_pokit_elig_data(post_data, response_raw_data, post_errors):
     if len(post_errors) == 0:
         eligibility_data = {
             "member": {},
+            # "provider":{"npi": "1962941096",
+            #             "organization_name": "Care Advisors Inc"},
             "trading_partner_id": rqst_consumer_trading_partner
         }
         if rqst_consumer_f_name:
