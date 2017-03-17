@@ -37,6 +37,7 @@ The body of the request should be a JSON document which has the following format
                     "no_sep_eligible": "Number of SEP eligible" (Integer),
                     "no_employ_spons_cov_issues": "Number of employer-sponsored coverage issues (non-Marketplace or Medicaid)" (Integer),
                     "no_aptc_csr_assis": "Number of consumers assisted with APTC/CSR (Advanced Premium Tax Credit issues or customer service issues with call center)" (Integer),
+                    "no_cps_consumers": "Number of CPS consumers enrolled" (Integer)(Can be omitted),
                     "cmplx_cases_mplace_issues": "Complex cases and other Marketplace issues (Note other issues or trends not listed. You may mark N/A if nothing to report on this day)" (String - Can be empty string),
                     "Plan Stats": [
                                     {"Issuer Name": String,
@@ -308,6 +309,7 @@ In response, a JSON document will be displayed with the following format:
                 "no_sep_eligible": "Number of SEP eligible" (Integer),
                 "no_employ_spons_cov_issues": "Number of employer-sponsored coverage issues (non-Marketplace or Medicaid)" (Integer),
                 "no_aptc_csr_assis": "Number of consumers assisted with APTC/CSR (Advanced Premium Tax Credit issues or customer service issues with call center)" (Integer),
+                "no_cps_consumers": "Number of CPS consumers enrolled" (Integer),
                 "cmplx_cases_mplace_issues": "Complex cases and other Marketplace issues (Note other issues or trends not listed. You may mark N/A if nothing to report on this day)" (String),
                 "Date Created": String,
                 "County": String,

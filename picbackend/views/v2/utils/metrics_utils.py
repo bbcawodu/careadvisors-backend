@@ -66,6 +66,10 @@ def add_or_update_metrics_entity(response_raw_data, post_data, post_errors):
                                                                   post_errors)
         rqst_cmplx_cases_mplace_issues = clean_string_value_from_dict_object(consumer_metrics, "Consumer Metrics", "cmplx_cases_mplace_issues", post_errors,
                                                                              empty_string_allowed=True)
+        rqst_no_cps_consumers = clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_cps_consumers",
+                                                                post_errors, no_key_allowed=True)
+        if rqst_no_cps_consumers is None:
+            rqst_no_cps_consumers = 0
 
         rqst_metrics_county = clean_string_value_from_dict_object(consumer_metrics, "Consumer Metrics", "County", post_errors)
         rqst_metrics_location = clean_string_value_from_dict_object(consumer_metrics, "Consumer Metrics", "Location", post_errors)
@@ -131,6 +135,7 @@ def add_or_update_metrics_entity(response_raw_data, post_data, post_errors):
             metrics_instance.no_sep_eligible = rqst_no_sep_eligible
             metrics_instance.no_employ_spons_cov_issues = rqst_no_employ_spons_cov_issues
             metrics_instance.no_aptc_csr_assis = rqst_no_aptc_csr_assis
+            metrics_instance.no_cps_consumers = rqst_no_cps_consumers
             metrics_instance.cmplx_cases_mplace_issues = rqst_cmplx_cases_mplace_issues
             metrics_instance.county = rqst_metrics_county
 

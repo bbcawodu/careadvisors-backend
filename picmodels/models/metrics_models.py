@@ -35,6 +35,7 @@ class MetricsSubmission(models.Model):
     no_employ_spons_cov_issues = models.IntegerField(default=0)
     no_aptc_csr_assis = models.IntegerField(default=0)
     cmplx_cases_mplace_issues = models.CharField(max_length=5000, blank=True, default="")
+    no_cps_consumers = models.IntegerField(default=0)
 
     def return_values_dict(self):
         valuesdict = {"no_general_assis": self.no_general_assis,
@@ -58,6 +59,7 @@ class MetricsSubmission(models.Model):
                       "no_employ_spons_cov_issues": self.no_employ_spons_cov_issues,
                       "no_aptc_csr_assis": self.no_aptc_csr_assis,
                       "cmplx_cases_mplace_issues": self.cmplx_cases_mplace_issues,
+                      "no_cps_consumers": self.no_cps_consumers,
 
                       "Staff Member ID": self.staff_member_id,
                       "Date Created": self.date_created.isoformat(),
