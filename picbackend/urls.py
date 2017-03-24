@@ -114,4 +114,8 @@ urlpatterns = [
     url(r"^v2/calendar_auth/$", views.NavGoogleCalendarAccessRequestView.as_view()),
     url(r'^v2/oauth2callback', views.GoogleCalendarAuthReturnView.as_view()),
     url(r'^v2/patient_assist_apt_mgr', views.PatientAssistAptMgtView.as_view()),
+
+    # urls for call to action views
+    url(r"^v2/cta_management/$", views.manage_cta_request),
+    url(r"^v2/cta/$", views.ViewCTAView.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

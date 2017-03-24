@@ -28,7 +28,6 @@ from picmodels.forms import StaffImageUploadForm
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
-from .utils import parse_and_log_errors
 from django.conf import settings
 
 

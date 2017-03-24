@@ -245,6 +245,8 @@ def build_search_params(rqst_params, rqst_errors):
     if 'nav_location_tags' in rqst_params:
         search_params['nav_location_tags'] = rqst_params['nav_location_tags']
         search_params['nav_location_tags list'] = re.findall(r"[@\w. '-]+", search_params['region'])
+    if 'intent' in rqst_params:
+        search_params['intent'] = urllib.parse.unquote(rqst_params['intent'])
 
     return search_params
 
