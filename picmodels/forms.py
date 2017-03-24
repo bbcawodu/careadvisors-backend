@@ -9,6 +9,7 @@ from django.forms import Form
 from django.forms import ImageField
 from django.forms import HiddenInput
 from django.forms import IntegerField
+from django.forms import CharField
 from .models import PICStaff
 
 
@@ -40,3 +41,9 @@ class StaffImageUploadForm(Form):
     #     })
     #
     #     super(StaffImageUploadForm, self).__init__()
+
+
+class CTAManagementForm(Form):
+    """Image upload form."""
+    cta_image = ImageField()
+    cta_intent = CharField()
