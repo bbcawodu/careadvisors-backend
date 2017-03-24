@@ -172,3 +172,4 @@ MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
 DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 DEFAULT_STAFF_PIC_URL = 'staff_pics/None/default_staff.jpg'
+DEFAULT_CTA_PIC_URL = 'call_to_actions/None/default_staff.jpg'
