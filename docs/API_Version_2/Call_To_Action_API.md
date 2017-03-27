@@ -13,6 +13,7 @@
   http://picbackend.herokuapp.com/v2/cta/ with the following mandatory parameter: "intent"
     - "intent" corresponds to the intent keyword for the Call to action that you want to retrieve.
         - Must be a string
+        - Use keyword 'all' to retrieve all call to actions in db
     
 - The response will be a JSON document with the following format:
     ```
