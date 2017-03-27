@@ -9,7 +9,8 @@ class CallToAction(models.Model):
 
     def return_values_dict(self):
         valuesdict = {"Intent": self.intent,
-                      "Picture": self.cta_image.url
+                      "Picture": self.cta_image.url,
+                      "Database ID": self.id
                       }
 
         return valuesdict
