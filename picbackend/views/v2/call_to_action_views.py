@@ -63,8 +63,15 @@ class ViewCTAView(JSONGETRspMixin, View):
         cta_return_list = []
         if 'intent' in search_params:
             try:
-                cta_object = CallToAction.objects.get(intent__iexact=search_params['intent'])
-                cta_return_list.append(cta_object.return_values_dict())
+                if search_params['intent'] == 'all':
+                    cta_objects = CallToAction.objects.all()
+
+                    for cta_object in cta_objects:
+                        cta_return_list.append(cta_object.return_values_dict())
+                else:
+                    cta_object = CallToAction.objects.get(intent__iexact=search_params['intent'])
+
+                    cta_return_list.append(cta_object.return_values_dict())
             except CallToAction.DoesNotExist:
                 rqst_errors.append("No Call to Action object found for intent keyword: {}".format(search_params["intent"]))
         else:
