@@ -9,6 +9,7 @@ from .utils import clean_string_value_from_dict_object
 from .utils import add_carrier
 from .utils import modify_carrier
 from .utils import delete_carrier
+from picmodels.models import HealthcareCarrier
 from django.views.decorators.csrf import csrf_exempt
 from .base import JSONPUTRspMixin
 from .base import JSONGETRspMixin
@@ -17,7 +18,7 @@ from .base import JSONGETRspMixin
 #Need to abstract common variables in get and post class methods into class attributes
 class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
-    Defines views that handles Patient Innovation Center metrics instance related requests
+    Defines views that handles healthcare carrier related requests
     """
 
     @method_decorator(csrf_exempt)
@@ -40,6 +41,22 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         return response_raw_data, post_errors
 
     def carriers_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
+        carriers = HealthcareCarrier.objects.all()
+
+        if 'id' in search_params:
+            rqst_consumer_id = search_params['id']
+            if rqst_consumer_id != 'all':
+                list_of_ids = search_params['id list']
+            else:
+                list_of_ids = None
+            # response_raw_data, rqst_errors = retrieve_id_consumers(response_raw_data, rqst_errors, consumers,
+            #                                                        rqst_consumer_id, list_of_ids)
+        elif 'name' in search_params:
+            rqst_name = search_params['name']
+            list_of_names = search_params['name list']
+
+            # response_raw_data, rqst_errors = retrieve_f_l_name_consumers(response_raw_data, rqst_errors, consumers,
+            #                                                              rqst_first_name, rqst_last_name)
 
         return response_raw_data, rqst_errors
 

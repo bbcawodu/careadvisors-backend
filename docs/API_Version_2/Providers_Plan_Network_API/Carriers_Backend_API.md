@@ -35,12 +35,12 @@ In response, a JSON document will be displayed with the following format:
     - The response JSON document will have a dictionary object as the value for the "Data" key.
         - It contains the key "Database ID", the value for which is the database id of the created entry
     
-- Updating a HealthcareCarrier database entry. (IN DEVELOPMENT)
+- Updating a HealthcareCarrier database entry.
     - To update a HealthcareCarrier database entry, the value for "Database Action" in the JSON Body must equal "Carrier Modification".
     - All other fields must be filled.
     - All key value pairs in the JSON Body document correspond to updated fields for specified "Database ID"
 
-- Deleting a HealthcareCarrier database entry. (IN DEVELOPMENT)
+- Deleting a HealthcareCarrier database entry.
     - To delete a HealthcareCarrier database entry, the value for "Database Action" in the JSON Body must equal "Carrier Deletion".
     - The only other field should be "Database ID".
     - The response JSON document will have a "Deleted" as the value for the "Data" key.
