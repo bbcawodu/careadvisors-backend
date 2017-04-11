@@ -42,3 +42,8 @@ This file is documentation for the backend API library for Patient Innovation Ce
 ## Call to Action Backend Management API
 
 [Call to Action Backend Management API README](Call_To_Action_API.md)
+
+
+## Accepted Plans for PIC Contracted Healthcare Provider Networks API
+
+[Accepted Plans for PIC Contracted Healthcare Provider Networks API README](Providers_Plan_Network_API/Index.md)

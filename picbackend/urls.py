@@ -118,4 +118,8 @@ urlpatterns = [
     # urls for call to action views
     url(r"^v2/cta_management/$", views.manage_cta_request),
     url(r"^v2/cta/$", views.ViewCTAView.as_view()),
+
+    # urls for provider network and accepted plans views
+    url(r"^v2/carriers/$", views.CarriersManagementView.as_view()),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
