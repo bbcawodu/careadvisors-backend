@@ -11,3 +11,4 @@ from .nav_location_views import *
 from .consumer_health_insurance_views import *
 from .patient_assist_scheduler_views import *
 from .call_to_action_views import *
+from .providers_plan_network_views import *

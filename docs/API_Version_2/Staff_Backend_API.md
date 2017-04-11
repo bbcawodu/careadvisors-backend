@@ -37,13 +37,15 @@ In response, a JSON document will be displayed with the following format:
 - Adding a staff member database entry.
     - To add a staff member database entry, the value for "Database Action" in the POST request must equal "Staff Addition".
     - All other fields except "Database ID" must be filled.
-    - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the added database entry.
+    - The response JSON document will have a dictionary object as the value for the "Data" key.
+        - It contains the key "Database ID", the value for which is the database id of the created entry
     
 - Modifying a staff member database entry.
     - To modify a staff member database entry, the value for "Database Action" in the POST request must equal "Staff Modification".
     - All other fields must be filled.
     - All key value pairs in the JSON Body document correspond to updated fields for specified "Database ID"
-    - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the updated database entry.
+    - The response JSON document will have a dictionary object as the value for the "Data" key.
+        - It contains the key "Database ID", the value for which is the database id of the updated entry
 
 - Deleting a staff member database entry.
     - To delete a staff member database entry, the value for "Database Action" in the POST request must equal "Staff Deletion".

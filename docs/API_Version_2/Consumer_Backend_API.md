@@ -89,7 +89,8 @@ In response, a JSON document will be displayed with the following format:
 - Adding a consumer database entry.
     - To add a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Addition".
     - All other fields except "Consumer Database ID" must be filled.
-    - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the added database entry.
+    - The response JSON document will have a dictionary object as the value for the "Data" key.
+        - It contains the key "Database ID", the value for which is the database id of the created entry
     
 - Modifying a consumer database entry.
     - To modify a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Modification".
@@ -103,7 +104,8 @@ In response, a JSON document will be displayed with the following format:
             - And there is no 'cps_info' for the consumer, no change
         - If 'cps_consumer'=True
             - 'cps_consumer' and 'cps_info' fields for related consumer will be modified
-    - The response JSON document will have a dictionary object as the value for the "Data" key with key value pairs for all the fields of the updated database entry.
+    - The response JSON document will have a dictionary object as the value for the "Data" key.
+        - It contains the key "Database ID", the value for which is the database id of the updated entry
 
 - Deleting a consumer database entry.
     - To delete a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Deletion".
