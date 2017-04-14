@@ -285,6 +285,10 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
 
             consumer_instance.cps_info = cps_info_object
             consumer_instance.save()
+        else:
+            consumer_instance.delete()
+    else:
+        consumer_instance.delete()
 
 
 def check_consumer_db_entries_for_dependent_info(rqst_dependent_dict, post_errors):

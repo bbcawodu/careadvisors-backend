@@ -50,3 +50,45 @@ In response, a JSON document will be displayed with the following format:
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
+    
+    
+### Healthcare Carrier Data Retrieval API
+- To retrieve HealthcareCarrier data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/carriers/ with the following optional parameters: "name", "id"
+    - NOTE: Only one of the following parameters allowed at a time
+    - "name" corresponds to first name.
+        - Must be a string
+        - all non ASCII characters must be url encoded
+    - "id" corresponds to database id.
+        - passing "all" as the value will return all staff members
+        - All other cases:
+            - must be a base 10 integer.
+            - Can be multiple values separated by commas.
+    
+- The response will be a JSON document with the following format:
+    ```
+    {
+        "Data": [
+            {
+                "name": String,
+                "Database ID": Integer,
+            },
+            ...,
+            ...,
+            ...,
+        ],
+        "Status": {
+            "Version": 2.0,
+            "Error Code": Integer,
+            "Errors": Array
+        }
+    }
+    ```
+
+- If healthcare carriers are found,
+    - "Error Code" will be 0
+    - Array corresponding to the "Data" key will be non empty.
+- If healthcare carriers are not found,
+    - "Error Code" will be 1.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
+    - Array corresponding to the "Data" key will be empty.
