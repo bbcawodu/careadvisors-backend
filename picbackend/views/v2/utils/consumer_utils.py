@@ -101,7 +101,6 @@ def add_consumer(response_raw_data, rqst_consumer_info, post_errors):
 
                 response_raw_data['Data']["Database ID"] = consumer_instance.id
             except PICStaff.DoesNotExist:
-                consumer_instance.delete()
                 post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(add_consumer_params['rqst_nav_id'])))
 
     return response_raw_data

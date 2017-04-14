@@ -166,6 +166,7 @@ def build_search_params(rqst_params, rqst_errors):
     :param rqst_errors: (type: list) list of error messages
     :return: (type: dictionary) dictionary populated with key value paramaters from GET request
     """
+
     search_params = {}
     if 'location' in rqst_params:
         search_params['location'] = urllib.parse.unquote(rqst_params['location'])
@@ -247,6 +248,8 @@ def build_search_params(rqst_params, rqst_errors):
         search_params['nav_location_tags list'] = re.findall(r"[@\w. '-]+", search_params['region'])
     if 'intent' in rqst_params:
         search_params['intent'] = urllib.parse.unquote(rqst_params['intent'])
+    if 'name' in rqst_params:
+        search_params['name'] = urllib.parse.unquote(rqst_params['name'])
 
     return search_params
 
