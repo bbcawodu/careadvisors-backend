@@ -271,9 +271,12 @@ In response, a JSON document will be displayed with the following format:
         - "startdate" and "enddate" must be given in "YYYY-MM-DD" format
         - "time" must be an integer amount of days to look up in the past
         - "zipcode" must be a non empty comma separated string of zipcodes
-        - "location" must be a percent encoded string that corresponds to the name of the location you desire to search for
+        - "location" must be a string that corresponds to the name of the location you desire to search for
+            - all non ASCII characters must be url encoded
         - "grouby" can be "zipcode" to group the metrics submissions returned by zipcode
-        - "fields" must be a percent encoded list of fields that you would like each metrics report to include.
+        - "fields" must be a string.
+            - Corresponds to a comma separated list of fields that you would like each metrics report to include.
+                - all non ASCII characters of a field must be url encoded before separating by commas
             - If no valid fields are given, all fields of each metrics report will be returned
         
 - The response will be a JSON document with the following format:

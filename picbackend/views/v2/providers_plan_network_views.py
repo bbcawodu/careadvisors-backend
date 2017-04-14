@@ -9,6 +9,15 @@ from .utils import clean_string_value_from_dict_object
 from .utils import add_carrier
 from .utils import modify_carrier
 from .utils import delete_carrier
+from .utils import retrieve_id_carriers
+from .utils import retrieve_name_carriers
+from .utils import add_plan
+from .utils import modify_plan
+from .utils import delete_plan
+from .utils import retrieve_id_plans
+from .utils import retrieve_name_plans
+from picmodels.models import HealthcareCarrier
+from picmodels.models import HealthcarePlan
 from django.views.decorators.csrf import csrf_exempt
 from .base import JSONPUTRspMixin
 from .base import JSONGETRspMixin
@@ -17,7 +26,7 @@ from .base import JSONGETRspMixin
 #Need to abstract common variables in get and post class methods into class attributes
 class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
-    Defines views that handles Patient Innovation Center metrics instance related requests
+    Defines views that handles healthcare carrier related requests
     """
 
     @method_decorator(csrf_exempt)
@@ -40,8 +49,69 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         return response_raw_data, post_errors
 
     def carriers_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
+        carriers = HealthcareCarrier.objects.all()
+
+        if 'id' in search_params:
+            rqst_carrier_id = search_params['id']
+            if rqst_carrier_id != 'all':
+                list_of_ids = search_params['id list']
+            else:
+                list_of_ids = None
+            response_raw_data, rqst_errors = retrieve_id_carriers(response_raw_data, rqst_errors, carriers,
+                                                                   rqst_carrier_id, list_of_ids)
+        elif 'name' in search_params:
+            rqst_name = search_params['name']
+
+            response_raw_data, rqst_errors = retrieve_name_carriers(response_raw_data, rqst_errors, carriers, rqst_name)
 
         return response_raw_data, rqst_errors
 
     put_logic_function = carriers_management_put_logic
     get_logic_function = carriers_management_get_logic
+
+
+#Need to abstract common variables in get and post class methods into class attributes
+class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
+    """
+    Defines views that handles healthcare carrier related requests
+    """
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(PlansManagementView, self).dispatch(request, *args, **kwargs)
+
+    def plans_management_put_logic(self, post_data, response_raw_data, post_errors):
+        # Retrieve database action from post data
+        rqst_action = clean_string_value_from_dict_object(post_data, "root", "Database Action", post_errors)
+
+        # If there are no parsing errors, process PUT data based on database action
+        if not post_errors:
+            if rqst_action == "Plan Addition":
+                response_raw_data = add_plan(response_raw_data, post_data, post_errors)
+            elif rqst_action == "Plan Modification":
+                response_raw_data = modify_plan(response_raw_data, post_data, post_errors)
+            elif rqst_action == "Plan Deletion":
+                response_raw_data = delete_plan(response_raw_data, post_data, post_errors)
+
+        return response_raw_data, post_errors
+
+    def plans_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
+        carriers = HealthcarePlan.objects.all()
+
+        if 'id' in search_params:
+            rqst_carrier_id = search_params['id']
+            if rqst_carrier_id != 'all':
+                list_of_ids = search_params['id list']
+            else:
+                list_of_ids = None
+            response_raw_data, rqst_errors = retrieve_id_plans(response_raw_data, rqst_errors, carriers,
+                                                                   rqst_carrier_id, list_of_ids)
+        elif 'name' in search_params:
+            rqst_name = search_params['name']
+
+            response_raw_data, rqst_errors = retrieve_name_plans(response_raw_data, rqst_errors, carriers, rqst_name)
+
+        return response_raw_data, rqst_errors
+
+    put_logic_function = plans_management_put_logic
+    get_logic_function = plans_management_get_logic
