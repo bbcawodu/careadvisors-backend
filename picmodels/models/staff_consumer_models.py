@@ -85,8 +85,10 @@ class PICStaff(models.Model):
 
         base_locations = self.base_locations.all()
         if base_locations:
+            base_location_values = []
             for base_location in base_locations:
-                valuesdict["Base Locations"].append(base_location.return_values_dict())
+                base_location_values.append(base_location.return_values_dict())
+            valuesdict["Base Locations"] = base_location_values
 
         try:
             credentials_object = CredentialsModel.objects.get(id=self.id)

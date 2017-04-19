@@ -23,15 +23,20 @@ def add_carrier(response_raw_data, rqst_carrier_info, post_errors):
     add_carrier_params = get_carrier_mgmt_put_params(rqst_carrier_info, post_errors)
 
     if len(post_errors) == 0:
-        found_healthcare_carrier_objs = check_for_healthcare_carrier_objs_with_given_name(
-            add_carrier_params['rqst_carrier_name'], post_errors)
+        found_healthcare_carrier_objs = check_for_healthcare_carrier_objs_with_given_name_and_state(
+            add_carrier_params['rqst_carrier_name'], add_carrier_params['rqst_carrier_state'],  post_errors)
 
         if not found_healthcare_carrier_objs and len(post_errors) == 0:
             healthcare_carrier_obj = HealthcareCarrier()
             healthcare_carrier_obj.name = add_carrier_params['rqst_carrier_name']
-            healthcare_carrier_obj.save()
+            healthcare_carrier_obj.state_province = add_carrier_params['rqst_carrier_state']
+            if not healthcare_carrier_obj.check_state_choices():
+                post_errors.append(
+                    "State: {!s} is not a valid state abbreviation".format(healthcare_carrier_obj.state_province))
 
-            response_raw_data['Data']["Database ID"] = healthcare_carrier_obj.id
+            if len(post_errors) == 0:
+                healthcare_carrier_obj.save()
+                response_raw_data['Data']["Database ID"] = healthcare_carrier_obj.id
 
     return response_raw_data
 
@@ -41,26 +46,31 @@ def modify_carrier(response_raw_data, rqst_carrier_info, post_errors):
     rqst_carrier_id = clean_int_value_from_dict_object(rqst_carrier_info, "root", "Database ID", post_errors)
 
     if len(post_errors) == 0:
-        found_healthcare_carrier_objs = check_for_healthcare_carrier_objs_with_given_name(
-            modify_carrier_params['rqst_carrier_name'], post_errors)
+        found_healthcare_carrier_objs = check_for_healthcare_carrier_objs_with_given_name_and_state(
+            modify_carrier_params['rqst_carrier_name'], modify_carrier_params['rqst_carrier_state'], post_errors)
 
         if not found_healthcare_carrier_objs and len(post_errors) == 0:
             try:
                 healthcare_carrier_obj = HealthcareCarrier.objects.get(id=rqst_carrier_id)
                 healthcare_carrier_obj.name = modify_carrier_params['rqst_carrier_name']
-                healthcare_carrier_obj.save()
+                healthcare_carrier_obj.state_province = modify_carrier_params['rqst_carrier_state']
+                if not healthcare_carrier_obj.check_state_choices():
+                    post_errors.append("State: {!s} is not a valid state abbreviation".format(healthcare_carrier_obj.state_province))
 
-                response_raw_data['Data']["Database ID"] = healthcare_carrier_obj.id
+                if len(post_errors) == 0:
+                    healthcare_carrier_obj.save()
+                    response_raw_data['Data']["Database ID"] = healthcare_carrier_obj.id
             except HealthcareCarrier.DoesNotExist:
                 post_errors.append("Healthcare carrier does not exist for database id: {}".format(rqst_carrier_id))
 
     return response_raw_data
 
 
-def check_for_healthcare_carrier_objs_with_given_name(carrier_name, post_errors):
+def check_for_healthcare_carrier_objs_with_given_name_and_state(carrier_name, carrier_state,  post_errors):
     found_healthcare_carrier_obj = False
 
-    healthcare_carrier_objs = HealthcareCarrier.objects.filter(name=carrier_name)
+    healthcare_carrier_objs = HealthcareCarrier.objects.filter(name__iexact=carrier_name,
+                                                               state_province__iexact=carrier_state)
 
     if healthcare_carrier_objs:
         found_healthcare_carrier_obj = True
@@ -69,14 +79,14 @@ def check_for_healthcare_carrier_objs_with_given_name(carrier_name, post_errors)
         for carrier_obj in healthcare_carrier_objs:
             carrier_ids.append(carrier_obj.id)
 
-        if len(healthcare_carrier_objs) > 1:
+        if healthcare_carrier_objs.count() > 1:
             post_errors.append(
-                "Multiple healthcare carriers with name {} already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
-                    carrier_name, json.dumps(carrier_ids)))
+                "Multiple healthcare carriers with name: {} and state: {} already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
+                    carrier_name, carrier_state, json.dumps(carrier_ids)))
         else:
             post_errors.append(
-                "Healthcare carrier with name {} already exists in db. (Hint - Modify that entry) id: {}".format(
-                    carrier_name, carrier_ids[0]))
+                "Healthcare carrier with name: {} and state: {} already exists in db. (Hint - Modify that entry) id: {}".format(
+                    carrier_name, carrier_state, carrier_ids[0]))
 
     return found_healthcare_carrier_obj
 
@@ -92,8 +102,10 @@ def get_carrier_mgmt_put_params(rqst_carrier_info, post_errors):
     """
 
     rqst_carrier_name = clean_string_value_from_dict_object(rqst_carrier_info, "root", "name", post_errors)
+    rqst_carrier_state = clean_string_value_from_dict_object(rqst_carrier_info, "root", "state_province", post_errors)
 
-    return {"rqst_carrier_name": rqst_carrier_name,}
+    return {"rqst_carrier_name": rqst_carrier_name,
+            "rqst_carrier_state": rqst_carrier_state}
 
 
 def delete_carrier(response_raw_data, rqst_carrier_info, post_errors):
@@ -157,6 +169,31 @@ def retrieve_id_carriers(response_raw_data, rqst_errors, carriers, rqst_carrier_
                 rqst_errors.append('No carriers found for database ID(s): ' + rqst_carrier_id)
         else:
             rqst_errors.append('No valid carrier IDs provided in request (must be integers)')
+
+    return response_raw_data, rqst_errors
+
+
+def retrieve_state_carriers(response_raw_data, rqst_errors, carriers, rqst_state, list_of_states):
+    carrier_dict = {}
+    for state in list_of_states:
+        name_carriers = carriers.filter(state_province__iexact=state)
+        for carrier in name_carriers:
+            if state not in carrier_dict:
+                carrier_dict[state] = [carrier.return_values_dict()]
+            else:
+                carrier_dict[state].append(carrier.return_values_dict())
+    if len(carrier_dict) > 0:
+        carrier_list = []
+        for carrier_key, carrier_entry in carrier_dict.items():
+            carrier_list.append(carrier_entry)
+        response_raw_data["Data"] = carrier_list
+        for state in list_of_states:
+            if state not in carrier_dict:
+                if response_raw_data['Status']['Error Code'] != 2:
+                    response_raw_data['Status']['Error Code'] = 2
+                rqst_errors.append('Carriers in the state: {!s} not found in database'.format(state))
+    else:
+        rqst_errors.append('Carriers in the state(s): {!s} not found in database'.format(rqst_state))
 
     return response_raw_data, rqst_errors
 

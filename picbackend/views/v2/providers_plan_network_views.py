@@ -11,11 +11,15 @@ from .utils import modify_carrier
 from .utils import delete_carrier
 from .utils import retrieve_id_carriers
 from .utils import retrieve_name_carriers
+from .utils import retrieve_state_carriers
 from .utils import add_plan
 from .utils import modify_plan
 from .utils import delete_plan
 from .utils import retrieve_id_plans
 from .utils import retrieve_name_plans
+from .utils import retrieve_plans_by_carrier_id
+from .utils import retrieve_plans_by_carrier_state
+from .utils import retrieve_plans_by_carrier_name
 from picmodels.models import HealthcareCarrier
 from picmodels.models import HealthcarePlan
 from django.views.decorators.csrf import csrf_exempt
@@ -63,6 +67,12 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             rqst_name = search_params['name']
 
             response_raw_data, rqst_errors = retrieve_name_carriers(response_raw_data, rqst_errors, carriers, rqst_name)
+        elif 'state' in search_params:
+            rqst_state = search_params['state']
+            list_of_states = search_params['state list']
+
+            response_raw_data, rqst_errors = retrieve_state_carriers(response_raw_data, rqst_errors, carriers,
+                                                                     rqst_state, list_of_states)
 
         return response_raw_data, rqst_errors
 
@@ -96,20 +106,37 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         return response_raw_data, post_errors
 
     def plans_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
-        carriers = HealthcarePlan.objects.all()
+        plans = HealthcarePlan.objects.all()
 
         if 'id' in search_params:
-            rqst_carrier_id = search_params['id']
-            if rqst_carrier_id != 'all':
+            rqst_plan_id = search_params['id']
+            if rqst_plan_id != 'all':
                 list_of_ids = search_params['id list']
             else:
                 list_of_ids = None
-            response_raw_data, rqst_errors = retrieve_id_plans(response_raw_data, rqst_errors, carriers,
-                                                                   rqst_carrier_id, list_of_ids)
+            response_raw_data, rqst_errors = retrieve_id_plans(response_raw_data, rqst_errors, plans,
+                                                                   rqst_plan_id, list_of_ids)
         elif 'name' in search_params:
             rqst_name = search_params['name']
 
-            response_raw_data, rqst_errors = retrieve_name_plans(response_raw_data, rqst_errors, carriers, rqst_name)
+            response_raw_data, rqst_errors = retrieve_name_plans(response_raw_data, rqst_errors, plans, rqst_name)
+        elif 'carrier state' in search_params:
+            rqst_carrier_state = search_params['carrier state']
+            list_of_carrier_states = search_params['carrier state list']
+
+            response_raw_data, rqst_errors = retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, plans,
+                                                                             rqst_carrier_state, list_of_carrier_states)
+        elif 'carrier name' in search_params:
+            rqst_carrier_name = search_params['carrier name']
+
+            response_raw_data, rqst_errors = retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, plans,
+                                                                            rqst_carrier_name)
+        elif 'carrier id' in search_params:
+            rqst_carrier_id = search_params['carrier id']
+            list_of_carrier_ids = search_params['carrier id list']
+
+            response_raw_data, rqst_errors = retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans,
+                                                                          rqst_carrier_id, list_of_carrier_ids)
 
         return response_raw_data, rqst_errors
 

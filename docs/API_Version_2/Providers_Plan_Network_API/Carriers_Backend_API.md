@@ -11,6 +11,7 @@ The body of the request should be a JSON document using the following template:
 ```
 {
 "name": String,
+"state_province": String (Must be a valid State Abbreviation eg. TX),
 "Database ID": Integer(Required when "Database Action" == "Carrier Modification" or "Carrier Deletion"),
 "Database Action": String,
 }
@@ -53,16 +54,19 @@ In response, a JSON document will be displayed with the following format:
     
     
 ### Healthcare Carrier Data Retrieval API
-- To retrieve HealthcareCarrier data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/carriers/ with the following optional parameters: "name", "id"
+- To retrieve HealthcareCarrier data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/carriers/ with the following optional parameters: "name", "id", "state"
     - NOTE: Only one of the following parameters allowed at a time
-    - "name" corresponds to first name.
+    - "name" corresponds to carrier name.
         - Must be a string
         - all non ASCII characters must be url encoded
     - "id" corresponds to database id.
-        - passing "all" as the value will return all staff members
+        - passing "all" as the value will return all carriers
         - All other cases:
             - must be a base 10 integer.
             - Can be multiple values separated by commas.
+    - "state" corresponds to the coverage state of a carrier.
+        - must be a string.
+        - Can be multiple values separated by commas.
     
 - The response will be a JSON document with the following format:
     ```

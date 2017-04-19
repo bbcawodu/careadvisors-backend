@@ -250,6 +250,24 @@ def build_search_params(rqst_params, rqst_errors):
         search_params['intent'] = urllib.parse.unquote(rqst_params['intent'])
     if 'name' in rqst_params:
         search_params['name'] = urllib.parse.unquote(rqst_params['name'])
+    if "state" in rqst_params:
+        search_params['state'] = rqst_params['state']
+        search_params['state list'] = re.findall(r"[\w. '-]+", search_params['state'])
+    if 'carrier_id' in rqst_params:
+        search_params['carrier id'] = rqst_params['carrier_id']
+
+        list_of_carrier_ids = re.findall("\d+", search_params['carrier id'])
+        for indx, element in enumerate(list_of_carrier_ids):
+            list_of_carrier_ids[indx] = int(element)
+        search_params['carrier id list'] = list_of_carrier_ids
+
+        if not search_params['carrier id list']:
+            rqst_errors.append('Invalid carrier id, navigator ids must be base 10 integers')
+    if "carrier_state" in rqst_params:
+        search_params['carrier state'] = rqst_params['carrier_state']
+        search_params['carrier state list'] = re.findall(r"[\w. '-]+", search_params['carrier state'])
+    if 'carrier_name' in rqst_params:
+        search_params['carrier name'] = urllib.parse.unquote(rqst_params['carrier_name'])
 
     return search_params
 
