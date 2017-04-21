@@ -211,6 +211,14 @@ class ProviderNetwork(models.Model):
         valuesdict = {"name": self.name,
                       "Database ID": self.id}
 
+        # add related plans to values dict
+        provider_locations = []
+        for provider_location in self.providerlocation_set.all():
+            provider_locations.append(provider_location.id)
+
+        if provider_locations:
+            valuesdict["provider_locations"] = provider_locations
+
         return valuesdict
 
 

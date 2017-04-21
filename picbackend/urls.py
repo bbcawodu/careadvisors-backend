@@ -122,5 +122,7 @@ urlpatterns = [
     # urls for provider network and accepted plans views
     url(r"^v2/carriers/$", views.CarriersManagementView.as_view()),
     url(r"^v2/plans/$", views.PlansManagementView.as_view()),
+    url(r"^v2/provider_locations/$", views.ProviderLocationsManagementView.as_view()),
+    url(r"^v2/provider_networks/$", views.ProviderNetworksManagementView.as_view()),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

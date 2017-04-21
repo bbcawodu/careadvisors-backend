@@ -11,16 +11,6 @@ from picbackend.views.v2.utils import clean_int_value_from_dict_object
 
 
 def add_plan(response_raw_data, rqst_plan_info, post_errors):
-    """
-    This function takes dictionary populated with Healthcare carrier info, parses for errors, adds the carrier
-    to the database if there are none, and adds the carrier info to given response data.
-
-    :param response_raw_data: (type: dictionary) dictionary that contains response data
-    :param rqst_carrier_info: (type: dictionary) dictionary that contains carrier info
-    :param post_errors: (type: list) list of error messages
-    :return: (type: dictionary) dictionary that contains response data
-    """
-
     add_plan_params = get_plan_mgmt_put_params(rqst_plan_info, post_errors)
 
     if len(post_errors) == 0:
@@ -138,32 +128,20 @@ def get_plan_mgmt_put_params(rqst_plan_info, post_errors):
 
 
 def delete_plan(response_raw_data, rqst_carrier_info, post_errors):
-    rqst_carrier_id = clean_int_value_from_dict_object(rqst_carrier_info, "root", "Database ID", post_errors)
+    rqst_plan_id = clean_int_value_from_dict_object(rqst_carrier_info, "root", "Database ID", post_errors)
 
     if len(post_errors) == 0:
         try:
-            healthcare_carrier_obj = HealthcareCarrier.objects.get(id=rqst_carrier_id)
-            healthcare_carrier_obj.delete()
+            healthcare_plan_obj = HealthcarePlan.objects.get(id=rqst_plan_id)
+            healthcare_plan_obj.delete()
             response_raw_data['Data']["Database ID"] = "Deleted"
-        except HealthcareCarrier.DoesNotExist:
-            post_errors.append("Healthcare carrier does not exist for database id: {}".format(rqst_carrier_id))
+        except HealthcarePlan.DoesNotExist:
+            post_errors.append("Healthcare plan does not exist for database id: {}".format(rqst_plan_id))
 
     return response_raw_data
 
 
 def retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_of_ids):
-    """
-    This function takes a list of ids and a QueryList of HealthcareCarrier instances as parameters,
-    filters the database with the parameters, and adds the carrier info the given dictionary of response data
-
-    :param response_raw_data: (type: dictionary) response data
-    :param rqst_errors: (type: list) list of error messages
-    :param carriers: (type: QueryList) QueryList of carriers
-    :param rqst_carrier_id: (type: integer) carrier id
-    :param list_of_ids: (type: list) list of carrier ids
-    :return: (type: dictionary and list) response data and list of error messages
-    """
-
     if rqst_plan_id == "all":
         all_plans = plans
         plan_dict = {}
@@ -203,43 +181,20 @@ def retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_
 
 
 def retrieve_name_plans(response_raw_data, rqst_errors, plans, rqst_name):
-    """
-    This function takes a carrier name and a QueryList of HealthcareCarrier instances as parameters,
-    filters the database with the parameters, and adds the carrier info the given dictionary of response data
-
-    :param response_raw_data: (type: dictionary) response data
-    :param rqst_errors: (type: list) list of error messages
-    :param carriers: (type: QueryList) QueryList of consumers
-    :param rqst_name: (type: string) consumer last name
-    :return: (type: dictionary and list) response data and list of error messages
-    """
-
     plans_list = []
     plans = plans.filter(name__iexact=rqst_name)
 
     if plans:
-        for plans in plans:
-            plans_list.append(plans.return_values_dict())
+        for plan in plans:
+            plans_list.append(plan.return_values_dict())
         response_raw_data["Data"] = plans_list
     else:
-        rqst_errors.append('Plans with name: {!s} not found in database'.format(rqst_name))
+        rqst_errors.append('No plans with name: {!s} not found in database'.format(rqst_name))
 
     return response_raw_data, rqst_errors
 
 
 def retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans, rqst_carrier_id, list_of_carrier_ids):
-    """
-    This function takes a list of ids and a QueryList of HealthcareCarrier instances as parameters,
-    filters the database with the parameters, and adds the carrier info the given dictionary of response data
-
-    :param response_raw_data: (type: dictionary) response data
-    :param rqst_errors: (type: list) list of error messages
-    :param carriers: (type: QueryList) QueryList of carriers
-    :param rqst_carrier_id: (type: integer) carrier id
-    :param list_of_ids: (type: list) list of carrier ids
-    :return: (type: dictionary and list) response data and list of error messages
-    """
-
     if rqst_carrier_id == "all":
         all_plans = plans
         plan_dict = {}
@@ -282,18 +237,6 @@ def retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans, rqst_car
 
 
 def retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, plans, rqst_carrier_state, list_of_carrier_states):
-    """
-    This function takes an email consumer parameter and a QueryList of PICConsumer instances,
-    filters the database with the parameters, and adds the consumer info the given dictionary of response data
-
-    :param response_raw_data: (type: dictionary) response data
-    :param rqst_errors: (type: list) list of error messages
-    :param consumers: (type: QueryList) QueryList of consumers
-    :param rqst_email: (type: string) consumer email
-    :param list_of_emails: (type: list) list of consumer emails
-    :return: (type: dictionary and list) response data and list of error messages
-    """
-
     plans_dict = {}
     plans_object = plans
     for state in list_of_carrier_states:
@@ -320,17 +263,6 @@ def retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, plans, rqst_
 
 
 def retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, plans, rqst_carrier_name):
-    """
-    This function takes a carrier name and a QueryList of HealthcareCarrier instances as parameters,
-    filters the database with the parameters, and adds the carrier info the given dictionary of response data
-
-    :param response_raw_data: (type: dictionary) response data
-    :param rqst_errors: (type: list) list of error messages
-    :param carriers: (type: QueryList) QueryList of consumers
-    :param rqst_name: (type: string) consumer last name
-    :return: (type: dictionary and list) response data and list of error messages
-    """
-
     plans_list = []
     plans = plans.filter(carrier__name__iexact=rqst_carrier_name)
 
