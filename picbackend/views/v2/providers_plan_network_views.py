@@ -25,6 +25,11 @@ from .utils import modify_provider_network
 from .utils import delete_provider_network
 from .utils import retrieve_provider_networks_by_id
 from .utils import retrieve_provider_networks_by_name
+from .utils import add_provider_location
+from .utils import modify_provider_location
+from .utils import modify_provider_location_add_accepted_plans
+from .utils import modify_provider_location_delete_accepted_plans
+from .utils import delete_provider_location
 from picmodels.models import HealthcareCarrier
 from picmodels.models import HealthcarePlan
 from picmodels.models import ProviderLocation
@@ -167,12 +172,16 @@ class ProviderLocationsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
         # If there are no parsing errors, process PUT data based on database action
         if not post_errors:
-            if rqst_action == "Provider Location Addition":
-                response_raw_data = add_plan(response_raw_data, post_data, post_errors)
-            elif rqst_action == "Provider Location Modification":
-                response_raw_data = modify_plan(response_raw_data, post_data, post_errors)
-            elif rqst_action == "Provider Location Deletion":
-                response_raw_data = delete_plan(response_raw_data, post_data, post_errors)
+            if rqst_action == "Add Provider Location":
+                response_raw_data = add_provider_location(response_raw_data, post_data, post_errors)
+            elif rqst_action == "Modify Provider Location":
+                response_raw_data = modify_provider_location(response_raw_data, post_data, post_errors)
+            elif rqst_action == "Modify Location - add_accepted_plans":
+                response_raw_data = modify_provider_location_add_accepted_plans(response_raw_data, post_data, post_errors)
+            elif rqst_action == "Modify Location - delete_accepted_plan":
+                response_raw_data = modify_provider_location_delete_accepted_plans(response_raw_data, post_data, post_errors)
+            elif rqst_action == "Delete Provider Location":
+                response_raw_data = delete_provider_location(response_raw_data, post_data, post_errors)
 
         return response_raw_data, post_errors
 

@@ -11,6 +11,7 @@
 ### Call to Action Retrieval API
 - To retrieve information for a call to action that is stored in the backend, submit a GET request to
   http://picbackend.herokuapp.com/v2/cta/ with the following mandatory parameter: "intent"
+    - Results will be filtered by the given parameters.
     - "intent" corresponds to the intent keyword for the Call to action that you want to retrieve.
         - Must be a string
         - Use keyword 'all' to retrieve all call to actions in db

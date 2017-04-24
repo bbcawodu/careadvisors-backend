@@ -55,6 +55,7 @@ In response, a JSON document will be displayed with the following format:
     
 ### Healthcare Carrier Data Retrieval API
 - To retrieve HealthcareCarrier data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/carriers/ with the following optional parameters: "name", "id", "state"
+    - Results will be filtered by the given parameters.
     - NOTE: Only one of the following parameters allowed at a time
     - "name" corresponds to carrier name.
         - Must be a string
