@@ -1,6 +1,6 @@
 ## Healthcare Provider Location Backend API
 
-### Healthcare Provider Location Data Submission API (IN DEVELOPMENT)
+### Healthcare Provider Location Data Submission API
 To create, update, or delete members of the ProviderLocation class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/provider_locations/.
 
 - The headers of the request should include: 
@@ -78,7 +78,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
     
-### Healthcare Provider Location Data Retrieval API (IN DEVELOPMENT)
+### Healthcare Provider Location Data Retrieval API
 - To retrieve ProviderNetwork data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/provider_locations/ with the following optional parameters:
 "name", "id"
     - Results will be filtered by the given parameters.
