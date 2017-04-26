@@ -11,14 +11,13 @@ The body of the request should be a JSON document using the following template:
 ```
 {
 "name": String,
-"provider_network Database ID": Integer(Database ID for ProviderNetwork entry),
+"provider_network Database ID": Integer (Database ID of the Network this location belongs to.),
 "accepted_plans": [Integer,
                    ...,
                    ...
                   ](List of Database ID's for HealthcarePlan entries),
-"Network Database ID": Integer (Database ID of the Network this location belongs to.),
 "Database ID": Integer(Required when "Database Action" == "Modify Provider Location", "Modify Provider Location - add_accepted_plans"),
-               "Modify Provider Location - delete_accepted_plans", or "Delete Provider Location"
+               "Modify Provider Location - remove_accepted_plans", or "Delete Provider Location"
 "Database Action": String,
 }
 ```
@@ -60,8 +59,8 @@ In response, a JSON document will be displayed with the following format:
         - Must contain database ids for valid Healthcare Plan entries
     - All key value pairs in the JSON Body correspond to updated fields of the entry for specified "Database ID"
     
-- Updating a ProviderLocation database entry - Deleting an accepted plan.
-    - To update a ProviderLocation database entry, the value for "Database Action" in the JSON Body must equal "Modify Provider Location - delete_accepted_plans".
+- Updating a ProviderLocation database entry - Removing an accepted plan.
+    - To update a ProviderLocation database entry, the value for "Database Action" in the JSON Body must equal "Modify Provider Location - remove_accepted_plans".
     - All other fields must be filled.
     - accepted_plans list information
         - Must contain database ids for valid Healthcare Plan entries

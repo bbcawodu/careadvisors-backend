@@ -84,7 +84,7 @@ class PICStaff(models.Model):
                     break
 
         base_locations = self.base_locations.all()
-        if base_locations:
+        if base_locations.count():
             base_location_values = []
             for base_location in base_locations:
                 base_location_values.append(base_location.return_values_dict())

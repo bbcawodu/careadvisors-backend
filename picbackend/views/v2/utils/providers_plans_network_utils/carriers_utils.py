@@ -66,7 +66,7 @@ def modify_carrier(response_raw_data, rqst_carrier_info, post_errors):
     return response_raw_data
 
 
-def check_for_healthcare_carrier_objs_with_given_name_and_state(carrier_name, carrier_state,  post_errors):
+def check_for_healthcare_carrier_objs_with_given_name_and_state(carrier_name, carrier_state,  post_errors, current_carrier_id=None):
     found_healthcare_carrier_obj = False
 
     healthcare_carrier_objs = HealthcareCarrier.objects.filter(name__iexact=carrier_name,
@@ -84,9 +84,12 @@ def check_for_healthcare_carrier_objs_with_given_name_and_state(carrier_name, ca
                 "Multiple healthcare carriers with name: {} and state: {} already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
                     carrier_name, carrier_state, json.dumps(carrier_ids)))
         else:
-            post_errors.append(
-                "Healthcare carrier with name: {} and state: {} already exists in db. (Hint - Modify that entry) id: {}".format(
-                    carrier_name, carrier_state, carrier_ids[0]))
+            if not current_carrier_id or current_carrier_id not in carrier_ids:
+                post_errors.append(
+                    "Healthcare carrier with name: {} and state: {} already exists in db. (Hint - Modify that entry) id: {}".format(
+                        carrier_name, carrier_state, carrier_ids[0]))
+            else:
+                found_healthcare_carrier_obj = False
 
     return found_healthcare_carrier_obj
 
