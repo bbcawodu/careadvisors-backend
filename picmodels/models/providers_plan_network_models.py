@@ -224,11 +224,28 @@ class ProviderNetwork(models.Model):
 
 class ProviderLocation(models.Model):
     name = models.CharField(max_length=10000)
-    accepted_plans = models.ManyToManyField(HealthcarePlan, blank=True)
+    accepted_plans = models.ManyToManyField(HealthcarePlan, blank=True, related_name='locations_accepted_at')
     provider_network = models.ForeignKey(ProviderNetwork, on_delete=models.CASCADE, blank=True, null=True)
 
     def return_values_dict(self):
         valuesdict = {"name": self.name,
+                      "provider_network info": None,
+                      "accepted_plans": [],
                       "Database ID": self.id}
+
+        if self.provider_network:
+            provider_network_object = self.provider_network
+            provider_network_info = {
+                                        "name": provider_network_object.name,
+                                        "Database ID": provider_network_object.id
+                                    }
+            valuesdict['provider_network info'] = provider_network_info
+
+        accepted_plans_queryset = self.accepted_plans.all()
+        if accepted_plans_queryset.count():
+            accepted_plans_ids = []
+            for plan_object in accepted_plans_queryset:
+                accepted_plans_ids.append(plan_object.id)
+            valuesdict['accepted_plans'] = accepted_plans_ids
 
         return valuesdict

@@ -37,6 +37,8 @@ def add_staff(response_raw_data, post_data, post_errors):
                 base_location_objects.append(base_location_object)
             except NavMetricsLocation.DoesNotExist:
                 location_errors.append("No Nav Hub Location Database entry found for name: {!s}".format(base_location_name))
+    for location_error in location_errors:
+        post_errors.append(location_error)
 
     if len(post_errors) == 0:
         usr_rqst_values = {"first_name": rqst_usr_f_name,
@@ -52,9 +54,6 @@ def add_staff(response_raw_data, post_data, post_errors):
             user_instance.base_locations = base_location_objects
             user_instance.save()
             response_raw_data['Data'] = {"Database ID": user_instance.id}
-
-    for location_error in location_errors:
-        post_errors.append(location_error)
 
     return response_raw_data
 
@@ -80,6 +79,8 @@ def modify_staff(response_raw_data, post_data, post_errors):
                 base_location_objects.append(base_location_object)
             except NavMetricsLocation.DoesNotExist:
                 location_errors.append("No Nav Hub Location Database entry found for name: {!s}".format(base_location_name))
+    for location_error in location_errors:
+        post_errors.append(location_error)
 
     if len(post_errors) == 0:
         try:
@@ -102,9 +103,6 @@ def modify_staff(response_raw_data, post_data, post_errors):
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
         except IntegrityError:
             post_errors.append('Database entry already exists for the email: {!s}'.format(rqst_usr_email))
-
-    for location_error in location_errors:
-        post_errors.append(location_error)
 
     return response_raw_data
 

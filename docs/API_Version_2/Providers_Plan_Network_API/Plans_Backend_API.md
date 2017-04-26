@@ -79,6 +79,7 @@ In response, a JSON document will be displayed with the following format:
 ### Healthcare Plan Data Retrieval API
 - To retrieve HealthcarePlan data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/plans/ with the following optional parameters:
 "name", "id", "carrier_id", "carrier_name", "carrier_state"
+    - Results will be filtered by the given parameters.
     - NOTE: Only one of the following parameters allowed at a time
     - "name" corresponds to the plan name.
         - Must be a string
@@ -101,6 +102,11 @@ In response, a JSON document will be displayed with the following format:
         - all non ASCII characters must be url encoded
         - Can be multiple values separated by commas.
         - Return value will be a list of lists. One list for each state requested.
+    - "accepted_location_id" corresponds to database id of a provider location that a plan is accepted at.
+        - passing "all" as the value will return all plans that are accepted for all provider locations
+        - All other cases:
+            - must be a base 10 integer.
+            - Can be multiple values separated by commas.
     
 - The response will be a JSON document with the following format:
     ```

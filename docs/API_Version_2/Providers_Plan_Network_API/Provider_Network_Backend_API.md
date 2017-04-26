@@ -55,12 +55,13 @@ In response, a JSON document will be displayed with the following format:
 ### Healthcare Provider Network Data Retrieval API
 - To retrieve ProviderNetwork data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/provider_networks/ with the following optional parameters:
 "name", "id"
+    - Results will be filtered by the given parameters.
     - NOTE: Only one of the following parameters allowed at a time
-    - "name" corresponds to the plan name.
+    - "name" corresponds to a provider network name.
         - Must be a string
         - all non ASCII characters must be url encoded
-    - "id" corresponds to database id.
-        - passing "all" as the value will return all plans
+    - "id" corresponds to database id of a provider network.
+        - passing "all" as the value will return all provider networks.
         - All other cases:
             - must be a base 10 integer.
             - Can be multiple values separated by commas.
@@ -74,7 +75,7 @@ In response, a JSON document will be displayed with the following format:
                 "provider_locations": [1,
                                        2,
                                        Integer,
-                                       ...,]
+                                       ...,] (Database ids for provider locations in this network.)
                 "Database ID": Integer,
             },
             ...,

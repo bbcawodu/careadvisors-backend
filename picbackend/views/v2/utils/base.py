@@ -262,12 +262,34 @@ def build_search_params(rqst_params, rqst_errors):
         search_params['carrier id list'] = list_of_carrier_ids
 
         if not search_params['carrier id list']:
-            rqst_errors.append('Invalid carrier id, navigator ids must be base 10 integers')
+            rqst_errors.append('Invalid carrier id, carrier ids must be base 10 integers')
     if "carrier_state" in rqst_params:
         search_params['carrier state'] = rqst_params['carrier_state']
         search_params['carrier state list'] = re.findall(r"[\w. '-]+", search_params['carrier state'])
     if 'carrier_name' in rqst_params:
         search_params['carrier name'] = urllib.parse.unquote(rqst_params['carrier_name'])
+    if 'accepted_location_id' in rqst_params:
+        search_params['accepted_location_id'] = rqst_params['accepted_location_id']
+
+        list_of_accepted_location_ids = re.findall("\d+", search_params['accepted_location_id'])
+        for indx, element in enumerate(list_of_accepted_location_ids):
+            list_of_accepted_location_ids[indx] = int(element)
+        search_params['accepted_location_id_list'] = list_of_accepted_location_ids
+
+        if not search_params['accepted_location_id_list']:
+            rqst_errors.append('Invalid accepted_location id, accepted_location ids must be base 10 integers')
+    if 'network_name' in rqst_params:
+        search_params['network_name'] = urllib.parse.unquote(rqst_params['network_name'])
+    if 'network_id' in rqst_params:
+        search_params['network_id'] = rqst_params['network_id']
+
+        list_of_network_ids = re.findall("\d+", search_params['network_id'])
+        for indx, element in enumerate(list_of_network_ids):
+            list_of_network_ids[indx] = int(element)
+        search_params['network_id_list'] = list_of_network_ids
+
+        if not search_params['network_id_list']:
+            rqst_errors.append('Invalid network id, network ids must be base 10 integers')
 
     return search_params
 

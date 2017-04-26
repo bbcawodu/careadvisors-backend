@@ -17,3 +17,8 @@ that are contracted with Patient Innovation Center.
 ## Healthcare Provider Network Backend API
 
 [Healthcare Provider Network Backend API README](Provider_Network_Backend_API.md)
+
+
+## Healthcare Provider Location Backend API
+
+[Healthcare Provider Location Backend API README](Provider_Location_Backend_API.md)
