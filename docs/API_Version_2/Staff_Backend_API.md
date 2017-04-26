@@ -60,6 +60,7 @@ In response, a JSON document will be displayed with the following format:
     
 ### Staff Data Retrieval API
 - To retrieve staff data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/staff/ with the following optional parameters: "fname", "lname", "email", "mpn", "id"
+    - Results will be filtered by the given parameters.
     - "fname" corresponds to first name.
         - Must be a string
         - Can be multiple values separated by commas.

@@ -120,6 +120,8 @@ In response, a JSON document will be displayed with the following format:
     
 ### Consumer Data Retrieval API
 - To retrieve consumer data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/consumers/ with the following parameters(at least one required)
+    - Results will be filtered by the given parameters.
+    - NOTE: Only one of the following parameters allowed at a time(Unless stated otherwise.).
     - A maximum of 20 consumer records with full fields will be returned due to size constraints
         - The rest are consumer database IDs
         - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter

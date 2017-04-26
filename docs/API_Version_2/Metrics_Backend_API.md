@@ -265,6 +265,7 @@ In response, a JSON document will be displayed with the following format:
     
 ### Consumer Metrics Retrieval API.
 - To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/metrics/ with the following optional parameters: "fname", "lname", "email", "mpn", "id", "time", "groupby", "startdate", "enddate", "time", "zipcode", "location", "fields"
+    - Results will be filtered by the given parameters.
     - "fname" corresponds to staff member first name.
     - "lname" corresponds to staff member last name.
     - "email" corresponds to staff member email.

@@ -6,6 +6,7 @@ with PIC
 import json
 from picmodels.models import HealthcareCarrier
 from picmodels.models import HealthcarePlan
+from picmodels.models import ProviderLocation
 from picbackend.views.v2.utils import clean_string_value_from_dict_object
 from picbackend.views.v2.utils import clean_int_value_from_dict_object
 
@@ -49,7 +50,7 @@ def modify_plan(response_raw_data, rqst_plan_info, post_errors):
 
     if len(post_errors) == 0 and healthcare_carrier_obj:
         found_healthcare_plan_objs = check_for_healthcare_plan_objs_with_given_name_and_carrier(
-            modify_plan_params['rqst_plan_name'], healthcare_carrier_obj, post_errors)
+            modify_plan_params['rqst_plan_name'], healthcare_carrier_obj, post_errors, rqst_plan_id)
 
         if not found_healthcare_plan_objs:
             try:
@@ -83,7 +84,7 @@ def return_healthcare_carrier_obj_with_given_id(carrier_id, post_errors):
     return healthcare_carrier_obj
 
 
-def check_for_healthcare_plan_objs_with_given_name_and_carrier(plan_name, healthcare_carrier_obj, post_errors):
+def check_for_healthcare_plan_objs_with_given_name_and_carrier(plan_name, healthcare_carrier_obj, post_errors, current_healthcare_plan_id=None):
     found_healthcare_plan_obj = False
 
     healthcare_plan_objs = HealthcarePlan.objects.filter(name__iexact=plan_name, carrier=healthcare_carrier_obj)
@@ -97,9 +98,12 @@ def check_for_healthcare_plan_objs_with_given_name_and_carrier(plan_name, health
                 "Multiple healthcare plans with name: {} and carrier: {}already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
                     plan_name, healthcare_carrier_obj.name, json.dumps(plan_ids)))
         else:
-            post_errors.append(
-                "Healthcare plan with name: {} and carrier: {} already exists in db. (Hint - Modify that entry) id: {}".format(
-                    plan_name, healthcare_carrier_obj.name, plan_ids[0]))
+            if not current_healthcare_plan_id or current_healthcare_plan_id not in plan_ids:
+                post_errors.append(
+                    "Healthcare plan with name: {} and carrier: {} already exists in db. (Hint - Modify that entry) id: {}".format(
+                        plan_name, healthcare_carrier_obj.name, plan_ids[0]))
+            else:
+                found_healthcare_plan_obj = False
 
     return found_healthcare_plan_obj
 
@@ -267,10 +271,68 @@ def retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, plans, rqst_c
     plans = plans.filter(carrier__name__iexact=rqst_carrier_name)
 
     if plans:
-        for plans in plans:
-            plans_list.append(plans.return_values_dict())
+        for plan in plans:
+            plans_list.append(plan.return_values_dict())
         response_raw_data["Data"] = plans_list
     else:
         rqst_errors.append('No Plans with a carrier with the name: {!s} found in database'.format(rqst_carrier_name))
+
+    return response_raw_data, rqst_errors
+
+
+def retrieve_plans_by_accepted_location_id(response_raw_data, rqst_errors, plans, rqst_accepted_location_id, list_of_accepted_location_ids):
+    if rqst_accepted_location_id == "all":
+        all_plans = plans
+        plan_dict = {}
+        for plan in all_plans:
+            plan_dict[plan.id] = plan.return_values_dict()
+        plan_list = []
+        for plan_key, plan_entry in plan_dict.items():
+            plan_list.append(plan_entry)
+
+        response_raw_data["Data"] = plan_list
+    elif list_of_accepted_location_ids:
+        if len(list_of_accepted_location_ids) > 0:
+
+            for indx, element in enumerate(list_of_accepted_location_ids):
+                integer_id = int(element)
+                list_of_accepted_location_ids[indx] = integer_id
+
+            provider_locations = ProviderLocation.objects.all().filter(id__in=list_of_accepted_location_ids)
+            if provider_locations.count():
+                plan_dict = {}
+
+                for location_object in provider_locations:
+                    location_id = location_object.id
+
+                    accepted_plan_objects = location_object.accepted_plans.all()
+                    if accepted_plan_objects.count():
+                        for accepted_plan_object in accepted_plan_objects:
+                            if location_id in plan_dict:
+                                plan_dict[location_id].append(accepted_plan_object.return_values_dict())
+                            else:
+                                plan_dict[location_id] = [accepted_plan_object.return_values_dict()]
+                    else:
+                        plan_dict[location_id] = []
+
+                plan_list = []
+                for plan_key, plan_entry in plan_dict.items():
+                    if plan_entry:
+                        plan_list.append(plan_entry)
+                response_raw_data["Data"] = plan_list
+
+                for accepted_location_id in list_of_accepted_location_ids:
+                    if accepted_location_id in plan_dict:
+                        if not plan_dict[accepted_location_id]:
+                            if response_raw_data['Status']['Error Code'] != 2:
+                                response_raw_data['Status']['Error Code'] = 2
+                            rqst_errors.append('Provider location with id: {!s} has no accepted plans'.format(str(accepted_location_id)))
+                    else:
+                        rqst_errors.append("No provider location found for id: {}".format(accepted_location_id))
+            else:
+                rqst_errors.append('No provider locations found for database ID(s): ' + rqst_accepted_location_id)
+
+        else:
+            rqst_errors.append('No valid provider location database IDs provided in request (must be integers)')
 
     return response_raw_data, rqst_errors

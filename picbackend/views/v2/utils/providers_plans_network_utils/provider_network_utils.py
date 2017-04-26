@@ -30,7 +30,7 @@ def modify_provider_network(response_raw_data, rqst_provider_network_info, post_
 
     if len(post_errors) == 0:
         found_provider_network_objs = check_for_provider_network_objs_with_given_name(
-            modify_provider_network_params['rqst_provider_network_name'], post_errors)
+            modify_provider_network_params['rqst_provider_network_name'], post_errors, rqst_provider_network_id)
 
         if not found_provider_network_objs and len(post_errors) == 0:
             try:
@@ -45,7 +45,7 @@ def modify_provider_network(response_raw_data, rqst_provider_network_info, post_
     return response_raw_data
 
 
-def check_for_provider_network_objs_with_given_name(provider_network_name, post_errors):
+def check_for_provider_network_objs_with_given_name(provider_network_name, post_errors, current_provider_network_id=None):
     found_provider_network_obj = False
 
     provider_network_objs = ProviderNetwork.objects.filter(name__iexact=provider_network_name)
@@ -62,9 +62,12 @@ def check_for_provider_network_objs_with_given_name(provider_network_name, post_
                 "Multiple provider networks with name: {} already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
                     provider_network_name, json.dumps(provider_network_ids)))
         else:
-            post_errors.append(
-                "Provider network with name: {} already exists in db. (Hint - Modify that entry) id: {}".format(
-                    provider_network_name, provider_network_ids[0]))
+            if not current_provider_network_id or current_provider_network_id not in provider_network_ids:
+                post_errors.append(
+                    "Provider network with name: {} already exists in db. (Hint - Modify that entry) id: {}".format(
+                        provider_network_name, provider_network_ids[0]))
+            else:
+                found_provider_network_obj = False
 
     return found_provider_network_obj
 
