@@ -7,9 +7,9 @@ import json
 from picmodels.models import ProviderNetwork
 from picmodels.models import ProviderLocation
 from picmodels.models import HealthcarePlan
-from picbackend.views.v2.utils import clean_string_value_from_dict_object
-from picbackend.views.v2.utils import clean_int_value_from_dict_object
-from picbackend.views.v2.utils import clean_list_value_from_dict_object
+from ..base import clean_string_value_from_dict_object
+from ..base import clean_int_value_from_dict_object
+from ..base import clean_list_value_from_dict_object
 
 
 def add_provider_location(response_raw_data, rqst_provider_location_info, post_errors):
@@ -24,15 +24,24 @@ def add_provider_location(response_raw_data, rqst_provider_location_info, post_e
                 rqst_provider_location_name, provider_network_obj, post_errors)
 
             if not found_provider_location_objs and len(post_errors) == 0:
-                provider_location_obj = ProviderLocation()
-                provider_location_obj.name = rqst_provider_location_name
-                provider_location_obj.provider_network = provider_network_obj
-                provider_location_obj.save()
-                provider_location_obj.accepted_plans = add_provider_location_params['accepted_plans_objects']
-                provider_location_obj.save()
+                provider_location_obj = create_new_location_obj(add_provider_location_params,
+                                                                rqst_provider_location_name,
+                                                                provider_network_obj)
+
                 response_raw_data['Data']["Database ID"] = provider_location_obj.id
 
     return response_raw_data
+
+
+def create_new_location_obj(provider_location_params, provider_location_name, provider_network_obj):
+    provider_location_obj = ProviderLocation()
+    provider_location_obj.name = provider_location_name
+    provider_location_obj.provider_network = provider_network_obj
+    provider_location_obj.save()
+    provider_location_obj.accepted_plans = provider_location_params['accepted_plans_objects']
+    provider_location_obj.save()
+
+    return provider_location_obj
 
 
 def modify_provider_location(response_raw_data, rqst_provider_location_info, post_errors):
@@ -50,18 +59,27 @@ def modify_provider_location(response_raw_data, rqst_provider_location_info, pos
 
             if not found_provider_location_objs and len(post_errors) == 0:
                 try:
-                    provider_location_obj = ProviderLocation.objects.get(id=rqst_provider_location_id)
-                    provider_location_obj.name = rqst_provider_location_name
-                    provider_location_obj.provider_network = provider_network_obj
-                    provider_location_obj.accepted_plans.clear()
-                    provider_location_obj.accepted_plans = modify_provider_location_params['accepted_plans_objects']
-                    provider_location_obj.save()
+                    provider_location_obj = modify_location_obj(modify_provider_location_params,
+                                                                rqst_provider_location_id,
+                                                                rqst_provider_location_name,
+                                                                provider_network_obj)
 
                     response_raw_data['Data']["Database ID"] = provider_location_obj.id
                 except ProviderLocation.DoesNotExist:
                     post_errors.append("Provider Location does not exist for database id: {}".format(rqst_provider_location_id))
 
     return response_raw_data
+
+
+def modify_location_obj(provider_location_params, provider_location_id, provider_location_name, provider_network_obj):
+    provider_location_obj = ProviderLocation.objects.get(id=provider_location_id)
+    provider_location_obj.name = provider_location_name
+    provider_location_obj.provider_network = provider_network_obj
+    provider_location_obj.accepted_plans.clear()
+    provider_location_obj.accepted_plans = provider_location_params['accepted_plans_objects']
+    provider_location_obj.save()
+
+    return provider_location_obj
 
 
 def modify_provider_location_add_accepted_plans(response_raw_data, rqst_provider_location_info, post_errors):

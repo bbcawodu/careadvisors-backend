@@ -5,8 +5,8 @@ PIC
 
 import json
 from picmodels.models import HealthcareCarrier
-from picbackend.views.v2.utils import clean_string_value_from_dict_object
-from picbackend.views.v2.utils import clean_int_value_from_dict_object
+from ..base import clean_string_value_from_dict_object
+from ..base import clean_int_value_from_dict_object
 
 
 def add_carrier(response_raw_data, rqst_carrier_info, post_errors):
@@ -27,18 +27,24 @@ def add_carrier(response_raw_data, rqst_carrier_info, post_errors):
             add_carrier_params['rqst_carrier_name'], add_carrier_params['rqst_carrier_state'],  post_errors)
 
         if not found_healthcare_carrier_objs and len(post_errors) == 0:
-            healthcare_carrier_obj = HealthcareCarrier()
-            healthcare_carrier_obj.name = add_carrier_params['rqst_carrier_name']
-            healthcare_carrier_obj.state_province = add_carrier_params['rqst_carrier_state']
-            if not healthcare_carrier_obj.check_state_choices():
-                post_errors.append(
-                    "State: {!s} is not a valid state abbreviation".format(healthcare_carrier_obj.state_province))
+            healthcare_carrier_obj = create_new_carrier_obj(add_carrier_params, post_errors)
 
             if len(post_errors) == 0:
                 healthcare_carrier_obj.save()
                 response_raw_data['Data']["Database ID"] = healthcare_carrier_obj.id
 
     return response_raw_data
+
+
+def create_new_carrier_obj(carrier_params, post_errors):
+    healthcare_carrier_obj = HealthcareCarrier()
+    healthcare_carrier_obj.name = carrier_params['rqst_carrier_name']
+    healthcare_carrier_obj.state_province = carrier_params['rqst_carrier_state']
+    if not healthcare_carrier_obj.check_state_choices():
+        post_errors.append(
+            "State: {!s} is not a valid state abbreviation".format(healthcare_carrier_obj.state_province))
+
+    return healthcare_carrier_obj
 
 
 def modify_carrier(response_raw_data, rqst_carrier_info, post_errors):
@@ -64,6 +70,17 @@ def modify_carrier(response_raw_data, rqst_carrier_info, post_errors):
                 post_errors.append("Healthcare carrier does not exist for database id: {}".format(rqst_carrier_id))
 
     return response_raw_data
+
+
+def modify_carrier_obj(carrier_params, post_errors):
+    healthcare_carrier_obj = HealthcareCarrier.objects.get(id=rqst_carrier_id)
+    healthcare_carrier_obj.name = carrier_params['rqst_carrier_name']
+    healthcare_carrier_obj.state_province = carrier_params['rqst_carrier_state']
+    if not healthcare_carrier_obj.check_state_choices():
+        post_errors.append(
+            "State: {!s} is not a valid state abbreviation".format(healthcare_carrier_obj.state_province))
+
+    return healthcare_carrier_obj
 
 
 def check_for_healthcare_carrier_objs_with_given_name_and_state(carrier_name, carrier_state,  post_errors, current_carrier_id=None):
@@ -95,15 +112,6 @@ def check_for_healthcare_carrier_objs_with_given_name_and_state(carrier_name, ca
 
 
 def get_carrier_mgmt_put_params(rqst_carrier_info, post_errors):
-    """
-    This function parses the BODY of requests for PIC consumer management PUT requests, checks for errors, and returns
-    relevant information as a dictionary
-
-    :param rqst_carrier_info: (type: dictionary) Carrier information to be parsed
-    :param post_errors: (type: list) list of error messages
-    :return: (type: dictionary) dictionary with relevant consumer information
-    """
-
     rqst_carrier_name = clean_string_value_from_dict_object(rqst_carrier_info, "root", "name", post_errors)
     rqst_carrier_state = clean_string_value_from_dict_object(rqst_carrier_info, "root", "state_province", post_errors)
 
