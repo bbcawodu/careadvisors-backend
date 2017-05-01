@@ -56,53 +56,64 @@ def add_consumer(response_raw_data, rqst_consumer_info, post_errors):
             for consumer in found_consumers:
                 response_raw_data['Data']['Possible Consumer Matches'].append(consumer.return_values_dict())
         else:
-            address_instance = None
-            if add_consumer_params['rqst_address_line_1'] != '' and add_consumer_params['rqst_city'] != '' and add_consumer_params['rqst_state'] != '' and add_consumer_params['rqst_zipcode'] != '':
-                address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=add_consumer_params['rqst_address_line_1'],
-                                                                                           address_line_2=add_consumer_params['rqst_address_line_2'],
-                                                                                           city=add_consumer_params['rqst_city'],
-                                                                                           state_province=add_consumer_params['rqst_state'],
-                                                                                           zipcode=add_consumer_params['rqst_zipcode'],
-                                                                                           country=Country.objects.all()[0])
+            consumer_instance, backup_consumer_obj = create_consumer_obj(add_consumer_params, post_errors)
 
-            consumer_instance = PICConsumer(first_name=add_consumer_params['rqst_consumer_f_name'],
-                                            middle_name=add_consumer_params['rqst_consumer_m_name'],
-                                            last_name=add_consumer_params['rqst_consumer_l_name'],
-                                            email=add_consumer_params['rqst_consumer_email'],
-                                            phone=add_consumer_params['rqst_consumer_phone'],
-                                            plan=add_consumer_params['rqst_consumer_plan'],
-                                            preferred_language=add_consumer_params['rqst_consumer_pref_lang'],
-                                            address=address_instance,
-                                            date_met_nav=add_consumer_params['rqst_date_met_nav'],
-                                            met_nav_at=add_consumer_params['rqst_consumer_met_nav_at'],
-                                            household_size=add_consumer_params['rqst_consumer_household_size'],
-                                            )
-
-            try:
-                nav_instance = PICStaff.objects.get(id=add_consumer_params['rqst_nav_id'])
-                consumer_instance.navigator = nav_instance
-                consumer_instance.save()
-
-                for navigator_note in add_consumer_params['rqst_navigator_notes']:
-                    consumer_note_object = ConsumerNote(consumer=consumer_instance,
-                                                        navigator_notes=navigator_note)
-                    consumer_note_object.save()
-
-                if add_consumer_params['rqst_cps_consumer']:
-                    add_cps_info_to_consumer_instance(consumer_instance, add_consumer_params['rqst_cps_info_dict'], post_errors)
-                else:
-                    response_raw_data['Status']['Warnings'].append('Consumer instance created without cps_info')
-
-                if len(post_errors) == 0 and add_consumer_params['rqst_create_backup']:
-                    backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
-                    if backup_consumer_obj:
-                        response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
-
-                response_raw_data['Data']["Database ID"] = consumer_instance.id
-            except PICStaff.DoesNotExist:
-                post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(add_consumer_params['rqst_nav_id'])))
+            if len(post_errors) == 0:
+                if consumer_instance:
+                    response_raw_data['Data']["Database ID"] = consumer_instance.id
+                if backup_consumer_obj:
+                    response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
 
     return response_raw_data
+
+
+def create_consumer_obj(consumer_params, post_errors):
+    address_instance = None
+    if consumer_params['rqst_address_line_1'] != '' and consumer_params['rqst_city'] != '' and \
+                    consumer_params['rqst_state'] != '' and consumer_params['rqst_zipcode'] != '':
+        address_instance, address_instance_created = Address.objects.get_or_create(
+            address_line_1=consumer_params['rqst_address_line_1'],
+            address_line_2=consumer_params['rqst_address_line_2'],
+            city=consumer_params['rqst_city'],
+            state_province=consumer_params['rqst_state'],
+            zipcode=consumer_params['rqst_zipcode'],
+            country=Country.objects.all()[0])
+
+    consumer_instance = None
+    backup_consumer_obj = None
+
+    try:
+        nav_instance = PICStaff.objects.get(id=consumer_params['rqst_nav_id'])
+        consumer_instance = PICConsumer(first_name=consumer_params['rqst_consumer_f_name'],
+                                        middle_name=consumer_params['rqst_consumer_m_name'],
+                                        last_name=consumer_params['rqst_consumer_l_name'],
+                                        email=consumer_params['rqst_consumer_email'],
+                                        phone=consumer_params['rqst_consumer_phone'],
+                                        plan=consumer_params['rqst_consumer_plan'],
+                                        preferred_language=consumer_params['rqst_consumer_pref_lang'],
+                                        address=address_instance,
+                                        date_met_nav=consumer_params['rqst_date_met_nav'],
+                                        met_nav_at=consumer_params['rqst_consumer_met_nav_at'],
+                                        household_size=consumer_params['rqst_consumer_household_size'],
+                                        )
+        consumer_instance.navigator = nav_instance
+        consumer_instance.save()
+
+        for navigator_note in consumer_params['rqst_navigator_notes']:
+            consumer_note_object = ConsumerNote(consumer=consumer_instance,
+                                                navigator_notes=navigator_note)
+            consumer_note_object.save()
+
+        if consumer_params['rqst_cps_consumer']:
+            add_cps_info_to_consumer_instance(consumer_instance, consumer_params['rqst_cps_info_dict'], post_errors)
+
+        if len(post_errors) == 0 and consumer_params['rqst_create_backup']:
+            backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
+    except PICStaff.DoesNotExist:
+        post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(
+            str(consumer_params['rqst_nav_id'])))
+
+    return consumer_instance, backup_consumer_obj
 
 
 def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, post_errors):
@@ -116,131 +127,12 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
     :return: None
     """
 
-    rqst_primary_dependent_dict = clean_dict_value_from_dict_object(rqst_cps_info_dict,
-                                                                    "cps_info",
-                                                                    "primary_dependent",
-                                                                    post_errors)
-    primary_dependent_object = None
-    if len(post_errors) == 0:
-        rqst_primary_dependent_database_id = clean_int_value_from_dict_object(rqst_primary_dependent_dict,
-                                                                      "primary_dependent",
-                                                                      "Consumer Database ID",
-                                                                      post_errors,
-                                                                      no_key_allowed=True)
-        if not rqst_primary_dependent_database_id:
-            primary_dependent_found_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(rqst_primary_dependent_dict, post_errors)
-            if not primary_dependent_found_PICConsumer_entries:
-                try:
-                    primary_dependent_object = PICConsumer(first_name=rqst_primary_dependent_dict["first_name"],
-                                                           last_name=rqst_primary_dependent_dict["last_name"],
-                                                           met_nav_at=consumer_instance.met_nav_at,
-                                                           household_size=consumer_instance.household_size,
-                                                           navigator=consumer_instance.navigator
-                                                           )
-                except IntegrityError:
-                    post_errors.append("Error creating primary_dependent database entry for params: {!s}".format(json.dumps(rqst_primary_dependent_dict)))
-            else:
-                post_errors.append("The following PICConsumer objects were found for given primary_dependent: {!s}".format(json.dumps(primary_dependent_found_PICConsumer_entries)))
-        else:
-            try:
-                primary_dependent_object = PICConsumer.objects.get(id=rqst_primary_dependent_database_id)
-            except PICConsumer.DoesNotExist:
-                post_errors.append("PICConsumer object does not exist for primary_dependent Database ID: {!s}".format(str(rqst_primary_dependent_database_id)))
+    cps_info_params = get_consumer_cps_info_put_params(rqst_cps_info_dict, consumer_instance, post_errors)
 
-    rqst_cps_location = clean_string_value_from_dict_object(rqst_cps_info_dict, "cps_info", "cps_location", post_errors)
-
-    apt_date_dict = clean_dict_value_from_dict_object(rqst_cps_info_dict,
-                                                      "cps_info",
-                                                      "apt_date",
-                                                      post_errors)
-    rqst_apt_date = None
-    if apt_date_dict is not None:
-        month = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Month", post_errors)
-        if month < 1 or month > 12:
-            post_errors.append("Month must be between 1 and 12 inclusive")
-
-        day = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Day", post_errors)
-        if day < 1 or day > 31:
-            post_errors.append("Day must be between 1 and 31 inclusive")
-
-        year = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Year", post_errors)
-        if year < 1 or year > 9999:
-            post_errors.append("Year must be between 1 and 9999 inclusive")
-
-        if len(post_errors) == 0:
-            rqst_apt_date = datetime.date(year, month, day)
-
-    rqst_target_list = clean_bool_value_from_dict_object(rqst_cps_info_dict,
-                                                         "cps_info",
-                                                         "target_list",
-                                                         post_errors)
-    rqst_phone_apt = clean_bool_value_from_dict_object(rqst_cps_info_dict,
-                                                       "cps_info",
-                                                       "phone_apt",
-                                                       post_errors)
-    rqst_case_mgmt_type = clean_string_value_from_dict_object(rqst_cps_info_dict,
-                                                              "cps_info",
-                                                              "case_mgmt_type",
-                                                              post_errors)
-    rqst_case_mgmt_status = clean_string_value_from_dict_object(rqst_cps_info_dict,
-                                                                "cps_info",
-                                                                "case_mgmt_status",
-                                                                post_errors)
-
-    rqst_secondary_dependents = clean_list_value_from_dict_object(rqst_cps_info_dict,
-                                                                  "cps_info",
-                                                                  "secondary_dependents",
-                                                                  post_errors,
-                                                                  no_key_allowed=True)
-    secondary_dependents_list = []
-    if rqst_secondary_dependents:
-        for dependent_index, rqst_secondary_dependent_dict in enumerate(rqst_secondary_dependents):
-            secondary_dependent_object = None
-            if len(post_errors) == 0:
-                rqst_secondary_dependent_database_id = clean_int_value_from_dict_object(rqst_secondary_dependent_dict,
-                                                                                        "secondary_dependent",
-                                                                                        "Consumer Database ID",
-                                                                                        post_errors,
-                                                                                        no_key_allowed=True)
-                if not rqst_secondary_dependent_database_id:
-                    secondary_dependent_found_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
-                        rqst_secondary_dependent_dict, post_errors)
-                    if not secondary_dependent_found_PICConsumer_entries:
-                        try:
-                            secondary_dependent_object = PICConsumer(first_name=rqst_secondary_dependent_dict["first_name"],
-                                                                     last_name=rqst_secondary_dependent_dict["last_name"],
-                                                                     met_nav_at=consumer_instance.met_nav_at,
-                                                                     household_size=consumer_instance.household_size,
-                                                                     navigator=consumer_instance.navigator)
-                        except IntegrityError:
-                            post_errors.append(
-                                "Error creating secondary_dependent database entry for params: {!s}".format(
-                                    json.dumps(rqst_secondary_dependent_dict)))
-                    else:
-                        post_errors.append(
-                            "The following PICConsumer objects were found for secondary_dependent with index({!s}): {!s}".format(str(dependent_index),
-                                json.dumps(secondary_dependent_found_PICConsumer_entries)))
-                else:
-                    try:
-                        secondary_dependent_object = PICConsumer.objects.get(id=rqst_secondary_dependent_database_id)
-                    except NavMetricsLocation.DoesNotExist:
-                        post_errors.append(
-                            "PICConsumer object does not exist for secondary_dependent with index({!s}) and Database ID: {!s}".format(str(dependent_index),
-                                str(rqst_secondary_dependent_database_id)))
-
-            secondary_dependents_list.append(secondary_dependent_object)
-
-    rqst_app_type = clean_string_value_from_dict_object(rqst_cps_info_dict,
-                                                        "cps_info",
-                                                        "app_type",
-                                                        post_errors)
-    rqst_app_status = clean_string_value_from_dict_object(rqst_cps_info_dict,
-                                                          "cps_info",
-                                                          "app_status",
-                                                          post_errors)
     if len(post_errors) == 0:
         cps_info_object = ConsumerCPSInfoEntry()
 
+        rqst_cps_location = cps_info_params["rqst_cps_location"]
         try:
             cps_location_object = NavMetricsLocation.objects.get(name=rqst_cps_location)
             if not cps_location_object.cps_location:
@@ -250,19 +142,18 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
         except NavMetricsLocation.DoesNotExist:
             post_errors.append("NavMetricsLocation object does not exist for name: {!s}".format(rqst_cps_location))
 
-        cps_info_object.apt_date = rqst_apt_date
-        cps_info_object.target_list = rqst_target_list
-        cps_info_object.phone_apt = rqst_phone_apt
-        cps_info_object.case_mgmt_type = rqst_case_mgmt_type
-        cps_info_object.case_mgmt_type = rqst_case_mgmt_type
+        cps_info_object.apt_date = cps_info_params["rqst_apt_date"]
+        cps_info_object.target_list = cps_info_params["rqst_target_list"]
+        cps_info_object.phone_apt = cps_info_params["rqst_phone_apt"]
+        cps_info_object.case_mgmt_type = cps_info_params["rqst_case_mgmt_type"]
 
-        cps_info_object.case_mgmt_status = rqst_case_mgmt_status
+        cps_info_object.case_mgmt_status = cps_info_params["rqst_case_mgmt_status"]
         if not cps_info_object.check_case_mgmt_status_choices():
             post_errors.append("case_mgmt_status: {!s} is not a valid choice".format(cps_info_object.case_mgmt_status))
-        cps_info_object.app_type = rqst_app_type
+        cps_info_object.app_type = cps_info_params["rqst_app_type"]
         if not cps_info_object.check_app_type_choices():
             post_errors.append("app_type: {!s} is not a valid choice".format(cps_info_object.app_type))
-        cps_info_object.app_status = rqst_app_status
+        cps_info_object.app_status = cps_info_params["rqst_app_status"]
         if not cps_info_object.check_app_status_choices():
             post_errors.append("app_status: {!s} is not a valid choice".format(cps_info_object.app_status))
 
@@ -270,11 +161,13 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
             consumer_instance.cps_consumer = True
             consumer_instance.save()
 
+            primary_dependent_object = cps_info_params["primary_dependent_object"]
             if primary_dependent_object._state.adding:
                 primary_dependent_object.save()
             cps_info_object.primary_dependent = primary_dependent_object
             cps_info_object.save()
 
+            secondary_dependents_list = cps_info_params["secondary_dependents_list"]
             if secondary_dependents_list:
                 for secondary_dependent_instance in secondary_dependents_list:
                     if secondary_dependent_instance._state.adding:
@@ -290,130 +183,7 @@ def add_cps_info_to_consumer_instance(consumer_instance, rqst_cps_info_dict, pos
         consumer_instance.delete()
 
 
-def check_consumer_db_entries_for_dependent_info(rqst_dependent_dict, post_errors):
-    """
-    This function takes a dictionary populated with dependent information and checks to see if there are any PICConsumer
-    database entries that exist for it.
-
-    :param rqst_dependent_dict: (type: dictionary) dependent information
-    :param post_errors: (type: list) list of error messages
-    :return: (type: list) list of id's for found PICConsumer entries
-    """
-
-    found_consumer_entries = []
-
-    rqst_dependent_f_name = clean_string_value_from_dict_object(rqst_dependent_dict,
-                                                                "dependent_info",
-                                                                "first_name",
-                                                                post_errors)
-    rqst_dependent_l_name = clean_string_value_from_dict_object(rqst_dependent_dict,
-                                                                "dependent_info",
-                                                                "last_name",
-                                                                post_errors)
-
-    if len(post_errors) == 0:
-        consumer_entry_query = PICConsumer.objects.filter(first_name=rqst_dependent_f_name,
-                                                          last_name=rqst_dependent_l_name)
-        for consumer_entry in consumer_entry_query:
-            found_consumer_entries.append(consumer_entry.id)
-
-    return found_consumer_entries
-
-
-def modify_consumer(response_raw_data, post_data, post_errors):
-    """
-    This function takes dictionary populated with PIC consumer info, parses for errors, and modifies the consumer
-    instance if there are none.
-
-    :param response_raw_data: (type: dictionary) dictionary that contains response data
-    :param post_data: (type: dictionary) dictionary with PIC consumer info
-    :param post_errors: (type: list) list of error messages
-    :return: (type: dictionary) dictionary that contains response data
-    """
-
-    modify_consumer_params = get_consumer_mgmt_put_params(post_data, post_errors)
-    modify_consumer_params['rqst_consumer_id'] = clean_int_value_from_dict_object(post_data, "root", "Consumer Database ID", post_errors)
-
-    if len(post_errors) == 0:
-        address_instance = None
-        if modify_consumer_params['rqst_address_line_1'] != '' and modify_consumer_params['rqst_city'] != '' and modify_consumer_params['rqst_state'] != '' and modify_consumer_params['rqst_zipcode'] != '':
-            address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=modify_consumer_params['rqst_address_line_1'],
-                                                                                       address_line_2=modify_consumer_params['rqst_address_line_2'],
-                                                                                       city=modify_consumer_params['rqst_city'],
-                                                                                       state_province=modify_consumer_params['rqst_state'],
-                                                                                       zipcode=modify_consumer_params['rqst_zipcode'],
-                                                                                       country=Country.objects.all()[0])
-
-        try:
-            consumer_instance = PICConsumer.objects.get(id=modify_consumer_params['rqst_consumer_id'])
-            consumer_instance.first_name = modify_consumer_params['rqst_consumer_f_name']
-            consumer_instance.middle_name = modify_consumer_params['rqst_consumer_m_name']
-            consumer_instance.last_name = modify_consumer_params['rqst_consumer_l_name']
-            consumer_instance.phone = modify_consumer_params['rqst_consumer_phone']
-            consumer_instance.address = address_instance
-            consumer_instance.plan = modify_consumer_params['rqst_consumer_plan']
-            consumer_instance.met_nav_at = modify_consumer_params['rqst_consumer_met_nav_at']
-            consumer_instance.household_size = modify_consumer_params['rqst_consumer_household_size']
-            consumer_instance.preferred_language = modify_consumer_params['rqst_consumer_pref_lang']
-            consumer_instance.email = modify_consumer_params['rqst_consumer_email']
-            consumer_instance.date_met_nav = modify_consumer_params['rqst_date_met_nav']
-
-            nav_instance = PICStaff.objects.get(id=modify_consumer_params['rqst_nav_id'])
-            consumer_instance.navigator = nav_instance
-
-            if modify_consumer_params['rqst_cps_consumer'] is not None:
-                consumer_instance.cps_consumer = modify_consumer_params['rqst_cps_consumer']
-                if modify_consumer_params['rqst_cps_consumer']:
-                    modify_consumer_cps_info(consumer_instance, modify_consumer_params['rqst_cps_info_dict'], post_errors)
-                else:
-                    try:
-                        consumer_cps_info = consumer_instance.cps_info
-                        consumer_instance.cps_info.remove()
-                        consumer_cps_info.delete()
-                    except ConsumerCPSInfoEntry.DoesNotExist:
-                        pass
-            else:
-                pass
-
-            if len(post_errors) == 0:
-                consumer_instance.save()
-                old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
-                for old_consumer_note in old_consumer_notes:
-                    old_consumer_note.delete()
-
-                for navigator_note in modify_consumer_params['rqst_navigator_notes']:
-                    consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
-                    consumer_note_object.save()
-
-                if modify_consumer_params['rqst_create_backup']:
-                    backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
-                    if backup_consumer_obj:
-                        response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
-
-            response_raw_data['Data'] = {"Database ID": consumer_instance.id}
-        except PICConsumer.DoesNotExist:
-            post_errors.append('Consumer database entry does not exist for the id: {!s}'.format(str(modify_consumer_params['rqst_consumer_id'])))
-        except PICConsumer.MultipleObjectsReturned:
-            post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(modify_consumer_params['rqst_consumer_id'])))
-        except IntegrityError:
-            post_errors.append('Database entry already exists for the id: {!s}'.format(str(modify_consumer_params['rqst_consumer_id'])))
-        except PICStaff.DoesNotExist:
-            post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(str(modify_consumer_params['rqst_nav_id'])))
-
-    return response_raw_data
-
-
-def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors):
-    """
-    This function takes a consumer database instance and a dictionary populated with CPS consumer info, parses the info
-    for errors, and modifies the CPS info for that consumer if there are no errors.
-
-    :param consumer_instance: (type: PICConsumer) PICConsumer instance to add CPS info to
-    :param rqst_cps_info_dict: (type: dictionary) CPS info to parse
-    :param post_errors: (type: list) list of error messages
-    :return: None
-    """
-
+def get_consumer_cps_info_put_params(rqst_cps_info_dict, consumer_instance, post_errors):
     rqst_primary_dependent_dict = clean_dict_value_from_dict_object(rqst_cps_info_dict,
                                                                     "cps_info",
                                                                     "primary_dependent",
@@ -446,7 +216,7 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
         else:
             try:
                 primary_dependent_object = PICConsumer.objects.get(id=rqst_primary_dependent_database_id)
-            except NavMetricsLocation.DoesNotExist:
+            except PICConsumer.DoesNotExist:
                 post_errors.append("PICConsumer object does not exist for primary_dependent Database ID: {!s}".format(
                     str(rqst_primary_dependent_database_id)))
 
@@ -544,12 +314,173 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
                                                           "cps_info",
                                                           "app_status",
                                                           post_errors)
+
+    cps_info_params = {
+        "rqst_cps_location": rqst_cps_location,
+        "rqst_apt_date": rqst_apt_date,
+        "rqst_target_list": rqst_target_list,
+        "rqst_phone_apt": rqst_phone_apt,
+        "rqst_case_mgmt_type": rqst_case_mgmt_type,
+        "rqst_case_mgmt_status": rqst_case_mgmt_status,
+        "rqst_app_type": rqst_app_type,
+        "rqst_app_status": rqst_app_status,
+        "primary_dependent_object": primary_dependent_object,
+        "secondary_dependents_list": secondary_dependents_list
+    }
+
+    return cps_info_params
+
+
+def check_consumer_db_entries_for_dependent_info(rqst_dependent_dict, post_errors):
+    """
+    This function takes a dictionary populated with dependent information and checks to see if there are any PICConsumer
+    database entries that exist for it.
+
+    :param rqst_dependent_dict: (type: dictionary) dependent information
+    :param post_errors: (type: list) list of error messages
+    :return: (type: list) list of id's for found PICConsumer entries
+    """
+
+    found_consumer_entries = []
+
+    rqst_dependent_f_name = clean_string_value_from_dict_object(rqst_dependent_dict,
+                                                                "dependent_info",
+                                                                "first_name",
+                                                                post_errors)
+    rqst_dependent_l_name = clean_string_value_from_dict_object(rqst_dependent_dict,
+                                                                "dependent_info",
+                                                                "last_name",
+                                                                post_errors)
+
+    if len(post_errors) == 0:
+        consumer_entry_query = PICConsumer.objects.filter(first_name=rqst_dependent_f_name,
+                                                          last_name=rqst_dependent_l_name)
+        for consumer_entry in consumer_entry_query:
+            found_consumer_entries.append(consumer_entry.id)
+
+    return found_consumer_entries
+
+
+def modify_consumer(response_raw_data, post_data, post_errors):
+    """
+    This function takes dictionary populated with PIC consumer info, parses for errors, and modifies the consumer
+    instance if there are none.
+
+    :param response_raw_data: (type: dictionary) dictionary that contains response data
+    :param post_data: (type: dictionary) dictionary with PIC consumer info
+    :param post_errors: (type: list) list of error messages
+    :return: (type: dictionary) dictionary that contains response data
+    """
+
+    modify_consumer_params = get_consumer_mgmt_put_params(post_data, post_errors)
+    modify_consumer_params['rqst_consumer_id'] = clean_int_value_from_dict_object(post_data, "root", "Consumer Database ID", post_errors)
+
+    if len(post_errors) == 0:
+        consumer_instance, backup_consumer_obj = create_consumer_obj(modify_consumer_params, post_errors)
+
+        if len(post_errors) == 0:
+            if consumer_instance:
+                response_raw_data['Data']["Database ID"] = consumer_instance.id
+            if backup_consumer_obj:
+                response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
+
+    return response_raw_data
+
+
+def modify_consumer_obj(consumer_params, post_errors):
+    consumer_instance = None
+    backup_consumer_obj = None
+
+    address_instance = None
+    if consumer_params['rqst_address_line_1'] != '' and consumer_params['rqst_city'] != '' and \
+                    consumer_params['rqst_state'] != '' and consumer_params['rqst_zipcode'] != '':
+        address_instance, address_instance_created = Address.objects.get_or_create(
+            address_line_1=consumer_params['rqst_address_line_1'],
+            address_line_2=consumer_params['rqst_address_line_2'],
+            city=consumer_params['rqst_city'],
+            state_province=consumer_params['rqst_state'],
+            zipcode=consumer_params['rqst_zipcode'],
+            country=Country.objects.all()[0])
+
+    try:
+        consumer_instance = PICConsumer.objects.get(id=consumer_params['rqst_consumer_id'])
+        consumer_instance.first_name = consumer_params['rqst_consumer_f_name']
+        consumer_instance.middle_name = consumer_params['rqst_consumer_m_name']
+        consumer_instance.last_name = consumer_params['rqst_consumer_l_name']
+        consumer_instance.phone = consumer_params['rqst_consumer_phone']
+        consumer_instance.address = address_instance
+        consumer_instance.plan = consumer_params['rqst_consumer_plan']
+        consumer_instance.met_nav_at = consumer_params['rqst_consumer_met_nav_at']
+        consumer_instance.household_size = consumer_params['rqst_consumer_household_size']
+        consumer_instance.preferred_language = consumer_params['rqst_consumer_pref_lang']
+        consumer_instance.email = consumer_params['rqst_consumer_email']
+        consumer_instance.date_met_nav = consumer_params['rqst_date_met_nav']
+
+        nav_instance = PICStaff.objects.get(id=consumer_params['rqst_nav_id'])
+        consumer_instance.navigator = nav_instance
+
+        if consumer_params['rqst_cps_consumer'] is not None:
+            consumer_instance.cps_consumer = consumer_params['rqst_cps_consumer']
+            if consumer_params['rqst_cps_consumer']:
+                modify_consumer_cps_info(consumer_instance, consumer_params['rqst_cps_info_dict'], post_errors)
+            else:
+                try:
+                    consumer_cps_info = consumer_instance.cps_info
+                    consumer_instance.cps_info.remove()
+                    consumer_cps_info.delete()
+                except ConsumerCPSInfoEntry.DoesNotExist:
+                    pass
+        else:
+            pass
+
+        if len(post_errors) == 0:
+            consumer_instance.save()
+            old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
+            for old_consumer_note in old_consumer_notes:
+                old_consumer_note.delete()
+
+            for navigator_note in consumer_params['rqst_navigator_notes']:
+                consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
+                consumer_note_object.save()
+
+            if consumer_params['rqst_create_backup']:
+                backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
+    except PICConsumer.DoesNotExist:
+        post_errors.append('Consumer database entry does not exist for the id: {!s}'.format(
+            str(consumer_params['rqst_consumer_id'])))
+    except PICConsumer.MultipleObjectsReturned:
+        post_errors.append(
+            'Multiple database entries exist for the id: {!s}'.format(str(consumer_params['rqst_consumer_id'])))
+    except IntegrityError:
+        post_errors.append(
+            'Database entry already exists for the id: {!s}'.format(str(consumer_params['rqst_consumer_id'])))
+    except PICStaff.DoesNotExist:
+        post_errors.append('Staff database entry does not exist for the navigator id: {!s}'.format(
+            str(consumer_params['rqst_nav_id'])))
+
+    return consumer_instance, backup_consumer_obj
+
+
+def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors):
+    """
+    This function takes a consumer database instance and a dictionary populated with CPS consumer info, parses the info
+    for errors, and modifies the CPS info for that consumer if there are no errors.
+
+    :param consumer_instance: (type: PICConsumer) PICConsumer instance to add CPS info to
+    :param rqst_cps_info_dict: (type: dictionary) CPS info to parse
+    :param post_errors: (type: list) list of error messages
+    :return: None
+    """
+
+    cps_info_params = get_consumer_cps_info_put_params(rqst_cps_info_dict, consumer_instance, post_errors)
+
     if len(post_errors) == 0:
         try:
             cps_info_object = consumer_instance.cps_info
         except ConsumerCPSInfoEntry.DoesNotExist:
             cps_info_object = ConsumerCPSInfoEntry()
 
+        rqst_cps_location = cps_info_params["rqst_cps_location"]
         try:
             cps_location_object = NavMetricsLocation.objects.get(name=rqst_cps_location)
             if not cps_location_object.cps_location:
@@ -559,19 +490,18 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
         except NavMetricsLocation.DoesNotExist:
             post_errors.append("NavMetricsLocation object does not exist for name: {!s}".format(rqst_cps_location))
 
-        cps_info_object.apt_date = rqst_apt_date
-        cps_info_object.target_list = rqst_target_list
-        cps_info_object.phone_apt = rqst_phone_apt
-        cps_info_object.case_mgmt_type = rqst_case_mgmt_type
-        cps_info_object.case_mgmt_type = rqst_case_mgmt_type
+        cps_info_object.apt_date = cps_info_params['rqst_apt_date']
+        cps_info_object.target_list = cps_info_params['rqst_target_list']
+        cps_info_object.phone_apt = cps_info_params['rqst_phone_apt']
+        cps_info_object.case_mgmt_type = cps_info_params['rqst_case_mgmt_type']
 
-        cps_info_object.case_mgmt_status = rqst_case_mgmt_status
+        cps_info_object.case_mgmt_status = cps_info_params['rqst_case_mgmt_status']
         if not cps_info_object.check_case_mgmt_status_choices():
             post_errors.append("case_mgmt_status: {!s} is not a valid choice".format(cps_info_object.case_mgmt_status))
-        cps_info_object.app_type = rqst_app_type
+        cps_info_object.app_type = cps_info_params['rqst_app_type']
         if not cps_info_object.check_app_type_choices():
             post_errors.append("app_type: {!s} is not a valid choice".format(cps_info_object.app_type))
-        cps_info_object.app_status = rqst_app_status
+        cps_info_object.app_status = cps_info_params['rqst_app_status']
         if not cps_info_object.check_app_status_choices():
             post_errors.append("app_status: {!s} is not a valid choice".format(cps_info_object.app_status))
 
@@ -579,12 +509,14 @@ def modify_consumer_cps_info(consumer_instance, rqst_cps_info_dict, post_errors)
             consumer_instance.cps_consumer = True
             consumer_instance.save()
 
+            primary_dependent_object = cps_info_params['primary_dependent_object']
             if primary_dependent_object._state.adding:
                 primary_dependent_object.save()
             cps_info_object.primary_dependent = primary_dependent_object
 
             cps_info_object.save()
 
+            secondary_dependents_list = cps_info_params['secondary_dependents_list']
             if cps_info_object.secondary_dependents:
                 cps_info_object.secondary_dependents.clear()
             if secondary_dependents_list:

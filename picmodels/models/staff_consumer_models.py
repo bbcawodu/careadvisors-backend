@@ -60,10 +60,6 @@ class PICStaff(models.Model):
     base_locations = models.ManyToManyField(NavMetricsLocation, blank=True)
 
     def return_values_dict(self):
-        consumers = PICConsumer.objects.filter(navigator=self.id)
-        consumer_list = []
-        for consumer in consumers:
-            consumer_list.append(consumer.return_values_dict()["Database ID"])
         valuesdict = {"First Name": self.first_name,
                       "Last Name": self.last_name,
                       "MPN": self.mpn,
@@ -75,7 +71,13 @@ class PICStaff(models.Model):
                       "Region": None,
                       "Picture": self.staff_pic.url,
                       "Base Locations": [],
-                      "Consumers": consumer_list}
+                      "Consumers": []}
+
+        consumers = PICConsumer.objects.filter(navigator=self.id)
+        consumer_list = []
+        for consumer in consumers:
+            consumer_list.append(consumer.id)
+        valuesdict['Consumers'] = consumer_list
 
         if self.county:
             for region in self.REGIONS:
