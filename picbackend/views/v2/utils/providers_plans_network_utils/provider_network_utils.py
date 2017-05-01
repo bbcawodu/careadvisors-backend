@@ -4,8 +4,8 @@ This module defines utility functions and classes for views that handle provider
 
 import json
 from picmodels.models import ProviderNetwork
-from picbackend.views.v2.utils import clean_string_value_from_dict_object
-from picbackend.views.v2.utils import clean_int_value_from_dict_object
+from ..base import clean_string_value_from_dict_object
+from ..base import clean_int_value_from_dict_object
 
 
 def add_provider_network(response_raw_data, rqst_provider_network_info, post_errors):
@@ -19,6 +19,7 @@ def add_provider_network(response_raw_data, rqst_provider_network_info, post_err
             provider_network_obj = ProviderNetwork()
             provider_network_obj.name = add_provider_network_params['rqst_provider_network_name']
             provider_network_obj.save()
+
             response_raw_data['Data']["Database ID"] = provider_network_obj.id
 
     return response_raw_data
@@ -36,8 +37,8 @@ def modify_provider_network(response_raw_data, rqst_provider_network_info, post_
             try:
                 provider_network_obj = ProviderNetwork.objects.get(id=rqst_provider_network_id)
                 provider_network_obj.name = modify_provider_network_params['rqst_provider_network_name']
-
                 provider_network_obj.save()
+
                 response_raw_data['Data']["Database ID"] = provider_network_obj.id
             except ProviderNetwork.DoesNotExist:
                 post_errors.append("Provider Network does not exist for database id: {}".format(rqst_provider_network_id))
