@@ -4,9 +4,9 @@ Defines utility functions and classes for navigator location views
 
 
 from django.db import IntegrityError
-from .base import clean_string_value_from_dict_object
-from .base import clean_int_value_from_dict_object
-from .base import clean_bool_value_from_dict_object
+from ..base import clean_string_value_from_dict_object
+from ..base import clean_int_value_from_dict_object
+from ..base import clean_bool_value_from_dict_object
 from picmodels.models import NavMetricsLocation
 from picmodels.models import Address
 from picmodels.models import Country

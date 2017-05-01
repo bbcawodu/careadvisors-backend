@@ -7,8 +7,8 @@ import json
 from picmodels.models import HealthcareCarrier
 from picmodels.models import HealthcarePlan
 from picmodels.models import ProviderLocation
-from picbackend.views.v2.utils import clean_string_value_from_dict_object
-from picbackend.views.v2.utils import clean_int_value_from_dict_object
+from ..base import clean_string_value_from_dict_object
+from ..base import clean_int_value_from_dict_object
 
 
 def add_plan(response_raw_data, rqst_plan_info, post_errors):
@@ -23,22 +23,28 @@ def add_plan(response_raw_data, rqst_plan_info, post_errors):
                 add_plan_params['rqst_plan_name'], healthcare_carrier_obj, post_errors)
 
             if not found_healthcare_plan_objs and len(post_errors) == 0:
-                healthcare_plan = HealthcarePlan()
-                healthcare_plan.name = add_plan_params['rqst_plan_name']
-                healthcare_plan.carrier = healthcare_carrier_obj
-                healthcare_plan.metal_level = add_plan_params['rqst_plan_metal_level']
-                if not healthcare_plan.check_metal_choices():
-                    post_errors.append("Metal: {!s} is not a valid metal level".format(healthcare_plan.metal_level))
-                healthcare_plan.premium_type = add_plan_params['rqst_plan_premium_type']
-                if not healthcare_plan.check_premium_choices():
-                    post_errors.append(
-                        "Premium Type: {!s} is not a valid premium type".format(healthcare_plan.premium_type))
+                healthcare_plan = create_new_plan_obj(add_plan_params, healthcare_carrier_obj, post_errors)
 
                 if len(post_errors) == 0:
                     healthcare_plan.save()
                     response_raw_data['Data']["Database ID"] = healthcare_plan.id
 
     return response_raw_data
+
+
+def create_new_plan_obj(plan_params, healthcare_carrier_obj, post_errors):
+    healthcare_plan = HealthcarePlan()
+    healthcare_plan.name = plan_params['rqst_plan_name']
+    healthcare_plan.carrier = healthcare_carrier_obj
+    healthcare_plan.metal_level = plan_params['rqst_plan_metal_level']
+    if not healthcare_plan.check_metal_choices():
+        post_errors.append("Metal: {!s} is not a valid metal level".format(healthcare_plan.metal_level))
+    healthcare_plan.premium_type = plan_params['rqst_plan_premium_type']
+    if not healthcare_plan.check_premium_choices():
+        post_errors.append(
+            "Premium Type: {!s} is not a valid premium type".format(healthcare_plan.premium_type))
+
+    return healthcare_plan
 
 
 def modify_plan(response_raw_data, rqst_plan_info, post_errors):
@@ -54,16 +60,7 @@ def modify_plan(response_raw_data, rqst_plan_info, post_errors):
 
         if not found_healthcare_plan_objs:
             try:
-                healthcare_plan_obj = HealthcarePlan.objects.get(id=rqst_plan_id)
-                healthcare_plan_obj.name = modify_plan_params['rqst_plan_name']
-                healthcare_plan_obj.carrier = healthcare_carrier_obj
-                healthcare_plan_obj.metal_level = modify_plan_params['rqst_plan_metal_level']
-                if not healthcare_plan_obj.check_metal_choices():
-                    post_errors.append("Metal: {!s} is not a valid metal level".format(healthcare_plan_obj.metal_level))
-                healthcare_plan_obj.premium_type = modify_plan_params['rqst_plan_premium_type']
-                if not healthcare_plan_obj.check_premium_choices():
-                    post_errors.append(
-                        "Premium Type: {!s} is not a valid premium type".format(healthcare_plan_obj.premium_type))
+                healthcare_plan_obj = modify_plan_obj(rqst_plan_id, modify_plan_params, healthcare_carrier_obj, post_errors)
 
                 if len(post_errors) == 0:
                     healthcare_plan_obj.save()
@@ -72,6 +69,21 @@ def modify_plan(response_raw_data, rqst_plan_info, post_errors):
                 post_errors.append("Healthcare plan does not exist for database id: {}".format(rqst_plan_id))
 
     return response_raw_data
+
+
+def modify_plan_obj(plan_id, plan_params, healthcare_carrier_obj, post_errors):
+    healthcare_plan_obj = HealthcarePlan.objects.get(id=plan_id)
+    healthcare_plan_obj.name = plan_params['rqst_plan_name']
+    healthcare_plan_obj.carrier = healthcare_carrier_obj
+    healthcare_plan_obj.metal_level = plan_params['rqst_plan_metal_level']
+    if not healthcare_plan_obj.check_metal_choices():
+        post_errors.append("Metal: {!s} is not a valid metal level".format(healthcare_plan_obj.metal_level))
+    healthcare_plan_obj.premium_type = plan_params['rqst_plan_premium_type']
+    if not healthcare_plan_obj.check_premium_choices():
+        post_errors.append(
+            "Premium Type: {!s} is not a valid premium type".format(healthcare_plan_obj.premium_type))
+
+    return healthcare_plan_obj
 
 
 def return_healthcare_carrier_obj_with_given_id(carrier_id, post_errors):
