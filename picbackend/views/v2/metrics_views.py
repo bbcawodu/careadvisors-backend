@@ -62,6 +62,7 @@ class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                           "no_sep_eligible",
                           "no_employ_spons_cov_issues",
                           "no_aptc_csr_assis",
+                          "no_cps_consumers",
                           "cmplx_cases_mplace_issues",
                           "Plan Stats"]
         validated_fields = []
