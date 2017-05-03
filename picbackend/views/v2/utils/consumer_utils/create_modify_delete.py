@@ -22,7 +22,7 @@ from django.core.validators import validate_email
 from django import forms
 
 
-def add_consumer(response_raw_data, rqst_consumer_info, post_errors):
+def add_consumer_using_api_rqst_params(response_raw_data, rqst_consumer_info, post_errors):
     """
     This function takes dictionary populated with PIC consumer info, parses for errors, adds the consumer
     to the database if there are none, and adds the consumer info to given response data.
@@ -361,7 +361,7 @@ def check_consumer_db_entries_for_dependent_info(rqst_dependent_dict, post_error
     return found_consumer_entries
 
 
-def modify_consumer(response_raw_data, post_data, post_errors):
+def modify_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors):
     """
     This function takes dictionary populated with PIC consumer info, parses for errors, and modifies the consumer
     instance if there are none.
@@ -635,7 +635,7 @@ def get_consumer_mgmt_put_params(post_data, post_errors):
             "rqst_create_backup": rqst_create_backup}
 
 
-def delete_consumer(response_raw_data, post_data, post_errors):
+def delete_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors):
     """
     This function takes dictionary populated with PIC consumer info, parses for errors, and deletes the consumer
     instance if there are none.
@@ -710,7 +710,9 @@ def create_backup_consumer_obj(consumer_instance):
         for cps_info_orig_field in cps_info_orig_fields:
             try:
                 cps_info_orig_field_value = getattr(cps_info_orig, cps_info_orig_field.name)
+
                 if cps_info_orig_field.name == 'secondary_dependents':
+                    # Need to implement something to copy secondary dependents, breaks if you omit this
                     pass
                 elif cps_info_orig_field.name != 'id':
                     setattr(cps_info_copy, cps_info_orig_field.name, cps_info_orig_field_value)

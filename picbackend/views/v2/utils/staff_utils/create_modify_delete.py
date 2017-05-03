@@ -12,7 +12,7 @@ from django.core.validators import validate_email
 from django import forms
 
 
-def add_staff(response_raw_data, post_data, post_errors):
+def add_staff_using_api_rqst_params(response_raw_data, post_data, post_errors):
     add_staff_params = get_staff_mgmt_put_params(post_data, post_errors)
 
     if len(post_errors) == 0:
@@ -88,7 +88,7 @@ def create_staff_obj(staff_params, rqst_errors):
     return user_instance
 
 
-def modify_staff(response_raw_data, post_data, post_errors):
+def modify_staff_using_api_rqst_params(response_raw_data, post_data, post_errors):
     modify_staff_params = get_staff_mgmt_put_params(post_data, post_errors)
     modify_staff_params['rqst_usr_id'] = clean_int_value_from_dict_object(post_data, "root", "Database ID", post_errors)
 
@@ -129,7 +129,7 @@ def modify_staff_obj(staff_params, rqst_errors):
     return staff_instance
 
 
-def delete_staff(response_raw_data, post_data, post_errors):
+def delete_staff_using_api_rqst_params(response_raw_data, post_data, post_errors):
     rqst_usr_id = clean_int_value_from_dict_object(post_data, "root", "Database ID", post_errors)
 
     if len(post_errors) == 0:
