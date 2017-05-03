@@ -209,6 +209,7 @@ class ProviderNetwork(models.Model):
 
     def return_values_dict(self):
         valuesdict = {"name": self.name,
+                      "provider_locations": None,
                       "Database ID": self.id}
 
         # add related plans to values dict
@@ -230,7 +231,7 @@ class ProviderLocation(models.Model):
     def return_values_dict(self):
         valuesdict = {"name": self.name,
                       "provider_network info": None,
-                      "accepted_plans": [],
+                      "accepted_plans": None,
                       "Database ID": self.id}
 
         if self.provider_network:

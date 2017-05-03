@@ -66,14 +66,15 @@ class MetricsSubmission(models.Model):
                       "Submission Date": self.submission_date.isoformat(),
                       "County": self.county,
                       "Location": None,
-                      "Plan Stats": None,
+                      "Plan Stats": [],
                       }
 
-        plan_stats = PlanStat.objects.filter(metrics_submission=self.id)
-        plan_stats_list = []
-        for plan_stat in plan_stats:
-            plan_stats_list.append(plan_stat.return_values_dict())
-        valuesdict["Plan Stats"] = plan_stats_list
+        plan_stats = self.planstat_set.all()
+        if plan_stats.count():
+            plan_stats_list = []
+            for plan_stat in plan_stats:
+                plan_stats_list.append(plan_stat.return_values_dict())
+            valuesdict["Plan Stats"] = plan_stats_list
 
         if self.location:
             valuesdict["Location"] = self.location.return_values_dict()

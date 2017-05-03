@@ -11,9 +11,9 @@ from django.views.decorators.csrf import csrf_exempt
 from .utils import build_search_params
 from .utils import init_v2_response_data
 from .utils import clean_string_value_from_dict_object
-from .utils import add_staff
-from .utils import modify_staff
-from .utils import delete_staff
+from .utils import add_staff_using_api_rqst_params
+from .utils import modify_staff_using_api_rqst_params
+from .utils import delete_staff_using_api_rqst_params
 from .utils import retrieve_f_l_name_staff
 from .utils import retrieve_email_staff
 from .utils import retrieve_first_name_staff
@@ -47,14 +47,13 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
         # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
         # create and save database entry for appointment
-        if len(post_errors) == 0 and rqst_action == "Staff Addition":
-            response_raw_data = add_staff(response_raw_data, post_data, post_errors)
-
-        elif len(post_errors) == 0 and rqst_action == "Staff Modification":
-            response_raw_data = modify_staff(response_raw_data, post_data, post_errors)
-
-        elif len(post_errors) == 0 and rqst_action == "Staff Deletion":
-            response_raw_data = delete_staff(response_raw_data, post_data, post_errors)
+        if len(post_errors) == 0:
+            if rqst_action == "Staff Addition":
+                response_raw_data = add_staff_using_api_rqst_params(response_raw_data, post_data, post_errors)
+            elif rqst_action == "Staff Modification":
+                response_raw_data = modify_staff_using_api_rqst_params(response_raw_data, post_data, post_errors)
+            elif rqst_action == "Staff Deletion":
+                response_raw_data = delete_staff_using_api_rqst_params(response_raw_data, post_data, post_errors)
 
         return response_raw_data, post_errors
 

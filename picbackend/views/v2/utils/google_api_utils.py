@@ -14,7 +14,7 @@ from .base import clean_int_value_from_dict_object
 from .base import clean_string_value_from_dict_object
 from .base import clean_dict_value_from_dict_object
 from .base import init_v2_response_data
-from .consumer_utils import add_consumer
+from .consumer_utils import add_consumer_using_api_rqst_params
 from picmodels.models import PICStaff
 from picmodels.models import PICConsumer
 from picmodels.models import CredentialsModel
@@ -175,7 +175,7 @@ def create_consumer_instance_from_apt_rqst(rqst_nav_id, post_data, post_errors):
         rqst_consumer_info['Navigator Database ID'] = rqst_nav_id
 
         consumer_info_response, consumer_info_errors = init_v2_response_data()
-        consumer_info_response = add_consumer(consumer_info_response, rqst_consumer_info, post_errors)
+        consumer_info_response = add_consumer_using_api_rqst_params(consumer_info_response, rqst_consumer_info, post_errors)
         consumer_instance = PICConsumer.objects.get(id=consumer_info_response['Data']["Database ID"])
 
         consumer_info = consumer_instance.return_values_dict()
