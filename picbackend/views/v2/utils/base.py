@@ -212,6 +212,12 @@ def build_search_params(rqst_params, rqst_errors):
 
         if not search_params['navigator id list']:
             rqst_errors.append('Invalid navigator id, navigator ids must be base 10 integers')
+    if 'is_cps_consumer' in rqst_params:
+        search_params['is_cps_consumer'] = rqst_params['is_cps_consumer'].lower()
+        if search_params['is_cps_consumer'] not in ('true', 'false'):
+            rqst_errors.append("Value for is_cps_consumer is not type boolean")
+        else:
+            search_params['is_cps_consumer'] = search_params['is_cps_consumer'] in ('true')
     if 'page' in rqst_params:
         search_params['page number'] = int(rqst_params['page'])
     if "county" in rqst_params:

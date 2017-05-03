@@ -10,9 +10,9 @@ from picmodels.models import PICConsumer
 from picmodels.models import PICConsumerBackup
 from django.views.decorators.csrf import csrf_exempt
 from .utils import clean_string_value_from_dict_object
-from .utils import add_consumer
-from .utils import modify_consumer
-from .utils import delete_consumer
+from .utils import add_consumer_using_api_rqst_params
+from .utils import modify_consumer_using_api_rqst_params
+from .utils import delete_consumer_using_api_rqst_params
 from .utils import retrieve_f_l_name_consumers
 from .utils import retrieve_email_consumers
 from .utils import retrieve_first_name_consumers
@@ -43,19 +43,21 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         # If there are no parsing errors, process POST data based on database action
         if not post_errors:
             if rqst_action == "Consumer Addition":
-                response_raw_data = add_consumer(response_raw_data, post_data, post_errors)
+                response_raw_data = add_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
             elif rqst_action == "Consumer Modification":
-                response_raw_data = modify_consumer(response_raw_data, post_data, post_errors)
+                response_raw_data = modify_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
             elif rqst_action == "Consumer Deletion":
-                response_raw_data = delete_consumer(response_raw_data, post_data, post_errors)
+                response_raw_data = delete_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
 
         return response_raw_data, post_errors
 
     def consumer_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
-        # Retrieve all Patient Innovation Center consumer objects
-        consumers = PICConsumer.objects.all()
+        if not rqst_errors:
+            # Retrieve all Patient Innovation Center consumer objects
+            consumers = PICConsumer.objects.all()
 
-        response_raw_data, rqst_errors = get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
+            response_raw_data, rqst_errors = get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
+
         return response_raw_data, rqst_errors
 
     put_logic_function = consumer_management_put_logic
@@ -74,9 +76,11 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
     def consumer_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         # Retrieve all Patient Innovation Center consumer objects
-        consumers = PICConsumerBackup.objects.all()
+        if not rqst_errors:
+            consumers = PICConsumerBackup.objects.all()
 
-        response_raw_data, rqst_errors = get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
+            response_raw_data, rqst_errors = get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
+
         return response_raw_data, rqst_errors
 
     get_logic_function = consumer_management_get_logic
@@ -87,6 +91,10 @@ def get_and_add_consumer_data_to_response(consumers, request, search_params, res
     if 'navigator id list' in search_params:
         list_of_nav_ids = search_params['navigator id list']
         consumers = consumers.filter(navigator__in=list_of_nav_ids)
+    if 'is_cps_consumer' in search_params:
+        is_cps_consumer = search_params['is_cps_consumer']
+        consumers = consumers.filter(cps_consumer=is_cps_consumer)
+
     if 'first name' in search_params and 'last name' in search_params:
         rqst_first_name = search_params['first name']
         rqst_last_name = search_params['last name']

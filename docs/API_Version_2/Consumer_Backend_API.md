@@ -133,7 +133,9 @@ In response, a JSON document will be displayed with the following format:
     - "id" corresponds to consumer class database id.
         - passing "all" as the value will return all consumer enteties
     - "navid" corresponds to staff member class database id. (Can be combined with any of the above parameters)
-    - "page" corresponds to the current page of consumer instances to be displayed with full fields. 
+    - "is_cps_consumer" corresponds to whether consumer is a Chicago Public Schools consumer (Can be combined with any of the above parameters)
+        - must be of type boolean (true or false)
+    - "page" corresponds to the current page of consumer instances to be displayed with full fields. (Can be combined with any of the above parameters) 
         - if this parameter is missing, the first 20 consumer instances will be displayed with full fields.
         
 - The response will be a JSON document with the following format:

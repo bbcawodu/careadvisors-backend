@@ -73,7 +73,8 @@ class PICStaff(models.Model):
                       "Base Locations": [],
                       "Consumers": []}
 
-        consumers = PICConsumer.objects.filter(navigator=self.id)
+        # consumers = PICConsumer.objects.filter(navigator=self.id)
+        consumers = self.picconsumer_set.all()
         consumer_list = []
         for consumer in consumers:
             consumer_list.append(consumer.id)
@@ -92,14 +93,13 @@ class PICStaff(models.Model):
                 base_location_values.append(base_location.return_values_dict())
             valuesdict["Base Locations"] = base_location_values
 
-        try:
-            credentials_object = CredentialsModel.objects.get(id=self.id)
-            if credentials_object.credential.invalid:
-                credentials_object.delete()
-            else:
-                valuesdict["Authorized Credentials"] = True
-        except CredentialsModel.DoesNotExist:
-            pass
+        credentials_queryset = self.credentialsmodel_set.all()
+        if credentials_queryset.count():
+            for credentials_instance in credentials_queryset:
+                if credentials_instance.credential.invalid:
+                    credentials_instance.delete()
+                else:
+                    valuesdict["Authorized Credentials"] = True
 
         return valuesdict
 
@@ -195,7 +195,7 @@ class PICConsumerBase(models.Model):
         if self.date_met_nav is not None:
             valuesdict["date_met_nav"] = self.date_met_nav.isoformat()
 
-        navigator_note_objects = ConsumerNote.objects.filter(consumer=self.id)
+        navigator_note_objects = self.consumernote_set.all()
         navigator_note_list = []
         for navigator_note in navigator_note_objects:
             navigator_note_list.append(navigator_note.navigator_notes)
@@ -228,17 +228,7 @@ class PICConsumer(PICConsumerBase):
 
 
 class PICConsumerBackup(PICConsumerBase):
-    def return_values_dict(self):
-        valuesdict = super(PICConsumerBackup, self).return_values_dict()
-        valuesdict["Navigator Notes"] = None
-
-        navigator_note_objects = ConsumerNote.objects.filter(consumer_backup=self.id)
-        navigator_note_list = []
-        for navigator_note in navigator_note_objects:
-            navigator_note_list.append(navigator_note.navigator_notes)
-        valuesdict["Navigator Notes"] = navigator_note_list
-
-        return valuesdict
+    pass
 
 
 class ConsumerNote(models.Model):
@@ -339,9 +329,10 @@ class ConsumerCPSInfoEntry(models.Model):
                                        "Database ID": self.primary_dependent.id}
             valuesdict["primary_dependent"] = primary_dependent_entry
 
-        if self.secondary_dependents is not None:
+        secondary_dependent_queryset = self.secondary_dependents.all()
+        if secondary_dependent_queryset.count():
             secondary_dependent_list = []
-            for secondary_dependent in self.secondary_dependents.all():
+            for secondary_dependent in secondary_dependent_queryset:
                 dependent_entry = {"first_name": secondary_dependent.first_name,
                                    "last_name": secondary_dependent.last_name,
                                    "Database ID": secondary_dependent.id}
