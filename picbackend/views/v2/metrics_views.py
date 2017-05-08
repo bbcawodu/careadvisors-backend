@@ -7,7 +7,7 @@ from django.views.generic import View
 from django.utils.decorators import method_decorator
 from picmodels.models import MetricsSubmission
 from django.views.decorators.csrf import csrf_exempt
-from .utils import add_or_update_metrics_entity
+from .utils import add_or_update_metrics_instance_using_api_rqst_params
 from .utils import group_metrics
 from .utils import retrieve_id_metrics
 from .utils import retrieve_f_l_name_metrics
@@ -31,7 +31,7 @@ class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
     def metrics_management_put_logic(self, post_data, response_raw_data, post_errors):
         # Parse BODY data and add or update metrics entry
-        response_raw_data = add_or_update_metrics_entity(response_raw_data, post_data, post_errors)
+        response_raw_data = add_or_update_metrics_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
 
         return response_raw_data, post_errors
 
