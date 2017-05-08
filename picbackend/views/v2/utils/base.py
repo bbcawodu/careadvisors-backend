@@ -212,6 +212,16 @@ def build_search_params(rqst_params, rqst_errors):
 
         if not search_params['navigator id list']:
             rqst_errors.append('Invalid navigator id, navigator ids must be base 10 integers')
+    if 'location_id' in rqst_params:
+        search_params['location_id'] = rqst_params['location_id']
+
+        list_of_ids = re.findall("\d+", search_params['location_id'])
+        for indx, element in enumerate(list_of_ids):
+            list_of_ids[indx] = int(element)
+        search_params['location_id list'] = list_of_ids
+
+        if not search_params['location_id list']:
+            rqst_errors.append('Invalid location_id, ids must be base 10 integers')
     if 'is_cps_consumer' in rqst_params:
         search_params['is_cps_consumer'] = rqst_params['is_cps_consumer'].lower()
         if search_params['is_cps_consumer'] not in ('true', 'false'):
@@ -296,6 +306,12 @@ def build_search_params(rqst_params, rqst_errors):
 
         if not search_params['network_id_list']:
             rqst_errors.append('Invalid network id, network ids must be base 10 integers')
+    if 'is_cps_location' in rqst_params:
+        search_params['is_cps_location'] = rqst_params['is_cps_location'].lower()
+        if search_params['is_cps_location'] not in ('true', 'false'):
+            rqst_errors.append("Value for is_cps_location is not type boolean")
+        else:
+            search_params['is_cps_location'] = search_params['is_cps_location'] in ('true')
 
     return search_params
 

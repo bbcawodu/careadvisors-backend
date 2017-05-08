@@ -95,6 +95,9 @@ class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         if 'location' in search_params:
             rqst_location = search_params['location']
             metrics_submissions = metrics_submissions.filter(location__name__iexact=rqst_location)
+        if 'location_id list' in search_params:
+            list_of_location_ids = search_params['location_id list']
+            metrics_submissions = metrics_submissions.filter(location__id__in=list_of_location_ids)
 
         if 'id' in search_params:
             rqst_staff_id = search_params['id']

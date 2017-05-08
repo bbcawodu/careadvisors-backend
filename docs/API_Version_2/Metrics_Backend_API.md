@@ -280,6 +280,8 @@ In response, a JSON document will be displayed with the following format:
         - "zipcode" must be a non empty comma separated string of zipcodes
         - "location" must be a string that corresponds to the name of the location you desire to search for
             - all non ASCII characters must be url encoded
+        - "location_id" corresponds to navigator hub location class database id.
+            - Can be multiple values separated by commas.
         - "grouby" can be "zipcode" to group the metrics submissions returned by zipcode
         - "fields" must be a string.
             - Corresponds to a comma separated list of fields that you would like each metrics report to include.

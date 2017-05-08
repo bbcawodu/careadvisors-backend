@@ -52,11 +52,10 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         return response_raw_data, post_errors
 
     def consumer_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
-        if not rqst_errors:
-            # Retrieve all Patient Innovation Center consumer objects
-            consumers = PICConsumer.objects.all()
+        # Retrieve all Patient Innovation Center consumer objects
+        consumers = PICConsumer.objects.all()
 
-            response_raw_data, rqst_errors = get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
+        response_raw_data, rqst_errors = get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
 
         return response_raw_data, rqst_errors
 
@@ -76,10 +75,9 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
     def consumer_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         # Retrieve all Patient Innovation Center consumer objects
-        if not rqst_errors:
-            consumers = PICConsumerBackup.objects.all()
+        consumers = PICConsumerBackup.objects.all()
 
-            response_raw_data, rqst_errors = get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
+        response_raw_data, rqst_errors = get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
 
         return response_raw_data, rqst_errors
 

@@ -48,6 +48,10 @@ class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         nav_location_list = []
 
         nav_location_entries = NavMetricsLocation.objects.all()
+        if 'is_cps_location' in search_params:
+            is_cps_location = search_params['is_cps_location']
+            nav_location_entries = nav_location_entries.filter(cps_location=is_cps_location)
+
         for nav_location_entry in nav_location_entries:
             nav_location_list.append(nav_location_entry.return_values_dict())
 
