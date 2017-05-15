@@ -126,13 +126,19 @@ In response, a JSON document will be displayed with the following format:
         - The rest are consumer database IDs
         - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter
     - "fname" corresponds to consumer first name.
+        - Can be multiple values separated by commas.
     - "lname" corresponds to consumer last name.
+        - Can be multiple values separated by commas.
         - "fname" and "lname" can be given simultaneously as parameters. If so, only one value each is permitted.
     - "email" corresponds to consumer email.
+        - Can be multiple values separated by commas.
     - "region" corresponds to consumer region.
+        - Can be multiple values separated by commas.
     - "id" corresponds to consumer class database id.
+        - Can be multiple values separated by commas.
         - passing "all" as the value will return all consumer enteties
     - "navid" corresponds to staff member class database id. (Can be combined with any of the above parameters)
+        - Can be multiple values separated by commas.
     - "is_cps_consumer" corresponds to whether consumer is a Chicago Public Schools consumer (Can be combined with any of the above parameters)
         - must be of type boolean (true or false)
     - "page" corresponds to the current page of consumer instances to be displayed with full fields. (Can be combined with any of the above parameters) 

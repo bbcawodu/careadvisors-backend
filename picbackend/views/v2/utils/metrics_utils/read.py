@@ -6,7 +6,7 @@ from picmodels.models import PICStaff
 
 
 # defines function to group metrics by given parameter
-def group_metrics(metrics_dict, grouping_parameter):
+def group_metrics_by_rqst_param(metrics_dict, grouping_parameter):
     return_dict = {}
     if grouping_parameter == "County":
         for staff_key, staff_dict in metrics_dict.items():
@@ -24,15 +24,15 @@ def group_metrics(metrics_dict, grouping_parameter):
     elif grouping_parameter == "Zipcode":
         for staff_key, staff_dict in metrics_dict.items():
             for metrics_entry in staff_dict["Metrics Data"]:
-                if metrics_entry[grouping_parameter] not in return_dict:
-                    return_dict[metrics_entry[grouping_parameter]] = {staff_key: {"Metrics Data": [metrics_entry],
+                if metrics_entry["Location"][grouping_parameter] not in return_dict:
+                    return_dict[metrics_entry["Location"][grouping_parameter]] = {staff_key: {"Metrics Data": [metrics_entry],
                                                                       "Staff Information": staff_dict["Staff Information"]}}
                 else:
-                    if staff_key not in return_dict[metrics_entry[grouping_parameter]]:
-                        return_dict[metrics_entry[grouping_parameter]][staff_key] = {"Metrics Data": [metrics_entry],
+                    if staff_key not in return_dict[metrics_entry["Location"][grouping_parameter]]:
+                        return_dict[metrics_entry["Location"][grouping_parameter]][staff_key] = {"Metrics Data": [metrics_entry],
                                                                                      "Staff Information": staff_dict["Staff Information"]}
                     else:
-                        return_dict[metrics_entry[grouping_parameter]][staff_key]["Metrics Data"].append(metrics_entry)
+                        return_dict[metrics_entry["Location"][grouping_parameter]][staff_key]["Metrics Data"].append(metrics_entry)
     return return_dict
 
 
@@ -105,12 +105,24 @@ def retrieve_f_l_name_metrics(response_raw_data, rqst_errors, metrics_submission
                 else:
                     filtered_values_dict = values_dict
 
+                staff_id = metrics_submission.staff_member.id
+                staff_info_dict = metrics_submission.staff_member.return_values_dict()
+
+                metrics_params_dict_entry = {
+                    "Metrics Data": [filtered_values_dict],
+                    "Staff Information": staff_info_dict
+                }
+
                 name = '{!s} {!s}'.format(metrics_submission.staff_member.first_name, metrics_submission.staff_member.last_name)
                 if name not in metrics_dict:
-                    metrics_dict[name] = {"Metrics Data": [filtered_values_dict]}
-                    metrics_dict[name]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+                    metrics_dict[name] = {staff_id: metrics_params_dict_entry}
                 else:
-                    metrics_dict[name]["Metrics Data"].append(filtered_values_dict)
+                    metrics_param_dict = metrics_dict[name]
+
+                    if staff_id in metrics_param_dict:
+                        metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
+                    else:
+                        metrics_param_dict[staff_id] = metrics_params_dict_entry
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for first names(s): {!s}; and last names(s): {!s} not found in database'.format(rqst_fname, rqst_lname))
@@ -150,11 +162,22 @@ def retrieve_first_name_metrics(response_raw_data, rqst_errors, metrics_submissi
                 else:
                     filtered_values_dict = values_dict
 
+                staff_id = metrics_submission.staff_member.id
+                staff_info_dict = metrics_submission.staff_member.return_values_dict()
+
+                metrics_params_dict_entry = {
+                    "Metrics Data": [filtered_values_dict],
+                    "Staff Information": staff_info_dict
+                }
                 if metrics_submission.staff_member.first_name not in metrics_dict:
-                    metrics_dict[metrics_submission.staff_member.first_name] = {"Metrics Data": [filtered_values_dict]}
-                    metrics_dict[metrics_submission.staff_member.first_name]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+                    metrics_dict[metrics_submission.staff_member.first_name] = {staff_id: metrics_params_dict_entry}
                 else:
-                    metrics_dict[metrics_submission.staff_member.first_name]["Metrics Data"].append(filtered_values_dict)
+                    metrics_param_dict = metrics_dict[metrics_submission.staff_member.first_name]
+
+                    if staff_id in metrics_param_dict:
+                        metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
+                    else:
+                        metrics_param_dict[staff_id] = metrics_params_dict_entry
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_fname))
@@ -196,11 +219,23 @@ def retrieve_last_name_metrics(response_raw_data, rqst_errors, metrics_submissio
                 else:
                     filtered_values_dict = values_dict
 
+                staff_id = metrics_submission.staff_member.id
+                staff_info_dict = metrics_submission.staff_member.return_values_dict()
+
+                metrics_params_dict_entry = {
+                    "Metrics Data": [filtered_values_dict],
+                    "Staff Information": staff_info_dict
+                }
+
                 if metrics_submission.staff_member.last_name not in metrics_dict:
-                    metrics_dict[metrics_submission.staff_member.last_name] = {"Metrics Data": [filtered_values_dict]}
-                    metrics_dict[metrics_submission.staff_member.last_name]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+                    metrics_dict[metrics_submission.staff_member.last_name] = {staff_id: metrics_params_dict_entry}
                 else:
-                    metrics_dict[metrics_submission.staff_member.last_name]["Metrics Data"].append(filtered_values_dict)
+                    metrics_param_dict = metrics_dict[metrics_submission.staff_member.last_name]
+
+                    if staff_id in metrics_param_dict:
+                        metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
+                    else:
+                        metrics_param_dict[staff_id] = metrics_params_dict_entry
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_lname))
@@ -242,11 +277,23 @@ def retrieve_email_metrics(response_raw_data, rqst_errors, metrics_submissions, 
                 else:
                     filtered_values_dict = values_dict
 
+                staff_id = metrics_submission.staff_member.id
+                staff_info_dict = metrics_submission.staff_member.return_values_dict()
+
+                metrics_params_dict_entry = {
+                    "Metrics Data": [filtered_values_dict],
+                    "Staff Information": staff_info_dict
+                }
+
                 if metrics_submission.staff_member.email not in metrics_dict:
-                    metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [filtered_values_dict]}
-                    metrics_dict[metrics_submission.staff_member.email]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+                    metrics_dict[metrics_submission.staff_member.email] = {staff_id: metrics_params_dict_entry}
                 else:
-                    metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(filtered_values_dict)
+                    metrics_param_dict = metrics_dict[metrics_submission.staff_member.email]
+
+                    if staff_id in metrics_param_dict:
+                        metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
+                    else:
+                        metrics_param_dict[staff_id] = metrics_params_dict_entry
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_staff_email))
@@ -288,11 +335,26 @@ def retrieve_mpn_metrics(response_raw_data, rqst_errors, metrics_submissions, rq
                 else:
                     filtered_values_dict = values_dict
 
-                if metrics_submission.staff_member.email not in metrics_dict:
-                    metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [filtered_values_dict]}
-                    metrics_dict[metrics_submission.staff_member.email]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
+                staff_id = metrics_submission.staff_member.id
+                staff_info_dict = metrics_submission.staff_member.return_values_dict()
+
+                metrics_params_dict_entry = {
+                    "Metrics Data": [filtered_values_dict],
+                    "Staff Information": staff_info_dict
+                }
+
+                staff_mpn = metrics_submission.staff_member.mpn
+                if staff_mpn == '':
+                    staff_mpn = "None"
+                if staff_mpn not in metrics_dict:
+                    metrics_dict[staff_mpn] = {staff_id: metrics_params_dict_entry}
                 else:
-                    metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(filtered_values_dict)
+                    metrics_param_dict = metrics_dict[staff_mpn]
+
+                    if staff_id in metrics_param_dict:
+                        metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
+                    else:
+                        metrics_param_dict[staff_id] = metrics_params_dict_entry
         else:
             if response_raw_data['Status']['Error Code'] != 2:
                 rqst_errors.append('No metrics entries for mpn(s): {!s} not found in database'.format(rqst_staff_mpn))
@@ -305,27 +367,40 @@ def retrieve_mpn_metrics(response_raw_data, rqst_errors, metrics_submissions, rq
     return metrics_dict
 
 
-def retrieve_location_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_location, fields=None):
-    metrics_submissions = metrics_submissions.filter(location__name__iexact=rqst_location)
-
-    metrics_dict = {}
-    if len(metrics_submissions) > 0:
-        for metrics_submission in metrics_submissions:
-            values_dict = metrics_submission.return_values_dict()
-            filtered_values_dict = {}
-            if fields:
-                for field in fields:
-                    filtered_values_dict[field] = values_dict[field]
-            else:
-                filtered_values_dict = values_dict
-
-            if metrics_submission.staff_member.email not in metrics_dict:
-                metrics_dict[metrics_submission.staff_member.email] = {"Metrics Data": [filtered_values_dict]}
-                metrics_dict[metrics_submission.staff_member.email]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
-            else:
-                metrics_dict[metrics_submission.staff_member.email]["Metrics Data"].append(filtered_values_dict)
-    else:
-        if response_raw_data['Status']['Error Code'] != 2:
-            rqst_errors.append('No metrics entries for location(s): {!s} found in database'.format(rqst_location))
-
-    return metrics_dict
+# def retrieve_location_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_location, fields=None):
+#     metrics_submissions = metrics_submissions.filter(location__name__iexact=rqst_location)
+#
+#     metrics_dict = {}
+#     if len(metrics_submissions) > 0:
+#         for metrics_submission in metrics_submissions:
+#             values_dict = metrics_submission.return_values_dict()
+#             filtered_values_dict = {}
+#             if fields:
+#                 for field in fields:
+#                     filtered_values_dict[field] = values_dict[field]
+#             else:
+#                 filtered_values_dict = values_dict
+#
+#             staff_id = metrics_submission.staff_member.id
+#             staff_info_dict = metrics_submission.staff_member.return_values_dict()
+#
+#             metrics_params_dict_entry = {
+#                 "Metrics Data": [filtered_values_dict],
+#                 "Staff Information": staff_info_dict
+#             }
+#
+#             location_name = metrics_submission.location.name
+#             if location_name not in metrics_dict:
+#                 metrics_dict[location_name] = {staff_id: metrics_params_dict_entry}
+#             else:
+#                 metrics_param_dict = metrics_dict[location_name]
+#
+#                 if staff_id in metrics_param_dict:
+#                     metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
+#                 else:
+#                     metrics_param_dict[staff_id] = metrics_params_dict_entry
+#     else:
+#         if response_raw_data['Status']['Error Code'] != 2:
+#             rqst_errors.append('No metrics entries for location(s): {!s} found in database'.format(rqst_location))
+#
+#     return metrics_dict

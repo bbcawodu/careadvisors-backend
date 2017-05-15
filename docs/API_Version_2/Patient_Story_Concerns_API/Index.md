@@ -1,0 +1,9 @@
+# Patient Story Concerns API
+
+This file is documentation for managing data associated Patient Story Concerns in the Navigator Online Plus conversation
+flow.
+
+
+## General Concerns Backend API
+
+[General Concerns Backend API README](General_Concerns_API.md) (IN DEVELOPMENT)

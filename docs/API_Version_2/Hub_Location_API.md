@@ -64,7 +64,11 @@ In response, a JSON document will be displayed with the following format:
     
 ### Navigator Location Data Retrieval API
 - To navigator location data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/navigator_hub_locations/
-    
+    - Results will be filtered by the given parameters.
+    - NOTE: Only one of the following parameters allowed at a time (Unless stated otherwise).
+    - "is_cps_location" corresponds to whether the location is a Chicago Public Schools location (Can be combined with any of the above parameters)
+        - must be of type boolean (true or false)
+        
 - The response will be a JSON document with the following format:
     ```
     {

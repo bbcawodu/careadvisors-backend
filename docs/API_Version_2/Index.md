@@ -47,3 +47,8 @@ This file is documentation for the backend API library for Patient Innovation Ce
 ## Accepted Plans for PIC Contracted Healthcare Provider Networks API
 
 [Accepted Plans for PIC Contracted Healthcare Provider Networks API README](Providers_Plan_Network_API/Index.md)
+
+
+## Patient Story Concerns API
+
+[Patient Story Concerns API README](Patient_Story_Concerns_API/Index.md)

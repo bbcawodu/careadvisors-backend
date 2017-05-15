@@ -124,6 +124,7 @@ class HealthcareCarrier(models.Model):
     def return_values_dict(self):
         valuesdict = {"name": self.name,
                       "state": None,
+                      "plans": None,
                       "Database ID": self.id}
 
         # add related plans to values dict
