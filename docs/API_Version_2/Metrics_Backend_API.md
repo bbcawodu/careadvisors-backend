@@ -264,27 +264,52 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Consumer Metrics Retrieval API.
-- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/metrics/ with the following optional parameters: "fname", "lname", "email", "mpn", "id", "time", "groupby", "startdate", "enddate", "time", "zipcode", "location", "fields"
+- To retrieve metrics data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/metrics/
     - Results will be filtered by the given parameters.
-    - "fname" corresponds to staff member first name.
-    - "lname" corresponds to staff member last name.
-    - "email" corresponds to staff member email.
-    - "mpn" corresponds to staff member mpn.
-    - "id" corresponds to staff member class database id.
-        - passing "all" as the value will return all staff members
-    - One of the above parameters is allowed at a time (only "fname" and "lname" can be grouped)
-        - If "fname" and "lname" are given simultaneously as parameters, only one value each is permitted.
-    - The following parameters can be added without limit to the query: "startdate", "enddate", "time", "zipcode", "groupby", "location", "fields"
-        - "startdate" and "enddate" must be given in "YYYY-MM-DD" format
-        - "time" must be an integer amount of days to look up in the past
-        - "zipcode" must be a non empty comma separated string of zipcodes
-        - "location" must be a string that corresponds to the name of the location you desire to search for
+    - Parameters are divided into 2 categories: "primary" and "secondary"
+    
+    - "Primary" parameters - One and exactly one of these parameters are required in every request.
+        - "fname" corresponds to staff member first name.
+            - Must be a String
+            - Can be multiple values separated by commas.
+        - "lname" corresponds to staff member last name.
+            - Must be a String
+            - Can be multiple values separated by commas.
+        - "email" corresponds to staff member email.
+            - Must be a valid email address.
+            - Can be multiple values separated by commas.
+        - "mpn" corresponds to staff member mpn.
+            - Must be a String
+            - Can be multiple values separated by commas.
+        - "id" corresponds to staff member class database id.
+            - Must be an integer
+            - Can be multiple values separated by commas.
+            - passing "all" as the value will return all staff members.
+        - SPECIAL CASE: Only "fname" and "lname" can be given simultaneously as parameters.
+            - When "fname" and "lname" are given at the same time, only one value of each permitted.
+    
+    - "Secondary" parameters - Any number of these parameters can be added to a request.
+        - "startdate" - Start date of metrics to be retrieved
+            - Must be given in "YYYY-MM-DD" format
+        - "enddate" - End date of metrics to be retrieved
+            - Must be given in "YYYY-MM-DD" format
+        - "time" - amount of days to look up in the past
+            - Must be an integer
+        - "zipcode" - Zipcode of the location for metrics to be retrieved.
+            - Must be a 5 digit integer
+            - Can be multiple values separated by commas.
+        - "location" - Name of the location for metrics to be retrieved.
+            - Must be a String
             - all non ASCII characters must be url encoded
-        - "grouby" can be "zipcode" to group the metrics submissions returned by zipcode
+        - "location_id" - Database id of the location for metrics to be retrieved.
+            - Must be an integer
+            - Can be multiple values separated by commas.
         - "fields" must be a string.
             - Corresponds to a comma separated list of fields that you would like each metrics report to include.
                 - all non ASCII characters of a field must be url encoded before separating by commas
             - If no valid fields are given, all fields of each metrics report will be returned
+            
+        - "grouby" can be "zipcode" to group the metrics submissions returned by zipcode (IN DEVELOPMENT)
         
 - The response will be a JSON document with the following format:
     ```
@@ -345,6 +370,18 @@ In response, a JSON document will be displayed with the following format:
     }
     ```
 
+- NOTES: Results will be grouped by the "Primary" parameter that is given with the request.
+    -Eg: If "first_name" is the "Primary" parameter the results will be grouped like the following
+        
+        ```
+        "Data": [
+            Results for first_name parameter 2,
+            Results for first_name parameter 1,
+            Results for first_name parameter 3,
+            ...,
+        ] (Order is arbitrary)
+        ```
+        
 - If metrics reports are found,
     - "Error Code" will be 0
     - Array corresponding to the "Data" key will be non empty.

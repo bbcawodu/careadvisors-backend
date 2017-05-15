@@ -59,29 +59,35 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Staff Data Retrieval API
-- To retrieve staff data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/staff/ with the following optional parameters: "fname", "lname", "email", "mpn", "id"
+- To retrieve staff data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/staff/
     - Results will be filtered by the given parameters.
-    - "fname" corresponds to first name.
-        - Must be a string
-        - Can be multiple values separated by commas.
-    - "lname" corresponds to last name.
-        - Must be a string
-        - Can be multiple values separated by commas.
-    - "email" corresponds to email.
-        - Must be a string
-        - Can be multiple values separated by commas.
-    - "mpn" corresponds to mpn.
-        - Must be a string
-        - Can be multiple values separated by commas.
-    - "county" corresponds to navigator county.
-        - Must be a string
-        - Can be multiple values separated by commas.
-    - "id" corresponds to database id.
-        - passing "all" as the value will return all staff members
-        - otherwise, must be a base 10 integer.
-    - All parameters may have a single or multiple values separated by commas
-    - One parameter is allowed at a time (only "fname" and "lname" can be grouped)
-        - If "fname" and "lname" are given simultaneously as parameters, only one value each is permitted.
+    - Parameters are divided into 2 categories: "primary" and "secondary"
+    
+    - "Primary" parameters - One and exactly one of these parameters are required in every request.
+        - "fname" corresponds to first name.
+            - Must be a string
+            - Can be multiple values separated by commas.
+        - "lname" corresponds to last name.
+            - Must be a string
+            - Can be multiple values separated by commas.
+        - "email" corresponds to email.
+            - Must be a string
+            - Can be multiple values separated by commas.
+        - "mpn" corresponds to mpn.
+            - Must be a string
+            - Can be multiple values separated by commas.
+        - "county" corresponds to navigator county.
+            - Must be a string
+            - Can be multiple values separated by commas.
+        - "id" corresponds to database id.
+            - Must be an integer
+            - Can be multiple values separated by commas.
+            - passing "all" as the value will return all staff members.
+        - SPECIAL CASE: Only "fname" and "lname" can be given simultaneously as parameters.
+            - When "fname" and "lname" are given at the same time, only one value of each permitted.
+            
+    - "Secondary" parameters - Any number of these parameters can be added to a request.
+        - None
     
 - The response will be a JSON document with the following format:
     ```
@@ -135,6 +141,18 @@ In response, a JSON document will be displayed with the following format:
     }
     ```
 
+- NOTES: Results will be grouped by the "Primary" parameter that is given with the request.
+    -Eg: If "first_name" is the "Primary" parameter the results will be grouped like the following
+        
+        ```
+        "Data": [
+            [Results for first_name parameter 2],
+            [Results for first_name parameter 1],
+            [Results for first_name parameter 3],
+            ...,
+        ] (Order is arbitrary)
+        ```
+  
 - If staff members are found,
     - "Error Code" will be 0
     - Array corresponding to the "Data" key will be non empty.
