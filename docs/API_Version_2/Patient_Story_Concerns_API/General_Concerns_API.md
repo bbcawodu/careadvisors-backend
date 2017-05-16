@@ -1,4 +1,4 @@
-## General Concerns Backend API (IN DEVELOPMENT)
+## General Concerns Backend API
 
 ### General Concerns Data Submission API
 To create, update, or delete members of the ConsumerGeneralConcern class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/general_concerns/.

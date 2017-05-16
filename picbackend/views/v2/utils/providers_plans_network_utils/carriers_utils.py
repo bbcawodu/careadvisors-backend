@@ -53,32 +53,29 @@ def modify_carrier(response_raw_data, rqst_carrier_info, post_errors):
 
     if len(post_errors) == 0:
         found_healthcare_carrier_objs = check_for_healthcare_carrier_objs_with_given_name_and_state(
-            modify_carrier_params['rqst_carrier_name'], modify_carrier_params['rqst_carrier_state'], post_errors)
+            modify_carrier_params['rqst_carrier_name'], modify_carrier_params['rqst_carrier_state'], post_errors, rqst_carrier_id)
 
         if not found_healthcare_carrier_objs and len(post_errors) == 0:
-            try:
-                healthcare_carrier_obj = HealthcareCarrier.objects.get(id=rqst_carrier_id)
-                healthcare_carrier_obj.name = modify_carrier_params['rqst_carrier_name']
-                healthcare_carrier_obj.state_province = modify_carrier_params['rqst_carrier_state']
-                if not healthcare_carrier_obj.check_state_choices():
-                    post_errors.append("State: {!s} is not a valid state abbreviation".format(healthcare_carrier_obj.state_province))
+            healthcare_carrier_obj = modify_carrier_obj(modify_carrier_params, rqst_carrier_id, post_errors)
 
-                if len(post_errors) == 0:
-                    healthcare_carrier_obj.save()
-                    response_raw_data['Data']["Database ID"] = healthcare_carrier_obj.id
-            except HealthcareCarrier.DoesNotExist:
-                post_errors.append("Healthcare carrier does not exist for database id: {}".format(rqst_carrier_id))
+            if len(post_errors) == 0:
+                healthcare_carrier_obj.save()
+                response_raw_data['Data']["Database ID"] = healthcare_carrier_obj.id
 
     return response_raw_data
 
 
-def modify_carrier_obj(carrier_params, post_errors):
-    healthcare_carrier_obj = HealthcareCarrier.objects.get(id=rqst_carrier_id)
-    healthcare_carrier_obj.name = carrier_params['rqst_carrier_name']
-    healthcare_carrier_obj.state_province = carrier_params['rqst_carrier_state']
-    if not healthcare_carrier_obj.check_state_choices():
-        post_errors.append(
-            "State: {!s} is not a valid state abbreviation".format(healthcare_carrier_obj.state_province))
+def modify_carrier_obj(carrier_params, rqst_carrier_id, post_errors):
+    healthcare_carrier_obj = None
+    try:
+        healthcare_carrier_obj = HealthcareCarrier.objects.get(id=rqst_carrier_id)
+        healthcare_carrier_obj.name = carrier_params['rqst_carrier_name']
+        healthcare_carrier_obj.state_province = carrier_params['rqst_carrier_state']
+        if not healthcare_carrier_obj.check_state_choices():
+            post_errors.append(
+                "State: {!s} is not a valid state abbreviation".format(healthcare_carrier_obj.state_province))
+    except HealthcareCarrier.DoesNotExist:
+        post_errors.append("Healthcare carrier does not exist for database id: {}".format(rqst_carrier_id))
 
     return healthcare_carrier_obj
 
