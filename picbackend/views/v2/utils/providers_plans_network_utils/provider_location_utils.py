@@ -87,36 +87,37 @@ def modify_provider_location_add_accepted_plans(response_raw_data, rqst_provider
     rqst_provider_location_id = clean_int_value_from_dict_object(rqst_provider_location_info, "root",
                                                                  "Database ID", post_errors)
 
-    try:
-        provider_location_obj = ProviderLocation.objects.get(id=rqst_provider_location_id)
-        cur_accepted_plans_qset = provider_location_obj.accepted_plans.all()
-        for plan in modify_provider_location_params['accepted_plans_objects']:
-            if plan in cur_accepted_plans_qset:
-                post_errors.append("Plan with the following id already exists in db id {}'s accepted plans list (Hint - remove from parameter 'accepted_plans' list): {})".format(
-                    provider_location_obj.id, plan.id
-                ))
-    except ProviderLocation.DoesNotExist:
-        post_errors.append(
-            "Provider Location does not exist for database id: {}".format(rqst_provider_location_id))
-
     if len(post_errors) == 0:
-        provider_network_obj = return_provider_network_obj_with_given_id(
-            modify_provider_location_params['rqst_provider_network_id'],
-            post_errors)
-        if provider_network_obj and len(post_errors) == 0:
-            rqst_provider_location_name = modify_provider_location_params['rqst_provider_location_name']
-            found_provider_location_objs = check_for_provider_location_objs_with_given_name_and_network(
-                rqst_provider_location_name, provider_network_obj, post_errors, rqst_provider_location_id)
+        try:
+            provider_location_obj = ProviderLocation.objects.get(id=rqst_provider_location_id)
+            cur_accepted_plans_qset = provider_location_obj.accepted_plans.all()
+            for plan in modify_provider_location_params['accepted_plans_objects']:
+                if plan in cur_accepted_plans_qset:
+                    post_errors.append("Plan with the following id already exists in db id {}'s accepted plans list (Hint - remove from parameter 'accepted_plans' list): {})".format(
+                        provider_location_obj.id, plan.id
+                    ))
+        except ProviderLocation.DoesNotExist:
+            post_errors.append(
+                "Provider Location does not exist for database id: {}".format(rqst_provider_location_id))
 
-            if not found_provider_location_objs and len(post_errors) == 0:
-                provider_location_obj.name = rqst_provider_location_name
-                provider_location_obj.provider_network = provider_network_obj
-                for plan in modify_provider_location_params['accepted_plans_objects']:
-                    provider_location_obj.accepted_plans.add(plan)
+        if len(post_errors) == 0:
+            provider_network_obj = return_provider_network_obj_with_given_id(
+                modify_provider_location_params['rqst_provider_network_id'],
+                post_errors)
+            if provider_network_obj and len(post_errors) == 0:
+                rqst_provider_location_name = modify_provider_location_params['rqst_provider_location_name']
+                found_provider_location_objs = check_for_provider_location_objs_with_given_name_and_network(
+                    rqst_provider_location_name, provider_network_obj, post_errors, rqst_provider_location_id)
 
-                provider_location_obj.save()
+                if not found_provider_location_objs and len(post_errors) == 0:
+                    provider_location_obj.name = rqst_provider_location_name
+                    provider_location_obj.provider_network = provider_network_obj
+                    for plan in modify_provider_location_params['accepted_plans_objects']:
+                        provider_location_obj.accepted_plans.add(plan)
 
-                response_raw_data['Data']["Database ID"] = provider_location_obj.id
+                    provider_location_obj.save()
+
+                    response_raw_data['Data']["Database ID"] = provider_location_obj.id
 
     return response_raw_data
 
@@ -126,37 +127,38 @@ def modify_provider_location_remove_accepted_plans(response_raw_data, rqst_provi
     rqst_provider_location_id = clean_int_value_from_dict_object(rqst_provider_location_info, "root",
                                                                  "Database ID", post_errors)
 
-    try:
-        provider_location_obj = ProviderLocation.objects.get(id=rqst_provider_location_id)
-        cur_accepted_plans_qset = provider_location_obj.accepted_plans.all()
-        for plan in modify_provider_location_params['accepted_plans_objects']:
-            if plan not in cur_accepted_plans_qset:
-                post_errors.append(
-                    "Plan with the following id does not exist in db id {}'s accepted plans list (Hint - remove from parameter 'accepted_plans' list): {})".format(
-                        provider_location_obj.id, plan.id
-                    ))
-    except ProviderLocation.DoesNotExist:
-        post_errors.append(
-            "Provider Location does not exist for database id: {}".format(rqst_provider_location_id))
-
     if len(post_errors) == 0:
-        provider_network_obj = return_provider_network_obj_with_given_id(
-            modify_provider_location_params['rqst_provider_network_id'],
-            post_errors)
-        if provider_network_obj and len(post_errors) == 0:
-            rqst_provider_location_name = modify_provider_location_params['rqst_provider_location_name']
-            found_provider_location_objs = check_for_provider_location_objs_with_given_name_and_network(
-                rqst_provider_location_name, provider_network_obj, post_errors, rqst_provider_location_id)
+        try:
+            provider_location_obj = ProviderLocation.objects.get(id=rqst_provider_location_id)
+            cur_accepted_plans_qset = provider_location_obj.accepted_plans.all()
+            for plan in modify_provider_location_params['accepted_plans_objects']:
+                if plan not in cur_accepted_plans_qset:
+                    post_errors.append(
+                        "Plan with the following id does not exist in db id {}'s accepted plans list (Hint - remove from parameter 'accepted_plans' list): {})".format(
+                            provider_location_obj.id, plan.id
+                        ))
+        except ProviderLocation.DoesNotExist:
+            post_errors.append(
+                "Provider Location does not exist for database id: {}".format(rqst_provider_location_id))
 
-            if not found_provider_location_objs and len(post_errors) == 0:
-                provider_location_obj.name = rqst_provider_location_name
-                provider_location_obj.provider_network = provider_network_obj
-                for plan in modify_provider_location_params['accepted_plans_objects']:
-                    provider_location_obj.accepted_plans.remove(plan)
+        if len(post_errors) == 0:
+            provider_network_obj = return_provider_network_obj_with_given_id(
+                modify_provider_location_params['rqst_provider_network_id'],
+                post_errors)
+            if provider_network_obj and len(post_errors) == 0:
+                rqst_provider_location_name = modify_provider_location_params['rqst_provider_location_name']
+                found_provider_location_objs = check_for_provider_location_objs_with_given_name_and_network(
+                    rqst_provider_location_name, provider_network_obj, post_errors, rqst_provider_location_id)
 
-                provider_location_obj.save()
+                if not found_provider_location_objs and len(post_errors) == 0:
+                    provider_location_obj.name = rqst_provider_location_name
+                    provider_location_obj.provider_network = provider_network_obj
+                    for plan in modify_provider_location_params['accepted_plans_objects']:
+                        provider_location_obj.accepted_plans.remove(plan)
 
-                response_raw_data['Data']["Database ID"] = provider_location_obj.id
+                    provider_location_obj.save()
+
+                    response_raw_data['Data']["Database ID"] = provider_location_obj.id
 
     return response_raw_data
 
@@ -195,13 +197,13 @@ def get_provider_location_mgmt_put_params(rqst_provider_location_info, post_erro
                                                                 "provider_network Database ID", post_errors)
     rqst_accepted_plans_ids = clean_list_value_from_dict_object(rqst_provider_location_info, "root", "accepted_plans",
                                                             post_errors, empty_list_allowed=True)
-    for plan_id in rqst_accepted_plans_ids:
+    for indx, plan_id in enumerate(rqst_accepted_plans_ids):
         if not isinstance(plan_id, int):
-            post_errors.append("All plan ids must be integers, plan id is not an integer for 'accepted_plans' field at index: {}".format(plan_id))
+            post_errors.append("All plan ids must be integers, plan id is not an integer for 'accepted_plans' field at index: {}".format(indx))
     rqst_accepted_plans_ids = list(set(rqst_accepted_plans_ids))
     accepted_plans_objects = []
     plans_errors = []
-    if rqst_accepted_plans_ids:
+    if rqst_accepted_plans_ids and len(post_errors) == 0:
         for accepted_plan_id in rqst_accepted_plans_ids:
             try:
                 accepted_plan_object = HealthcarePlan.objects.get(id=accepted_plan_id)

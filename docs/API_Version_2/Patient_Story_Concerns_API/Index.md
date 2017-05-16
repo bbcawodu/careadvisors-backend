@@ -11,4 +11,4 @@ flow.
 
 ## Specific Concerns Backend API
 
-[Specific Concerns Backend API README](Specific_Concerns_API.md) (IN DEVELOPMENT)
+[Specific Concerns Backend API README](Specific_Concerns_API.md)

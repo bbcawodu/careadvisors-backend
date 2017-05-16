@@ -58,10 +58,10 @@ In response, a JSON document will be displayed with the following format:
     - Parameters are divided into 2 categories: "primary" and "secondary"
     
     - "Primary" parameters - One and exactly one of these parameters are required in every request.
-        - "name" corresponds to staff member first name.
+        - "name" corresponds to general concern name.
             - Must be a String.
             - all non ASCII characters must be url encoded.
-        - "id" corresponds to staff member class database id.
+        - "id" corresponds to ConsumerGeneralConcern class database id.
             - Must be an integer
             - Can be multiple values separated by commas.
             - passing "all" as the value will return all staff members.

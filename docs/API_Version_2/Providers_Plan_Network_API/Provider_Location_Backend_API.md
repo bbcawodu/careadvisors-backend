@@ -57,6 +57,7 @@ In response, a JSON document will be displayed with the following format:
     - All other fields must be filled.
     - accepted_plans list information
         - Must contain database ids for valid Healthcare Plan entries
+        - All given values will be added to the accepted_plans list of the current ProviderLocation.
     - All key value pairs in the JSON Body correspond to updated fields of the entry for specified "Database ID"
     
 - Updating a ProviderLocation database entry - Removing an accepted plan.
@@ -64,6 +65,7 @@ In response, a JSON document will be displayed with the following format:
     - All other fields must be filled.
     - accepted_plans list information
         - Must contain database ids for valid Healthcare Plan entries
+        - All given values will be removed from the accepted_plans list of the current ProviderLocation.
     - All key value pairs in the JSON Body correspond to updated fields of the entry for specified "Database ID"
 
 - Deleting a ProviderLocation database entry.
