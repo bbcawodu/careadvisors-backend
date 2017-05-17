@@ -94,12 +94,12 @@ In response, a JSON document will be displayed with the following format:
             - Must be an integer
             - Can be multiple values separated by commas.
             - passing "all" as the value will return all general concerns.
-        - "general_concern_id" corresponds to a ConsumerGeneralConcern class database id that a "specific concern" is related to.
-            - Retrieves specific concerns whose "related_general_concerns" contain ALL ConsumerGeneralConcern's specified by the  given "general_concern_ids"
+        - "gen_concern_id_subset" corresponds to a ConsumerGeneralConcern class database id that a "specific concern" is related to.
+            - Retrieves specific concerns whose "related_general_concerns" are a superset of the ConsumerGeneralConcern's specified by the  given "gen_concern_id"'s
             - Must be an integer
             - Can be multiple values separated by commas.
-        - "general_concern_name" corresponds to a general concern name that a "specific concern" is related to.
-            - Retrieves specific concerns whose "related_general_concerns" contain the ConsumerGeneralConcern specified by the given "general_concern_name"
+        - "gen_concern_name" corresponds to a general concern name that a "specific concern" is related to.
+            - Retrieves specific concerns whose "related_general_concerns" contain a ConsumerGeneralConcern specified by the given "gen_concern_name"
             - Must be a String.
             - all non ASCII characters must be url encoded.
     

@@ -247,7 +247,7 @@ def retrieve_provider_locations_by_id(response_raw_data, rqst_errors, provider_l
     if rqst_provider_location_id == "all":
         all_provider_locations = provider_locations
         provider_locations_dict = {}
-        for provider_location in provider_locations:
+        for provider_location in all_provider_locations:
             provider_locations_dict[provider_location.id] = provider_location.return_values_dict()
         provider_locations_list = []
         for provider_location_key, provider_location_entry in provider_locations_dict.items():
@@ -305,7 +305,7 @@ def retrieve_provider_locations_by_network_name(response_raw_data, rqst_errors, 
             provider_locations_list.append(provider_location.return_values_dict())
         response_raw_data["Data"] = provider_locations_list
     else:
-        rqst_errors.append('No Plans with a carrier with the name: {!s} found in database'.format(rqst_network_name))
+        rqst_errors.append('No provider locations with a provider network with the name: {!s} found in database'.format(rqst_network_name))
 
     return response_raw_data, rqst_errors
 
@@ -347,6 +347,6 @@ def retrieve_provider_locations_by_network_id(response_raw_data, rqst_errors, pr
             else:
                 rqst_errors.append('No provider locations found for provider network database ID(s): ' + rqst_network_id)
         else:
-            rqst_errors.append('No valid provider location database IDs provided in request (must be integers)')
+            rqst_errors.append('No valid provider network database IDs provided in request (must be integers)')
 
     return response_raw_data, rqst_errors

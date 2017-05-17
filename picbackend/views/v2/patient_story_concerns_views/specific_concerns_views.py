@@ -12,6 +12,10 @@ from ..utils import modify_specific_concern_using_api_rqst_params
 from ..utils import modify_specific_concern_add_general_concern_using_api_rqst_params
 from ..utils import modify_specific_concern_remove_general_concern_using_api_rqst_params
 from ..utils import delete_specific_concern_using_api_rqst_params
+from ..utils import retrieve_specific_concerns_by_id
+from ..utils import retrieve_specific_concerns_by_question
+from ..utils import retrieve_specific_concerns_by_gen_concern_name
+from ..utils import retrieve_specific_concerns_by_gen_concern_id_subset
 from ..base import JSONPUTRspMixin
 from ..base import JSONGETRspMixin
 
@@ -42,37 +46,44 @@ class SpecificConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 response_raw_data = modify_specific_concern_remove_general_concern_using_api_rqst_params(response_raw_data, post_data, post_errors)
             elif rqst_action == "Delete Specific Concern":
                 response_raw_data = delete_specific_concern_using_api_rqst_params(response_raw_data, post_data, post_errors)
+            else:
+                post_errors.append("No valid 'Database Action' provided.")
 
         return response_raw_data, post_errors
 
     def specific_concerns_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         specific_concerns = ConsumerSpecificConcern.objects.all()
 
-        # if 'id' in search_params:
-        #     rqst_provider_location_id = search_params['id']
-        #     if rqst_provider_location_id != 'all':
-        #         list_of_ids = search_params['id list']
-        #     else:
-        #         list_of_ids = None
-        #     response_raw_data, rqst_errors = retrieve_provider_locations_by_id(response_raw_data, rqst_errors, provider_locations,
-        #                                                                        rqst_provider_location_id, list_of_ids)
-        # elif 'name' in search_params:
-        #     rqst_name = search_params['name']
-        #
-        #     response_raw_data, rqst_errors = retrieve_provider_locations_by_name(response_raw_data, rqst_errors,
-        #                                                                          provider_locations, rqst_name)
-        # elif 'network_name' in search_params:
-        #     rqst_network_name = search_params['network_name']
-        #
-        #     response_raw_data, rqst_errors = retrieve_provider_locations_by_network_name(response_raw_data, rqst_errors,
-        #                                                                                  provider_locations, rqst_network_name)
-        # elif 'network_id' in search_params:
-        #     rqst_network_id = search_params['network_id']
-        #     list_of_network_ids = search_params['network_id_list']
-        #
-        #     response_raw_data, rqst_errors = retrieve_provider_locations_by_network_id(response_raw_data, rqst_errors,
-        #                                                                                provider_locations, rqst_network_id,
-        #                                                                                list_of_network_ids)
+        if 'id' in search_params:
+            rqst_specific_concern_id = search_params['id']
+            if rqst_specific_concern_id != 'all':
+                list_of_ids = search_params['id list']
+            else:
+                list_of_ids = None
+            response_raw_data, rqst_errors = retrieve_specific_concerns_by_id(response_raw_data, rqst_errors,
+                                                                              specific_concerns,
+                                                                              rqst_specific_concern_id, list_of_ids)
+        elif 'question' in search_params:
+            rqst_question = search_params['question']
+
+            response_raw_data, rqst_errors = retrieve_specific_concerns_by_question(response_raw_data, rqst_errors,
+                                                                                    specific_concerns, rqst_question)
+        elif 'gen_concern_name' in search_params:
+            rqst_gen_concern_name = search_params['gen_concern_name']
+
+            response_raw_data, rqst_errors = retrieve_specific_concerns_by_gen_concern_name(response_raw_data,
+                                                                                            rqst_errors,
+                                                                                            specific_concerns,
+                                                                                            rqst_gen_concern_name)
+        elif 'gen_concern_id_subset' in search_params:
+            rqst_gen_concern_id = search_params['gen_concern_id_subset']
+            list_of_gen_concern_ids = search_params['gen_concern_id_subset_list']
+
+            response_raw_data, rqst_errors = retrieve_specific_concerns_by_gen_concern_id_subset(response_raw_data,
+                                                                                                 rqst_errors,
+                                                                                                 specific_concerns,
+                                                                                                 rqst_gen_concern_id,
+                                                                                                 list_of_gen_concern_ids)
 
         return response_raw_data, rqst_errors
 
