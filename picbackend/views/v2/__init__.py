@@ -12,3 +12,4 @@ from .consumer_health_insurance_views import *
 from .patient_assist_scheduler_views import *
 from .call_to_action_views import *
 from .provider_plan_network_views import *
+from .patient_story_concerns_views import *
