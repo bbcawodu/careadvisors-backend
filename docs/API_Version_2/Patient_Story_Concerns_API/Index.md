@@ -9,6 +9,11 @@ flow.
 [General Concerns Backend API README](General_Concerns_API.md)
 
 
-## Specific Concerns Backend API
+## Specific Concerns Backend API (GET METHOD IN DEVELOPMENT)
 
 [Specific Concerns Backend API README](Specific_Concerns_API.md)
+
+
+## Ranked Specific Concerns Backend API (IN DEVELOPMENT)
+
+[Ranked Specific Concerns Backend API README](Ranked_Specific_Concerns_API.md)

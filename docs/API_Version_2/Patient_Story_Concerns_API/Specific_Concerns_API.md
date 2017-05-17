@@ -94,7 +94,11 @@ In response, a JSON document will be displayed with the following format:
             - Must be an integer
             - Can be multiple values separated by commas.
             - passing "all" as the value will return all general concerns.
-        - "gen_concern_id_subset" corresponds to a ConsumerGeneralConcern class database id that a "specific concern" is related to.
+        - "gen_concern_id" corresponds to a ConsumerGeneralConcern class database id that a "specific concern" is related to.
+            - Retrieves specific concerns whose "related_general_concerns" contain the ConsumerGeneralConcern's specified by the  given "gen_concern_id"'s
+            - Must be an integer
+            - Can be multiple values separated by commas.
+        - "gen_concern_id_subset" corresponds to a set of ConsumerGeneralConcern class database id's that a "specific concern"'s "related_general_concerns" is a superset of.
             - Retrieves specific concerns whose "related_general_concerns" are a superset of the ConsumerGeneralConcern's specified by the  given "gen_concern_id"'s
             - Must be an integer
             - Can be multiple values separated by commas.
@@ -112,10 +116,9 @@ In response, a JSON document will be displayed with the following format:
         "Data": [
             {
                 "name": String,
-                "related_specific_concerns": [
+                "related_general_concerns": [
                                                 {
-                                                    "question": String,
-                                                    "research_weight": Integer,
+                                                    "name": String,
                                                     "Database ID": Integer
                                                 },
                                                 ...,
