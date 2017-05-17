@@ -312,6 +312,20 @@ def build_search_params(rqst_params, rqst_errors):
             rqst_errors.append("Value for is_cps_location is not type boolean")
         else:
             search_params['is_cps_location'] = search_params['is_cps_location'] in ('true')
+    if 'question' in rqst_params:
+        search_params['question'] = urllib.parse.unquote(rqst_params['question'])
+    if 'gen_concern_name' in rqst_params:
+        search_params['gen_concern_name'] = urllib.parse.unquote(rqst_params['gen_concern_name'])
+    if 'gen_concern_id_subset' in rqst_params:
+        search_params['gen_concern_id_subset'] = rqst_params['gen_concern_id_subset']
+
+        list_of_gen_concern_ids = re.findall("\d+", search_params['gen_concern_id_subset'])
+        for indx, element in enumerate(list_of_gen_concern_ids):
+            list_of_gen_concern_ids[indx] = int(element)
+        search_params['gen_concern_id_subset_list'] = list_of_gen_concern_ids
+
+        if not search_params['gen_concern_id_subset_list']:
+            rqst_errors.append('Invalid gen_concern id, gen_concern ids must be base 10 integers')
 
     return search_params
 
