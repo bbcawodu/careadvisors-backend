@@ -326,6 +326,16 @@ def build_search_params(rqst_params, rqst_errors):
 
         if not search_params['gen_concern_id_subset_list']:
             rqst_errors.append('Invalid gen_concern id, gen_concern ids must be base 10 integers')
+    if 'gen_concern_id' in rqst_params:
+        search_params['gen_concern_id'] = rqst_params['gen_concern_id']
+
+        list_of_gen_concern_ids = re.findall("\d+", search_params['gen_concern_id'])
+        for indx, element in enumerate(list_of_gen_concern_ids):
+            list_of_gen_concern_ids[indx] = int(element)
+        search_params['gen_concern_id_list'] = list_of_gen_concern_ids
+
+        if not search_params['gen_concern_id_list']:
+            rqst_errors.append('Invalid gen_concern id, gen_concern ids must be base 10 integers')
 
     return search_params
 

@@ -16,6 +16,7 @@ from ..utils import retrieve_specific_concerns_by_id
 from ..utils import retrieve_specific_concerns_by_question
 from ..utils import retrieve_specific_concerns_by_gen_concern_name
 from ..utils import retrieve_specific_concerns_by_gen_concern_id_subset
+from ..utils import retrieve_specific_concerns_by_gen_concern_id
 from ..base import JSONPUTRspMixin
 from ..base import JSONGETRspMixin
 
@@ -84,6 +85,15 @@ class SpecificConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                                                                                                  specific_concerns,
                                                                                                  rqst_gen_concern_id,
                                                                                                  list_of_gen_concern_ids)
+        elif 'gen_concern_id' in search_params:
+            rqst_gen_concern_id = search_params['gen_concern_id']
+            list_of_gen_concern_ids = search_params['gen_concern_id_list']
+
+            response_raw_data, rqst_errors = retrieve_specific_concerns_by_gen_concern_id(response_raw_data,
+                                                                                          rqst_errors,
+                                                                                          specific_concerns,
+                                                                                          rqst_gen_concern_id,
+                                                                                          list_of_gen_concern_ids)
 
         return response_raw_data, rqst_errors
 
