@@ -27,6 +27,7 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
                 min_no_of_specific_concerns_to_fetch = total_no_of_rel_spec_concerns
             else:
                 min_no_of_specific_concerns_to_fetch = MIN_NO_OF_SPECIFIC_CONCERNS_TO_FETCH
+            response_raw_data["min_entries"] = min_no_of_specific_concerns_to_fetch
 
             ranked_list_of_specific_concern_objects = []
             no_of_gen_concern_objects = len(ranked_gen_concs_objects_w_rel_spec_concs)
@@ -35,7 +36,7 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
                 related_specific_concerns = gen_concern_object_w_rel_spec_concs[1]
                 for ranked_specific_concern_entry in ranked_list_of_specific_concern_objects:
                     if ranked_specific_concern_entry in related_specific_concerns:
-                        related_specific_concerns.remove(ranked_specific_concern_entry)
+                        related_specific_concerns = related_specific_concerns.exclude(question=ranked_specific_concern_entry.question)
 
                 # need to write formula to obtain percentage from no_of_gen_concern_objects and index in list
                 percentage_of_specific_concerns_to_get = (1/no_of_gen_concern_objects) * \
@@ -51,12 +52,13 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
 
             no_of_remaining_specific_concern_spots = min_no_of_specific_concerns_to_fetch - len(ranked_list_of_specific_concern_objects)
 
-            while no_of_remaining_specific_concern_spots < 0:
+            while no_of_remaining_specific_concern_spots > 0:
                 for indx, gen_concern_object_w_rel_spec_concs in enumerate(ranked_gen_concs_objects_w_rel_spec_concs):
                     related_specific_concerns = gen_concern_object_w_rel_spec_concs[1]
                     for ranked_specific_concern_entry in ranked_list_of_specific_concern_objects:
                         if ranked_specific_concern_entry in related_specific_concerns:
-                            related_specific_concerns.remove(ranked_specific_concern_entry)
+                            related_specific_concerns = related_specific_concerns.exclude(
+                                question=ranked_specific_concern_entry.question)
 
                     # need to write formula to obtain percentage from no_of_gen_concern_objects and index in list
                     percentage_of_specific_concerns_to_get = (1 / no_of_gen_concern_objects) * \
