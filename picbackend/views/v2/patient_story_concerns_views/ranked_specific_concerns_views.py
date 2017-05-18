@@ -32,39 +32,17 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
             ranked_list_of_specific_concern_objects = []
             no_of_gen_concern_objects = len(ranked_gen_concs_objects_w_rel_spec_concs)
 
-            for indx, gen_concern_object_w_rel_spec_concs in enumerate(ranked_gen_concs_objects_w_rel_spec_concs):
-                related_specific_concerns = gen_concern_object_w_rel_spec_concs[1]
-                for ranked_specific_concern_entry in ranked_list_of_specific_concern_objects:
-                    if ranked_specific_concern_entry in related_specific_concerns:
-                        related_specific_concerns = related_specific_concerns.exclude(question=ranked_specific_concern_entry.question)
-
-                # need to write formula to obtain percentage from no_of_gen_concern_objects and index in list
-                percentage_of_specific_concerns_to_get = (1/no_of_gen_concern_objects) * \
-                                                         1#<-formula to obtain percentage goes here
-                no_of_specific_concerns_to_get = ceil(percentage_of_specific_concerns_to_get * min_no_of_specific_concerns_to_fetch)
-
-                for specific_concern in related_specific_concerns:
-                    ranked_list_of_specific_concern_objects.append(specific_concern)
-
-                    no_of_specific_concerns_to_get -= 1
-                    if no_of_specific_concerns_to_get <= 0:
-                        break
-
-            no_of_remaining_specific_concern_spots = min_no_of_specific_concerns_to_fetch - len(ranked_list_of_specific_concern_objects)
-
-            while no_of_remaining_specific_concern_spots > 0:
+            def compile_ranked_list_of_specific_concern_objects():
                 for indx, gen_concern_object_w_rel_spec_concs in enumerate(ranked_gen_concs_objects_w_rel_spec_concs):
                     related_specific_concerns = gen_concern_object_w_rel_spec_concs[1]
                     for ranked_specific_concern_entry in ranked_list_of_specific_concern_objects:
                         if ranked_specific_concern_entry in related_specific_concerns:
-                            related_specific_concerns = related_specific_concerns.exclude(
-                                question=ranked_specific_concern_entry.question)
+                            related_specific_concerns = related_specific_concerns.exclude(question=ranked_specific_concern_entry.question)
 
                     # need to write formula to obtain percentage from no_of_gen_concern_objects and index in list
-                    percentage_of_specific_concerns_to_get = (1 / no_of_gen_concern_objects) * \
-                                                             1  # <-formula to obtain percentage goes here
-                    no_of_specific_concerns_to_get = ceil(
-                        percentage_of_specific_concerns_to_get * min_no_of_specific_concerns_to_fetch)
+                    percentage_of_specific_concerns_to_get = (1/no_of_gen_concern_objects) * \
+                                                             1#<-formula to obtain percentage goes here
+                    no_of_specific_concerns_to_get = ceil(percentage_of_specific_concerns_to_get * min_no_of_specific_concerns_to_fetch)
 
                     for specific_concern in related_specific_concerns:
                         ranked_list_of_specific_concern_objects.append(specific_concern)
@@ -73,8 +51,12 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
                         if no_of_specific_concerns_to_get <= 0:
                             break
 
-                no_of_remaining_specific_concern_spots = min_no_of_specific_concerns_to_fetch - len(
-                    ranked_list_of_specific_concern_objects)
+                no_of_remaining_specific_concern_spots = min_no_of_specific_concerns_to_fetch - len(ranked_list_of_specific_concern_objects)
+                return no_of_remaining_specific_concern_spots
+
+            no_of_remaining_specific_concern_spots = compile_ranked_list_of_specific_concern_objects()
+            while no_of_remaining_specific_concern_spots > 0:
+                no_of_remaining_specific_concern_spots = compile_ranked_list_of_specific_concern_objects()
 
             response_data_entry = []
             for specific_concern in ranked_list_of_specific_concern_objects:
@@ -88,6 +70,7 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
 
 def retrieve_ranked_gen_concern_entries_from_list_of_names(rqst_data, rqst_errors):
     ranked_gen_concs_objects_w_rel_spec_concs = []
+    total_related_spec_concerns_qset = None
     total_no_of_rel_spec_concerns = 0
 
     rqst_ranked_general_concerns_names = clean_list_value_from_dict_object(rqst_data, "root", "ranked_general_concerns",
@@ -114,13 +97,19 @@ def retrieve_ranked_gen_concern_entries_from_list_of_names(rqst_data, rqst_error
                             name__iexact=ranked_general_concerns_name)
 
                         related_spec_concerns_qset = ranked_general_concerns_object.related_specific_concerns.all().order_by("-research_weight")
-                        total_no_of_rel_spec_concerns += len(related_spec_concerns_qset)
+                        if total_related_spec_concerns_qset:
+                            total_related_spec_concerns_qset = total_related_spec_concerns_qset | related_spec_concerns_qset
+                        else:
+                            total_related_spec_concerns_qset = related_spec_concerns_qset
 
                         ranked_general_concerns_objects_entry = [ranked_general_concerns_object, related_spec_concerns_qset]
                         ranked_gen_concs_objects_w_rel_spec_concs.append(ranked_general_concerns_objects_entry)
                     except ConsumerGeneralConcern.DoesNotExist:
                         ranked_general_concerns_errors.append(
                             "No ConsumerGeneralConcern database entry found for name: {}".format(ranked_general_concerns_name))
+
+                if total_related_spec_concerns_qset:
+                    total_no_of_rel_spec_concerns = total_related_spec_concerns_qset.distinct().count()
 
                 for ranked_general_concerns_error in ranked_general_concerns_errors:
                     rqst_errors.append(ranked_general_concerns_error)
