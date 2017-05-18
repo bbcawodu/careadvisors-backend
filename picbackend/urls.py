@@ -128,5 +128,6 @@ urlpatterns = [
     # urls for patient story concerns views
     url(r"^v2/general_concerns/$", views.GeneralConcernsManagementView.as_view()),
     url(r"^v2/specific_concerns/$", views.SpecificConcernsManagementView.as_view()),
+    url(r"^v2/ranked_specific_concerns/$", views.RankedSpecificConcernsView.as_view()),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
