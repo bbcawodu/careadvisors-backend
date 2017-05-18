@@ -1,8 +1,8 @@
 ## Ranked Specific Concerns Backend API (IN DEVELOPMENT)
 
 ### Ranked Specific Concerns Retrieval API
-To retrieve a ranked list of ConsumerSpecificConcern class entries based on a submitted ranked list of
-ConsumerGeneralConcern class entries from the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/ranked_specific_concerns/.
+To retrieve a ranked list of ConsumerSpecificConcern class entries based on a submitted ranked list of consumer general
+concerns that exist in our db, submit a POST request to: http://picbackend.herokuapp.com/v2/ranked_specific_concerns/.
 
 - The headers of the request should include: 
     - "Content-Type: "application/json""
@@ -15,7 +15,7 @@ The body of the request should be a JSON document using the following template:
                                 String,
                                 ...,
                                 ...
-                            ] (Must contain at least one entry)(Order matters.),
+                            ] (Must contain at least one entry)(Order matters.)(NO DUPLICATES),
 }
 ```
 
@@ -30,7 +30,7 @@ In response, a JSON document will be displayed with the following format:
            },
  "Data": [
                 {
-                "name": String,
+                "question": String,
                 "related_general_concerns": [
                                                 {
                                                     "name": String,
@@ -42,7 +42,7 @@ In response, a JSON document will be displayed with the following format:
                 "Database ID": Integer,
             },
             {
-                "name": String,
+                "question": String,
                 "related_general_concerns": [
                                                 {
                                                     "name": String,
@@ -54,7 +54,7 @@ In response, a JSON document will be displayed with the following format:
                 "Database ID": Integer,
             },
             {
-                "name": String,
+                "question": String,
                 "related_general_concerns": [
                                                 {
                                                     "name": String,

@@ -81,7 +81,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
     
-### Specific Concerns Data Retrieval API (IN DEVELOPMENT)
+### Specific Concerns Data Retrieval API
 - To retrieve ConsumerSpecificConcern data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/specific_concerns/
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"
@@ -115,7 +115,7 @@ In response, a JSON document will be displayed with the following format:
     {
         "Data": [
             {
-                "name": String,
+                "question": String,
                 "related_general_concerns": [
                                                 {
                                                     "name": String,
