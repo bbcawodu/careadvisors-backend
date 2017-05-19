@@ -51,8 +51,8 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
                         if no_of_specific_concerns_to_get <= 0:
                             break
 
-                no_of_remaining_specific_concern_spots = min_no_of_specific_concerns_to_fetch - len(ranked_list_of_specific_concern_objects)
-                return no_of_remaining_specific_concern_spots
+                remaining_specific_concern_spots = min_no_of_specific_concerns_to_fetch - len(ranked_list_of_specific_concern_objects)
+                return remaining_specific_concern_spots
 
             no_of_remaining_specific_concern_spots = compile_ranked_list_of_specific_concern_objects()
             while no_of_remaining_specific_concern_spots > 0:
