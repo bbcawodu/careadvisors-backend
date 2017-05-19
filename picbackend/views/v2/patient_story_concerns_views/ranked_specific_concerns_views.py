@@ -34,22 +34,28 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
 
             def compile_ranked_list_of_specific_concern_objects():
                 for indx, gen_concern_object_w_rel_spec_concs in enumerate(ranked_gen_concs_objects_w_rel_spec_concs):
-                    related_specific_concerns = gen_concern_object_w_rel_spec_concs[1]
-                    for ranked_specific_concern_entry in ranked_list_of_specific_concern_objects:
-                        if ranked_specific_concern_entry in related_specific_concerns:
-                            related_specific_concerns = related_specific_concerns.exclude(question=ranked_specific_concern_entry.question)
+                    if len(ranked_list_of_specific_concern_objects) < min_no_of_specific_concerns_to_fetch:
+                        related_specific_concerns = gen_concern_object_w_rel_spec_concs[1]
+                        for ranked_specific_concern_entry in ranked_list_of_specific_concern_objects:
+                            if ranked_specific_concern_entry in related_specific_concerns:
+                                related_specific_concerns = related_specific_concerns.exclude(question=ranked_specific_concern_entry.question)
 
-                    # need to write formula to obtain percentage from no_of_gen_concern_objects and index in list
-                    percentage_of_specific_concerns_to_get = (1/no_of_gen_concern_objects) * \
-                                                             1#<-formula to obtain percentage goes here
-                    no_of_specific_concerns_to_get = ceil(percentage_of_specific_concerns_to_get * min_no_of_specific_concerns_to_fetch)
+                        # need to write formula to obtain percentage from no_of_gen_concern_objects and index in list
+                        percentage_of_specific_concerns_to_get = (1/no_of_gen_concern_objects) * \
+                                                                 calculate_weight_from_index_and_len_of_array(indx, no_of_gen_concern_objects)
+                        no_of_specific_concerns_to_get = ceil(percentage_of_specific_concerns_to_get * min_no_of_specific_concerns_to_fetch)
 
-                    for specific_concern in related_specific_concerns:
-                        ranked_list_of_specific_concern_objects.append(specific_concern)
+                        for specific_concern in related_specific_concerns:
+                            if len(ranked_list_of_specific_concern_objects) < min_no_of_specific_concerns_to_fetch:
+                                ranked_list_of_specific_concern_objects.append(specific_concern)
 
-                        no_of_specific_concerns_to_get -= 1
-                        if no_of_specific_concerns_to_get <= 0:
-                            break
+                                no_of_specific_concerns_to_get -= 1
+                                if no_of_specific_concerns_to_get <= 0:
+                                    break
+                            else:
+                                break
+                    else:
+                        break
 
                 remaining_specific_concern_spots = min_no_of_specific_concerns_to_fetch - len(ranked_list_of_specific_concern_objects)
                 return remaining_specific_concern_spots
@@ -118,3 +124,56 @@ def retrieve_ranked_gen_concern_entries_from_list_of_names(rqst_data, rqst_error
                 MAX_NO_OF_GEN_CONCERNS_GIVEN, no_of_ranked_gen_concerns))
 
     return ranked_gen_concs_objects_w_rel_spec_concs, total_no_of_rel_spec_concerns
+
+
+def calculate_weight_from_index_and_len_of_array(indx, len_of_array):
+    element_number = indx + 1
+    if len_of_array == 1:
+        return 1
+    elif len_of_array == 2:
+        if element_number == 1:
+            return 1.7
+        else:
+            return .7
+    elif len_of_array == 3:
+        if element_number == 1:
+            return 1.6
+        elif element_number == 2:
+            return .8
+        else:
+            return .8
+    elif len_of_array == 4:
+        if element_number == 1:
+            return 1.5
+        elif element_number == 2:
+            return .8
+        elif element_number == 3:
+            return .8
+        else:
+            return .9
+    elif len_of_array == 5:
+        if element_number == 1:
+            return 1.5
+        elif element_number == 2:
+            return .8
+        elif element_number == 3:
+            return .8
+        elif element_number == 4:
+            return .9
+        else:
+            return .9
+    elif len_of_array == 6:
+        if element_number == 1:
+            return 1.4
+        elif element_number == 2:
+            return .8
+        elif element_number == 3:
+            return .9
+        elif element_number == 4:
+            return .9
+        elif element_number == 5:
+            return .9
+        else:
+            return .9
+    else:
+        return 1
