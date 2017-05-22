@@ -5,6 +5,7 @@ from ..utils import clean_list_value_from_dict_object
 from picmodels.models import ConsumerGeneralConcern
 from ..base import JSONPOSTRspMixin
 from math import ceil
+from copy import deepcopy
 
 
 MAX_NO_OF_GEN_CONCERNS_GIVEN = 6
@@ -33,13 +34,18 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
 
             ranked_list_of_specific_concern_objects = []
 
-            def compile_ranked_list_of_specific_concern_objects(ordered_gen_concs_objects_w_rel_spec_concs):
-                no_of_gen_concern_objects = len(ordered_gen_concs_objects_w_rel_spec_concs)
+            def compile_ranked_list_of_specific_concern_objects(ordered_list_of_spec_conc_qsets):
+                no_of_gen_concern_objects = len(ordered_list_of_spec_conc_qsets)
                 remaining_specific_concern_spots = min_no_of_specific_concerns_to_fetch - len(ranked_list_of_specific_concern_objects)
 
-                if ordered_gen_concs_objects_w_rel_spec_concs:
+                if ordered_list_of_spec_conc_qsets:
+                    # Need a copy of all the objects within the list. This is because lists and querysets are mutable
+                    # and all changes will be propagated to the original list. I do not want this. Original list should
+                    # remain intact
+                    ordered_list_of_spec_conc_qsets = deepcopy(ordered_list_of_spec_conc_qsets)
+
                     if len(ranked_list_of_specific_concern_objects) < min_no_of_specific_concerns_to_fetch:
-                        related_specific_concern_qset = ordered_gen_concs_objects_w_rel_spec_concs[0]
+                        related_specific_concern_qset = ordered_list_of_spec_conc_qsets[0]
                         for ranked_specific_concern_entry in ranked_list_of_specific_concern_objects:
                             if ranked_specific_concern_entry in related_specific_concern_qset:
                                 related_specific_concern_qset = related_specific_concern_qset.exclude(question=ranked_specific_concern_entry.question)
@@ -59,7 +65,7 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
                             else:
                                 break
 
-                        compile_ranked_list_of_specific_concern_objects(ordered_gen_concs_objects_w_rel_spec_concs[1:])
+                        compile_ranked_list_of_specific_concern_objects(ordered_list_of_spec_conc_qsets[1:])
 
                 return remaining_specific_concern_spots
 
