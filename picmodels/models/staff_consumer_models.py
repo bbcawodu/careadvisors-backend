@@ -119,7 +119,9 @@ class PICStaff(models.Model):
 
 @receiver(models.signals.post_delete, sender=PICStaff)
 def remove_file_from_s3(sender, instance, using, **kwargs):
-    instance.staff_pic.delete(save=False)
+    default_pic_url = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_STAFF_PIC_URL)
+    if instance.staff_pic.url != default_pic_url:
+        instance.staff_pic.delete(save=False)
 
 
 # Maybe add some sort of authorization to our API? OAuth? OAuth2? Some shit?

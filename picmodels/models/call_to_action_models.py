@@ -23,4 +23,6 @@ class CallToAction(models.Model):
 
 @receiver(models.signals.post_delete, sender=CallToAction)
 def remove_file_from_s3(sender, instance, using, **kwargs):
-    instance.cta_image.delete(save=False)
+    default_cta_image_url = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_CTA_PIC_URL)
+    if instance.staff_pic.url != default_cta_image_url:
+        instance.cta_image.delete(save=False)
