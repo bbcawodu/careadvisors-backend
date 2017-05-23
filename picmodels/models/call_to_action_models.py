@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.dispatch import receiver
 
 
 class CallToAction(models.Model):
@@ -18,3 +19,8 @@ class CallToAction(models.Model):
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
+
+
+@receiver(models.signals.post_delete, sender=CallToAction)
+def remove_file_from_s3(sender, instance, using, **kwargs):
+    instance.cta_image.delete(save=False)
