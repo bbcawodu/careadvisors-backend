@@ -3,6 +3,8 @@ This module defines the db Tables for storing provider networks and the plans th
 """
 
 from django.db import models
+from django.conf import settings
+from django.dispatch import receiver
 
 
 class HealthcareCarrier(models.Model):
@@ -111,6 +113,7 @@ class HealthcareCarrier(models.Model):
 
     name = models.CharField(max_length=10000)
     state_province = models.CharField("State/Province", max_length=40, blank=True, null=True, choices=STATE_CHOICES)
+    sample_id_card = models.ImageField(upload_to='carrier_sample_id_cards/', default=settings.DEFAULT_CARRIER_SAMPLE_ID_CARD_URL)
 
     def check_state_choices(self,):
         if self.state_province:
@@ -125,6 +128,7 @@ class HealthcareCarrier(models.Model):
         valuesdict = {"name": self.name,
                       "state": None,
                       "plans": None,
+                      "sample_id_card": self.sample_id_card.url,
                       "Database ID": self.id}
 
         # add related plans to values dict
@@ -139,6 +143,13 @@ class HealthcareCarrier(models.Model):
             valuesdict['state'] = self.state_province
 
         return valuesdict
+
+
+@receiver(models.signals.post_delete, sender=HealthcareCarrier)
+def remove_file_from_s3(sender, instance, using, **kwargs):
+    default_sample_id_card_url = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_CARRIER_SAMPLE_ID_CARD_URL)
+    if instance.sample_id_card.url != default_sample_id_card_url:
+        instance.sample_id_card.delete(save=False)
 
 
 class HealthcarePlan(models.Model):
