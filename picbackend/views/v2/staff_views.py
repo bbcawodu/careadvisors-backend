@@ -141,3 +141,5 @@ def upload_staff_pic(request):
             staff_object.staff_pic = form.cleaned_data['staff_pic']
             staff_object.save()
             return HttpResponse('image upload success')
+        else:
+            return render(request, 'staff_image_upload_form.html', {'form': form})

@@ -56,18 +56,22 @@ In response, a JSON document will be displayed with the following format:
 ### Healthcare Carrier Data Retrieval API
 - To retrieve HealthcareCarrier data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/carriers/ with the following optional parameters: "name", "id", "state"
     - Results will be filtered by the given parameters.
-    - NOTE: Only one of the following parameters allowed at a time
-    - "name" corresponds to carrier name.
-        - Must be a string
-        - all non ASCII characters must be url encoded
-    - "id" corresponds to database id.
-        - passing "all" as the value will return all carriers
-        - All other cases:
-            - must be a base 10 integer.
+    - Parameters are divided into 2 categories: "primary" and "secondary"
+    - "Primary" parameters - One and exactly one of these parameters are required in every request.
+        - "name" corresponds to carrier name.
+            - Must be a string
+            - all non ASCII characters must be url encoded
+        - "id" corresponds to database id.
+            - passing "all" as the value will return all carriers
+            - All other cases:
+                - must be a base 10 integer.
+                - Can be multiple values separated by commas.
+        - "state" corresponds to the coverage state of a carrier.
+            - must be a string.
             - Can be multiple values separated by commas.
-    - "state" corresponds to the coverage state of a carrier.
-        - must be a string.
-        - Can be multiple values separated by commas.
+    - "Secondary" parameters - Any number of these parameters can be added to a request.
+        - "has_sample_id_card" corresponds to whether HealthcareCarrier object has a non default sample id card image.
+            - must be of type boolean (true or false
     
 - The response will be a JSON document with the following format:
     ```
@@ -89,6 +93,19 @@ In response, a JSON document will be displayed with the following format:
     }
     ```
 
+- NOTES: Results will be grouped by the "Primary" parameter that is given with the request.
+    -Eg: If "name" is the "Primary" parameter the results will be grouped like the following
+        
+        ```
+        "Data": [
+            Results for name parameter 2,
+            Results for name parameter 1,
+            Results for name parameter 3,
+            ...,
+        ] (Order is arbitrary)
+        ```
+        
+        
 - If healthcare carriers are found,
     - "Error Code" will be 0
     - Array corresponding to the "Data" key will be non empty.
@@ -97,3 +114,7 @@ In response, a JSON document will be displayed with the following format:
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - Array corresponding to the "Data" key will be empty.
+    
+    
+### Healthcare Carrier Sample id card upload page.
+- To view/change the sample id card for a HealthcareCarrier entry in the database, submit a GET request to http://picbackend.herokuapp.com/v2/carrier_sample_id_card_manager/ with the following mandatory parameter, "id".

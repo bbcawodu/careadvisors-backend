@@ -15,7 +15,10 @@ The body of the request should be a JSON document using the following template:
                                 String,
                                 ...,
                                 ...
-                            ] (Must contain at least one entry)(Order matters.)(NO DUPLICATES),
+                            ] (Must contain at least one entry)
+                              (Order matters.)
+                              (NO DUPLICATES)
+                              (ConsumerGeneralConcern entry must exist in db for any given name),
 }
 ```
 
