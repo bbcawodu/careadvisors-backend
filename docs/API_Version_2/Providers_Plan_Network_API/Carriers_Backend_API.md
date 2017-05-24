@@ -70,7 +70,8 @@ In response, a JSON document will be displayed with the following format:
             - must be a string.
             - Can be multiple values separated by commas.
     - "Secondary" parameters - Any number of these parameters can be added to a request.
-        - None
+        - "has_sample_id_card" corresponds to whether HealthcareCarrier object has a non default sample id card image.
+            - must be of type boolean (true or false
     
 - The response will be a JSON document with the following format:
     ```
@@ -113,3 +114,7 @@ In response, a JSON document will be displayed with the following format:
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - Array corresponding to the "Data" key will be empty.
+    
+    
+### Healthcare Carrier Sample id card upload page.
+- To view/change the sample id card for a HealthcareCarrier entry in the database, submit a GET request to http://picbackend.herokuapp.com/v2/carrier_sample_id_card_manager/ with the following mandatory parameter, "id".

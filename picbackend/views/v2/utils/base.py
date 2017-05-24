@@ -269,6 +269,12 @@ def build_search_params(rqst_params, rqst_errors):
     if "state" in rqst_params:
         search_params['state'] = rqst_params['state']
         search_params['state list'] = re.findall(r"[\w. '-]+", search_params['state'])
+    if 'has_sample_id_card' in rqst_params:
+        search_params['has_sample_id_card'] = rqst_params['has_sample_id_card'].lower()
+        if search_params['has_sample_id_card'] not in ('true', 'false'):
+            rqst_errors.append("Value for has_sample_id_card is not type boolean")
+        else:
+            search_params['has_sample_id_card'] = search_params['has_sample_id_card'] in ('true')
     if 'carrier_id' in rqst_params:
         search_params['carrier id'] = rqst_params['carrier_id']
 

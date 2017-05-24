@@ -121,6 +121,7 @@ urlpatterns = [
 
     # urls for provider network and accepted plans views
     url(r"^v2/carriers/$", views.CarriersManagementView.as_view()),
+    url(r"^v2/carrier_sample_id_card_manager/$", views.handle_carrier_sample_id_card_mgmt_rqst),
     url(r"^v2/plans/$", views.PlansManagementView.as_view()),
     url(r"^v2/provider_locations/$", views.ProviderLocationsManagementView.as_view()),
     url(r"^v2/provider_networks/$", views.ProviderNetworksManagementView.as_view()),

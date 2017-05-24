@@ -47,3 +47,9 @@ class CTAManagementForm(Form):
     """Image upload form."""
     cta_image = ImageField()
     cta_intent = CharField()
+
+
+class CarrierSampleIDCardUploadForm(Form):
+    """Image upload form."""
+    carrier_id = IntegerField(widget=HiddenInput())
+    sample_id_card = ImageField()
