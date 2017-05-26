@@ -33,8 +33,8 @@ The body of the request should be a JSON document using the following template:
 
 ### Extra Benefit Information Fields
 "medical_deductible_family_standard": Float,
-"medical_out_of_pocket_max_individual_standard": Float,
-"primary_care_physician_individual_standard_cost": String,
+"medical_out_of_pocket_max_family_standard": Float,
+"primary_care_physician_family_standard_cost": String,
 ###
 
 "Database ID": Integer(Required when "Database Action" == "Plan Modification" or "Plan Deletion"),
