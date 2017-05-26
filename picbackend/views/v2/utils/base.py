@@ -374,6 +374,18 @@ def build_search_params(rqst_params, rqst_errors):
 
         if not search_params['gen_concern_id_list']:
             rqst_errors.append('Invalid gen_concern id, gen_concern ids must be base 10 integers')
+    if 'include_summary_report' in rqst_params:
+        search_params['include_summary_report'] = rqst_params['include_summary_report'].lower()
+        if search_params['include_summary_report'] not in ('true', 'false'):
+            rqst_errors.append("Value for include_summary_report is not type boolean")
+        else:
+            search_params['include_summary_report'] = search_params['include_summary_report'] in ('true')
+    if 'include_detailed_report' in rqst_params:
+        search_params['include_detailed_report'] = rqst_params['include_detailed_report'].lower()
+        if search_params['include_detailed_report'] not in ('true', 'false'):
+            rqst_errors.append("Value for include_detailed_report is not type boolean")
+        else:
+            search_params['include_detailed_report'] = search_params['include_detailed_report'] in ('true')
 
     return search_params
 

@@ -22,8 +22,8 @@ def add_plan(response_raw_data, rqst_plan_info, post_errors):
                                                                                post_errors)
 
         if healthcare_carrier_obj and len(post_errors) == 0:
-            found_healthcare_plan_objs = check_for_healthcare_plan_objs_with_given_name_and_carrier(
-                add_plan_params['rqst_plan_name'], healthcare_carrier_obj, post_errors)
+            found_healthcare_plan_objs = check_for_healthcare_plan_objs_with_given_name_county_and_carrier(
+                add_plan_params['rqst_plan_name'], healthcare_carrier_obj, add_plan_params['county'], post_errors)
 
             if not found_healthcare_plan_objs and len(post_errors) == 0:
                 healthcare_plan = create_and_save_new_plan_obj(add_plan_params, healthcare_carrier_obj, post_errors)
@@ -135,12 +135,8 @@ def get_plan_mgmt_put_params(rqst_plan_info, post_errors):
                 create_healthcare_service_cost_instance_from_cost_string_fragment(cost_string_piece)
 
         return healthcare_service_cost_instances
-    rqst_primary_care_physician_individual_standard_cost = create_healthcare_service_cost_instances_from_string(
-        clean_string_value_from_dict_object(rqst_plan_info, "root", "primary_care_physician_individual_standard_cost", post_errors, none_allowed=True, no_key_allowed=True), "primary_care_physician_individual_standard_cost")
-    rqst_primary_care_physician_family_standard_cost = create_healthcare_service_cost_instances_from_string(
-        clean_string_value_from_dict_object(rqst_plan_info, "root", "primary_care_physician_family_standard_cost",
-                                            post_errors, none_allowed=True, no_key_allowed=True),
-        "primary_care_physician_family_standard_cost")
+
+    rqst_primary_care_physician_standard_cost = create_healthcare_service_cost_instances_from_string(clean_string_value_from_dict_object(rqst_plan_info, "root", "primary_care_physician_standard_cost", post_errors, none_allowed=True, no_key_allowed=True), "primary_care_physician_individual_standard_cost")
     rqst_specialist_standard_cost = create_healthcare_service_cost_instances_from_string(
         clean_string_value_from_dict_object(rqst_plan_info, "root", "specialist_standard_cost",
                                             post_errors, none_allowed=True, no_key_allowed=True),
@@ -174,11 +170,12 @@ def get_plan_mgmt_put_params(rqst_plan_info, post_errors):
             "rqst_carrier_id": clean_int_value_from_dict_object(rqst_plan_info, "root", "Carrier Database ID", post_errors),
             "rqst_plan_premium_type": clean_string_value_from_dict_object(rqst_plan_info, "root", "premium_type", post_errors, none_allowed=True, no_key_allowed=True),
             "rqst_plan_metal_level": clean_string_value_from_dict_object(rqst_plan_info, "root", "metal_level", post_errors, none_allowed=True, no_key_allowed=True),
+            "county": clean_string_value_from_dict_object(rqst_plan_info, "root", "county", post_errors, none_allowed=True, no_key_allowed=True),
 
             # Summary report fields
             "medical_deductible_individual_standard": clean_float_value_from_dict_object(rqst_plan_info, "root", "medical_deductible_individual_standard", post_errors, none_allowed=True, no_key_allowed=True),
             "medical_out_of_pocket_max_individual_standard": clean_float_value_from_dict_object(rqst_plan_info, "root", "medical_out_of_pocket_max_individual_standard", post_errors, none_allowed=True, no_key_allowed=True),
-            "primary_care_physician_individual_standard_cost": rqst_primary_care_physician_individual_standard_cost,
+            "primary_care_physician_standard_cost": rqst_primary_care_physician_standard_cost,
 
             # Detailed report fields
             "specialist_standard_cost": rqst_specialist_standard_cost,
@@ -192,7 +189,6 @@ def get_plan_mgmt_put_params(rqst_plan_info, post_errors):
             # Extra benefit report fields
             "medical_deductible_family_standard": clean_float_value_from_dict_object(rqst_plan_info, "root", "medical_deductible_family_standard", post_errors, none_allowed=True, no_key_allowed=True),
             "medical_out_of_pocket_max_family_standard": clean_float_value_from_dict_object(rqst_plan_info, "root", "medical_out_of_pocket_max_family_standard", post_errors, none_allowed=True, no_key_allowed=True),
-            "primary_care_physician_family_standard_cost": rqst_primary_care_physician_family_standard_cost
             }
 
 
@@ -206,10 +202,10 @@ def return_healthcare_carrier_obj_with_given_id(carrier_id, post_errors):
     return healthcare_carrier_obj
 
 
-def check_for_healthcare_plan_objs_with_given_name_and_carrier(plan_name, healthcare_carrier_obj, post_errors, current_healthcare_plan_id=None):
+def check_for_healthcare_plan_objs_with_given_name_county_and_carrier(plan_name, healthcare_carrier_obj, county, post_errors, current_healthcare_plan_id=None):
     found_healthcare_plan_obj = False
 
-    healthcare_plan_objs = HealthcarePlan.objects.filter(name__iexact=plan_name, carrier=healthcare_carrier_obj)
+    healthcare_plan_objs = HealthcarePlan.objects.filter(name__iexact=plan_name, carrier=healthcare_carrier_obj, county__iexact=county)
 
     if healthcare_plan_objs:
         found_healthcare_plan_obj = True
@@ -217,13 +213,13 @@ def check_for_healthcare_plan_objs_with_given_name_and_carrier(plan_name, health
 
         if len(healthcare_plan_objs) > 1:
             post_errors.append(
-                "Multiple healthcare plans with name: {} and carrier: {}already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
-                    plan_name, healthcare_carrier_obj.name, json.dumps(plan_ids)))
+                "Multiple healthcare plans with name: {}, carrier: {}, and county: {} already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
+                    plan_name, healthcare_carrier_obj.name, county, json.dumps(plan_ids)))
         else:
             if not current_healthcare_plan_id or current_healthcare_plan_id not in plan_ids:
                 post_errors.append(
-                    "Healthcare plan with name: {} and carrier: {} already exists in db. (Hint - Modify that entry) id: {}".format(
-                        plan_name, healthcare_carrier_obj.name, plan_ids[0]))
+                    "Healthcare plan with name: {}, carrier: {}, and county: {} already exists in db. (Hint - Modify that entry) id: {}".format(
+                        plan_name, healthcare_carrier_obj.name, county, plan_ids[0]))
             else:
                 found_healthcare_plan_obj = False
 
@@ -231,19 +227,30 @@ def check_for_healthcare_plan_objs_with_given_name_and_carrier(plan_name, health
 
 
 def create_and_save_new_plan_obj(plan_params, healthcare_carrier_obj, post_errors):
-    healthcare_plan = HealthcarePlan()
-    healthcare_plan.name = plan_params['rqst_plan_name']
-    healthcare_plan.carrier = healthcare_carrier_obj
-    healthcare_plan.metal_level = plan_params['rqst_plan_metal_level']
-    if not healthcare_plan.check_metal_choices():
-        post_errors.append("Metal: {!s} is not a valid metal level".format(healthcare_plan.metal_level))
-    healthcare_plan.premium_type = plan_params['rqst_plan_premium_type']
-    if not healthcare_plan.check_premium_choices():
+    healthcare_plan = populate_plan_fields_and_save(HealthcarePlan(), plan_params, healthcare_carrier_obj, post_errors)
+
+    return healthcare_plan
+
+
+def populate_plan_fields_and_save(healthcare_plan_instance, plan_params, healthcare_carrier_obj, post_errors):
+    healthcare_plan_instance.name = plan_params['rqst_plan_name']
+    healthcare_plan_instance.carrier = healthcare_carrier_obj
+    healthcare_plan_instance.metal_level = plan_params['rqst_plan_metal_level']
+    if not healthcare_plan_instance.check_metal_choices():
+        post_errors.append("Metal: {!s} is not a valid metal level".format(healthcare_plan_instance.metal_level))
+    healthcare_plan_instance.premium_type = plan_params['rqst_plan_premium_type']
+    if not healthcare_plan_instance.check_premium_choices():
         post_errors.append(
-            "Premium Type: {!s} is not a valid premium type".format(healthcare_plan.premium_type))
+            "Premium Type: {!s} is not a valid premium type".format(healthcare_plan_instance.premium_type))
+    healthcare_plan_instance.county = plan_params['county']
 
     if not post_errors:
-        healthcare_plan.save()
+        healthcare_plan_instance.save()
+
+        def delete_old_healthcare_service_cost_instances(healthcare_plan_instance, healthcare_plan_field):
+            old_healthcare_service_cost_qset = getattr(healthcare_plan_instance, healthcare_plan_field).all()
+            for old_healthcare_service_cost_instance in old_healthcare_service_cost_qset:
+                old_healthcare_service_cost_instance.delete()
 
         def save_and_return_healthcare_service_cost_instances(healthcare_service_cost_instances):
             for healthcare_service_cost_instance in healthcare_service_cost_instances:
@@ -251,25 +258,43 @@ def create_and_save_new_plan_obj(plan_params, healthcare_carrier_obj, post_error
 
             return healthcare_service_cost_instances
 
-        healthcare_plan.medical_deductible_individual_standard = plan_params["medical_deductible_individual_standard"]
-        healthcare_plan.medical_out_of_pocket_max_individual_standard = plan_params["medical_out_of_pocket_max_individual_standard"]
-        healthcare_plan.primary_care_physician_individual_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["primary_care_physician_individual_standard_cost"])
+        healthcare_plan_instance.medical_deductible_individual_standard = plan_params[
+            "medical_deductible_individual_standard"]
+        healthcare_plan_instance.medical_out_of_pocket_max_individual_standard = plan_params[
+            "medical_out_of_pocket_max_individual_standard"]
+        delete_old_healthcare_service_cost_instances(healthcare_plan_instance,
+                                                     "primary_care_physician_standard_cost")
+        healthcare_plan_instance.primary_care_physician_standard_cost = save_and_return_healthcare_service_cost_instances(
+            plan_params["primary_care_physician_standard_cost"])
 
-        healthcare_plan.specialist_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["specialist_standard_cost"])
-        healthcare_plan.emergency_room_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["emergency_room_standard_cost"])
-        healthcare_plan.inpatient_facility_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["inpatient_facility_standard_cost"])
-        healthcare_plan.generic_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["generic_drugs_standard_cost"])
-        healthcare_plan.preferred_brand_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["preferred_brand_drugs_standard_cost"])
-        healthcare_plan.non_preferred_brand_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["non_preferred_brand_drugs_standard_cost"])
-        healthcare_plan.specialty_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["specialty_drugs_standard_cost"])
+        delete_old_healthcare_service_cost_instances(healthcare_plan_instance, "specialist_standard_cost")
+        healthcare_plan_instance.specialist_standard_cost = save_and_return_healthcare_service_cost_instances(
+            plan_params["specialist_standard_cost"])
+        delete_old_healthcare_service_cost_instances(healthcare_plan_instance, "emergency_room_standard_cost")
+        healthcare_plan_instance.emergency_room_standard_cost = save_and_return_healthcare_service_cost_instances(
+            plan_params["emergency_room_standard_cost"])
+        delete_old_healthcare_service_cost_instances(healthcare_plan_instance, "inpatient_facility_standard_cost")
+        healthcare_plan_instance.inpatient_facility_standard_cost = save_and_return_healthcare_service_cost_instances(
+            plan_params["inpatient_facility_standard_cost"])
+        delete_old_healthcare_service_cost_instances(healthcare_plan_instance, "generic_drugs_standard_cost")
+        healthcare_plan_instance.generic_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(
+            plan_params["generic_drugs_standard_cost"])
+        delete_old_healthcare_service_cost_instances(healthcare_plan_instance, "preferred_brand_drugs_standard_cost")
+        healthcare_plan_instance.preferred_brand_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(
+            plan_params["preferred_brand_drugs_standard_cost"])
+        delete_old_healthcare_service_cost_instances(healthcare_plan_instance, "non_preferred_brand_drugs_standard_cost")
+        healthcare_plan_instance.non_preferred_brand_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(
+            plan_params["non_preferred_brand_drugs_standard_cost"])
+        delete_old_healthcare_service_cost_instances(healthcare_plan_instance, "specialty_drugs_standard_cost")
+        healthcare_plan_instance.specialty_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(
+            plan_params["specialty_drugs_standard_cost"])
 
-        healthcare_plan.medical_deductible_family_standard = plan_params["medical_deductible_family_standard"]
-        healthcare_plan.medical_out_of_pocket_max_family_standard = plan_params["medical_out_of_pocket_max_family_standard"]
-        healthcare_plan.primary_care_physician_family_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["primary_care_physician_family_standard_cost"])
+        healthcare_plan_instance.medical_deductible_family_standard = plan_params["medical_deductible_family_standard"]
+        healthcare_plan_instance.medical_out_of_pocket_max_family_standard = plan_params[
+            "medical_out_of_pocket_max_family_standard"]
 
-        healthcare_plan.save()
-
-    return healthcare_plan
+        healthcare_plan_instance.save()
+    return healthcare_plan_instance
 
 
 def modify_plan(response_raw_data, rqst_plan_info, post_errors):
@@ -280,8 +305,8 @@ def modify_plan(response_raw_data, rqst_plan_info, post_errors):
                                                                          post_errors)
 
     if len(post_errors) == 0 and healthcare_carrier_obj:
-        found_healthcare_plan_objs = check_for_healthcare_plan_objs_with_given_name_and_carrier(
-            modify_plan_params['rqst_plan_name'], healthcare_carrier_obj, post_errors, rqst_plan_id)
+        found_healthcare_plan_objs = check_for_healthcare_plan_objs_with_given_name_county_and_carrier(
+            modify_plan_params['rqst_plan_name'], healthcare_carrier_obj, modify_plan_params['county'],  post_errors, rqst_plan_id)
 
         if not found_healthcare_plan_objs:
             try:
@@ -297,54 +322,7 @@ def modify_plan(response_raw_data, rqst_plan_info, post_errors):
 
 def modify_plan_obj(plan_id, plan_params, healthcare_carrier_obj, post_errors):
     healthcare_plan_obj = HealthcarePlan.objects.get(id=plan_id)
-    healthcare_plan_obj.name = plan_params['rqst_plan_name']
-    healthcare_plan_obj.carrier = healthcare_carrier_obj
-    healthcare_plan_obj.metal_level = plan_params['rqst_plan_metal_level']
-    if not healthcare_plan_obj.check_metal_choices():
-        post_errors.append("Metal: {!s} is not a valid metal level".format(healthcare_plan_obj.metal_level))
-    healthcare_plan_obj.premium_type = plan_params['rqst_plan_premium_type']
-    if not healthcare_plan_obj.check_premium_choices():
-        post_errors.append(
-            "Premium Type: {!s} is not a valid premium type".format(healthcare_plan_obj.premium_type))
-
-    if not post_errors:
-        def delete_old_healthcare_service_cost_instances(healthcare_plan_instance, healthcare_plan_field):
-            old_healthcare_service_cost_qset = getattr(healthcare_plan_instance, healthcare_plan_field).all()
-            for old_healthcare_service_cost_instance in old_healthcare_service_cost_qset:
-                old_healthcare_service_cost_instance.delete()
-
-        def save_and_return_healthcare_service_cost_instances(healthcare_service_cost_instances):
-            for healthcare_service_cost_instance in healthcare_service_cost_instances:
-                healthcare_service_cost_instance.save()
-
-            return healthcare_service_cost_instances
-
-        healthcare_plan_obj.medical_deductible_individual_standard = plan_params["medical_deductible_individual_standard"]
-        healthcare_plan_obj.medical_out_of_pocket_max_individual_standard = plan_params["medical_out_of_pocket_max_individual_standard"]
-        delete_old_healthcare_service_cost_instances(healthcare_plan_obj, "primary_care_physician_individual_standard_cost")
-        healthcare_plan_obj.primary_care_physician_individual_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["primary_care_physician_individual_standard_cost"])
-
-        delete_old_healthcare_service_cost_instances(healthcare_plan_obj, "specialist_standard_cost")
-        healthcare_plan_obj.specialist_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["specialist_standard_cost"])
-        delete_old_healthcare_service_cost_instances(healthcare_plan_obj, "emergency_room_standard_cost")
-        healthcare_plan_obj.emergency_room_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["emergency_room_standard_cost"])
-        delete_old_healthcare_service_cost_instances(healthcare_plan_obj, "inpatient_facility_standard_cost")
-        healthcare_plan_obj.inpatient_facility_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["inpatient_facility_standard_cost"])
-        delete_old_healthcare_service_cost_instances(healthcare_plan_obj, "generic_drugs_standard_cost")
-        healthcare_plan_obj.generic_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["generic_drugs_standard_cost"])
-        delete_old_healthcare_service_cost_instances(healthcare_plan_obj, "preferred_brand_drugs_standard_cost")
-        healthcare_plan_obj.preferred_brand_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["preferred_brand_drugs_standard_cost"])
-        delete_old_healthcare_service_cost_instances(healthcare_plan_obj, "non_preferred_brand_drugs_standard_cost")
-        healthcare_plan_obj.non_preferred_brand_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["non_preferred_brand_drugs_standard_cost"])
-        delete_old_healthcare_service_cost_instances(healthcare_plan_obj, "specialty_drugs_standard_cost")
-        healthcare_plan_obj.specialty_drugs_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["specialty_drugs_standard_cost"])
-
-        healthcare_plan_obj.medical_deductible_family_standard = plan_params["medical_deductible_family_standard"]
-        healthcare_plan_obj.medical_out_of_pocket_max_family_standard = plan_params["medical_out_of_pocket_max_family_standard"]
-        delete_old_healthcare_service_cost_instances(healthcare_plan_obj, "primary_care_physician_family_standard_cost")
-        healthcare_plan_obj.primary_care_physician_family_standard_cost = save_and_return_healthcare_service_cost_instances(plan_params["primary_care_physician_family_standard_cost"])
-
-        healthcare_plan_obj.save()
+    healthcare_plan_obj = populate_plan_fields_and_save(healthcare_plan_obj, plan_params, healthcare_carrier_obj, post_errors)
 
     return healthcare_plan_obj
 
@@ -363,12 +341,12 @@ def delete_plan(response_raw_data, rqst_carrier_info, post_errors):
     return response_raw_data
 
 
-def retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_of_ids):
+def retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_of_ids, include_summary_report=False, include_detailed_report=False):
     if rqst_plan_id == "all":
         all_plans = plans
         plan_dict = {}
         for plan in all_plans:
-            plan_dict[plan.id] = plan.return_values_dict()
+            plan_dict[plan.id] = plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)
         plan_list = []
         for plan_key, plan_entry in plan_dict.items():
             plan_list.append(plan_entry)
@@ -383,7 +361,7 @@ def retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_
 
                 plan_dict = {}
                 for plan in plans:
-                    plan_dict[plan.id] = plan.return_values_dict()
+                    plan_dict[plan.id] = plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)
                 plan_list = []
                 for plan_key, plan_entry in plan_dict.items():
                     plan_list.append(plan_entry)
@@ -402,13 +380,13 @@ def retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_
     return response_raw_data, rqst_errors
 
 
-def retrieve_name_plans(response_raw_data, rqst_errors, plans, rqst_name):
+def retrieve_name_plans(response_raw_data, rqst_errors, plans, rqst_name, include_summary_report=False, include_detailed_report=False):
     plans_list = []
     plans = plans.filter(name__iexact=rqst_name)
 
     if plans:
         for plan in plans:
-            plans_list.append(plan.return_values_dict())
+            plans_list.append(plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report))
         response_raw_data["Data"] = plans_list
     else:
         rqst_errors.append('No plans with name: {!s} not found in database'.format(rqst_name))
@@ -416,12 +394,12 @@ def retrieve_name_plans(response_raw_data, rqst_errors, plans, rqst_name):
     return response_raw_data, rqst_errors
 
 
-def retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans, rqst_carrier_id, list_of_carrier_ids):
+def retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans, rqst_carrier_id, list_of_carrier_ids, include_summary_report=False, include_detailed_report=False):
     if rqst_carrier_id == "all":
         all_plans = plans
         plan_dict = {}
         for plan in all_plans:
-            plan_dict[plan.id] = plan.return_values_dict()
+            plan_dict[plan.id] = plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)
         plan_list = []
         for plan_key, plan_entry in plan_dict.items():
             plan_list.append(plan_entry)
@@ -437,9 +415,9 @@ def retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans, rqst_car
                 plan_dict = {}
                 for plan in plans:
                     if plan.carrier.id not in plan_dict:
-                        plan_dict[plan.carrier.id] = [plan.return_values_dict()]
+                        plan_dict[plan.carrier.id] = [plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)]
                     else:
-                        plan_dict[plan.carrier.id].append(plan.return_values_dict())
+                        plan_dict[plan.carrier.id].append(plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report))
                 plan_list = []
                 for plan_key, plan_entry in plan_dict.items():
                     plan_list.append(plan_entry)
@@ -458,16 +436,16 @@ def retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans, rqst_car
     return response_raw_data, rqst_errors
 
 
-def retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, plans, rqst_carrier_state, list_of_carrier_states):
+def retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, plans, rqst_carrier_state, list_of_carrier_states, include_summary_report=False, include_detailed_report=False):
     plans_dict = {}
     plans_object = plans
     for state in list_of_carrier_states:
         plans = plans_object.filter(carrier__state_province__iexact=state)
         for plan in plans:
             if state not in plans_dict:
-                plans_dict[state] = [plan.return_values_dict()]
+                plans_dict[state] = [plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)]
             else:
-                plans_dict[state].append(plan.return_values_dict())
+                plans_dict[state].append(plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report))
     if len(plans_dict) > 0:
         plans_list = []
         for plan_key, plan_entry in plans_dict.items():
@@ -484,13 +462,13 @@ def retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, plans, rqst_
     return response_raw_data, rqst_errors
 
 
-def retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, plans, rqst_carrier_name):
+def retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, plans, rqst_carrier_name, include_summary_report=False, include_detailed_report=False):
     plans_list = []
     plans = plans.filter(carrier__name__iexact=rqst_carrier_name)
 
     if plans:
         for plan in plans:
-            plans_list.append(plan.return_values_dict())
+            plans_list.append(plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report))
         response_raw_data["Data"] = plans_list
     else:
         rqst_errors.append('No Plans with a carrier with the name: {!s} found in database'.format(rqst_carrier_name))
@@ -498,12 +476,12 @@ def retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, plans, rqst_c
     return response_raw_data, rqst_errors
 
 
-def retrieve_plans_by_accepted_location_id(response_raw_data, rqst_errors, plans, rqst_accepted_location_id, list_of_accepted_location_ids):
+def retrieve_plans_by_accepted_location_id(response_raw_data, rqst_errors, plans, rqst_accepted_location_id, list_of_accepted_location_ids, include_summary_report=False, include_detailed_report=False):
     if rqst_accepted_location_id == "all":
         all_plans = plans
         plan_dict = {}
         for plan in all_plans:
-            plan_dict[plan.id] = plan.return_values_dict()
+            plan_dict[plan.id] = plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)
         plan_list = []
         for plan_key, plan_entry in plan_dict.items():
             plan_list.append(plan_entry)
@@ -527,9 +505,9 @@ def retrieve_plans_by_accepted_location_id(response_raw_data, rqst_errors, plans
                     if accepted_plan_objects.count():
                         for accepted_plan_object in accepted_plan_objects:
                             if location_id in plan_dict:
-                                plan_dict[location_id].append(accepted_plan_object.return_values_dict())
+                                plan_dict[location_id].append(accepted_plan_object.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report))
                             else:
-                                plan_dict[location_id] = [accepted_plan_object.return_values_dict()]
+                                plan_dict[location_id] = [accepted_plan_object.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)]
                     else:
                         plan_dict[location_id] = []
 

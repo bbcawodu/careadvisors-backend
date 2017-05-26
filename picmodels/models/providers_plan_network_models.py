@@ -186,6 +186,7 @@ class HealthcarePlan(models.Model):
     carrier = models.ForeignKey(HealthcareCarrier, on_delete=models.CASCADE, blank=True, null=True)
     premium_type = models.CharField(max_length=1000, blank=True, null=True, choices=PREMIUM_CHOICES)
     metal_level = models.CharField(max_length=1000, blank=True, null=True, choices=METAL_CHOICES)
+    county = models.CharField(max_length=1000, blank=True, null=True)
 
     # Fields included in Summary Report
     medical_deductible_individual_standard = models.FloatField(blank=True, null=True)
@@ -193,7 +194,7 @@ class HealthcarePlan(models.Model):
     SUMMARY_REPORT_FIELDS = [
         "medical_deductible_individual_standard",
         "medical_out_of_pocket_max_individual_standard",
-        "primary_care_physician_individual_standard_cost"
+        "primary_care_physician_standard_cost"
     ]
 
     # Fields included in Detailed Report
@@ -213,7 +214,6 @@ class HealthcarePlan(models.Model):
     EXTRA_REPORT_FIELDS = [
         "medical_deductible_family_standard",
         "medical_out_of_pocket_max_family_standard",
-        "primary_care_physician_family_standard_cost"
     ]
 
     def check_metal_choices(self,):
@@ -234,13 +234,12 @@ class HealthcarePlan(models.Model):
         else:
             return True
 
-    def return_values_dict(self):
+    def return_values_dict(self, include_summary_report=False, include_detailed_report=False):
         valuesdict = {"name": self.name,
                       "premium_type": self.premium_type,
                       "metal_level": self.metal_level,
+                      "county": self.county,
                       "carrier_info": None,
-                      "summary_report": None,
-                      "detailed_report": None,
                       "Database ID": self.id}
 
         def add_report_fields_to_values_dict(summary_report_fields):
@@ -289,11 +288,15 @@ class HealthcarePlan(models.Model):
 
         def add_summary_report_fields_to_values_dict():
             valuesdict["summary_report"] = add_report_fields_to_values_dict(self.SUMMARY_REPORT_FIELDS)
-        add_summary_report_fields_to_values_dict()
+        if include_summary_report:
+            valuesdict["summary_report"] = None
+            add_summary_report_fields_to_values_dict()
 
         def add_detailed_report_fields_to_values_dict():
             valuesdict["detailed_report"] = add_report_fields_to_values_dict(self.DETAILED_REPORT_FIELDS)
-        add_detailed_report_fields_to_values_dict()
+        if include_detailed_report:
+            valuesdict["detailed_report"] = None
+            add_detailed_report_fields_to_values_dict()
 
         def add_carrier_info_to_values_dict():
             if self.carrier:
@@ -322,38 +325,16 @@ class HealthcareServiceCostEntry(models.Model):
     copay = models.FloatField(blank=True, null=True)
 
     # Fields included in Summary Report
-    plan_obj_for_primary_care_physician_individual_standard_cost = models.ForeignKey(HealthcarePlan,
-                                                                                          on_delete=models.CASCADE,
-                                                                                          blank=True,
-                                                                                          null=True,
-                                                                                          related_name='primary_care_physician_individual_standard_cost')
+    plan_obj_for_primary_care_physician_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True, null=True, related_name='primary_care_physician_standard_cost')
 
     # Fields included in Detailed Report
-    plan_obj_for_specialist_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True,
-                                                 null=True, related_name='specialist_standard_cost')
-    plan_obj_for_emergency_room_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True,
-                                                     null=True,
-                                                     related_name='emergency_room_standard_cost')
-    plan_obj_for_inpatient_facility_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE,
-                                                         blank=True, null=True,
-                                                         related_name='inpatient_facility_standard_cost')
-    plan_obj_for_generic_drugs_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True,
-                                                    null=True,
-                                                    related_name='generic_drugs_standard_cost')
-    plan_obj_for_preferred_brand_drugs_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE,
-                                                            blank=True, null=True,
-                                                            related_name='preferred_brand_drugs_standard_cost')
-    plan_obj_for_non_preferred_brand_drugs_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE,
-                                                                blank=True, null=True,
-                                                                related_name='non_preferred_brand_drugs_standard_cost')
-    plan_obj_for_specialty_drugs_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True,
-                                                      null=True,
-                                                      related_name='specialty_drugs_standard_cost')
-
-    # Extra benefit report fields
-    plan_obj_for_primary_care_physician_family_standard_cost = models.ForeignKey(HealthcarePlan,
-                                                                    on_delete=models.CASCADE, blank=True, null=True,
-                                                                    related_name='primary_care_physician_family_standard_cost')
+    plan_obj_for_specialist_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True, null=True, related_name='specialist_standard_cost')
+    plan_obj_for_emergency_room_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True, null=True, related_name='emergency_room_standard_cost')
+    plan_obj_for_inpatient_facility_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True, null=True, related_name='inpatient_facility_standard_cost')
+    plan_obj_for_generic_drugs_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True, null=True, related_name='generic_drugs_standard_cost')
+    plan_obj_for_preferred_brand_drugs_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True, null=True, related_name='preferred_brand_drugs_standard_cost')
+    plan_obj_for_non_preferred_brand_drugs_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True, null=True, related_name='non_preferred_brand_drugs_standard_cost')
+    plan_obj_for_specialty_drugs_standard_cost = models.ForeignKey(HealthcarePlan, on_delete=models.CASCADE, blank=True, null=True, related_name='specialty_drugs_standard_cost')
 
     def check_relative_to_deductible_choices(self,):
         if self.cost_relation_to_deductible:
