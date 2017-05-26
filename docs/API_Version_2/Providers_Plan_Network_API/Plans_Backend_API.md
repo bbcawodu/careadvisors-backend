@@ -14,6 +14,29 @@ The body of the request should be a JSON document using the following template:
 "metal_level": String,
 "premium_type": String,
 "Carrier Database ID": Integer (Database ID of the Carrier for this plan),
+
+### Summary Report Fields (Can be Null)(Can be omitted - db values will be set to null)
+"medical_deductible_individual_standard": Float,
+"medical_out_of_pocket_max_individual_standard": Float,
+"primary_care_physician_individual_standard_cost": String,
+###
+
+### Detailed Report Fields (Can be Null)(Can be omitted - db values will be set to null)
+"specialist_standard_cost": String,
+"emergency_room_standard_cost": String,
+"inpatient_facility_standard_cost": String,
+"generic_drugs_standard_cost": String,
+"preferred_brand_drugs_standard_cost": String,
+"non_preferred_brand_drugs_standard_cost": String,
+"specialty_drugs_standard_cost": String,
+###
+
+### Extra Benefit Information Fields
+"medical_deductible_family_standard": Float,
+"medical_out_of_pocket_max_individual_standard": Float,
+"primary_care_physician_individual_standard_cost": String,
+###
+
 "Database ID": Integer(Required when "Database Action" == "Plan Modification" or "Plan Deletion"),
 "Database Action": String,
 }
