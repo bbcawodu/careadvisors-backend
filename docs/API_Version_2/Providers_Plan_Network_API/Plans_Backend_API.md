@@ -14,11 +14,12 @@ The body of the request should be a JSON document using the following template:
 "metal_level": String,
 "premium_type": String,
 "Carrier Database ID": Integer (Database ID of the Carrier for this plan),
+"county" : String(Can be Null)(Can be omitted - db value will be set to null),
 
 ### Summary Report Fields (Can be Null)(Can be omitted - db values will be set to null)
 "medical_deductible_individual_standard": Float,
 "medical_out_of_pocket_max_individual_standard": Float,
-"primary_care_physician_individual_standard_cost": String,
+"primary_care_physician_standard_cost": String,
 ###
 
 ### Detailed Report Fields (Can be Null)(Can be omitted - db values will be set to null)
@@ -34,7 +35,6 @@ The body of the request should be a JSON document using the following template:
 ### Extra Benefit Information Fields
 "medical_deductible_family_standard": Float,
 "medical_out_of_pocket_max_family_standard": Float,
-"primary_care_physician_family_standard_cost": String,
 ###
 
 "Database ID": Integer(Required when "Database Action" == "Plan Modification" or "Plan Deletion"),
