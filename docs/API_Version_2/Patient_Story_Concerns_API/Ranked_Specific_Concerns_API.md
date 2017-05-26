@@ -1,4 +1,4 @@
-## Ranked Specific Concerns Backend API (IN TEST)
+## Ranked Specific Concerns Backend API
 
 ### Ranked Specific Concerns Retrieval API
 To retrieve a ranked list of ConsumerSpecificConcern class entries based on a submitted ranked list of consumer general
