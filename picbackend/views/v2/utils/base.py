@@ -42,7 +42,7 @@ def clean_string_value_from_dict_object(dict_object, dict_name, dict_key, post_e
             return None
 
 
-def clean_int_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, no_key_allowed=False):
+def clean_int_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, none_allowed=False, no_key_allowed=False):
     """
     This function takes a target dictionary and returns the integer value given by the given key.
     Returns None if key if not found and appends any error messages to the post_errors list
@@ -51,6 +51,7 @@ def clean_int_value_from_dict_object(dict_object, dict_name, dict_key, post_erro
     :param dict_name: (type: string) name of target dictionary
     :param dict_key: (type: string) target dictionary key
     :param post_errors: (type: list) list of error messages
+    :param none_allowed: (type: boolean) whether Null values are allowed for given key, default is False
     :param no_key_allowed: (type: boolean) whether the or not to allow for absence of target key in target dictionary,
                            default is False
     :return: (type: integer or None) Integer type value for given target key, or None
@@ -60,12 +61,43 @@ def clean_int_value_from_dict_object(dict_object, dict_name, dict_key, post_erro
             return None
         else:
             post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
-    elif dict_object[dict_key] is None:
+    elif dict_object[dict_key] is None and not none_allowed:
         post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
     elif not isinstance(dict_object[dict_key], int):
         post_errors.append("Value for {!r} in {!r} dictionary is not an integer".format(dict_key, dict_name))
-    else:
+    elif dict_object[dict_key]:
         return int(dict_object[dict_key])
+    else:
+        return None
+
+
+def clean_float_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, none_allowed=False, no_key_allowed=False):
+    """
+    This function takes a target dictionary and returns the float value given by the given key.
+    Returns None if key if not found and appends any error messages to the post_errors list
+
+    :param dict_object: (type: dictionary) target object to get integer from
+    :param dict_name: (type: string) name of target dictionary
+    :param dict_key: (type: string) target dictionary key
+    :param post_errors: (type: list) list of error messages
+    :param none_allowed: (type: boolean) whether Null values are allowed for given key, default is False
+    :param no_key_allowed: (type: boolean) whether the or not to allow for absence of target key in target dictionary,
+                           default is False
+    :return: (type: float or None) Integer type value for given target key, or None
+    """
+    if dict_key not in dict_object:
+        if no_key_allowed:
+            return None
+        else:
+            post_errors.append("{!r} key not found in {!r} dictionary".format(dict_key, dict_name))
+    elif dict_object[dict_key] is None and not none_allowed:
+        post_errors.append("Value for {!r} in {!r} dictionary is Null".format(dict_key, dict_name))
+    elif not isinstance(dict_object[dict_key], float):
+        post_errors.append("Value for {!r} in {!r} dictionary is not an float".format(dict_key, dict_name))
+    elif dict_object[dict_key]:
+        return float(dict_object[dict_key])
+    else:
+        return None
 
 
 def clean_dict_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, none_allowed=False, no_key_allowed=False):
