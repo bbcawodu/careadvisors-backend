@@ -47,6 +47,17 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
     def plans_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         plans = HealthcarePlan.objects.all()
+        include_summary_report = [False]
+        include_detailed_report = [False]
+
+        def filter_db_objects_by_secondary_params(search_params, db_objects):
+            if 'include_summary_report' in search_params:
+                include_summary_report[0] = search_params['include_summary_report']
+            if 'include_detailed_report' in search_params:
+                include_detailed_report[0] = search_params['include_detailed_report']
+            return db_objects
+
+        plans = filter_db_objects_by_secondary_params(search_params, plans)
 
         if 'id' in search_params:
             rqst_plan_id = search_params['id']
@@ -55,35 +66,35 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             else:
                 list_of_ids = None
             response_raw_data, rqst_errors = retrieve_id_plans(response_raw_data, rqst_errors, plans,
-                                                                   rqst_plan_id, list_of_ids)
+                                                                   rqst_plan_id, list_of_ids, include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
         elif 'name' in search_params:
             rqst_name = search_params['name']
 
-            response_raw_data, rqst_errors = retrieve_name_plans(response_raw_data, rqst_errors, plans, rqst_name)
+            response_raw_data, rqst_errors = retrieve_name_plans(response_raw_data, rqst_errors, plans, rqst_name, include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
         elif 'carrier state' in search_params:
             rqst_carrier_state = search_params['carrier state']
             list_of_carrier_states = search_params['carrier state list']
 
             response_raw_data, rqst_errors = retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, plans,
-                                                                             rqst_carrier_state, list_of_carrier_states)
+                                                                             rqst_carrier_state, list_of_carrier_states, include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
         elif 'carrier name' in search_params:
             rqst_carrier_name = search_params['carrier name']
 
             response_raw_data, rqst_errors = retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, plans,
-                                                                            rqst_carrier_name)
+                                                                            rqst_carrier_name, include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
         elif 'carrier id' in search_params:
             rqst_carrier_id = search_params['carrier id']
             list_of_carrier_ids = search_params['carrier id list']
 
             response_raw_data, rqst_errors = retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans,
-                                                                          rqst_carrier_id, list_of_carrier_ids)
+                                                                          rqst_carrier_id, list_of_carrier_ids, include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
         elif 'accepted_location_id' in search_params:
             rqst_accepted_location_id = search_params['accepted_location_id']
             list_of_accepted_location_ids = search_params['accepted_location_id_list']
 
             response_raw_data, rqst_errors = retrieve_plans_by_accepted_location_id(response_raw_data, rqst_errors,
                                                                                     plans, rqst_accepted_location_id,
-                                                                                    list_of_accepted_location_ids)
+                                                                                    list_of_accepted_location_ids, include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
 
         return response_raw_data, rqst_errors
 
