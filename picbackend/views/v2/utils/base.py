@@ -66,7 +66,7 @@ def clean_int_value_from_dict_object(dict_object, dict_name, dict_key, post_erro
     elif not isinstance(dict_object[dict_key], int):
         post_errors.append("Value for {!r} in {!r} dictionary is not an integer".format(dict_key, dict_name))
     elif dict_object[dict_key]:
-        return int(dict_object[dict_key])
+        return dict_object[dict_key]
     else:
         return None
 

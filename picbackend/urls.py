@@ -131,4 +131,7 @@ urlpatterns = [
     url(r"^v2/specific_concerns/$", views.SpecificConcernsManagementView.as_view()),
     url(r"^v2/ranked_specific_concerns/$", views.RankedSpecificConcernsView.as_view()),
 
+    # urls for hospital web traffic calculator views
+    url(r"^v2/hospital_web_traffic_data/$", views.HospitalWebTrafficCalculatorDataMgrView.as_view()),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
