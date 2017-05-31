@@ -52,3 +52,8 @@ This file is documentation for the backend API library for Patient Innovation Ce
 ## Patient Story Concerns API
 
 [Patient Story Concerns API README](Patient_Story_Concerns_API/Index.md)
+
+
+## Hospital Web Traffic Data API (IN DEVELOPMENT)
+
+[Hospital Web Traffic Data API README](Hospital_Web_Traffic_Data_API.md)
