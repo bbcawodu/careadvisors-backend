@@ -9,3 +9,4 @@ from .presence_scheduler_models import *
 from .call_to_action_models import *
 from .providers_plan_network_models import *
 from .patient_story_models import *
+from .hospital_web_traffic_data_models import *
