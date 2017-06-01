@@ -27,6 +27,16 @@ class HospitalWebTrafficData(models.Model):
         else:
             return None
 
+    def return_values_dict(self):
+        values_dict = {
+            "hospital_name": self.hospital_name,
+            "monthly_visits": self.monthly_visits,
+            "consumers_seeking_health_services": self.consumers_seeking_health_services,
+            "consumers_who_spill_off": self.consumers_who_spill_off
+        }
+
+        return values_dict
+
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'

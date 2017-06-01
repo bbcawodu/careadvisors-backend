@@ -379,6 +379,8 @@ def build_search_params(rqst_params, rqst_errors):
             rqst_errors.append("Value for include_detailed_report is not type boolean")
         else:
             search_params['include_detailed_report'] = search_params['include_detailed_report'] in ('true')
+    if 'hospital_name' in rqst_params:
+        search_params['hospital_name'] = urllib.parse.unquote(rqst_params['hospital_name'])
 
     return search_params
 

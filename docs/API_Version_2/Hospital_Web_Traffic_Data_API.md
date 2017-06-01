@@ -1,4 +1,4 @@
-## Hospital Web Traffic Data API (IN DEVELOPMENT)
+## Hospital Web Traffic Data API
 
 ### Hospital Web Traffic Data Submission API
 To create a HospitalWebTrafficData entry in the database, make a PUT request to: http://picbackend.herokuapp.com/v2/hospital_web_traffic_data/.
@@ -58,7 +58,7 @@ In response, a JSON document will be displayed with the following format:
     - Parameters are divided into 2 categories: "primary" and "secondary"
     
     - "Primary" parameters - One and exactly one of these parameters are required in every request.
-        - "name" corresponds to hospital_name.
+        - "hospital_name" corresponds to hospital_name.
             - Must be a string
             - all non ASCII characters must be url encoded
         - "id" corresponds to HospitalTrafficData class database id.
@@ -103,7 +103,7 @@ In response, a JSON document will be displayed with the following format:
         ] (Order is arbitrary)
         ```
         
-- If metrics reports are found,
+- If hospital web traffic data is found,
     - "Error Code" will be 0
     - Array corresponding to the "Data" key will be non empty.
 - If metrics reports are not found,
