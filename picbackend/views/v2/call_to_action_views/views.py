@@ -1,13 +1,12 @@
-from picmodels.models import CallToAction
-from .utils import build_search_params
-from .utils import init_v2_response_data
-from picmodels.forms import CTAManagementForm
 from django.http import HttpResponse
-from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.conf import settings
 from django.views.generic import View
-from .base import JSONGETRspMixin
+from ..base import JSONGETRspMixin
+from picmodels.models import CallToAction
+from picmodels.forms import CTAManagementForm
+from ..utils import build_search_params
+from ..utils import init_v2_response_data
 
 
 def manage_cta_request(request):

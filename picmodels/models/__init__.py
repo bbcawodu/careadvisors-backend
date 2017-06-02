@@ -10,3 +10,4 @@ from .call_to_action_models import *
 from .providers_plan_network_models import *
 from .patient_story_models import *
 from .hospital_web_traffic_data_models import *
+from .healthcare_subsidy_eligibility_models import *

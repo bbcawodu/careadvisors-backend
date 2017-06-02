@@ -5,18 +5,18 @@ API Version 2
 
 from django.views.generic import View
 from django.utils.decorators import method_decorator
-from picmodels.models import MetricsSubmission
 from django.views.decorators.csrf import csrf_exempt
-from .utils import add_or_update_metrics_instance_using_api_rqst_params
-from .utils import group_metrics_by_rqst_param
-from .utils import retrieve_id_metrics
-from .utils import retrieve_f_l_name_metrics
-from .utils import retrieve_first_name_metrics
-from .utils import retrieve_last_name_metrics
-from .utils import retrieve_email_metrics
-from .utils import retrieve_mpn_metrics
-from .base import JSONPUTRspMixin
-from .base import JSONGETRspMixin
+from picmodels.models import MetricsSubmission
+from ..utils import add_or_update_metrics_instance_using_api_rqst_params
+from ..utils import group_metrics_by_rqst_param
+from ..utils import retrieve_id_metrics
+from ..utils import retrieve_f_l_name_metrics
+from ..utils import retrieve_first_name_metrics
+from ..utils import retrieve_last_name_metrics
+from ..utils import retrieve_email_metrics
+from ..utils import retrieve_mpn_metrics
+from ..base import JSONPUTRspMixin
+from ..base import JSONGETRspMixin
 
 
 #Need to abstract common variables in get and post class methods into class attributes
