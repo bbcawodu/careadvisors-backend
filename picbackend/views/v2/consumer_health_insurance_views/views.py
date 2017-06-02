@@ -3,13 +3,13 @@ Defines views that are responsible for accessing consumer health insurance Relat
 API Version 2
 """
 
+import pokitdok
 from django.views.generic import View
 from django.utils.decorators import method_decorator
-import pokitdok
 from django.views.decorators.csrf import csrf_exempt
-from .utils import fetch_and_parse_pokit_elig_data
-from .base import JSONPOSTRspMixin
-from .base import JSONGETRspMixin
+from ..utils import fetch_and_parse_pokit_elig_data
+from ..base import JSONPOSTRspMixin
+from ..base import JSONGETRspMixin
 
 
 class ConsumerHealthInsuranceBenefitsView(JSONPOSTRspMixin, View):

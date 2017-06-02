@@ -6,14 +6,14 @@ API Version 2
 
 from django.views.generic import View
 from django.utils.decorators import method_decorator
-from picmodels.models import NavMetricsLocation
 from django.views.decorators.csrf import csrf_exempt
-from .utils import clean_string_value_from_dict_object
-from .utils import add_nav_hub_location
-from .utils import modify_nav_hub_location
-from .utils import delete_nav_hub_location
-from .base import JSONPUTRspMixin
-from .base import JSONGETRspMixin
+from picmodels.models import NavMetricsLocation
+from ..base import JSONPUTRspMixin
+from ..base import JSONGETRspMixin
+from ..utils import clean_string_value_from_dict_object
+from ..utils import add_nav_hub_location
+from ..utils import modify_nav_hub_location
+from ..utils import delete_nav_hub_location
 
 
 # Need to abstract common variables in get and post class methods into class attributes
