@@ -54,6 +54,11 @@ This file is documentation for the backend API library for Patient Innovation Ce
 [Patient Story Concerns API README](Patient_Story_Concerns_API/Index.md)
 
 
-## Hospital Web Traffic Data API (IN DEVELOPMENT)
+## Hospital Web Traffic Data API
 
 [Hospital Web Traffic Data API README](Hospital_Web_Traffic_Data_API.md)
+
+
+## Healthcare Subsidy Eligibility Data By Family Size API (IN DEVELOPMENT)
+
+[Healthcare Subsidy Eligibility Data By Family Size API README](Healthcare_Subsidy_Eligibility_Data_By_Family_Size_API.md)

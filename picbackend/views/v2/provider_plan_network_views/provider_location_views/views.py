@@ -4,20 +4,20 @@ This module defines views that handle hospital/provider locations for provider n
 
 from django.views.generic import View
 from django.utils.decorators import method_decorator
-from picbackend.views.v2.utils import clean_string_value_from_dict_object
-from picbackend.views.v2.utils import add_provider_location
-from picbackend.views.v2.utils import modify_provider_location
-from picbackend.views.v2.utils import modify_provider_location_add_accepted_plans
-from picbackend.views.v2.utils import modify_provider_location_remove_accepted_plans
-from picbackend.views.v2.utils import delete_provider_location
-from picbackend.views.v2.utils import retrieve_provider_locations_by_id
-from picbackend.views.v2.utils import retrieve_provider_locations_by_name
-from picbackend.views.v2.utils import retrieve_provider_locations_by_network_name
-from picbackend.views.v2.utils import retrieve_provider_locations_by_network_id
-from picmodels.models import ProviderLocation
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.views.v2.base import JSONPUTRspMixin
-from picbackend.views.v2.base import JSONGETRspMixin
+from picmodels.models import ProviderLocation
+from ...utils import clean_string_value_from_dict_object
+from ...utils import add_provider_location
+from ...utils import modify_provider_location
+from ...utils import modify_provider_location_add_accepted_plans
+from ...utils import modify_provider_location_remove_accepted_plans
+from ...utils import delete_provider_location
+from ...utils import retrieve_provider_locations_by_id
+from ...utils import retrieve_provider_locations_by_name
+from ...utils import retrieve_provider_locations_by_network_name
+from ...utils import retrieve_provider_locations_by_network_id
+from ...base import JSONPUTRspMixin
+from ...base import JSONGETRspMixin
 
 
 #Need to abstract common variables in get and post class methods into class attributes

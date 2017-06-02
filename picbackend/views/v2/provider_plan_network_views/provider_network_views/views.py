@@ -4,16 +4,16 @@ This module defines views that handle CRUD for provider networks contracted with
 
 from django.views.generic import View
 from django.utils.decorators import method_decorator
-from picbackend.views.v2.utils import clean_string_value_from_dict_object
-from picbackend.views.v2.utils import add_provider_network
-from picbackend.views.v2.utils import modify_provider_network
-from picbackend.views.v2.utils import delete_provider_network
-from picbackend.views.v2.utils import retrieve_provider_networks_by_id
-from picbackend.views.v2.utils import retrieve_provider_networks_by_name
-from picmodels.models import ProviderNetwork
 from django.views.decorators.csrf import csrf_exempt
-from picbackend.views.v2.base import JSONPUTRspMixin
-from picbackend.views.v2.base import JSONGETRspMixin
+from picmodels.models import ProviderNetwork
+from ...utils import clean_string_value_from_dict_object
+from ...utils import add_provider_network
+from ...utils import modify_provider_network
+from ...utils import delete_provider_network
+from ...utils import retrieve_provider_networks_by_id
+from ...utils import retrieve_provider_networks_by_name
+from ...base import JSONPUTRspMixin
+from ...base import JSONGETRspMixin
 
 
 #Need to abstract common variables in get and post class methods into class attributes
