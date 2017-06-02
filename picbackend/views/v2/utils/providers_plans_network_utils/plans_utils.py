@@ -343,6 +343,7 @@ def delete_plan(response_raw_data, rqst_carrier_info, post_errors):
 
 def retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_of_ids, include_summary_report=False, include_detailed_report=False):
     if rqst_plan_id == "all":
+        pass
         # all_plans = plans
         # plan_dict = {}
         # for plan in all_plans:
