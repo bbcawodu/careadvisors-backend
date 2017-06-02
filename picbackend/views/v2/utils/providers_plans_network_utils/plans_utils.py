@@ -343,14 +343,14 @@ def delete_plan(response_raw_data, rqst_carrier_info, post_errors):
 
 def retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_of_ids, include_summary_report=False, include_detailed_report=False):
     if rqst_plan_id == "all":
-        all_plans = plans
-        plan_dict = {}
-        for plan in all_plans:
-            plan_dict[plan.id] = plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)
-        plan_list = []
-        for plan_key, plan_entry in plan_dict.items():
-            plan_list.append(plan_entry)
-
+        # all_plans = plans
+        # plan_dict = {}
+        # for plan in all_plans:
+        #     plan_dict[plan.id] = plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)
+        # plan_list = []
+        # for plan_key, plan_entry in plan_dict.items():
+        #     plan_list.append(plan_entry)
+        #
         # response_raw_data["Data"] = plan_list
     elif list_of_ids:
         if len(list_of_ids) > 0:
