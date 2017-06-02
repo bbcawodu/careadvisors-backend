@@ -365,7 +365,7 @@ def retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_
                 plan_list = []
                 for plan_key, plan_entry in plan_dict.items():
                     plan_list.append(plan_entry)
-                response_raw_data["Data"] = plan_list
+                # response_raw_data["Data"] = plan_list
 
                 for plan_id in list_of_ids:
                     if plan_id not in plan_dict:
