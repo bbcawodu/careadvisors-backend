@@ -381,6 +381,16 @@ def build_search_params(rqst_params, rqst_errors):
             search_params['include_detailed_report'] = search_params['include_detailed_report'] in ('true')
     if 'hospital_name' in rqst_params:
         search_params['hospital_name'] = urllib.parse.unquote(rqst_params['hospital_name'])
+    if 'family_size' in rqst_params:
+        search_params['family_size'] = rqst_params['family_size']
+
+        list_of_family_sizes = re.findall("\d+", search_params['family_size'])
+        for indx, element in enumerate(list_of_family_sizes):
+            list_of_family_sizes[indx] = int(element)
+        search_params['family_size_list'] = list_of_family_sizes
+
+        if not search_params['family_size_list']:
+            rqst_errors.append('Invalid family_size, family_sizes must be base 10 integers')
 
     return search_params
 
