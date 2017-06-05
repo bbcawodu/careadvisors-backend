@@ -15,9 +15,9 @@ The body of the request should be a JSON document which has the following format
 ```
 {
 "family_size": Integer,
-"medicaid_income_limit": Integer,
-"tax_cred_for_marketplace_income_limit": Integer,
-"marketplace_without_subsidies_income_level": Integer,
+"medicaid_income_limit": Float,
+"tax_cred_for_marketplace_income_limit": Float,
+"marketplace_without_subsidies_income_level": Float,
 
 "Database ID": Integer(Required when "Database Action" == "Instance Modification" or "Instance Deletion"),
 "Database Action": String,
@@ -81,9 +81,9 @@ In response, a JSON document will be displayed with the following format:
         "Data": [
             {
                 "family_size": Integer,
-                "medicaid_income_limit": Integer,
-                "tax_cred_for_marketplace_income_limit": Integer,
-                "marketplace_without_subsidies_income_level": Integer,
+                "medicaid_income_limit": Float,
+                "tax_cred_for_marketplace_income_limit": Float,
+                "marketplace_without_subsidies_income_level": Float,
             },
             ...,
             ...,
