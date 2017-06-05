@@ -134,4 +134,7 @@ urlpatterns = [
     # urls for hospital web traffic calculator views
     url(r"^v2/hospital_web_traffic_data/$", views.HospitalWebTrafficCalculatorDataMgrView.as_view()),
 
+    # urls for Healthcare Subsidy Eligibility Data By Family Size views
+    url(r"^v2/subsidy_data_by_family_size/$", views.HealthcareSubsidyEligibilityDataMgrView.as_view()),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

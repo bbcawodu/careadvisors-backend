@@ -14,3 +14,4 @@ from .call_to_action_views import *
 from .provider_plan_network_views import *
 from .patient_story_concerns_views import *
 from .hospital_web_traffic_calculator_views import *
+from .healthcare_subsidy_eligibility_data_views import *
