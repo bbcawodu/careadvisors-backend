@@ -7,13 +7,13 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from picmodels.models import ProviderNetwork
 from ...utils import clean_string_value_from_dict_object
-from ...utils import add_provider_network
-from ...utils import modify_provider_network
-from ...utils import delete_provider_network
-from ...utils import retrieve_provider_networks_by_id
-from ...utils import retrieve_provider_networks_by_name
 from ...base import JSONPUTRspMixin
 from ...base import JSONGETRspMixin
+from .tools import add_provider_network
+from .tools import modify_provider_network
+from .tools import delete_provider_network
+from .tools import retrieve_provider_networks_by_id
+from .tools import retrieve_provider_networks_by_name
 
 
 #Need to abstract common variables in get and post class methods into class attributes

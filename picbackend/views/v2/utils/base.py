@@ -6,6 +6,7 @@ import sys
 import urllib
 import re
 import datetime
+from picmodels.models import HealthcarePlan
 
 
 def clean_string_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, empty_string_allowed=False,
@@ -286,7 +287,7 @@ def build_search_params(rqst_params, rqst_errors):
         search_params['group by'] = rqst_params['groupby']
     if 'nav_location_tags' in rqst_params:
         search_params['nav_location_tags'] = rqst_params['nav_location_tags']
-        search_params['nav_location_tags list'] = re.findall(r"[@\w. '-]+", search_params['region'])
+        search_params['nav_location_tags list'] = re.findall(r"[@\w. '-]+", search_params['nav_location_tags'])
     if 'intent' in rqst_params:
         search_params['intent'] = urllib.parse.unquote(rqst_params['intent'])
     if 'name' in rqst_params:
@@ -391,6 +392,17 @@ def build_search_params(rqst_params, rqst_errors):
 
         if not search_params['family_size_list']:
             rqst_errors.append('Invalid family_size, family_sizes must be base 10 integers')
+    if 'premium_type' in rqst_params:
+        search_params['premium_type'] = rqst_params['premium_type']
+        search_params['premium_type list'] = re.findall(r"[@\w. '-]+", search_params['premium_type'])
+
+        if not search_params['premium_type list']:
+            rqst_errors.append('Invalid premium_type.')
+        else:
+            for premium_type in search_params['premium_type list']:
+                dummy_plan_object = HealthcarePlan(premium_type=premium_type)
+                if not dummy_plan_object.check_premium_choices():
+                    rqst_errors.append('The following is an invalid premium_type : {}'.format(premium_type))
 
     return search_params
 

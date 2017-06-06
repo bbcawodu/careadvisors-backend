@@ -26,12 +26,12 @@ from ..utils import init_v2_response_data
 from ..utils import parse_and_log_errors
 from ..utils import clean_list_value_from_dict_object
 from ..utils import build_search_params
-from ..utils import check_or_create_navigator_google_cal
-from ..utils import add_nav_apt_to_google_calendar
-from ..utils import delete_nav_apt_from_google_calendar
-from ..utils import get_preferred_nav_apts
-from ..utils import get_next_available_nav_apts
-from ..utils import get_nav_scheduled_appointments
+from .tools import check_or_create_navigator_google_cal
+from .tools import add_nav_apt_to_google_calendar
+from .tools import delete_nav_apt_from_google_calendar
+from .tools import get_preferred_nav_apts
+from .tools import get_next_available_nav_apts
+from .tools import get_nav_scheduled_appointments
 
 
 FLOW = flow_from_clientsecrets(
