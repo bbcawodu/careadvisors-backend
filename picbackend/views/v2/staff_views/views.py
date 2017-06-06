@@ -16,19 +16,19 @@ from picmodels.forms import StaffImageUploadForm
 from ..utils import build_search_params
 from ..utils import init_v2_response_data
 from ..utils import clean_string_value_from_dict_object
-from ..utils import add_staff_using_api_rqst_params
-from ..utils import modify_staff_using_api_rqst_params
-from ..utils import delete_staff_using_api_rqst_params
-from ..utils import retrieve_f_l_name_staff
-from ..utils import retrieve_email_staff
-from ..utils import retrieve_first_name_staff
-from ..utils import retrieve_last_name_staff
-from ..utils import retrieve_id_staff
-from ..utils import retrieve_mpn_staff
-from ..utils import retrieve_county_staff
-from ..utils import retrieve_region_staff
 from ..base import JSONPUTRspMixin
 from ..base import JSONGETRspMixin
+from .tools import add_staff_using_api_rqst_params
+from .tools import modify_staff_using_api_rqst_params
+from .tools import delete_staff_using_api_rqst_params
+from .tools import retrieve_f_l_name_staff
+from .tools import retrieve_email_staff
+from .tools import retrieve_first_name_staff
+from .tools import retrieve_last_name_staff
+from .tools import retrieve_id_staff
+from .tools import retrieve_mpn_staff
+from .tools import retrieve_county_staff
+from .tools import retrieve_region_staff
 
 
 # Need to abstract common variables in get and post class methods into class attributes

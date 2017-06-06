@@ -15,7 +15,8 @@ class HealthcareSubsidyEligibilityByFamSize(models.Model):
             "family_size": self.family_size,
             "medicaid_income_limit": self.medicaid_income_limit,
             "tax_cred_for_marketplace_income_limit": self.tax_cred_for_marketplace_income_limit,
-            "marketplace_without_subsidies_income_level": self.marketplace_without_subsidies_income_level
+            "marketplace_without_subsidies_income_level": self.marketplace_without_subsidies_income_level,
+            "Database ID": self.id
         }
 
         return values_dict

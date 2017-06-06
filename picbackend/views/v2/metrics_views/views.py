@@ -7,14 +7,14 @@ from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from picmodels.models import MetricsSubmission
-from ..utils import add_or_update_metrics_instance_using_api_rqst_params
-from ..utils import group_metrics_by_rqst_param
-from ..utils import retrieve_id_metrics
-from ..utils import retrieve_f_l_name_metrics
-from ..utils import retrieve_first_name_metrics
-from ..utils import retrieve_last_name_metrics
-from ..utils import retrieve_email_metrics
-from ..utils import retrieve_mpn_metrics
+from .tools import add_or_update_metrics_instance_using_api_rqst_params
+from .tools import group_metrics_by_rqst_param
+from .tools import retrieve_id_metrics
+from .tools import retrieve_f_l_name_metrics
+from .tools import retrieve_first_name_metrics
+from .tools import retrieve_last_name_metrics
+from .tools import retrieve_email_metrics
+from .tools import retrieve_mpn_metrics
 from ..base import JSONPUTRspMixin
 from ..base import JSONGETRspMixin
 

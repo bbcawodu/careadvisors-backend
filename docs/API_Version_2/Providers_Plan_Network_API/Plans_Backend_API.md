@@ -136,6 +136,10 @@ In response, a JSON document will be displayed with the following format:
             - must be of type boolean (true or false)
         - "include_detailed_report" corresponds to whether to include the detailed report for each plan if it exists.
             - must be of type boolean (true or false)
+        - "premium_type" - Premium type of a given plan.
+            - Must be one of the following values: ['HMO', 'PPO', 'POS', 'EPO']
+            - Must be a string
+            - Can be multiple values separated by commas.
     
 - The response will be a JSON document with the following format:
     ```
