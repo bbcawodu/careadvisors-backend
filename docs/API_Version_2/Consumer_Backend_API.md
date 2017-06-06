@@ -121,28 +121,32 @@ In response, a JSON document will be displayed with the following format:
 ### Consumer Data Retrieval API
 - To retrieve consumer data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/consumers/ with the following parameters(at least one required)
     - Results will be filtered by the given parameters.
-    - NOTE: Only one of the following parameters allowed at a time(Unless stated otherwise.).
+    - Parameters are divided into 2 categories: "primary" and "secondary"
     - A maximum of 20 consumer records with full fields will be returned due to size constraints
         - The rest are consumer database IDs
         - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter
-    - "fname" corresponds to consumer first name.
-        - Can be multiple values separated by commas.
-    - "lname" corresponds to consumer last name.
-        - Can be multiple values separated by commas.
-        - "fname" and "lname" can be given simultaneously as parameters. If so, only one value each is permitted.
-    - "email" corresponds to consumer email.
-        - Can be multiple values separated by commas.
-    - "region" corresponds to consumer region.
-        - Can be multiple values separated by commas.
-    - "id" corresponds to consumer class database id.
-        - Can be multiple values separated by commas.
-        - passing "all" as the value will return all consumer enteties
-    - "navid" corresponds to staff member class database id. (Can be combined with any of the above parameters)
-        - Can be multiple values separated by commas.
-    - "is_cps_consumer" corresponds to whether consumer is a Chicago Public Schools consumer (Can be combined with any of the above parameters)
-        - must be of type boolean (true or false)
-    - "page" corresponds to the current page of consumer instances to be displayed with full fields. (Can be combined with any of the above parameters) 
-        - if this parameter is missing, the first 20 consumer instances will be displayed with full fields.
+    
+    - "Primary" parameters - One and exactly one of these parameters are required in every request.
+        - "fname" corresponds to consumer first name.
+            - Can be multiple values separated by commas.
+        - "lname" corresponds to consumer last name.
+            - Can be multiple values separated by commas.
+            - "fname" and "lname" can be given simultaneously as parameters. If so, only one value each is permitted.
+        - "email" corresponds to consumer email.
+            - Can be multiple values separated by commas.
+        - "region" corresponds to consumer region.
+            - Can be multiple values separated by commas.
+        - "id" corresponds to consumer class database id.
+            - Can be multiple values separated by commas.
+            - passing "all" as the value will return all consumer enteties
+            
+    - "Secondary" parameters - Any number of these parameters can be added to a request.
+        - "navid" corresponds to staff member class database id.
+            - Can be multiple values separated by commas.
+        - "is_cps_consumer" corresponds to whether consumer is a Chicago Public Schools consumer.
+            - must be of type boolean (true or false)
+        - "page" corresponds to the current page of consumer instances to be displayed with full fields.
+            - if this parameter is missing, the first 20 consumer instances will be displayed with full fields.
         
 - The response will be a JSON document with the following format:
     ```

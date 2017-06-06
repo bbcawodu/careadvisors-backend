@@ -55,6 +55,15 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 include_summary_report[0] = search_params['include_summary_report']
             if 'include_detailed_report' in search_params:
                 include_detailed_report[0] = search_params['include_detailed_report']
+            if 'premium_type' in search_params:
+                matching_db_objects = None
+                for rqst_premium_type in search_params['premium_type list']:
+                    if matching_db_objects:
+                        matching_db_objects = matching_db_objects | db_objects.filter(premium_type__iexact=rqst_premium_type)
+                    else:
+                        matching_db_objects = db_objects.filter(premium_type__iexact=rqst_premium_type)
+                db_objects = matching_db_objects
+
             return db_objects
 
         plans = filter_db_objects_by_secondary_params(search_params, plans)

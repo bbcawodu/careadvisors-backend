@@ -86,12 +86,17 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
 def get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors):
     # Filter consumer objects based on GET parameters
-    if 'navigator id list' in search_params:
-        list_of_nav_ids = search_params['navigator id list']
-        consumers = consumers.filter(navigator__in=list_of_nav_ids)
-    if 'is_cps_consumer' in search_params:
-        is_cps_consumer = search_params['is_cps_consumer']
-        consumers = consumers.filter(cps_consumer=is_cps_consumer)
+    def filter_results_by_secondary_params(db_objects):
+        if 'navigator id list' in search_params:
+            list_of_nav_ids = search_params['navigator id list']
+            db_objects = db_objects.filter(navigator__in=list_of_nav_ids)
+        if 'is_cps_consumer' in search_params:
+            is_cps_consumer = search_params['is_cps_consumer']
+            db_objects = db_objects.filter(cps_consumer=is_cps_consumer)
+
+        return db_objects
+
+    consumers = filter_results_by_secondary_params(consumers)
 
     if 'first name' in search_params and 'last name' in search_params:
         rqst_first_name = search_params['first name']
