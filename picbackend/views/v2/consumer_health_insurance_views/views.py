@@ -7,7 +7,7 @@ import pokitdok
 from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from ..utils import fetch_and_parse_pokit_elig_data
+from .tools import fetch_and_parse_pokit_elig_data
 from ..base import JSONPOSTRspMixin
 from ..base import JSONGETRspMixin
 

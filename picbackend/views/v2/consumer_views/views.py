@@ -10,15 +10,15 @@ from django.views.decorators.csrf import csrf_exempt
 from picmodels.models import PICConsumer
 from picmodels.models import PICConsumerBackup
 from ..utils import clean_string_value_from_dict_object
-from ..utils import add_consumer_using_api_rqst_params
-from ..utils import modify_consumer_using_api_rqst_params
-from ..utils import delete_consumer_using_api_rqst_params
-from ..utils import retrieve_f_l_name_consumers
-from ..utils import retrieve_email_consumers
-from ..utils import retrieve_first_name_consumers
-from ..utils import retrieve_last_name_consumers
-from ..utils import retrieve_id_consumers
-from ..utils import break_results_into_pages
+from .tools import add_consumer_using_api_rqst_params
+from .tools import modify_consumer_using_api_rqst_params
+from .tools import delete_consumer_using_api_rqst_params
+from .tools import retrieve_f_l_name_consumers
+from .tools import retrieve_email_consumers
+from .tools import retrieve_first_name_consumers
+from .tools import retrieve_last_name_consumers
+from .tools import retrieve_id_consumers
+from .tools import break_results_into_pages
 from ..base import JSONPUTRspMixin
 from ..base import JSONGETRspMixin
 

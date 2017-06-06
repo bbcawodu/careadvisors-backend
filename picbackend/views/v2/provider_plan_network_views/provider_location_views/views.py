@@ -7,17 +7,17 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from picmodels.models import ProviderLocation
 from ...utils import clean_string_value_from_dict_object
-from ...utils import add_provider_location
-from ...utils import modify_provider_location
-from ...utils import modify_provider_location_add_accepted_plans
-from ...utils import modify_provider_location_remove_accepted_plans
-from ...utils import delete_provider_location
-from ...utils import retrieve_provider_locations_by_id
-from ...utils import retrieve_provider_locations_by_name
-from ...utils import retrieve_provider_locations_by_network_name
-from ...utils import retrieve_provider_locations_by_network_id
 from ...base import JSONPUTRspMixin
 from ...base import JSONGETRspMixin
+from .tools import add_provider_location
+from .tools import modify_provider_location
+from .tools import modify_provider_location_add_accepted_plans
+from .tools import modify_provider_location_remove_accepted_plans
+from .tools import delete_provider_location
+from .tools import retrieve_provider_locations_by_id
+from .tools import retrieve_provider_locations_by_name
+from .tools import retrieve_provider_locations_by_network_name
+from .tools import retrieve_provider_locations_by_network_id
 
 
 #Need to abstract common variables in get and post class methods into class attributes

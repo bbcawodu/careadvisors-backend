@@ -4,24 +4,24 @@ This module defines views that handle carriers for provider networks contracted 
 
 from django.views.generic import View
 from django.utils.decorators import method_decorator
-from ...utils import clean_string_value_from_dict_object
-from ...utils import add_carrier
-from ...utils import modify_carrier
-from ...utils import delete_carrier
-from ...utils import retrieve_id_carriers
-from ...utils import retrieve_name_carriers
-from ...utils import retrieve_state_carriers
-from picmodels.models import HealthcareCarrier
 from django.views.decorators.csrf import csrf_exempt
-from ...base import JSONPUTRspMixin
-from ...base import JSONGETRspMixin
-from ...utils import build_search_params
-from ...utils import init_v2_response_data
-from picmodels.forms import CarrierSampleIDCardUploadForm
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.conf import settings
+from picmodels.models import HealthcareCarrier
+from picmodels.forms import CarrierSampleIDCardUploadForm
+from ...utils import clean_string_value_from_dict_object
+from ...utils import build_search_params
+from ...utils import init_v2_response_data
+from ...base import JSONPUTRspMixin
+from ...base import JSONGETRspMixin
+from .tools import add_carrier
+from .tools import modify_carrier
+from .tools import delete_carrier
+from .tools import retrieve_id_carriers
+from .tools import retrieve_name_carriers
+from .tools import retrieve_state_carriers
 
 
 #Need to abstract common variables in get and post class methods into class attributes
