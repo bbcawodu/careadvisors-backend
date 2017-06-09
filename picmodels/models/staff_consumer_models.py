@@ -8,6 +8,14 @@ from django.contrib import admin
 from oauth2client.contrib.django_util.models import CredentialsField
 from django.dispatch import receiver
 from django.conf import settings
+import uuid
+import os
+
+
+def get_staff_pic_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
+    return os.path.join('staff_pics', filename)
 
 
 class PICStaff(models.Model):
@@ -56,7 +64,7 @@ class PICStaff(models.Model):
     county = models.CharField(blank=True, null=True, max_length=1000, default="")
     region = models.CharField(blank=True, null=True, max_length=1000, default="")
     mpn = models.CharField(blank=True, max_length=1000, default="")
-    staff_pic = models.ImageField(upload_to='staff_pics/', blank=True, null=True)
+    staff_pic = models.ImageField(upload_to=get_staff_pic_file_path, blank=True, null=True)
     base_locations = models.ManyToManyField(NavMetricsLocation, blank=True)
 
     def return_values_dict(self):

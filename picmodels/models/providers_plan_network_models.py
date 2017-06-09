@@ -6,6 +6,14 @@ from django.db import models
 from django.conf import settings
 from django.dispatch import receiver
 from django.core.validators import MaxValueValidator
+import uuid
+import os
+
+
+def get_sample_id_card_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
+    return os.path.join('carrier_sample_id_cards', filename)
 
 
 class HealthcareCarrier(models.Model):
@@ -114,7 +122,7 @@ class HealthcareCarrier(models.Model):
 
     name = models.CharField(max_length=10000)
     state_province = models.CharField("State/Province", max_length=40, blank=True, null=True, choices=STATE_CHOICES)
-    sample_id_card = models.ImageField(upload_to='carrier_sample_id_cards/', blank=True, null=True)
+    sample_id_card = models.ImageField(upload_to=get_sample_id_card_file_path, blank=True, null=True)
 
     def check_state_choices(self,):
         if self.state_province:
