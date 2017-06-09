@@ -56,10 +56,13 @@ class PICStaff(models.Model):
     county = models.CharField(blank=True, null=True, max_length=1000, default="")
     region = models.CharField(blank=True, null=True, max_length=1000, default="")
     mpn = models.CharField(blank=True, max_length=1000, default="")
-    staff_pic = models.ImageField(upload_to='staff_pics/', default=settings.DEFAULT_STAFF_PIC_URL)
+    staff_pic = models.ImageField(upload_to='staff_pics/', blank=True, null=True)
     base_locations = models.ManyToManyField(NavMetricsLocation, blank=True)
 
     def return_values_dict(self):
+        if self.staff_pic and self.staff_pic.url == "{}{}".format(settings.MEDIA_URL, "staff_pics/None/default_staff.jpg"):
+            self.staff_pic.delete()
+
         valuesdict = {"First Name": self.first_name,
                       "Last Name": self.last_name,
                       "MPN": self.mpn,
@@ -69,7 +72,7 @@ class PICStaff(models.Model):
                       "Database ID": self.id,
                       "County": self.county,
                       "Region": None,
-                      "Picture": self.staff_pic.url,
+                      "Picture": None,
                       "Base Locations": [],
                       "Consumers": []}
 
@@ -100,6 +103,11 @@ class PICStaff(models.Model):
                     credentials_instance.delete()
                 else:
                     valuesdict["Authorized Credentials"] = True
+
+        if self.staff_pic:
+            valuesdict["Picture"] = self.staff_pic.url
+        else:
+            valuesdict["Picture"] = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_STAFF_PIC_URL)
 
         return valuesdict
 

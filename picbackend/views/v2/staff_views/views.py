@@ -130,16 +130,26 @@ def upload_staff_pic(request):
             return HttpResponseForbidden("'id' must be in search parameters")
     if request.method == 'POST':
         form = StaffImageUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            staff_object = PICStaff.objects.get(id=form.cleaned_data['staff_id'])
 
-            # Delete old pic
-            if staff_object.staff_pic.url != (settings.MEDIA_URL + settings.DEFAULT_STAFF_PIC_URL):
-                staff_object.staff_pic.delete()
-
-            # Add new pic
-            staff_object.staff_pic = form.cleaned_data['staff_pic']
-            staff_object.save()
-            return HttpResponse('image upload success')
+        current_staff_instance_id = form.data['staff_id']
+        try:
+            staff_object = PICStaff.objects.get(id=current_staff_instance_id)
+        except PICStaff.DoesNotExist:
+            HttpResponseForbidden("Staff member not found for given id: {}".format(current_staff_instance_id))
         else:
-            return render(request, 'staff_image_upload_form.html', {'form': form})
+            if request.POST.get('delete_current_image_field_value'):
+                if staff_object.staff_pic:
+                    staff_object.staff_pic.delete()
+
+                return HttpResponse('Current image deleted.')
+            elif form.is_valid():
+                # Delete old pic
+                if staff_object.staff_pic:
+                    staff_object.staff_pic.delete()
+
+                # Add new pic
+                staff_object.staff_pic = form.cleaned_data['staff_pic']
+                staff_object.save()
+                return HttpResponse('image upload success')
+            else:
+                return render(request, 'staff_image_upload_form.html', {'form': form})

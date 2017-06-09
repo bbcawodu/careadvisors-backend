@@ -114,12 +114,23 @@ def handle_carrier_sample_id_card_mgmt_rqst(request):
         response_message = 'Sample id card image edit success!'
         form = CarrierSampleIDCardUploadForm(request.POST, request.FILES)
 
-        if form.is_valid():
+        if request.POST.get('delete_current_image_field_value'):
+            current_carrier_id = form.data['carrier_id']
+            try:
+                carrier_object = HealthcareCarrier.objects.get(id=current_carrier_id)
+            except HealthcareCarrier.DoesNotExist:
+                HttpResponseForbidden("Healthcare carrier not found for given id: {}".format(current_carrier_id))
+            else:
+                if carrier_object.sample_id_card:
+                    carrier_object.sample_id_card.delete()
+
+                return HttpResponse('Current image deleted.')
+        elif form.is_valid():
             try:
                 carrier_object = HealthcareCarrier.objects.get(id=form.cleaned_data['carrier_id'])
 
                 # Delete old pic
-                if carrier_object.sample_id_card.url != (settings.MEDIA_URL + settings.DEFAULT_CARRIER_SAMPLE_ID_CARD_URL):
+                if carrier_object.sample_id_card:
                     carrier_object.sample_id_card.delete()
             except HealthcareCarrier.DoesNotExist:
                 return HttpResponseForbidden("Healthcare carrier not found for given id: {}".format(form.cleaned_data['carrier_id']))
