@@ -114,7 +114,7 @@ class HealthcareCarrier(models.Model):
 
     name = models.CharField(max_length=10000)
     state_province = models.CharField("State/Province", max_length=40, blank=True, null=True, choices=STATE_CHOICES)
-    sample_id_card = models.ImageField(upload_to='carrier_sample_id_cards/', default=settings.DEFAULT_CARRIER_SAMPLE_ID_CARD_URL)
+    sample_id_card = models.ImageField(upload_to='carrier_sample_id_cards/', blank=True, null=True)
 
     def check_state_choices(self,):
         if self.state_province:
@@ -126,10 +126,13 @@ class HealthcareCarrier(models.Model):
             return True
 
     def return_values_dict(self):
+        if self.sample_id_card and self.sample_id_card.url == "{}{}".format(settings.MEDIA_URL, "carrier_sample_id_cards/None/default_sample_id_card.jpg"):
+            self.sample_id_card.delete()
+
         valuesdict = {"name": self.name,
                       "state": None,
                       "plans": None,
-                      "sample_id_card": self.sample_id_card.url,
+                      "sample_id_card": None,
                       "Database ID": self.id}
 
         # add related plans to values dict
@@ -142,6 +145,11 @@ class HealthcareCarrier(models.Model):
 
         if self.state_province:
             valuesdict['state'] = self.state_province
+
+        if self.sample_id_card:
+            valuesdict["sample_id_card"] = self.sample_id_card.url
+        else:
+            valuesdict["sample_id_card"] = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_CARRIER_SAMPLE_ID_CARD_URL)
 
         return valuesdict
 
