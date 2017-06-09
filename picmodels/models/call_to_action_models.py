@@ -1,12 +1,20 @@
 from django.db import models
 from django.conf import settings
 from django.dispatch import receiver
+import uuid
+import os
+
+
+def get_cta_image_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
+    return os.path.join('call_to_actions', filename)
 
 
 class CallToAction(models.Model):
     # fields for CallToAction model
     intent = models.CharField(max_length=1000)
-    cta_image = models.ImageField(upload_to='call_to_actions/', blank=True, null=True)
+    cta_image = models.ImageField(upload_to=get_cta_image_file_path, blank=True, null=True)
 
     def return_values_dict(self):
         valuesdict = {"Intent": self.intent,
