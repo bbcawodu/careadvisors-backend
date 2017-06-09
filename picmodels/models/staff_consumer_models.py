@@ -60,9 +60,6 @@ class PICStaff(models.Model):
     base_locations = models.ManyToManyField(NavMetricsLocation, blank=True)
 
     def return_values_dict(self):
-        if self.staff_pic and self.staff_pic.url == "{}{}".format(settings.MEDIA_URL, "staff_pics/None/default_staff.jpg"):
-            self.staff_pic.delete()
-
         valuesdict = {"First Name": self.first_name,
                       "Last Name": self.last_name,
                       "MPN": self.mpn,

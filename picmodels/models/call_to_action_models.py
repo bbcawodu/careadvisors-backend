@@ -9,9 +9,6 @@ class CallToAction(models.Model):
     cta_image = models.ImageField(upload_to='call_to_actions/', blank=True, null=True)
 
     def return_values_dict(self):
-        if self.cta_image and self.cta_image.url == "{}{}".format(settings.MEDIA_URL, "call_to_actions/None/default_cta.jpg"):
-            self.cta_image.delete()
-
         valuesdict = {"Intent": self.intent,
                       "Picture": None,
                       "Database ID": self.id

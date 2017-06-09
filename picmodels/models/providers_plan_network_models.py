@@ -126,9 +126,6 @@ class HealthcareCarrier(models.Model):
             return True
 
     def return_values_dict(self):
-        if self.sample_id_card and self.sample_id_card.url == "{}{}".format(settings.MEDIA_URL, "carrier_sample_id_cards/None/default_sample_id_card.jpg"):
-            self.sample_id_card.delete()
-
         valuesdict = {"name": self.name,
                       "state": None,
                       "plans": None,
