@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.conf import settings
 from django.views.generic import View
+from django.http import HttpResponseForbidden
 from ..base import JSONGETRspMixin
 from picmodels.models import CallToAction
 from picmodels.forms import CTAManagementForm
@@ -32,13 +33,24 @@ def manage_cta_request(request):
         response_message = 'cta object edit success!'
         form = CTAManagementForm(request.POST, request.FILES)
 
-        if form.is_valid():
+        if request.POST.get('delete_current_image_field_value'):
+            current_cta_intent = form.data['cta_intent'].lower()
+            try:
+                cta_object = CallToAction.objects.get(intent__iexact=current_cta_intent)
+            except CallToAction.DoesNotExist:
+                HttpResponseForbidden("Call to action not found for given intent: {}".format(current_cta_intent))
+            else:
+                if cta_object.cta_image:
+                    cta_object.cta_image.delete()
+
+                return HttpResponse('Current image deleted.')
+        elif form.is_valid():
             form.cleaned_data['cta_intent'] = form.cleaned_data['cta_intent'].lower()
             try:
                 cta_object = CallToAction.objects.get(intent__iexact=form.cleaned_data['cta_intent'])
 
                 # Delete old pic
-                if cta_object.cta_image.url != (settings.MEDIA_URL + settings.DEFAULT_CTA_PIC_URL):
+                if cta_object.cta_image:
                     cta_object.cta_image.delete()
             except CallToAction.DoesNotExist:
                 cta_object = CallToAction(intent=form.cleaned_data['cta_intent'])

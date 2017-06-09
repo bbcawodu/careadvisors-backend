@@ -6,13 +6,21 @@ from django.dispatch import receiver
 class CallToAction(models.Model):
     # fields for CallToAction model
     intent = models.CharField(max_length=1000)
-    cta_image = models.ImageField(upload_to='call_to_actions/', default=settings.DEFAULT_CTA_PIC_URL)
+    cta_image = models.ImageField(upload_to='call_to_actions/', blank=True, null=True)
 
     def return_values_dict(self):
+        if self.cta_image and self.cta_image.url == "{}{}".format(settings.MEDIA_URL, "call_to_actions/None/default_cta.jpg"):
+            self.cta_image.delete()
+
         valuesdict = {"Intent": self.intent,
-                      "Picture": self.cta_image.url,
+                      "Picture": None,
                       "Database ID": self.id
                       }
+
+        if self.cta_image:
+            valuesdict["Picture"] = self.cta_image.url
+        else:
+            valuesdict["Picture"] = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_CTA_PIC_URL)
 
         return valuesdict
 
