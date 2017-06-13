@@ -37,27 +37,23 @@ class HealthcareSubsidyEligibilityDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
 
     def healthcare_subsidy_eligibility_data_mgr_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         healthcare_subsidy_eligibility_data_objs = HealthcareSubsidyEligibilityByFamSize.objects.all()
+        data_list = []
 
         if 'id' in search_params:
             rqst_healthcare_subsidy_eligibility_data_id = search_params['id']
             if rqst_healthcare_subsidy_eligibility_data_id != 'all':
                 list_of_ids = search_params['id list']
             else:
-                list_of_ids = None
-            response_raw_data, rqst_errors = retrieve_healthcare_subsidy_eligibility_data_by_id(response_raw_data,
-                                                                                                rqst_errors,
-                                                                                                healthcare_subsidy_eligibility_data_objs,
-                                                                                                rqst_healthcare_subsidy_eligibility_data_id,
-                                                                                                list_of_ids)
+                list_of_ids = []
+            data_list = retrieve_healthcare_subsidy_eligibility_data_by_id(healthcare_subsidy_eligibility_data_objs,
+                                                                           rqst_healthcare_subsidy_eligibility_data_id,
+                                                                           list_of_ids, rqst_errors)
         elif 'family_size' in search_params:
-            rqst_family_size = search_params['family_size']
             list_of_family_sizes = search_params['family_size_list']
 
-            response_raw_data, rqst_errors = retrieve_healthcare_subsidy_eligibility_data_by_family_size(response_raw_data,
-                                                                                                         rqst_errors,
-                                                                                                         healthcare_subsidy_eligibility_data_objs,
-                                                                                                         rqst_family_size,
-                                                                                                         list_of_family_sizes)
+            data_list = retrieve_healthcare_subsidy_eligibility_data_by_family_size(healthcare_subsidy_eligibility_data_objs,
+                                                                                    list_of_family_sizes, rqst_errors)
+        response_raw_data['Data'] = data_list
 
         return response_raw_data, rqst_errors
 

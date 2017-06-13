@@ -41,25 +41,23 @@ class HospitalWebTrafficCalculatorDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
 
     def hospital_web_traffic_calculator_data_mgr_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         web_traffic_calculator_data = HospitalWebTrafficData.objects.all()
+        data_list = []
 
         if 'id' in search_params:
             rqst_hospital_web_traffic_calculator_data_id = search_params['id']
             if rqst_hospital_web_traffic_calculator_data_id != 'all':
                 list_of_ids = search_params['id list']
             else:
-                list_of_ids = None
-            response_raw_data, rqst_errors = retrieve_hospital_web_traffic_calculator_data_by_id(response_raw_data,
-                                                                                                 rqst_errors,
-                                                                                                 web_traffic_calculator_data,
-                                                                                                 rqst_hospital_web_traffic_calculator_data_id,
-                                                                                                 list_of_ids)
+                list_of_ids = []
+            data_list = retrieve_hospital_web_traffic_calculator_data_by_id(web_traffic_calculator_data,
+                                                                            rqst_hospital_web_traffic_calculator_data_id,
+                                                                            list_of_ids, rqst_errors)
         elif 'hospital_name' in search_params:
             rqst_hospital_name = search_params['hospital_name']
 
-            response_raw_data, rqst_errors = retrieve_web_traffic_calculator_data_by_hospital_name(response_raw_data,
-                                                                                                   rqst_errors,
-                                                                                                   web_traffic_calculator_data,
-                                                                                                   rqst_hospital_name)
+            data_list = retrieve_web_traffic_calculator_data_by_hospital_name(web_traffic_calculator_data,
+                                                                              rqst_hospital_name, rqst_errors)
+        response_raw_data['Data'] = data_list
 
         return response_raw_data, rqst_errors
 

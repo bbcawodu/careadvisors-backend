@@ -32,7 +32,8 @@ class HospitalWebTrafficData(models.Model):
             "hospital_name": self.hospital_name,
             "monthly_visits": self.monthly_visits,
             "consumers_seeking_health_services": self.consumers_seeking_health_services,
-            "consumers_who_spill_off": self.consumers_who_spill_off
+            "consumers_who_spill_off": self.consumers_who_spill_off,
+            "Database ID": self.id
         }
 
         return values_dict
