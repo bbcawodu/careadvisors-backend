@@ -34,8 +34,6 @@ def retrieve_general_concerns_by_id(response_raw_data, rqst_errors, general_conc
         else:
             rqst_errors.append('No valid general concern IDs provided in request (must be integers)')
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_general_concerns_by_name(response_raw_data, rqst_errors, general_concerns, rqst_name):
     general_concerns_list = []
@@ -52,5 +50,3 @@ def retrieve_general_concerns_by_name(response_raw_data, rqst_errors, general_co
         response_raw_data["Data"] = general_concerns_list
     else:
         rqst_errors.append('General concern with name: {!s} not found in database'.format(rqst_name))
-
-    return response_raw_data, rqst_errors

@@ -33,13 +33,13 @@ class ProviderNetworksManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         # If there are no parsing errors, process PUT data based on database action
         if not post_errors:
             if rqst_action == "Provider Network Addition":
-                response_raw_data = add_provider_network(response_raw_data, post_data, post_errors)
+                add_provider_network(response_raw_data, post_data, post_errors)
             elif rqst_action == "Provider Network Modification":
-                response_raw_data = modify_provider_network(response_raw_data, post_data, post_errors)
+                modify_provider_network(response_raw_data, post_data, post_errors)
             elif rqst_action == "Provider Network Deletion":
-                response_raw_data = delete_provider_network(response_raw_data, post_data, post_errors)
-
-        return response_raw_data, post_errors
+                delete_provider_network(response_raw_data, post_data, post_errors)
+            else:
+                post_errors.append("No valid 'Database Action' provided.")
 
     def provider_networks_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         provider_networks = ProviderNetwork.objects.all()
@@ -50,16 +50,13 @@ class ProviderNetworksManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 list_of_ids = search_params['id list']
             else:
                 list_of_ids = None
-            response_raw_data, rqst_errors = retrieve_provider_networks_by_id(response_raw_data, rqst_errors,
-                                                                              provider_networks, rqst_provider_network_id,
-                                                                              list_of_ids)
+            retrieve_provider_networks_by_id(response_raw_data, rqst_errors, provider_networks, rqst_provider_network_id, list_of_ids)
         elif 'name' in search_params:
             rqst_name = search_params['name']
 
-            response_raw_data, rqst_errors = retrieve_provider_networks_by_name(response_raw_data, rqst_errors,
-                                                                                provider_networks, rqst_name)
-
-        return response_raw_data, rqst_errors
+            retrieve_provider_networks_by_name(response_raw_data, rqst_errors, provider_networks, rqst_name)
+        else:
+            rqst_errors.append('No Valid Parameters')
 
     put_logic_function = provider_networks_management_put_logic
     get_logic_function = provider_networks_management_get_logic

@@ -36,8 +36,6 @@ def retrieve_specific_concerns_by_id(response_raw_data, rqst_errors, specific_co
         else:
             rqst_errors.append('No valid specific concern IDs provided in request (must be integers)')
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_specific_concerns_by_question(response_raw_data, rqst_errors, specific_concerns, rqst_question):
     specific_concerns_list = []
@@ -50,8 +48,6 @@ def retrieve_specific_concerns_by_question(response_raw_data, rqst_errors, speci
     else:
         rqst_errors.append('No specific concern with question: {!s} found in database'.format(rqst_question))
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_specific_concerns_by_gen_concern_name(response_raw_data, rqst_errors, specific_concerns, rqst_gen_concern_name):
     specific_concerns_list = []
@@ -63,8 +59,6 @@ def retrieve_specific_concerns_by_gen_concern_name(response_raw_data, rqst_error
         response_raw_data["Data"] = specific_concerns_list
     else:
         rqst_errors.append('No specific concerns whose related general concerns contain an entry with the name: {!s} found in database'.format(rqst_gen_concern_name))
-
-    return response_raw_data, rqst_errors
 
 
 def retrieve_specific_concerns_by_gen_concern_id_subset(response_raw_data, rqst_errors, specific_concerns, rqst_gen_concern_id, list_of_gen_concern_ids):
@@ -83,8 +77,6 @@ def retrieve_specific_concerns_by_gen_concern_id_subset(response_raw_data, rqst_
             rqst_errors.append('No specific concerns found for general concern database ID(s): ' + rqst_gen_concern_id)
     else:
         rqst_errors.append('No valid general concern database IDs provided in request (must be integers)')
-
-    return response_raw_data, rqst_errors
 
 
 def retrieve_specific_concerns_by_gen_concern_id(response_raw_data, rqst_errors, specific_concerns, rqst_gen_concern_id, list_of_gen_concern_ids):
@@ -117,5 +109,3 @@ def retrieve_specific_concerns_by_gen_concern_id(response_raw_data, rqst_errors,
             rqst_errors.append("No general concerns found in database for given database id(s): {}".format(rqst_gen_concern_id))
     else:
         rqst_errors.append('No valid general concern database IDs provided in request (must be integers)')
-
-    return response_raw_data, rqst_errors

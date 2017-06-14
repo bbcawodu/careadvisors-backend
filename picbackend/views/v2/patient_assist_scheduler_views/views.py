@@ -81,7 +81,7 @@ class NavGoogleCalendarAccessRequestView(View):
             rqst_errors.append("No valid parameters")
 
         response_raw_data["Host"] = settings.HOSTURL
-        response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
+        parse_and_log_errors(response_raw_data, rqst_errors)
         response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
         return response
 
@@ -145,8 +145,6 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
 
         response_raw_data["Host"] = settings.HOSTURL
 
-        return response_raw_data, rqst_errors
-
     def available_nav_appointments_logic(self, post_data, response_raw_data, post_errors):
         response_raw_data["Data"] = {}
         response_raw_data["Data"]["Next Available Appointments"] = []
@@ -167,8 +165,6 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
         else:
             response_raw_data["Data"]["Next Available Appointments"] = get_next_available_nav_apts(post_errors)
 
-        return response_raw_data, post_errors
-
     def add_nav_scheduled_appointment_logic(self, post_data, response_raw_data, post_errors):
         response_raw_data["Data"] = {"Confirmed Appointment": None,
                                      "Consumer ID": None}
@@ -178,14 +174,10 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
         if consumer_dict:
             response_raw_data["Data"]["Consumer ID"] = consumer_dict["Database ID"]
 
-        return response_raw_data, post_errors
-
     def delete_nav_scheduled_appointment_logic(self, post_data, response_raw_data, post_errors):
         response_raw_data["Data"] = {"Deleted Appointment": False}
 
         response_raw_data["Data"]["Deleted Appointment"] = delete_nav_apt_from_google_calendar(post_data, post_errors)
-
-        return response_raw_data, post_errors
 
     put_logic_function = add_nav_scheduled_appointment_logic
     get_logic_function = nav_scheduled_appointments_logic

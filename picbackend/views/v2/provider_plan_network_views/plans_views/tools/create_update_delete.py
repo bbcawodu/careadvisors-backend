@@ -30,8 +30,6 @@ def add_plan(response_raw_data, rqst_plan_info, post_errors):
                 if not post_errors:
                     response_raw_data['Data']["Database ID"] = healthcare_plan.id
 
-    return response_raw_data
-
 
 def get_plan_mgmt_put_params(rqst_plan_info, post_errors):
     """
@@ -316,8 +314,6 @@ def modify_plan(response_raw_data, rqst_plan_info, post_errors):
             except HealthcarePlan.DoesNotExist:
                 post_errors.append("Healthcare plan does not exist for database id: {}".format(rqst_plan_id))
 
-    return response_raw_data
-
 
 def modify_plan_obj(plan_id, plan_params, healthcare_carrier_obj, post_errors):
     healthcare_plan_obj = HealthcarePlan.objects.get(id=plan_id)
@@ -336,5 +332,3 @@ def delete_plan(response_raw_data, rqst_carrier_info, post_errors):
             response_raw_data['Data']["Database ID"] = "Deleted"
         except HealthcarePlan.DoesNotExist:
             post_errors.append("Healthcare plan does not exist for database id: {}".format(rqst_plan_id))
-
-    return response_raw_data

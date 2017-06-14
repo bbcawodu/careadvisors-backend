@@ -46,8 +46,6 @@ def retrieve_id_carriers(response_raw_data, rqst_errors, carriers, rqst_carrier_
         else:
             rqst_errors.append('No valid carrier IDs provided in request (must be integers)')
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_state_carriers(response_raw_data, rqst_errors, carriers, rqst_state, list_of_states):
     carrier_dict = {}
@@ -70,8 +68,6 @@ def retrieve_state_carriers(response_raw_data, rqst_errors, carriers, rqst_state
                 rqst_errors.append('Carriers in the state: {!s} not found in database'.format(state))
     else:
         rqst_errors.append('Carriers in the state(s): {!s} not found in database'.format(rqst_state))
-
-    return response_raw_data, rqst_errors
 
 
 def retrieve_name_carriers(response_raw_data, rqst_errors, carriers, rqst_name):
@@ -100,8 +96,6 @@ def retrieve_name_carriers(response_raw_data, rqst_errors, carriers, rqst_name):
         response_raw_data["Data"] = carrier_list
     else:
         rqst_errors.append('Carrier with name: {!s} not found in database'.format(rqst_name))
-
-    return response_raw_data, rqst_errors
 
 
 # def retrieve_name_carriers(response_raw_data, rqst_errors, carriers, rqst_name, list_of_names):

@@ -25,8 +25,6 @@ def add_specific_concern_using_api_rqst_params(response_raw_data, rqst_specific_
             specific_concern_obj = create_new_specific_concern_obj(add_specific_concern_params)
             response_raw_data['Data']["Database ID"] = specific_concern_obj.id
 
-    return response_raw_data
-
 
 def get_specific_concern_mgmt_put_params(rqst_provider_location_info, post_errors):
     rqst_specific_concern_research_weight = clean_int_value_from_dict_object(rqst_provider_location_info, "root",
@@ -118,8 +116,6 @@ def modify_specific_concern_using_api_rqst_params(response_raw_data, rqst_specif
             except ConsumerSpecificConcern.DoesNotExist:
                 rqst_errors.append("Specific concern does not exist for database id: {}".format(rqst_specific_concern_id))
 
-    return response_raw_data
-
 
 def modify_specific_concern_obj(specific_concern_params, specific_concern_id):
     specific_concern_obj = ConsumerSpecificConcern.objects.get(id=specific_concern_id)
@@ -164,8 +160,6 @@ def modify_specific_concern_add_general_concern_using_api_rqst_params(response_r
 
                 response_raw_data['Data']["Database ID"] = specific_concern_obj.id
 
-    return response_raw_data
-
 
 def modify_specific_concern_remove_general_concern_using_api_rqst_params(response_raw_data, rqst_specific_concern_info, rqst_errors):
     modify_specific_concern_params = get_specific_concern_mgmt_put_params(rqst_specific_concern_info, rqst_errors)
@@ -200,8 +194,6 @@ def modify_specific_concern_remove_general_concern_using_api_rqst_params(respons
 
                 response_raw_data['Data']["Database ID"] = specific_concern_obj.id
 
-    return response_raw_data
-
 
 def delete_specific_concern_using_api_rqst_params(response_raw_data, rqst_specific_concern_info, rqst_errors):
     rqst_specific_concern_id = clean_int_value_from_dict_object(rqst_specific_concern_info, "root", "Database ID", rqst_errors)
@@ -213,5 +205,3 @@ def delete_specific_concern_using_api_rqst_params(response_raw_data, rqst_specif
             response_raw_data['Data']["Database ID"] = "Deleted"
         except ConsumerSpecificConcern.DoesNotExist:
             rqst_errors.append("Specific concern does not exist for database id: {}".format(rqst_specific_concern_id))
-
-    return response_raw_data

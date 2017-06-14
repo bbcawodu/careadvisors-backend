@@ -33,8 +33,6 @@ def add_carrier(response_raw_data, rqst_carrier_info, post_errors):
                 healthcare_carrier_obj.save()
                 response_raw_data['Data']["Database ID"] = healthcare_carrier_obj.id
 
-    return response_raw_data
-
 
 def create_new_carrier_obj(carrier_params, post_errors):
     healthcare_carrier_obj = HealthcareCarrier()
@@ -61,8 +59,6 @@ def modify_carrier(response_raw_data, rqst_carrier_info, post_errors):
             if len(post_errors) == 0:
                 healthcare_carrier_obj.save()
                 response_raw_data['Data']["Database ID"] = healthcare_carrier_obj.id
-
-    return response_raw_data
 
 
 def modify_carrier_obj(carrier_params, rqst_carrier_id, post_errors):
@@ -126,5 +122,3 @@ def delete_carrier(response_raw_data, rqst_carrier_info, post_errors):
             response_raw_data['Data']["Database ID"] = "Deleted"
         except HealthcareCarrier.DoesNotExist:
             post_errors.append("Healthcare carrier does not exist for database id: {}".format(rqst_carrier_id))
-
-    return response_raw_data

@@ -28,9 +28,9 @@ class JSONGETRspMixin(object):
             search_params = build_search_params(request.GET, rqst_errors)
 
             if not rqst_errors:
-                response_raw_data, rqst_errors = self.get_logic_function(request, search_params, response_raw_data, rqst_errors)
+                self.get_logic_function(request, search_params, response_raw_data, rqst_errors)
 
-            response_raw_data = parse_and_log_errors(response_raw_data, rqst_errors)
+            parse_and_log_errors(response_raw_data, rqst_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
             return response
 
@@ -52,9 +52,9 @@ class JSONPOSTRspMixin(object):
             post_json = request.body.decode('utf-8')
             post_data = json.loads(post_json)
 
-            response_raw_data, post_errors = self.post_logic_function(post_data, response_raw_data, post_errors)
+            self.post_logic_function(post_data, response_raw_data, post_errors)
 
-            response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
+            parse_and_log_errors(response_raw_data, post_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
             return response
 
@@ -76,9 +76,9 @@ class JSONPUTRspMixin(object):
             post_json = request.body.decode('utf-8')
             post_data = json.loads(post_json)
 
-            response_raw_data, post_errors = self.put_logic_function(post_data, response_raw_data, post_errors)
+            self.put_logic_function(post_data, response_raw_data, post_errors)
 
-            response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
+            parse_and_log_errors(response_raw_data, post_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
             return response
 
@@ -100,9 +100,9 @@ class JSONDELETERspMixin(object):
             post_json = request.body.decode('utf-8')
             post_data = json.loads(post_json)
 
-            response_raw_data, post_errors = self.delete_logic_function(post_data, response_raw_data, post_errors)
+            self.delete_logic_function(post_data, response_raw_data, post_errors)
 
-            response_raw_data = parse_and_log_errors(response_raw_data, post_errors)
+            parse_and_log_errors(response_raw_data, post_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
             return response
 
