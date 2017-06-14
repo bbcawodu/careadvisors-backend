@@ -30,8 +30,6 @@ def add_provider_location(response_raw_data, rqst_provider_location_info, post_e
 
                 response_raw_data['Data']["Database ID"] = provider_location_obj.id
 
-    return response_raw_data
-
 
 def create_new_location_obj(provider_location_params, provider_location_name, provider_network_obj):
     provider_location_obj = ProviderLocation()
@@ -67,8 +65,6 @@ def modify_provider_location(response_raw_data, rqst_provider_location_info, pos
                     response_raw_data['Data']["Database ID"] = provider_location_obj.id
                 except ProviderLocation.DoesNotExist:
                     post_errors.append("Provider Location does not exist for database id: {}".format(rqst_provider_location_id))
-
-    return response_raw_data
 
 
 def modify_location_obj(provider_location_params, provider_location_id, provider_location_name, provider_network_obj):
@@ -119,8 +115,6 @@ def modify_provider_location_add_accepted_plans(response_raw_data, rqst_provider
 
                     response_raw_data['Data']["Database ID"] = provider_location_obj.id
 
-    return response_raw_data
-
 
 def modify_provider_location_remove_accepted_plans(response_raw_data, rqst_provider_location_info, post_errors):
     modify_provider_location_params = get_provider_location_mgmt_put_params(rqst_provider_location_info, post_errors)
@@ -159,8 +153,6 @@ def modify_provider_location_remove_accepted_plans(response_raw_data, rqst_provi
                     provider_location_obj.save()
 
                     response_raw_data['Data']["Database ID"] = provider_location_obj.id
-
-    return response_raw_data
 
 
 def check_for_provider_location_objs_with_given_name_and_network(provider_location_name, provider_network_obj, post_errors, current_provider_location_id=None):
@@ -239,5 +231,3 @@ def delete_provider_location(response_raw_data, rqst_provider_location_info, pos
             response_raw_data['Data']["Database ID"] = "Deleted"
         except ProviderLocation.DoesNotExist:
             post_errors.append("Provider location does not exist for database id: {}".format(rqst_provider_location_id))
-
-    return response_raw_data

@@ -34,8 +34,6 @@ def retrieve_provider_locations_by_id(response_raw_data, rqst_errors, provider_l
         else:
             rqst_errors.append('No valid provider location IDs provided in request (must be integers)')
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_provider_locations_by_name(response_raw_data, rqst_errors, provider_locations, rqst_name):
     provider_locations_list = []
@@ -48,8 +46,6 @@ def retrieve_provider_locations_by_name(response_raw_data, rqst_errors, provider
     else:
         rqst_errors.append('No provider locations with name: {!s} not found in database'.format(rqst_name))
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_provider_locations_by_network_name(response_raw_data, rqst_errors, provider_locations, rqst_network_name):
     provider_locations_list = []
@@ -61,8 +57,6 @@ def retrieve_provider_locations_by_network_name(response_raw_data, rqst_errors, 
         response_raw_data["Data"] = provider_locations_list
     else:
         rqst_errors.append('No provider locations with a provider network with the name: {!s} found in database'.format(rqst_network_name))
-
-    return response_raw_data, rqst_errors
 
 
 def retrieve_provider_locations_by_network_id(response_raw_data, rqst_errors, provider_locations, rqst_network_id, list_of_network_ids):
@@ -103,5 +97,3 @@ def retrieve_provider_locations_by_network_id(response_raw_data, rqst_errors, pr
                 rqst_errors.append('No provider locations found for provider network database ID(s): ' + rqst_network_id)
         else:
             rqst_errors.append('No valid provider network database IDs provided in request (must be integers)')
-
-    return response_raw_data, rqst_errors

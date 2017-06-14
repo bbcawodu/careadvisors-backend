@@ -81,6 +81,4 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
 
             parse_ranked_specific_concern_objects_and_add_data_to_response()
 
-        return response_raw_data, post_errors
-
     post_logic_function = ranked_specific_concerns_post_logic

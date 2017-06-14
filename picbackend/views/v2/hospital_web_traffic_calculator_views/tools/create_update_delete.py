@@ -15,8 +15,6 @@ def add_hospital_web_traffic_calculator_data_instance_using_api_rqst_params(resp
         if not post_errors:
             response_raw_data['Data']["Database ID"] = web_traffic_data_obj.id
 
-    return response_raw_data
-
 
 def get_hospital_web_traffic_calculator_data_mgmt_put_params(rqst_hospital_web_traffic_calculator_data_info, post_errors):
 
@@ -37,8 +35,6 @@ def modify_hospital_web_traffic_calculator_data_instance_using_api_rqst_params(r
         if not post_errors:
             response_raw_data['Data']["Database ID"] = web_traffic_data_obj.id
 
-    return response_raw_data
-
 
 def delete_hospital_web_traffic_calculator_data_instance_using_api_rqst_params(response_raw_data, rqst_hospital_web_traffic_calculator_data_info, post_errors):
     rqst_hospital_web_traffic_calculator_data_id = clean_int_value_from_dict_object(rqst_hospital_web_traffic_calculator_data_info, "root", "Database ID", post_errors)
@@ -48,5 +44,3 @@ def delete_hospital_web_traffic_calculator_data_instance_using_api_rqst_params(r
                                                                            post_errors)
         if not post_errors:
             response_raw_data['Data']["Database ID"] = "Deleted"
-
-    return response_raw_data

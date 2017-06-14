@@ -29,15 +29,13 @@ class HospitalWebTrafficCalculatorDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
         # If there are no parsing errors, process PUT data based on database action
         if not post_errors:
             if rqst_action == "Instance Addition":
-                response_raw_data = add_hospital_web_traffic_calculator_data_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                add_hospital_web_traffic_calculator_data_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
             elif rqst_action == "Instance Modification":
-                response_raw_data = modify_hospital_web_traffic_calculator_data_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                modify_hospital_web_traffic_calculator_data_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
             elif rqst_action == "Instance Deletion":
-                response_raw_data = delete_hospital_web_traffic_calculator_data_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                delete_hospital_web_traffic_calculator_data_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
             else:
                 post_errors.append("No valid 'Database Action' provided.")
-
-        return response_raw_data, post_errors
 
     def hospital_web_traffic_calculator_data_mgr_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         web_traffic_calculator_data = HospitalWebTrafficData.objects.all()
@@ -57,9 +55,10 @@ class HospitalWebTrafficCalculatorDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
 
             data_list = retrieve_web_traffic_calculator_data_by_hospital_name(web_traffic_calculator_data,
                                                                               rqst_hospital_name, rqst_errors)
-        response_raw_data['Data'] = data_list
+        else:
+            rqst_errors.append('No Valid Parameters')
 
-        return response_raw_data, rqst_errors
+        response_raw_data['Data'] = data_list
 
     put_logic_function = hospital_web_traffic_calculator_data_mgr_put_logic
     get_logic_function = hospital_web_traffic_calculator_data_mgr_get_logic

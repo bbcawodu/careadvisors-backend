@@ -33,8 +33,6 @@ class HealthcareSubsidyEligibilityDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
             else:
                 post_errors.append("No valid 'Database Action' provided.")
 
-        return response_raw_data, post_errors
-
     def healthcare_subsidy_eligibility_data_mgr_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         healthcare_subsidy_eligibility_data_objs = HealthcareSubsidyEligibilityByFamSize.objects.all()
         data_list = []
@@ -53,9 +51,10 @@ class HealthcareSubsidyEligibilityDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
 
             data_list = retrieve_healthcare_subsidy_eligibility_data_by_family_size(healthcare_subsidy_eligibility_data_objs,
                                                                                     list_of_family_sizes, rqst_errors)
-        response_raw_data['Data'] = data_list
+        else:
+            rqst_errors.append('No Valid Parameters')
 
-        return response_raw_data, rqst_errors
+        response_raw_data['Data'] = data_list
 
     put_logic_function = healthcare_subsidy_eligibility_data_mgr_put_logic
     get_logic_function = healthcare_subsidy_eligibility_data_mgr_get_logic

@@ -32,16 +32,17 @@ class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
         # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
         # create and save database entry for appointment
-        if len(post_errors) == 0 and rqst_action == "Location Addition":
-            response_raw_data = add_nav_hub_location(response_raw_data, post_data, post_errors)
+        if not post_errors:
+            if rqst_action == "Location Addition":
+                add_nav_hub_location(response_raw_data, post_data, post_errors)
 
-        elif len(post_errors) == 0 and rqst_action == "Location Modification":
-            response_raw_data = modify_nav_hub_location(response_raw_data, post_data, post_errors)
+            elif rqst_action == "Location Modification":
+                modify_nav_hub_location(response_raw_data, post_data, post_errors)
 
-        elif len(post_errors) == 0 and rqst_action == "Location Deletion":
-            response_raw_data = delete_nav_hub_location(response_raw_data, post_data, post_errors)
-
-        return response_raw_data, post_errors
+            elif rqst_action == "Location Deletion":
+                delete_nav_hub_location(response_raw_data, post_data, post_errors)
+            else:
+                post_errors.append("No valid 'Database Action' provided.")
 
     def nav_hub_location_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         # Parse GET params and retreive metrics entries
@@ -59,8 +60,6 @@ class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             response_raw_data["Data"] = nav_location_list
         else:
             rqst_errors.append("No location entries found in database.")
-
-        return response_raw_data, rqst_errors
 
     put_logic_function = nav_hub_location_management_put_logic
     get_logic_function = nav_hub_location_management_get_logic

@@ -37,8 +37,6 @@ def retrieve_f_l_name_consumers(response_raw_data, rqst_errors, consumers, rqst_
         rqst_errors.append('Consumer with name: {!s} {!s} not found in database'.format(rqst_first_name,
                                                                                             rqst_last_name))
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_email_consumers(response_raw_data, rqst_errors, consumers, rqst_email, list_of_emails):
     """
@@ -74,8 +72,6 @@ def retrieve_email_consumers(response_raw_data, rqst_errors, consumers, rqst_ema
                 rqst_errors.append('Consumer with email: {!s} not found in database'.format(email))
     else:
         rqst_errors.append('Consumer with emails(s): {!s} not found in database'.format(rqst_email))
-
-    return response_raw_data, rqst_errors
 
 
 def retrieve_first_name_consumers(response_raw_data, rqst_errors, consumers, rqst_first_name, list_of_first_names):
@@ -113,8 +109,6 @@ def retrieve_first_name_consumers(response_raw_data, rqst_errors, consumers, rqs
     else:
         rqst_errors.append('Consumer with first name(s): {!s} not found in database'.format(rqst_first_name))
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_last_name_consumers(response_raw_data, rqst_errors, consumers, rqst_last_name, list_of_last_names):
     """
@@ -150,8 +144,6 @@ def retrieve_last_name_consumers(response_raw_data, rqst_errors, consumers, rqst
                 rqst_errors.append('Staff Member with last name: {!s} not found in database'.format(name))
     else:
         rqst_errors.append('Staff Member with last name(s): {!s} not found in database'.format(rqst_last_name))
-
-    return response_raw_data, rqst_errors
 
 
 def retrieve_id_consumers(response_raw_data, rqst_errors, consumers, rqst_consumer_id, list_of_ids):
@@ -202,10 +194,8 @@ def retrieve_id_consumers(response_raw_data, rqst_errors, consumers, rqst_consum
         else:
             rqst_errors.append('No valid consumer IDs provided in request (must be integers)')
 
-    return response_raw_data, rqst_errors
 
-
-def break_results_into_pages(request, response_raw_data, CONSUMERS_PER_PAGE, rqst_page_no):
+def break_results_into_pages(response_raw_data, CONSUMERS_PER_PAGE, rqst_page_no, base_url):
     """
     This function takes a dictionary of response data for a PIC Consumer GET API request, replaces excess consumer info
     with ids, and adds a key value pair of urls for subsequent pages of full PIC consumer info
@@ -218,7 +208,10 @@ def break_results_into_pages(request, response_raw_data, CONSUMERS_PER_PAGE, rqs
     """
 
     consumer_list = response_raw_data["Data"]
+
     if len(consumer_list) > CONSUMERS_PER_PAGE:
+        page_urls = []
+
         if rqst_page_no:
             if len(consumer_list) > ((rqst_page_no - 1) * CONSUMERS_PER_PAGE):
                 for i, consumer in enumerate(consumer_list[:(CONSUMERS_PER_PAGE * (rqst_page_no - 1))]):
@@ -227,13 +220,14 @@ def break_results_into_pages(request, response_raw_data, CONSUMERS_PER_PAGE, rqs
                 for i, consumer in enumerate(consumer_list[(rqst_page_no * CONSUMERS_PER_PAGE):]):
                     consumer_list[(rqst_page_no * CONSUMERS_PER_PAGE)+i] = consumer["Database ID"]
         else:
-            response_raw_data["Page URLs"] = []
             total_pages = math.ceil(len(consumer_list) / CONSUMERS_PER_PAGE)
             for i in range(total_pages):
-                response_raw_data["Page URLs"].append(request.build_absolute_uri(None) + "&page=" + str(i+1))
+                page_urls.append(base_url + "&page=" + str(i+1))
 
             for i, consumer in enumerate(consumer_list[CONSUMERS_PER_PAGE:]):
                 consumer_list[CONSUMERS_PER_PAGE+i] = consumer["Database ID"]
 
+        if page_urls:
+            response_raw_data['Page URLs'] = page_urls
+
     response_raw_data["Data"] = consumer_list
-    return response_raw_data

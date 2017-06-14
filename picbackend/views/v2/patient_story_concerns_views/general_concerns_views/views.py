@@ -34,15 +34,13 @@ class GeneralConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         # If there are no parsing errors, process PUT data based on database action
         if not post_errors:
             if rqst_action == "Concern Addition":
-                response_raw_data = add_general_concern_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                add_general_concern_using_api_rqst_params(response_raw_data, post_data, post_errors)
             elif rqst_action == "Concern Modification":
-                response_raw_data = modify_general_concern_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                modify_general_concern_using_api_rqst_params(response_raw_data, post_data, post_errors)
             elif rqst_action == "Concern Deletion":
-                response_raw_data = delete_general_concern_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                delete_general_concern_using_api_rqst_params(response_raw_data, post_data, post_errors)
             else:
                 post_errors.append("No valid 'Database Action' provided.")
-
-        return response_raw_data, post_errors
 
     def general_concerns_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         general_concerns = ConsumerGeneralConcern.objects.all()
@@ -53,16 +51,13 @@ class GeneralConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 list_of_ids = search_params['id list']
             else:
                 list_of_ids = None
-            response_raw_data, rqst_errors = retrieve_general_concerns_by_id(response_raw_data, rqst_errors,
-                                                                             general_concerns, rqst_carrier_id,
-                                                                             list_of_ids)
+            retrieve_general_concerns_by_id(response_raw_data, rqst_errors, general_concerns, rqst_carrier_id, list_of_ids)
         elif 'name' in search_params:
             rqst_name = search_params['name']
 
-            response_raw_data, rqst_errors = retrieve_general_concerns_by_name(response_raw_data, rqst_errors,
-                                                                               general_concerns, rqst_name)
-
-        return response_raw_data, rqst_errors
+            retrieve_general_concerns_by_name(response_raw_data, rqst_errors, general_concerns, rqst_name)
+        else:
+            rqst_errors.append('No Valid Parameters')
 
     put_logic_function = general_concerns_management_put_logic
     get_logic_function = general_concerns_management_get_logic

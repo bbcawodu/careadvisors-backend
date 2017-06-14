@@ -22,8 +22,6 @@ def add_provider_network(response_raw_data, rqst_provider_network_info, post_err
 
             response_raw_data['Data']["Database ID"] = provider_network_obj.id
 
-    return response_raw_data
-
 
 def modify_provider_network(response_raw_data, rqst_provider_network_info, post_errors):
     modify_provider_network_params = get_provider_network_mgmt_put_params(rqst_provider_network_info, post_errors)
@@ -42,8 +40,6 @@ def modify_provider_network(response_raw_data, rqst_provider_network_info, post_
                 response_raw_data['Data']["Database ID"] = provider_network_obj.id
             except ProviderNetwork.DoesNotExist:
                 post_errors.append("Provider Network does not exist for database id: {}".format(rqst_provider_network_id))
-
-    return response_raw_data
 
 
 def check_for_provider_network_objs_with_given_name(provider_network_name, post_errors, current_provider_network_id=None):
@@ -89,5 +85,3 @@ def delete_provider_network(response_raw_data, rqst_provider_network_info, post_
             response_raw_data['Data']["Database ID"] = "Deleted"
         except ProviderNetwork.DoesNotExist:
             post_errors.append("Provider network does not exist for database id: {}".format(rqst_provider_network_id))
-
-    return response_raw_data

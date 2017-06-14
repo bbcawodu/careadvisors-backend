@@ -7,7 +7,10 @@ from ...utils import clean_string_value_from_dict_object
 import pokitdok
 
 
-def fetch_and_parse_pokit_elig_data(post_data, response_raw_data, post_errors):
+def fetch_and_parse_pokit_elig_data(post_data, post_errors):
+    raw_eligibility_results = {}
+    parsed_eligibility_results = {}
+
     rqst_consumer_f_name = clean_string_value_from_dict_object(post_data, "root", "First Name", post_errors, none_allowed=True)
     rqst_consumer_l_name = clean_string_value_from_dict_object(post_data, "root", "Last Name", post_errors, none_allowed=True)
     rqst_consumer_birth = clean_string_value_from_dict_object(post_data, "root", "Birth Date", post_errors, none_allowed=True)
@@ -18,42 +21,37 @@ def fetch_and_parse_pokit_elig_data(post_data, response_raw_data, post_errors):
     rqst_consumer_trading_partner = clean_string_value_from_dict_object(post_data, "root", "Trading Partner ID", post_errors)
 
     # if no errors, make request to pokitdok
-    if len(post_errors) == 0:
-        eligibility_data = {
+    if not post_errors:
+        eligibility_request_data = {
             "member": {},
             "provider":{"npi": "1962941096",
                         "organization_name": "Care Advisors Inc."},
             "trading_partner_id": rqst_consumer_trading_partner
         }
         if rqst_consumer_f_name:
-            eligibility_data["member"]["first_name"] = rqst_consumer_f_name
+            eligibility_request_data["member"]["first_name"] = rqst_consumer_f_name
         if rqst_consumer_l_name:
-            eligibility_data["member"]["last_name"] = rqst_consumer_l_name
+            eligibility_request_data["member"]["last_name"] = rqst_consumer_l_name
         if rqst_consumer_birth:
-            eligibility_data["member"]["birth_date"] = rqst_consumer_birth
+            eligibility_request_data["member"]["birth_date"] = rqst_consumer_birth
         if rqst_consumer_plan_id:
-            eligibility_data["member"]["id"] = rqst_consumer_plan_id
+            eligibility_request_data["member"]["id"] = rqst_consumer_plan_id
         if rqst_consumer_gender:
-            eligibility_data["member"]["gender"] = rqst_consumer_gender
+            eligibility_request_data["member"]["gender"] = rqst_consumer_gender
 
         pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
-        eligibility_results = pd.eligibility(eligibility_data)
-        response_raw_data["Pokitdok Raw Results"] = eligibility_results
-        eligibility_results = check_elig_results_for_errors(eligibility_results, post_errors)
+        raw_eligibility_results = pd.eligibility(eligibility_request_data)
+        raw_eligibility_results = check_elig_results_for_errors(raw_eligibility_results, post_errors)
 
-        parsed_elig_dict = {}
         if "No Data in response from Pokitdok" not in post_errors and "Errors in Pokitdok Data" not in post_errors:
             if rqst_consumer_trading_partner == "united_health_care":
-                parse_united_health_care_data(eligibility_results, parsed_elig_dict, post_errors)
+                parse_united_health_care_data(raw_eligibility_results, parsed_eligibility_results, post_errors)
             elif rqst_consumer_trading_partner == "ambetter":
-                parse_ambetter_data(eligibility_results, parsed_elig_dict, post_errors)
+                parse_ambetter_data(raw_eligibility_results, parsed_eligibility_results, post_errors)
             else:
-                parse_united_health_care_data(eligibility_results, parsed_elig_dict, post_errors)
+                parse_united_health_care_data(raw_eligibility_results, parsed_eligibility_results, post_errors)
 
-        response_raw_data["Data"] = parsed_elig_dict
-        # response_raw_data["Pokitdok Request"] = eligibility_data
-
-    return response_raw_data
+    return raw_eligibility_results, parsed_eligibility_results
 
 
 def parse_united_health_care_data(eligibility_results, parsed_elig_dict, post_errors):

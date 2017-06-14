@@ -31,9 +31,8 @@ class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
     def metrics_management_put_logic(self, post_data, response_raw_data, post_errors):
         # Parse BODY data and add or update metrics entry
-        response_raw_data = add_or_update_metrics_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
+        add_or_update_metrics_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
 
-        return response_raw_data, post_errors
 
     def metrics_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         # Start with this query for all and then evaluate down from request params
@@ -49,9 +48,9 @@ class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
         # separate_results_into_groups(response_raw_data, search_params, metrics_dict)
 
-        convert_dict_results_into_list_results(metrics_dict, response_raw_data)
+        results_list = convert_dict_results_into_list_results(metrics_dict)
 
-        return response_raw_data, rqst_errors
+        response_raw_data["Data"] = results_list
 
     put_logic_function = metrics_management_put_logic
     get_logic_function = metrics_management_get_logic
@@ -96,6 +95,8 @@ def filter_db_objects_by_primary_params(response_raw_data, search_params, db_obj
         list_of_mpns = search_params['mpn list']
         metrics_dict = retrieve_mpn_metrics(response_raw_data, rqst_errors, db_objects, rqst_staff_mpn,
                                             list_of_mpns, fields=validated_fields)
+    else:
+        rqst_errors.append('No Valid Parameters')
 
     return metrics_dict
 
@@ -176,8 +177,10 @@ def separate_results_into_groups(response_raw_data, search_params, metrics_dict)
             response_raw_data['data_dict'] = metrics_dict
 
 
-def convert_dict_results_into_list_results(results_dict, response_raw_data):
+def convert_dict_results_into_list_results(results_dict):
     results_list = []
+
     for result_key, result_entry in results_dict.items():
         results_list.append(result_entry)
-    response_raw_data["Data"] = results_list
+
+    return results_list
