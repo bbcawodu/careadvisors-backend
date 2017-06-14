@@ -49,8 +49,6 @@ def add_nav_hub_location(response_raw_data, post_data, post_errors):
 
         response_raw_data['Data'] = {"Database ID": location_instance.id}
 
-    return response_raw_data
-
 
 def modify_nav_hub_location(response_raw_data, post_data, post_errors):
     # rqst_location_id = clean_int_value_from_dict_object(post_data, "root", "Database ID", post_errors)
@@ -91,8 +89,6 @@ def modify_nav_hub_location(response_raw_data, post_data, post_errors):
         except IntegrityError:
             post_errors.append('Database entry already exists for the name: {!s}'.format(rqst_location_name))
 
-    return response_raw_data
-
 
 def delete_nav_hub_location(response_raw_data, post_data, post_errors):
     rqst_location_id = clean_int_value_from_dict_object(post_data, "root", "Database ID", post_errors)
@@ -106,5 +102,3 @@ def delete_nav_hub_location(response_raw_data, post_data, post_errors):
             post_errors.append('Location database entry does not exist for the id: {!s}'.format(str(rqst_location_id)))
         except NavMetricsLocation.MultipleObjectsReturned:
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_location_id)))
-
-    return response_raw_data

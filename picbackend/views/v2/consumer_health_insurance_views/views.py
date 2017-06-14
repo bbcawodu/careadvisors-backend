@@ -23,9 +23,10 @@ class ConsumerHealthInsuranceBenefitsView(JSONPOSTRspMixin, View):
 
     def insurance_benefits_logic(self, post_data, response_raw_data, post_errors):
         # Fetch eligibility data from Pokitdok
-        response_raw_data = fetch_and_parse_pokit_elig_data(post_data, response_raw_data, post_errors)
+        raw_elig_data, parsed_elig_data = fetch_and_parse_pokit_elig_data(post_data, post_errors)
 
-        return response_raw_data, post_errors
+        response_raw_data['raw_eligibility_data'] = raw_elig_data
+        response_raw_data['Data'] = parsed_elig_data
 
     post_logic_function = insurance_benefits_logic
 
@@ -46,7 +47,5 @@ class TradingPartnerView(JSONGETRspMixin, View):
             trading_partners = pd.trading_partners()
 
         response_raw_data["Data"] = trading_partners["data"]
-
-        return response_raw_data, rqst_errors
 
     get_logic_function = trading_partner_logic

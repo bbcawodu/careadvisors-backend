@@ -37,8 +37,6 @@ def retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_
         else:
             rqst_errors.append('No valid plan IDs provided in request (must be integers)')
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_name_plans(response_raw_data, rqst_errors, plans, rqst_name, include_summary_report=False, include_detailed_report=False):
     plans_list = []
@@ -50,8 +48,6 @@ def retrieve_name_plans(response_raw_data, rqst_errors, plans, rqst_name, includ
         response_raw_data["Data"] = plans_list
     else:
         rqst_errors.append('No plans with name: {!s} not found in database'.format(rqst_name))
-
-    return response_raw_data, rqst_errors
 
 
 def retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans, rqst_carrier_id, list_of_carrier_ids, include_summary_report=False, include_detailed_report=False):
@@ -93,8 +89,6 @@ def retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans, rqst_car
         else:
             rqst_errors.append('No valid carrier database IDs provided in request (must be integers)')
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, plans, rqst_carrier_state, list_of_carrier_states, include_summary_report=False, include_detailed_report=False):
     plans_dict = {}
@@ -119,8 +113,6 @@ def retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, plans, rqst_
     else:
         rqst_errors.append('No plans with a carrier in state(s): {!s} found in database'.format(rqst_carrier_state))
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, plans, rqst_carrier_name, include_summary_report=False, include_detailed_report=False):
     plans_list = []
@@ -132,8 +124,6 @@ def retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, plans, rqst_c
         response_raw_data["Data"] = plans_list
     else:
         rqst_errors.append('No Plans with a carrier with the name: {!s} found in database'.format(rqst_carrier_name))
-
-    return response_raw_data, rqst_errors
 
 
 def retrieve_plans_by_accepted_location_id(response_raw_data, rqst_errors, plans, rqst_accepted_location_id, list_of_accepted_location_ids, include_summary_report=False, include_detailed_report=False):
@@ -190,5 +180,3 @@ def retrieve_plans_by_accepted_location_id(response_raw_data, rqst_errors, plans
 
         else:
             rqst_errors.append('No valid provider location database IDs provided in request (must be integers)')
-
-    return response_raw_data, rqst_errors

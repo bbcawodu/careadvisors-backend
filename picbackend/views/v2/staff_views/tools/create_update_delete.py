@@ -22,8 +22,6 @@ def add_staff_using_api_rqst_params(response_raw_data, post_data, post_errors):
             if user_instance:
                 response_raw_data['Data'] = {"Database ID": user_instance.id}
 
-    return response_raw_data
-
 
 def get_staff_mgmt_put_params(put_data, rqst_errors):
     rqst_usr_email = clean_string_value_from_dict_object(put_data, "root", "Email", rqst_errors)
@@ -98,8 +96,6 @@ def modify_staff_using_api_rqst_params(response_raw_data, post_data, post_errors
         if len(post_errors) == 0 and staff_instance:
             response_raw_data['Data'] = {"Database ID": staff_instance.id}
 
-    return response_raw_data
-
 
 def modify_staff_obj(staff_params, rqst_errors):
     staff_instance = None
@@ -141,5 +137,3 @@ def delete_staff_using_api_rqst_params(response_raw_data, post_data, post_errors
             post_errors.append('Staff database entry does not exist for the id: {!s}'.format(str(rqst_usr_id)))
         except PICStaff.MultipleObjectsReturned:
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
-
-    return response_raw_data

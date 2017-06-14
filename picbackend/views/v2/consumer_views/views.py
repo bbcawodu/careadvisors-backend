@@ -43,21 +43,19 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         # If there are no parsing errors, process POST data based on database action
         if not post_errors:
             if rqst_action == "Consumer Addition":
-                response_raw_data = add_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                add_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
             elif rqst_action == "Consumer Modification":
-                response_raw_data = modify_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                modify_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
             elif rqst_action == "Consumer Deletion":
-                response_raw_data = delete_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
-
-        return response_raw_data, post_errors
+                delete_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
+            else:
+                post_errors.append("No valid 'Database Action' provided.")
 
     def consumer_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         # Retrieve all Patient Innovation Center consumer objects
         consumers = PICConsumer.objects.all()
 
-        response_raw_data, rqst_errors = get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
-
-        return response_raw_data, rqst_errors
+        get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
 
     put_logic_function = consumer_management_put_logic
     get_logic_function = consumer_management_get_logic
@@ -77,9 +75,7 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         # Retrieve all Patient Innovation Center consumer objects
         consumers = PICConsumerBackup.objects.all()
 
-        response_raw_data, rqst_errors = get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
-
-        return response_raw_data, rqst_errors
+        get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
 
     get_logic_function = consumer_management_get_logic
 
@@ -101,37 +97,32 @@ def get_and_add_consumer_data_to_response(consumers, request, search_params, res
     if 'first name' in search_params and 'last name' in search_params:
         rqst_first_name = search_params['first name']
         rqst_last_name = search_params['last name']
-        response_raw_data, rqst_errors = retrieve_f_l_name_consumers(response_raw_data, rqst_errors, consumers,
-                                                                     rqst_first_name, rqst_last_name)
+        retrieve_f_l_name_consumers(response_raw_data, rqst_errors, consumers, rqst_first_name, rqst_last_name)
     elif 'email' in search_params:
         rqst_email = search_params['email']
         list_of_emails = search_params['email list']
-        response_raw_data, rqst_errors = retrieve_email_consumers(response_raw_data, rqst_errors, consumers, rqst_email,
-                                                                  list_of_emails)
+        retrieve_email_consumers(response_raw_data, rqst_errors, consumers, rqst_email, list_of_emails)
     elif 'first name' in search_params:
         rqst_first_name = search_params['first name']
         list_of_first_names = search_params['first name list']
-        response_raw_data, rqst_errors = retrieve_first_name_consumers(response_raw_data, rqst_errors, consumers,
-                                                                       rqst_first_name, list_of_first_names)
+        retrieve_first_name_consumers(response_raw_data, rqst_errors, consumers, rqst_first_name, list_of_first_names)
     elif 'last name' in search_params:
         rqst_last_name = search_params['last name']
         list_of_last_names = search_params['last name list']
-        response_raw_data, rqst_errors = retrieve_last_name_consumers(response_raw_data, rqst_errors, consumers,
-                                                                      rqst_last_name, list_of_last_names)
+        retrieve_last_name_consumers(response_raw_data, rqst_errors, consumers, rqst_last_name, list_of_last_names)
     elif 'id' in search_params:
         rqst_consumer_id = search_params['id']
         if rqst_consumer_id != 'all':
             list_of_ids = search_params['id list']
         else:
             list_of_ids = None
-        response_raw_data, rqst_errors = retrieve_id_consumers(response_raw_data, rqst_errors, consumers,
-                                                               rqst_consumer_id, list_of_ids)
+        retrieve_id_consumers(response_raw_data, rqst_errors, consumers, rqst_consumer_id, list_of_ids)
     else:
         rqst_errors.append('No Valid Parameters')
 
     # Break consumer results into pages so that results aren't too unruly
     if "Data" in response_raw_data:
         rqst_page_no = search_params['page number'] if 'page number' in search_params else None
-        response_raw_data = break_results_into_pages(request, response_raw_data, CONSUMERS_PER_PAGE, rqst_page_no)
+        base_url = request.build_absolute_uri(None)
 
-    return response_raw_data, rqst_errors
+        break_results_into_pages(response_raw_data, CONSUMERS_PER_PAGE, rqst_page_no, base_url)

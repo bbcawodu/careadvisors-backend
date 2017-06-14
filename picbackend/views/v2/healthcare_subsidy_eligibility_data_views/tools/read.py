@@ -1,63 +1,48 @@
-def retrieve_healthcare_subsidy_eligibility_data_by_id(response_raw_data, rqst_errors, healthcare_subsidy_eligibility_data_objs, rqst_healthcare_subsidy_eligibility_data_id, list_of_ids):
-    if rqst_healthcare_subsidy_eligibility_data_id == "all":
-        all_healthcare_subsidy_eligibility_data_objs = healthcare_subsidy_eligibility_data_objs.all()
-        healthcare_subsidy_eligibility_data_dict = {}
-        for healthcare_subsidy_eligibility_data_instance in all_healthcare_subsidy_eligibility_data_objs:
-            healthcare_subsidy_eligibility_data_dict[healthcare_subsidy_eligibility_data_instance.id] = healthcare_subsidy_eligibility_data_instance.return_values_dict()
-        healthcare_subsidy_eligibility_data_list = []
-        for healthcare_subsidy_eligibility_data_key, healthcare_subsidy_eligibility_data_entry in healthcare_subsidy_eligibility_data_dict.items():
-            healthcare_subsidy_eligibility_data_list.append(healthcare_subsidy_eligibility_data_entry)
+from picmodels.services import filter_db_queryset_by_id
+from picmodels.services import filter_healthcare_subsidy_eligibility_data_instances_by_family_size
 
-        response_raw_data["Data"] = healthcare_subsidy_eligibility_data_list
-    elif list_of_ids:
-        if len(list_of_ids) > 0:
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            healthcare_subsidy_eligibility_data_objs = healthcare_subsidy_eligibility_data_objs.filter(id__in=list_of_ids)
-            if len(healthcare_subsidy_eligibility_data_objs) > 0:
-                healthcare_subsidy_eligibility_data_dict = {}
-                for healthcare_subsidy_eligibility_data_instance in healthcare_subsidy_eligibility_data_objs:
-                    healthcare_subsidy_eligibility_data_dict[healthcare_subsidy_eligibility_data_instance.id] = healthcare_subsidy_eligibility_data_instance.return_values_dict()
-                healthcare_subsidy_eligibility_data_list = []
-                for healthcare_subsidy_eligibility_data_key, healthcare_subsidy_eligibility_data_entry in healthcare_subsidy_eligibility_data_dict.items():
-                    healthcare_subsidy_eligibility_data_list.append(healthcare_subsidy_eligibility_data_entry)
-                response_raw_data["Data"] = healthcare_subsidy_eligibility_data_list
 
-                for healthcare_subsidy_eligibility_data_id in list_of_ids:
-                    if healthcare_subsidy_eligibility_data_id not in healthcare_subsidy_eligibility_data_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('Healthcare subsidy eligibility data instance with id: {} not found in database'.format(healthcare_subsidy_eligibility_data_id))
-            else:
-                rqst_errors.append('No healthcare subsidy eligibility data instances found for database ID(s): ' + rqst_healthcare_subsidy_eligibility_data_id)
+def retrieve_healthcare_subsidy_eligibility_data_by_id(healthcare_subsidy_eligibility_data_objs, rqst_healthcare_subsidy_eligibility_data_id, list_of_ids, rqst_errors):
+    healthcare_subsidy_eligibility_data_objs = filter_db_queryset_by_id(healthcare_subsidy_eligibility_data_objs, rqst_healthcare_subsidy_eligibility_data_id, list_of_ids)
+
+    response_list = create_response_list_from_db_objects(healthcare_subsidy_eligibility_data_objs)
+
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No healthcare subsidy eligibility data instances in db for given ids")
         else:
-            rqst_errors.append('No valid healthcare subsidy eligibility data instance data IDs provided in request (must be integers)')
+            for healthcare_subsidy_eligibility_data_id in list_of_ids:
+                tuple_of_bools_if_id_in_data = (instance_data['Database ID'] == healthcare_subsidy_eligibility_data_id for instance_data in response_list)
+                if not any(tuple_of_bools_if_id_in_data):
+                    rqst_errors.append('Healthcare subsidy eligibility data instance with id: {} not found in database'.format(healthcare_subsidy_eligibility_data_id))
 
-    return response_raw_data, rqst_errors
+    check_response_data_for_requested_data()
+
+    return response_list
 
 
-def retrieve_healthcare_subsidy_eligibility_data_by_family_size(response_raw_data, rqst_errors, healthcare_subsidy_eligibility_data_objs, rqst_family_size, list_of_family_sizes):
-    if list_of_family_sizes:
-        if len(list_of_family_sizes) > 0:
-            healthcare_subsidy_eligibility_data_objs = healthcare_subsidy_eligibility_data_objs.filter(family_size__in=list_of_family_sizes)
-            if len(healthcare_subsidy_eligibility_data_objs) > 0:
-                healthcare_subsidy_eligibility_data_dict = {}
-                for healthcare_subsidy_eligibility_data_instance in healthcare_subsidy_eligibility_data_objs:
-                    healthcare_subsidy_eligibility_data_dict[healthcare_subsidy_eligibility_data_instance.family_size] = healthcare_subsidy_eligibility_data_instance.return_values_dict()
-                healthcare_subsidy_eligibility_data_list = []
-                for healthcare_subsidy_eligibility_data_key, healthcare_subsidy_eligibility_data_entry in healthcare_subsidy_eligibility_data_dict.items():
-                    healthcare_subsidy_eligibility_data_list.append(healthcare_subsidy_eligibility_data_entry)
-                response_raw_data["Data"] = healthcare_subsidy_eligibility_data_list
+def create_response_list_from_db_objects(db_objects):
+    return_list = []
 
-                for family_size in list_of_family_sizes:
-                    if family_size not in healthcare_subsidy_eligibility_data_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('Healthcare subsidy eligibility data instance with family size: {} not found in database'.format(family_size))
-            else:
-                rqst_errors.append(
-                    'No healthcare subsidy eligibility data instances found for family size(s): ' + rqst_family_size)
-        else:
-            rqst_errors.append('No valid family sizes provided in request (must be integers)')
+    for db_instance in db_objects:
+        return_list.append(db_instance.return_values_dict())
 
-    return response_raw_data, rqst_errors
+    return return_list
+
+
+def retrieve_healthcare_subsidy_eligibility_data_by_family_size(healthcare_subsidy_eligibility_data_objs, list_of_family_sizes, rqst_errors):
+    healthcare_subsidy_eligibility_data_objs = filter_healthcare_subsidy_eligibility_data_instances_by_family_size(healthcare_subsidy_eligibility_data_objs, list_of_family_sizes)
+
+    response_list = create_response_list_from_db_objects(healthcare_subsidy_eligibility_data_objs)
+
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No healthcare subsidy eligibility data instances in db for given family sizes.")
+        for family_size in list_of_family_sizes:
+            tuple_of_bools_if_family_size_in_data = (instance_data['family_size'] == family_size for instance_data in response_list)
+            if not any(tuple_of_bools_if_family_size_in_data):
+                rqst_errors.append('Healthcare subsidy eligibility data instance with family size: {} not found in database'.format(family_size))
+
+    check_response_data_for_requested_data()
+
+    return response_list

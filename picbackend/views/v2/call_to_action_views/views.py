@@ -90,6 +90,4 @@ class ViewCTAView(JSONGETRspMixin, View):
 
         response_raw_data["Data"] = cta_return_list
 
-        return response_raw_data, rqst_errors
-
     get_logic_function = view_cta_get_logic

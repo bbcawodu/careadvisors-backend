@@ -24,8 +24,6 @@ def add_or_update_metrics_instance_using_api_rqst_params(response_raw_data, post
         if len(post_errors) == 0 and metrics_instance and metrics_instance_message:
             response_raw_data["Status"]["Message"] = [metrics_instance_message]
 
-    return response_raw_data
-
 
 def get_metrics_mgmt_put_params(rqst_data, rqst_errors):
     consumer_metrics = clean_dict_value_from_dict_object(rqst_data, "root", "Consumer Metrics", rqst_errors)

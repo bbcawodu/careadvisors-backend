@@ -23,12 +23,11 @@ def add_general_concern_using_api_rqst_params(response_raw_data, rqst_gen_concer
                 general_concern_obj.save()
                 response_raw_data['Data']["Database ID"] = general_concern_obj.id
 
-    return response_raw_data
-
 
 def get_general_concern_mgmt_put_params(rqst_carrier_info, rqst_errors):
 
-    return {"rqst_general_concern_name": clean_string_value_from_dict_object(rqst_carrier_info, "root", "name", rqst_errors),
+    return {
+        "rqst_general_concern_name": clean_string_value_from_dict_object(rqst_carrier_info, "root", "name", rqst_errors),
             }
 
 
@@ -81,8 +80,6 @@ def modify_general_concern_using_api_rqst_params(response_raw_data, rqst_general
                 general_concern_obj.save()
                 response_raw_data['Data']["Database ID"] = general_concern_obj.id
 
-    return response_raw_data
-
 
 def modify_general_concern_obj(general_concern_params, rqst_general_concern_id, rqst_errors):
     general_concern_obj = None
@@ -105,5 +102,3 @@ def delete_general_concern_using_api_rqst_params(response_raw_data, rqst_general
             response_raw_data['Data']["Database ID"] = "Deleted"
         except ConsumerGeneralConcern.DoesNotExist:
             rqst_errors.append("General concern does not exist for database id: {}".format(rqst_general_concern_id))
-
-    return response_raw_data

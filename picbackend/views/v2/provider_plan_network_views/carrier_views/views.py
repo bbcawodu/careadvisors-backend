@@ -41,13 +41,13 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         # If there are no parsing errors, process PUT data based on database action
         if not post_errors:
             if rqst_action == "Carrier Addition":
-                response_raw_data = add_carrier(response_raw_data, post_data, post_errors)
+                add_carrier(response_raw_data, post_data, post_errors)
             elif rqst_action == "Carrier Modification":
-                response_raw_data = modify_carrier(response_raw_data, post_data, post_errors)
+                modify_carrier(response_raw_data, post_data, post_errors)
             elif rqst_action == "Carrier Deletion":
-                response_raw_data = delete_carrier(response_raw_data, post_data, post_errors)
-
-        return response_raw_data, post_errors
+                delete_carrier(response_raw_data, post_data, post_errors)
+            else:
+                post_errors.append("No valid 'Database Action' provided.")
 
     def carriers_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         carriers = [HealthcareCarrier.objects.all()]
@@ -72,20 +72,18 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 list_of_ids = search_params['id list']
             else:
                 list_of_ids = None
-            response_raw_data, rqst_errors = retrieve_id_carriers(response_raw_data, rqst_errors, carriers[0],
-                                                                   rqst_carrier_id, list_of_ids)
+            retrieve_id_carriers(response_raw_data, rqst_errors, carriers[0], rqst_carrier_id, list_of_ids)
         elif 'name' in search_params:
             rqst_name = search_params['name']
 
-            response_raw_data, rqst_errors = retrieve_name_carriers(response_raw_data, rqst_errors, carriers[0], rqst_name)
+            retrieve_name_carriers(response_raw_data, rqst_errors, carriers[0], rqst_name)
         elif 'state' in search_params:
             rqst_state = search_params['state']
             list_of_states = search_params['state list']
 
-            response_raw_data, rqst_errors = retrieve_state_carriers(response_raw_data, rqst_errors, carriers[0],
-                                                                     rqst_state, list_of_states)
-
-        return response_raw_data, rqst_errors
+            retrieve_state_carriers(response_raw_data, rqst_errors, carriers[0], rqst_state, list_of_states)
+        else:
+            rqst_errors.append('No Valid Parameters')
 
     put_logic_function = carriers_management_put_logic
     get_logic_function = carriers_management_get_logic

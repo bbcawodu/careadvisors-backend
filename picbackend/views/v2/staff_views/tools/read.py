@@ -24,8 +24,6 @@ def retrieve_f_l_name_staff(response_raw_data, rqst_errors, staff_members, rqst_
         rqst_errors.append('Staff Member with name: {!s} {!s} not found in database'.format(rqst_first_name,
                                                                                             rqst_last_name))
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_email_staff(response_raw_data, rqst_errors, rqst_email, list_of_emails):
     staff_dict = {}
@@ -48,8 +46,6 @@ def retrieve_email_staff(response_raw_data, rqst_errors, rqst_email, list_of_ema
                 rqst_errors.append('Staff Member with email: {!s} not found in database'.format(email))
     else:
         rqst_errors.append('Staff Member with email(s): {!s} not found in database'.format(rqst_email))
-
-    return response_raw_data, rqst_errors
 
 
 def retrieve_first_name_staff(response_raw_data, rqst_errors, rqst_first_name, list_of_first_names):
@@ -74,8 +70,6 @@ def retrieve_first_name_staff(response_raw_data, rqst_errors, rqst_first_name, l
     else:
         rqst_errors.append('Staff Member with first name(s): {!s} not found in database'.format(rqst_first_name))
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_last_name_staff(response_raw_data, rqst_errors, rqst_last_name, list_of_last_names):
     staff_dict = {}
@@ -99,8 +93,6 @@ def retrieve_last_name_staff(response_raw_data, rqst_errors, rqst_last_name, lis
     else:
         rqst_errors.append('Staff Member with last name(s): {!s} not found in database'.format(rqst_last_name))
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_county_staff(response_raw_data, rqst_errors, rqst_county, list_of_counties):
     staff_dict = {}
@@ -123,8 +115,6 @@ def retrieve_county_staff(response_raw_data, rqst_errors, rqst_county, list_of_c
                 rqst_errors.append('Staff Member(s) with county: {!s} not found in database'.format(county))
     else:
         rqst_errors.append('Staff Member(s) with county(s): {!s} not found in database'.format(rqst_county))
-
-    return response_raw_data, rqst_errors
 
 
 def retrieve_region_staff(response_raw_data, rqst_errors, rqst_region, list_of_regions):
@@ -160,8 +150,6 @@ def retrieve_region_staff(response_raw_data, rqst_errors, rqst_region, list_of_r
     else:
         rqst_errors.append('Staff Member(s) with region(s): {!s} not found in database'.format(rqst_region))
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_mpn_staff(response_raw_data, rqst_errors, rqst_mpn, list_of_mpns):
     staff_dict = {}
@@ -184,8 +172,6 @@ def retrieve_mpn_staff(response_raw_data, rqst_errors, rqst_mpn, list_of_mpns):
                 rqst_errors.append('Staff Member with mpn: {!s} not found in database'.format(mpn))
     else:
         rqst_errors.append('Staff Member with mpn(s): {!s} not found in database'.format(rqst_mpn))
-
-    return response_raw_data, rqst_errors
 
 
 def retrieve_id_staff(response_raw_data, rqst_errors, rqst_staff_id, list_of_ids):
@@ -222,5 +208,3 @@ def retrieve_id_staff(response_raw_data, rqst_errors, rqst_staff_id, list_of_ids
                 rqst_errors.append('No staff members found for database ID(s): ' + rqst_staff_id)
         else:
             rqst_errors.append('No valid staff IDs provided in request (must be integers)')
-
-    return response_raw_data, rqst_errors

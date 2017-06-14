@@ -33,8 +33,6 @@ def retrieve_provider_networks_by_id(response_raw_data, rqst_errors, provider_ne
         else:
             rqst_errors.append('No valid provider network IDs provided in request (must be integers)')
 
-    return response_raw_data, rqst_errors
-
 
 def retrieve_provider_networks_by_name(response_raw_data, rqst_errors, provider_networks, rqst_name):
     provider_networks_list = []
@@ -46,5 +44,3 @@ def retrieve_provider_networks_by_name(response_raw_data, rqst_errors, provider_
         response_raw_data["Data"] = provider_networks_list
     else:
         rqst_errors.append('No provider networks with name: {!s} not found in database'.format(rqst_name))
-
-    return response_raw_data, rqst_errors

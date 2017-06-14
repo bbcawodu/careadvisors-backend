@@ -64,8 +64,6 @@ def add_consumer_using_api_rqst_params(response_raw_data, rqst_consumer_info, po
                 if backup_consumer_obj:
                     response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
 
-    return response_raw_data
-
 
 def create_consumer_obj(consumer_params, post_errors):
     address_instance = None
@@ -384,8 +382,6 @@ def modify_consumer_using_api_rqst_params(response_raw_data, post_data, post_err
             if backup_consumer_obj:
                 response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
 
-    return response_raw_data
-
 
 def modify_consumer_obj(consumer_params, post_errors):
     consumer_instance = None
@@ -669,8 +665,6 @@ def delete_consumer_using_api_rqst_params(response_raw_data, post_data, post_err
             post_errors.append('Consumer database entry does not exist for the id: {!s}'.format(str(rqst_consumer_id)))
         except PICConsumer.MultipleObjectsReturned:
             post_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_consumer_id)))
-
-    return response_raw_data
 
 
 # getattr(object, field_name)

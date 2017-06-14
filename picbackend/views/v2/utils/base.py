@@ -434,5 +434,3 @@ def parse_and_log_errors(response_raw_data, errors_list):
         for message in errors_list:
             print(message)
             sys.stdout.flush()
-
-    return response_raw_data
