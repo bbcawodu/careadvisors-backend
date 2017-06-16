@@ -5,16 +5,14 @@ from picmodels.services import modify_healthcare_subsidy_eligibility_data_instan
 from picmodels.services import delete_healthcare_subsidy_eligibility_data_instance_using_validated_params
 
 
-def add_healthcare_subsidy_eligibility_data_instance_using_api_rqst_params(response_raw_data, rqst_healthcare_subsidy_eligibility_data_info, post_errors):
+def validate_rqst_params_and_add_instance(rqst_healthcare_subsidy_eligibility_data_info, post_errors):
     add_healthcare_subsidy_eligibility_data_params = get_healthcare_subsidy_eligibility_data_mgmt_put_params(rqst_healthcare_subsidy_eligibility_data_info, post_errors)
 
+    healthcare_subsidy_eligibility_data_obj = None
     if not post_errors:
         healthcare_subsidy_eligibility_data_obj = add_healthcare_subsidy_eligibility_data_instance_using_validated_params(add_healthcare_subsidy_eligibility_data_params, post_errors)
 
-        if not post_errors:
-            response_raw_data['Data']["Database ID"] = healthcare_subsidy_eligibility_data_obj.id
-
-    return response_raw_data
+    return healthcare_subsidy_eligibility_data_obj
 
 
 def get_healthcare_subsidy_eligibility_data_mgmt_put_params(rqst_healthcare_subsidy_eligibility_data_info, post_errors):
@@ -42,26 +40,19 @@ def get_healthcare_subsidy_eligibility_data_mgmt_put_params(rqst_healthcare_subs
             }
 
 
-def modify_healthcare_subsidy_eligibility_data_instance_using_api_rqst_params(response_raw_data, rqst_healthcare_subsidy_eligibility_data_info, post_errors):
+def validate_rqst_params_and_modify_instance(rqst_healthcare_subsidy_eligibility_data_info, post_errors):
     modify_healthcare_subsidy_eligibility_data_params = get_healthcare_subsidy_eligibility_data_mgmt_put_params(rqst_healthcare_subsidy_eligibility_data_info, post_errors)
     rqst_healthcare_subsidy_eligibility_data_id = clean_int_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "Database ID", post_errors)
 
+    healthcare_subsidy_eligibility_data_obj = None
     if not post_errors:
         healthcare_subsidy_eligibility_data_obj = modify_healthcare_subsidy_eligibility_data_instance_using_validated_params(modify_healthcare_subsidy_eligibility_data_params, rqst_healthcare_subsidy_eligibility_data_id, post_errors)
 
-        if not post_errors:
-            response_raw_data['Data']["Database ID"] = healthcare_subsidy_eligibility_data_obj.id
-
-    return response_raw_data
+    return healthcare_subsidy_eligibility_data_obj
 
 
-def delete_healthcare_subsidy_eligibility_data_instance_using_api_rqst_params(response_raw_data, rqst_healthcare_subsidy_eligibility_data_info, post_errors):
+def validate_rqst_params_and_delete_instance(rqst_healthcare_subsidy_eligibility_data_info, post_errors):
     rqst_healthcare_subsidy_eligibility_data_id = clean_int_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "Database ID", post_errors)
 
     if not post_errors:
         delete_healthcare_subsidy_eligibility_data_instance_using_validated_params(rqst_healthcare_subsidy_eligibility_data_id, post_errors)
-
-        if not post_errors:
-            response_raw_data['Data']["Database ID"] = "Deleted"
-
-    return response_raw_data

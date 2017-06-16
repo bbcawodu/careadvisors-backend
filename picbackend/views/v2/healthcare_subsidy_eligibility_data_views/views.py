@@ -2,9 +2,9 @@ from django.views.generic import View
 from django.utils.decorators import method_decorator
 from ..utils import clean_string_value_from_dict_object
 from picmodels.models import HealthcareSubsidyEligibilityByFamSize
-from .tools import add_healthcare_subsidy_eligibility_data_instance_using_api_rqst_params
-from .tools import modify_healthcare_subsidy_eligibility_data_instance_using_api_rqst_params
-from .tools import delete_healthcare_subsidy_eligibility_data_instance_using_api_rqst_params
+from .tools import validate_rqst_params_and_add_instance
+from .tools import validate_rqst_params_and_modify_instance
+from .tools import validate_rqst_params_and_delete_instance
 from .tools import retrieve_healthcare_subsidy_eligibility_data_by_id
 from .tools import retrieve_healthcare_subsidy_eligibility_data_by_family_size
 from django.views.decorators.csrf import csrf_exempt
@@ -25,11 +25,20 @@ class HealthcareSubsidyEligibilityDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
         # If there are no parsing errors, process PUT data based on database action
         if not post_errors:
             if rqst_action == "Instance Addition":
-                response_raw_data = add_healthcare_subsidy_eligibility_data_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                subsidy_eligibility_data_obj = validate_rqst_params_and_add_instance(post_data, post_errors)
+
+                if not post_errors:
+                    response_raw_data['Data']["Database ID"] = subsidy_eligibility_data_obj.id
             elif rqst_action == "Instance Modification":
-                response_raw_data = modify_healthcare_subsidy_eligibility_data_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                subsidy_eligibility_data_obj = validate_rqst_params_and_modify_instance(post_data, post_errors)
+
+                if not post_errors:
+                    response_raw_data['Data']["Database ID"] = subsidy_eligibility_data_obj.id
             elif rqst_action == "Instance Deletion":
-                response_raw_data = delete_healthcare_subsidy_eligibility_data_instance_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                validate_rqst_params_and_delete_instance(post_data, post_errors)
+
+                if not post_errors:
+                    response_raw_data['Data']["Database ID"] = "Deleted"
             else:
                 post_errors.append("No valid 'Database Action' provided.")
 

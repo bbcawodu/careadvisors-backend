@@ -10,9 +10,9 @@ from django.views.decorators.csrf import csrf_exempt
 from picmodels.models import PICConsumer
 from picmodels.models import PICConsumerBackup
 from ..utils import clean_string_value_from_dict_object
-from .tools import add_consumer_using_api_rqst_params
-from .tools import modify_consumer_using_api_rqst_params
-from .tools import delete_consumer_using_api_rqst_params
+from .tools import validate_rqst_params_and_add_instance
+from .tools import validate_rqst_params_and_modify_instance
+from .tools import validate_rqst_params_and_delete_instance
 from .tools import retrieve_f_l_name_consumers
 from .tools import retrieve_email_consumers
 from .tools import retrieve_first_name_consumers
@@ -43,11 +43,11 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         # If there are no parsing errors, process POST data based on database action
         if not post_errors:
             if rqst_action == "Consumer Addition":
-                add_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                validate_rqst_params_and_add_instance(response_raw_data, post_data, post_errors)
             elif rqst_action == "Consumer Modification":
-                modify_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                validate_rqst_params_and_modify_instance(response_raw_data, post_data, post_errors)
             elif rqst_action == "Consumer Deletion":
-                delete_consumer_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                validate_rqst_params_and_delete_instance(response_raw_data, post_data, post_errors)
             else:
                 post_errors.append("No valid 'Database Action' provided.")
 
