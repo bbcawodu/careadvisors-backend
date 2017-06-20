@@ -52,28 +52,31 @@ class ProviderLocationsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     def provider_locations_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         provider_locations = ProviderLocation.objects.all()
 
-        if 'id' in search_params:
-            rqst_provider_location_id = search_params['id']
-            if rqst_provider_location_id != 'all':
-                list_of_ids = search_params['id list']
+        def retrieve_data_by_primary_params_and_add_to_response(db_objects):
+            if 'id' in search_params:
+                rqst_provider_location_id = search_params['id']
+                if rqst_provider_location_id != 'all':
+                    list_of_ids = search_params['id list']
+                else:
+                    list_of_ids = None
+                retrieve_provider_locations_by_id(response_raw_data, rqst_errors, db_objects, rqst_provider_location_id, list_of_ids)
+            elif 'name' in search_params:
+                rqst_name = search_params['name']
+
+                retrieve_provider_locations_by_name(response_raw_data, rqst_errors, db_objects, rqst_name)
+            elif 'network_name' in search_params:
+                rqst_network_name = search_params['network_name']
+
+                retrieve_provider_locations_by_network_name(response_raw_data, rqst_errors, db_objects, rqst_network_name)
+            elif 'network_id' in search_params:
+                rqst_network_id = search_params['network_id']
+                list_of_network_ids = search_params['network_id_list']
+
+                retrieve_provider_locations_by_network_id(response_raw_data, rqst_errors, db_objects, rqst_network_id, list_of_network_ids)
             else:
-                list_of_ids = None
-            retrieve_provider_locations_by_id(response_raw_data, rqst_errors, provider_locations, rqst_provider_location_id, list_of_ids)
-        elif 'name' in search_params:
-            rqst_name = search_params['name']
+                rqst_errors.append('No Valid Parameters')
 
-            retrieve_provider_locations_by_name(response_raw_data, rqst_errors, provider_locations, rqst_name)
-        elif 'network_name' in search_params:
-            rqst_network_name = search_params['network_name']
-
-            retrieve_provider_locations_by_network_name(response_raw_data, rqst_errors, provider_locations, rqst_network_name)
-        elif 'network_id' in search_params:
-            rqst_network_id = search_params['network_id']
-            list_of_network_ids = search_params['network_id_list']
-
-            retrieve_provider_locations_by_network_id(response_raw_data, rqst_errors, provider_locations, rqst_network_id, list_of_network_ids)
-        else:
-            rqst_errors.append('No Valid Parameters')
+        retrieve_data_by_primary_params_and_add_to_response(provider_locations)
 
     put_logic_function = provider_locations_management_put_logic
     get_logic_function = provider_locations_management_get_logic

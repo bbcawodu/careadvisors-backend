@@ -53,13 +53,16 @@ class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             is_cps_location = search_params['is_cps_location']
             nav_location_entries = nav_location_entries.filter(cps_location=is_cps_location)
 
-        for nav_location_entry in nav_location_entries:
-            nav_location_list.append(nav_location_entry.return_values_dict())
+        def retrieve_data_by_primary_params_and_add_to_response(db_objects):
+            for nav_location_entry in db_objects:
+                nav_location_list.append(nav_location_entry.return_values_dict())
 
-        if nav_location_list:
-            response_raw_data["Data"] = nav_location_list
-        else:
-            rqst_errors.append("No location entries found in database.")
+            if nav_location_list:
+                response_raw_data["Data"] = nav_location_list
+            else:
+                rqst_errors.append("No location entries found in database.")
+
+        retrieve_data_by_primary_params_and_add_to_response(nav_location_entries)
 
     put_logic_function = nav_hub_location_management_put_logic
     get_logic_function = nav_hub_location_management_get_logic

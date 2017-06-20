@@ -68,44 +68,47 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
         plans = filter_db_objects_by_secondary_params(search_params, plans)
 
-        if 'id' in search_params:
-            rqst_plan_id = search_params['id']
-            if rqst_plan_id != 'all':
-                list_of_ids = search_params['id list']
+        def retrieve_data_by_primary_params_and_add_to_response(db_objects):
+            if 'id' in search_params:
+                rqst_plan_id = search_params['id']
+                if rqst_plan_id != 'all':
+                    list_of_ids = search_params['id list']
+                else:
+                    list_of_ids = None
+                retrieve_id_plans(response_raw_data, rqst_errors, db_objects, rqst_plan_id, list_of_ids,
+                                  include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
+            elif 'name' in search_params:
+                rqst_name = search_params['name']
+
+                retrieve_name_plans(response_raw_data, rqst_errors, db_objects, rqst_name,
+                                    include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
+            elif 'carrier state' in search_params:
+                rqst_carrier_state = search_params['carrier state']
+                list_of_carrier_states = search_params['carrier state list']
+
+                retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, db_objects, rqst_carrier_state,
+                                                list_of_carrier_states, include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
+            elif 'carrier name' in search_params:
+                rqst_carrier_name = search_params['carrier name']
+
+                retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, db_objects, rqst_carrier_name,
+                                               include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
+            elif 'carrier id' in search_params:
+                rqst_carrier_id = search_params['carrier id']
+                list_of_carrier_ids = search_params['carrier id list']
+
+                retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, db_objects, rqst_carrier_id, list_of_carrier_ids,
+                                             include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
+            elif 'accepted_location_id' in search_params:
+                rqst_accepted_location_id = search_params['accepted_location_id']
+                list_of_accepted_location_ids = search_params['accepted_location_id_list']
+
+                retrieve_plans_by_accepted_location_id(response_raw_data, rqst_errors, db_objects, rqst_accepted_location_id,
+                                                       list_of_accepted_location_ids, include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
             else:
-                list_of_ids = None
-            retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_of_ids,
-                              include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
-        elif 'name' in search_params:
-            rqst_name = search_params['name']
+                rqst_errors.append('No Valid Parameters')
 
-            retrieve_name_plans(response_raw_data, rqst_errors, plans, rqst_name,
-                                include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
-        elif 'carrier state' in search_params:
-            rqst_carrier_state = search_params['carrier state']
-            list_of_carrier_states = search_params['carrier state list']
-
-            retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, plans, rqst_carrier_state,
-                                            list_of_carrier_states, include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
-        elif 'carrier name' in search_params:
-            rqst_carrier_name = search_params['carrier name']
-
-            retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, plans, rqst_carrier_name,
-                                           include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
-        elif 'carrier id' in search_params:
-            rqst_carrier_id = search_params['carrier id']
-            list_of_carrier_ids = search_params['carrier id list']
-
-            retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans, rqst_carrier_id, list_of_carrier_ids,
-                                         include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
-        elif 'accepted_location_id' in search_params:
-            rqst_accepted_location_id = search_params['accepted_location_id']
-            list_of_accepted_location_ids = search_params['accepted_location_id_list']
-
-            retrieve_plans_by_accepted_location_id(response_raw_data, rqst_errors, plans, rqst_accepted_location_id,
-                                                   list_of_accepted_location_ids, include_summary_report=include_summary_report[0], include_detailed_report=include_detailed_report[0])
-        else:
-            rqst_errors.append('No Valid Parameters')
+        retrieve_data_by_primary_params_and_add_to_response(plans)
 
     put_logic_function = plans_management_put_logic
     get_logic_function = plans_management_get_logic

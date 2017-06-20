@@ -20,7 +20,7 @@ from django.core.validators import validate_email
 from django import forms
 
 
-def validate_rqst_params_and_add_instance(response_raw_data, rqst_consumer_info, post_errors):
+def validate_rqst_params_and_add_instance(rqst_consumer_info, post_errors):
     """
     This function takes dictionary populated with PIC consumer info, parses for errors, adds the consumer
     to the database if there are none, and adds the consumer info to given response data.
@@ -40,19 +40,13 @@ def validate_rqst_params_and_add_instance(response_raw_data, rqst_consumer_info,
                                                                                      post_errors,
                                                                                      no_key_allowed=True)
 
+    matching_consumer_instances = None
+    consumer_instance = None
+    backup_consumer_obj = None
     if not post_errors:
         matching_consumer_instances, consumer_instance, backup_consumer_obj = add_instance_using_validated_params(add_consumer_params, post_errors)
 
-        if matching_consumer_instances:
-            consumer_match_data = []
-            for consumer in matching_consumer_instances:
-                consumer_match_data.append(consumer.return_values_dict())
-            response_raw_data['Data']['Possible Consumer Matches'] = consumer_match_data
-        else:
-            if consumer_instance:
-                response_raw_data['Data']["Database ID"] = consumer_instance.id
-            if backup_consumer_obj:
-                response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
+    return matching_consumer_instances, consumer_instance, backup_consumer_obj
 
 
 def get_consumer_mgmt_put_params(post_data, post_errors):
@@ -348,7 +342,7 @@ def check_consumer_db_entries_for_dependent_info(rqst_dependent_dict, post_error
     return found_consumer_entries
 
 
-def validate_rqst_params_and_modify_instance(response_raw_data, post_data, post_errors):
+def validate_rqst_params_and_modify_instance(post_data, post_errors):
     """
     This function takes dictionary populated with PIC consumer info, parses for errors, and modifies the consumer
     instance if there are none.
@@ -362,17 +356,15 @@ def validate_rqst_params_and_modify_instance(response_raw_data, post_data, post_
     modify_consumer_params = get_consumer_mgmt_put_params(post_data, post_errors)
     modify_consumer_params['rqst_consumer_id'] = clean_int_value_from_dict_object(post_data, "root", "Consumer Database ID", post_errors)
 
+    consumer_instance = None
+    backup_consumer_obj = None
     if not post_errors:
         consumer_instance, backup_consumer_obj = modify_instance_using_validated_params(modify_consumer_params, post_errors)
 
-        if not post_errors:
-            if consumer_instance:
-                response_raw_data['Data']["Database ID"] = consumer_instance.id
-            if backup_consumer_obj:
-                response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
+    return consumer_instance, backup_consumer_obj
 
 
-def validate_rqst_params_and_delete_instance(response_raw_data, post_data, post_errors):
+def validate_rqst_params_and_delete_instance(post_data, post_errors):
     """
     This function takes dictionary populated with PIC consumer info, parses for errors, and deletes the consumer
     instance if there are none.
@@ -390,11 +382,8 @@ def validate_rqst_params_and_delete_instance(response_raw_data, post_data, post_
                                                           post_errors,
                                                           no_key_allowed=True)
 
+    backup_consumer_obj = None
     if not post_errors:
         backup_consumer_obj = delete_instance_using_validated_params(rqst_consumer_id, rqst_create_backup, post_errors)
 
-        if not post_errors:
-            response_raw_data['Data']["Database ID"] = "Deleted"
-
-            if backup_consumer_obj:
-                response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
+    return backup_consumer_obj

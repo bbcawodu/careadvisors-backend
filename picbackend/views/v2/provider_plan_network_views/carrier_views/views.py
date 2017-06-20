@@ -66,24 +66,27 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 filter_by_has_sample_id_card_param()
         filter_results_by_secondary_params()
 
-        if 'id' in search_params:
-            rqst_carrier_id = search_params['id']
-            if rqst_carrier_id != 'all':
-                list_of_ids = search_params['id list']
+        def retrieve_data_by_primary_params_and_add_to_response():
+            if 'id' in search_params:
+                rqst_carrier_id = search_params['id']
+                if rqst_carrier_id != 'all':
+                    list_of_ids = search_params['id list']
+                else:
+                    list_of_ids = None
+                retrieve_id_carriers(response_raw_data, rqst_errors, carriers[0], rqst_carrier_id, list_of_ids)
+            elif 'name' in search_params:
+                rqst_name = search_params['name']
+
+                retrieve_name_carriers(response_raw_data, rqst_errors, carriers[0], rqst_name)
+            elif 'state' in search_params:
+                rqst_state = search_params['state']
+                list_of_states = search_params['state list']
+
+                retrieve_state_carriers(response_raw_data, rqst_errors, carriers[0], rqst_state, list_of_states)
             else:
-                list_of_ids = None
-            retrieve_id_carriers(response_raw_data, rqst_errors, carriers[0], rqst_carrier_id, list_of_ids)
-        elif 'name' in search_params:
-            rqst_name = search_params['name']
+                rqst_errors.append('No Valid Parameters')
 
-            retrieve_name_carriers(response_raw_data, rqst_errors, carriers[0], rqst_name)
-        elif 'state' in search_params:
-            rqst_state = search_params['state']
-            list_of_states = search_params['state list']
-
-            retrieve_state_carriers(response_raw_data, rqst_errors, carriers[0], rqst_state, list_of_states)
-        else:
-            rqst_errors.append('No Valid Parameters')
+        retrieve_data_by_primary_params_and_add_to_response()
 
     put_logic_function = carriers_management_put_logic
     get_logic_function = carriers_management_get_logic

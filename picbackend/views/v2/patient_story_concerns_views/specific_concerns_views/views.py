@@ -53,33 +53,36 @@ class SpecificConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     def specific_concerns_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         specific_concerns = ConsumerSpecificConcern.objects.all()
 
-        if 'id' in search_params:
-            rqst_specific_concern_id = search_params['id']
-            if rqst_specific_concern_id != 'all':
-                list_of_ids = search_params['id list']
+        def retrieve_data_by_primary_params_and_add_to_response(db_objects):
+            if 'id' in search_params:
+                rqst_specific_concern_id = search_params['id']
+                if rqst_specific_concern_id != 'all':
+                    list_of_ids = search_params['id list']
+                else:
+                    list_of_ids = None
+                retrieve_specific_concerns_by_id(response_raw_data, rqst_errors, db_objects, rqst_specific_concern_id, list_of_ids)
+            elif 'question' in search_params:
+                rqst_question = search_params['question']
+
+                retrieve_specific_concerns_by_question(response_raw_data, rqst_errors, db_objects, rqst_question)
+            elif 'gen_concern_name' in search_params:
+                rqst_gen_concern_name = search_params['gen_concern_name']
+
+                retrieve_specific_concerns_by_gen_concern_name(response_raw_data, rqst_errors, db_objects, rqst_gen_concern_name)
+            elif 'gen_concern_id_subset' in search_params:
+                rqst_gen_concern_id = search_params['gen_concern_id_subset']
+                list_of_gen_concern_ids = search_params['gen_concern_id_subset_list']
+
+                retrieve_specific_concerns_by_gen_concern_id_subset(response_raw_data, rqst_errors, db_objects, rqst_gen_concern_id, list_of_gen_concern_ids)
+            elif 'gen_concern_id' in search_params:
+                rqst_gen_concern_id = search_params['gen_concern_id']
+                list_of_gen_concern_ids = search_params['gen_concern_id_list']
+
+                retrieve_specific_concerns_by_gen_concern_id(response_raw_data, rqst_errors, db_objects, rqst_gen_concern_id, list_of_gen_concern_ids)
             else:
-                list_of_ids = None
-            retrieve_specific_concerns_by_id(response_raw_data, rqst_errors, specific_concerns, rqst_specific_concern_id, list_of_ids)
-        elif 'question' in search_params:
-            rqst_question = search_params['question']
+                rqst_errors.append('No Valid Parameters')
 
-            retrieve_specific_concerns_by_question(response_raw_data, rqst_errors, specific_concerns, rqst_question)
-        elif 'gen_concern_name' in search_params:
-            rqst_gen_concern_name = search_params['gen_concern_name']
-
-            retrieve_specific_concerns_by_gen_concern_name(response_raw_data, rqst_errors, specific_concerns, rqst_gen_concern_name)
-        elif 'gen_concern_id_subset' in search_params:
-            rqst_gen_concern_id = search_params['gen_concern_id_subset']
-            list_of_gen_concern_ids = search_params['gen_concern_id_subset_list']
-
-            retrieve_specific_concerns_by_gen_concern_id_subset(response_raw_data, rqst_errors, specific_concerns, rqst_gen_concern_id, list_of_gen_concern_ids)
-        elif 'gen_concern_id' in search_params:
-            rqst_gen_concern_id = search_params['gen_concern_id']
-            list_of_gen_concern_ids = search_params['gen_concern_id_list']
-
-            retrieve_specific_concerns_by_gen_concern_id(response_raw_data, rqst_errors, specific_concerns, rqst_gen_concern_id, list_of_gen_concern_ids)
-        else:
-            rqst_errors.append('No Valid Parameters')
+        retrieve_data_by_primary_params_and_add_to_response(specific_concerns)
 
     put_logic_function = specific_concerns_management_put_logic
     get_logic_function = specific_concerns_management_get_logic

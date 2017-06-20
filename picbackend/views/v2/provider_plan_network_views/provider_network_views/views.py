@@ -44,19 +44,22 @@ class ProviderNetworksManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     def provider_networks_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         provider_networks = ProviderNetwork.objects.all()
 
-        if 'id' in search_params:
-            rqst_provider_network_id = search_params['id']
-            if rqst_provider_network_id != 'all':
-                list_of_ids = search_params['id list']
-            else:
-                list_of_ids = None
-            retrieve_provider_networks_by_id(response_raw_data, rqst_errors, provider_networks, rqst_provider_network_id, list_of_ids)
-        elif 'name' in search_params:
-            rqst_name = search_params['name']
+        def retrieve_data_by_primary_params_and_add_to_response(db_objects):
+            if 'id' in search_params:
+                rqst_provider_network_id = search_params['id']
+                if rqst_provider_network_id != 'all':
+                    list_of_ids = search_params['id list']
+                else:
+                    list_of_ids = None
+                retrieve_provider_networks_by_id(response_raw_data, rqst_errors, db_objects, rqst_provider_network_id, list_of_ids)
+            elif 'name' in search_params:
+                rqst_name = search_params['name']
 
-            retrieve_provider_networks_by_name(response_raw_data, rqst_errors, provider_networks, rqst_name)
-        else:
-            rqst_errors.append('No Valid Parameters')
+                retrieve_provider_networks_by_name(response_raw_data, rqst_errors, db_objects, rqst_name)
+            else:
+                rqst_errors.append('No Valid Parameters')
+
+        retrieve_data_by_primary_params_and_add_to_response(provider_networks)
 
     put_logic_function = provider_networks_management_put_logic
     get_logic_function = provider_networks_management_get_logic
