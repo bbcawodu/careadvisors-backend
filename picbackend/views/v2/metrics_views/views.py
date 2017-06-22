@@ -6,7 +6,6 @@ API Version 2
 from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from picmodels.models import MetricsSubmission
 from .tools import validate_rqst_params_then_add_or_update_metrics_instance
 from .tools import retrieve_metrics_data_by_staff_id
 from .tools import retrieve_metrics_data_by_staff_f_and_l_name
@@ -36,14 +35,10 @@ class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 response_raw_data["Status"]["Message"] = [metrics_instance_message]
 
     def metrics_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
-        # Start with this query for all and then evaluate down from request params
-        # Queries arent evaluated until you read the data
-        metrics_submissions = MetricsSubmission.objects.all()
-
         validated_fields = retrieve_data_fields_to_return(search_params, rqst_errors)
 
         if not rqst_errors:
-            data_list, missing_primary_parameters = retrieve_data_by_request_params_and_add_to_response(search_params, validated_fields, rqst_errors)
+            data_list, missing_primary_parameters = retrieve_metrics_data_by_request_params(search_params, validated_fields, rqst_errors)
         else:
             data_list = []
             missing_primary_parameters = []
@@ -102,7 +97,7 @@ def retrieve_data_fields_to_return(search_params, rqst_errors):
     return validated_fields
 
 
-def retrieve_data_by_request_params_and_add_to_response(search_params, validated_fields, rqst_errors):
+def retrieve_metrics_data_by_request_params(search_params, validated_fields, rqst_errors):
     data_list = []
     missing_primary_parameters = []
 

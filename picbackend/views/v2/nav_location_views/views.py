@@ -11,9 +11,10 @@ from picmodels.models import NavMetricsLocation
 from ..base import JSONPUTRspMixin
 from ..base import JSONGETRspMixin
 from ..utils import clean_string_value_from_dict_object
-from .tools import add_nav_hub_location
-from .tools import modify_nav_hub_location
-from .tools import delete_nav_hub_location
+from .tools import validate_rqst_params_and_add_instance
+from .tools import validate_rqst_params_and_modify_instance
+from .tools import validate_rqst_params_and_delete_instance
+from .tools import retrieve_nav_hub_location_data_by_id
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -27,42 +28,56 @@ class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         return super(NavHubLocationManagementView, self).dispatch(request, *args, **kwargs)
 
     def nav_hub_location_management_put_logic(self, post_data, response_raw_data, post_errors):
-        # Parse BODY data and add or update navigator hub location entry
         rqst_action = clean_string_value_from_dict_object(post_data, "root", "Database Action", post_errors)
 
-        # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
-        # create and save database entry for appointment
         if not post_errors:
             if rqst_action == "Location Addition":
-                add_nav_hub_location(response_raw_data, post_data, post_errors)
+                location_instance = validate_rqst_params_and_add_instance(post_data, post_errors)
 
+                if location_instance:
+                    response_raw_data['Data'] = {"Database ID": location_instance.id}
             elif rqst_action == "Location Modification":
-                modify_nav_hub_location(response_raw_data, post_data, post_errors)
+                location_instance = validate_rqst_params_and_modify_instance(post_data, post_errors)
 
+                if location_instance:
+                    response_raw_data['Data'] = {"Database ID": location_instance.id}
             elif rqst_action == "Location Deletion":
-                delete_nav_hub_location(response_raw_data, post_data, post_errors)
+                validate_rqst_params_and_delete_instance(post_data, post_errors)
+
+                if not post_errors:
+                    response_raw_data['Data']["Database ID"] = "Deleted"
             else:
                 post_errors.append("No valid 'Database Action' provided.")
 
     def nav_hub_location_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
-        # Parse GET params and retreive metrics entries
-        nav_location_list = []
+        nav_hub_location_qset = NavMetricsLocation.objects.all()
 
-        nav_location_entries = NavMetricsLocation.objects.all()
-        if 'is_cps_location' in search_params:
-            is_cps_location = search_params['is_cps_location']
-            nav_location_entries = nav_location_entries.filter(cps_location=is_cps_location)
+        def filter_db_objects_by_secondary_params(db_objects):
+            if 'is_cps_location' in search_params:
+                is_cps_location = search_params['is_cps_location']
+                db_objects = db_objects.filter(cps_location=is_cps_location)
 
-        def retrieve_data_by_primary_params_and_add_to_response(db_objects):
-            for nav_location_entry in db_objects:
-                nav_location_list.append(nav_location_entry.return_values_dict())
+            return db_objects
 
-            if nav_location_list:
-                response_raw_data["Data"] = nav_location_list
+        nav_hub_location_qset = filter_db_objects_by_secondary_params(nav_hub_location_qset)
+
+        def retrieve_data_by_primary_params_and_add_to_response(db_object_qset):
+            if 'id' in search_params:
+                rqst_nav_hub_location_id = search_params['id']
+                if rqst_nav_hub_location_id != 'all':
+                    list_of_ids = search_params['id list']
+                else:
+                    list_of_ids = None
             else:
-                rqst_errors.append("No location entries found in database.")
+                rqst_nav_hub_location_id = 'all'
+                list_of_ids = None
 
-        retrieve_data_by_primary_params_and_add_to_response(nav_location_entries)
+            data_list = retrieve_nav_hub_location_data_by_id(db_object_qset, rqst_nav_hub_location_id, list_of_ids,
+                                                             rqst_errors)
+
+            response_raw_data["Data"] = data_list
+
+        retrieve_data_by_primary_params_and_add_to_response(nav_hub_location_qset)
 
     put_logic_function = nav_hub_location_management_put_logic
     get_logic_function = nav_hub_location_management_get_logic
