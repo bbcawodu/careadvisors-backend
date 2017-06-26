@@ -1,52 +1,48 @@
-def retrieve_general_concerns_by_id(response_raw_data, rqst_errors, general_concerns, rqst_general_concerns_id, list_of_ids):
-    if rqst_general_concerns_id == "all":
-        all_general_concerns = general_concerns
-        general_concerns_dict = {}
-        for general_concern in all_general_concerns:
-            general_concerns_dict[general_concern.id] = general_concern.return_values_dict()
-        general_concerns_list = []
-        for general_concern_key, general_concern_entry in general_concerns_dict.items():
-            general_concerns_list.append(general_concern_entry)
+from picmodels.services import filter_db_queryset_by_id
+from picmodels.services.patient_story_models_services.consumer_general_concern_services import filter_general_concern_objs_by_name
 
-        response_raw_data["Data"] = general_concerns_list
-    elif list_of_ids:
-        if len(list_of_ids) > 0:
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            general_concerns = general_concerns.filter(id__in=list_of_ids)
-            if len(general_concerns) > 0:
 
-                general_concerns_dict = {}
-                for general_concern in general_concerns:
-                    general_concerns_dict[general_concern.id] = general_concern.return_values_dict()
-                general_concerns_list = []
-                for general_concern_key, general_concern_entry in general_concerns_dict.items():
-                    general_concerns_list.append(general_concern_entry)
-                response_raw_data["Data"] = general_concerns_list
+def retrieve_general_concerns_by_id(general_concerns, rqst_general_concerns_id, list_of_ids, rqst_errors):
+    general_concerns = filter_db_queryset_by_id(general_concerns, rqst_general_concerns_id, list_of_ids)
 
-                for general_concern_id in list_of_ids:
-                    if general_concern_id not in general_concerns_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('General concern with id: {!s} not found in database'.format(str(general_concern_id)))
-            else:
-                rqst_errors.append('No general concerns found for database ID(s): ' + rqst_general_concerns_id)
+    response_list = create_response_list_from_db_objects(general_concerns)
+
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No general concern instances in db for given ids")
         else:
-            rqst_errors.append('No valid general concern IDs provided in request (must be integers)')
+            if list_of_ids:
+                for db_id in list_of_ids:
+                    tuple_of_bools_if_id_in_data = (instance_data['Database ID'] == db_id for instance_data in
+                                                    response_list)
+                    if not any(tuple_of_bools_if_id_in_data):
+                        rqst_errors.append('General concern instance with id: {} not found in database'.format(db_id))
+
+    check_response_data_for_requested_data()
+
+    return response_list
 
 
-def retrieve_general_concerns_by_name(response_raw_data, rqst_errors, general_concerns, rqst_name):
-    general_concerns_list = []
-    general_concerns = general_concerns.filter(name__iexact=rqst_name)
+def create_response_list_from_db_objects(db_objects):
+    return_list = []
 
-    if general_concerns:
-        if len(general_concerns) > 1:
-            if response_raw_data['Status']['Error Code'] != 2:
-                response_raw_data['Status']['Error Code'] = 2
-            rqst_errors.append('Multiple general concerns found in db for name: {!s}'.format(rqst_name))
+    for db_instance in db_objects:
+        return_list.append(db_instance.return_values_dict())
 
-        for general_concern in general_concerns:
-            general_concerns_list.append(general_concern.return_values_dict())
-        response_raw_data["Data"] = general_concerns_list
-    else:
-        rqst_errors.append('General concern with name: {!s} not found in database'.format(rqst_name))
+    return return_list
+
+
+def retrieve_general_concerns_by_name(general_concerns, rqst_name, rqst_errors):
+    general_concerns = filter_general_concern_objs_by_name(general_concerns, rqst_name)
+    if len(general_concerns) > 1:
+        rqst_errors.append('Multiple general concerns found in db for name: {!s}'.format(rqst_name))
+
+    response_list = create_response_list_from_db_objects(general_concerns)
+
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No general concern instances in db for given name")
+
+    check_response_data_for_requested_data()
+
+    return response_list
