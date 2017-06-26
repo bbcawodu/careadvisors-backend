@@ -1,111 +1,106 @@
 from picmodels.models import ConsumerGeneralConcern
+from picmodels.services import filter_db_queryset_by_id
+from picmodels.services.patient_story_models_services.consumer_specific_concern_services import filter_specific_concern_objs_by_question
+from picmodels.services.patient_story_models_services.consumer_specific_concern_services import filter_specific_concern_objs_by_gen_concern_name
+from picmodels.services.patient_story_models_services.consumer_specific_concern_services import filter_specific_concern_objs_by_gen_concern_id_subset
 
 
-def retrieve_specific_concerns_by_id(response_raw_data, rqst_errors, specific_concerns, rqst_specific_concern_id, list_of_ids):
-    if rqst_specific_concern_id == "all":
-        all_specific_concerns = specific_concerns
-        specific_concerns_dict = {}
-        for specific_concern in all_specific_concerns:
-            specific_concerns_dict[specific_concern.id] = specific_concern.return_values_dict()
-        specific_concerns_list = []
-        for specific_concern_key, specific_concern_entry in specific_concerns_dict.items():
-            specific_concerns_list.append(specific_concern_entry)
+def retrieve_specific_concern_data_by_id(specific_concerns, rqst_specific_concern_id, list_of_ids, rqst_errors):
+    specific_concerns = filter_db_queryset_by_id(specific_concerns, rqst_specific_concern_id, list_of_ids)
 
-        response_raw_data["Data"] = specific_concerns_list
-    elif list_of_ids:
-        if len(list_of_ids) > 0:
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            specific_concerns = specific_concerns.filter(id__in=list_of_ids)
-            if len(specific_concerns) > 0:
-                specific_concerns_dict = {}
-                for specific_concern in specific_concerns:
-                    specific_concerns_dict[specific_concern.id] = specific_concern.return_values_dict()
-                specific_concerns_list = []
-                for specific_concern_key, specific_concern_entry in specific_concerns_dict.items():
-                    specific_concerns_list.append(specific_concern_entry)
-                response_raw_data["Data"] = specific_concerns_list
+    response_list = create_response_list_from_db_objects(specific_concerns)
 
-                for specific_concerns_id in list_of_ids:
-                    if specific_concerns_id not in specific_concerns_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('Specific concern with id: {!s} not found in database'.format(str(specific_concerns_id)))
-            else:
-                rqst_errors.append('No specific concerns found for database ID(s): ' + rqst_specific_concern_id)
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No specific concern instances in db for given ids")
         else:
-            rqst_errors.append('No valid specific concern IDs provided in request (must be integers)')
+            if list_of_ids:
+                for db_id in list_of_ids:
+                    tuple_of_bools_if_id_in_data = (instance_data['Database ID'] == db_id for instance_data in
+                                                    response_list)
+                    if not any(tuple_of_bools_if_id_in_data):
+                        rqst_errors.append('Specific concern instance with id: {} not found in database'.format(db_id))
+
+    check_response_data_for_requested_data()
+
+    return response_list
 
 
-def retrieve_specific_concerns_by_question(response_raw_data, rqst_errors, specific_concerns, rqst_question):
-    specific_concerns_list = []
-    specific_concerns = specific_concerns.filter(question__iexact=rqst_question)
+def create_response_list_from_db_objects(db_objects):
+    return_list = []
 
-    if specific_concerns:
-        for specific_concern in specific_concerns:
-            specific_concerns_list.append(specific_concern.return_values_dict())
-        response_raw_data["Data"] = specific_concerns_list
-    else:
-        rqst_errors.append('No specific concern with question: {!s} found in database'.format(rqst_question))
+    for db_instance in db_objects:
+        return_list.append(db_instance.return_values_dict())
+
+    return return_list
 
 
-def retrieve_specific_concerns_by_gen_concern_name(response_raw_data, rqst_errors, specific_concerns, rqst_gen_concern_name):
-    specific_concerns_list = []
-    specific_concerns = specific_concerns.filter(related_general_concerns__name__iexact=rqst_gen_concern_name)
+def retrieve_specific_concern_data_by_question(specific_concerns, rqst_question, rqst_errors):
+    specific_concerns = filter_specific_concern_objs_by_question(specific_concerns, rqst_question)
 
-    if specific_concerns:
-        for specific_concern in specific_concerns:
-            specific_concerns_list.append(specific_concern.return_values_dict())
-        response_raw_data["Data"] = specific_concerns_list
-    else:
-        rqst_errors.append('No specific concerns whose related general concerns contain an entry with the name: {!s} found in database'.format(rqst_gen_concern_name))
+    response_list = create_response_list_from_db_objects(specific_concerns)
 
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No specific concern instances in db for given question")
 
-def retrieve_specific_concerns_by_gen_concern_id_subset(response_raw_data, rqst_errors, specific_concerns, rqst_gen_concern_id, list_of_gen_concern_ids):
-    if len(list_of_gen_concern_ids) > 0:
-        for indx, element in enumerate(list_of_gen_concern_ids):
-            list_of_gen_concern_ids[indx] = int(element)
-        for gen_concern_id in list_of_gen_concern_ids:
-            specific_concerns = specific_concerns.filter(related_general_concerns__id=gen_concern_id)
-        if len(specific_concerns) > 0:
-            specific_concerns_list = []
-            for specific_concern in specific_concerns:
-                specific_concerns_list.append(specific_concern.return_values_dict())
+    check_response_data_for_requested_data()
 
-            response_raw_data["Data"] = specific_concerns_list
-        else:
-            rqst_errors.append('No specific concerns found for general concern database ID(s): ' + rqst_gen_concern_id)
-    else:
-        rqst_errors.append('No valid general concern database IDs provided in request (must be integers)')
+    return response_list
 
 
-def retrieve_specific_concerns_by_gen_concern_id(response_raw_data, rqst_errors, specific_concerns, rqst_gen_concern_id, list_of_gen_concern_ids):
-    if len(list_of_gen_concern_ids) > 0:
-        for indx, element in enumerate(list_of_gen_concern_ids):
-            list_of_gen_concern_ids[indx] = int(element)
-        general_concern_objs = ConsumerGeneralConcern.objects.all().filter(id__in=list_of_gen_concern_ids)
-        if len(general_concern_objs) > 0:
-            specific_concerns_dict = {}
-            for gen_concern_obj in general_concern_objs:
-                cur_specific_concern_qset = gen_concern_obj.related_specific_concerns.all()
-                if len(cur_specific_concern_qset) > 0:
-                    for specific_concern_object in cur_specific_concern_qset:
-                        if gen_concern_obj.id not in specific_concerns_dict:
-                            specific_concerns_dict[gen_concern_obj.id] = [specific_concern_object.return_values_dict()]
-                        else:
-                            specific_concerns_dict[gen_concern_obj.id].append(specific_concern_object.return_values_dict())
+def retrieve_specific_concern_data_by_gen_concern_name(specific_concerns, rqst_gen_concern_name, rqst_errors):
+    specific_concerns = filter_specific_concern_objs_by_gen_concern_name(specific_concerns, rqst_gen_concern_name)
 
-            for gen_concern_id in list_of_gen_concern_ids:
-                if gen_concern_id not in specific_concerns_dict:
-                    if response_raw_data['Status']['Error Code'] != 2:
-                        response_raw_data['Status']['Error Code'] = 2
-                    rqst_errors.append('No specific concerns found whose related_general_concerns contain a general concern with database id: {}'.format(gen_concern_id))
+    response_list = create_response_list_from_db_objects(specific_concerns)
 
-            specific_concerns_list = []
-            for gen_concern_key, specific_concerns_entry in specific_concerns_dict.items():
-                specific_concerns_list.append(specific_concerns_entry)
-            response_raw_data["Data"] = specific_concerns_list
-        else:
-            rqst_errors.append("No general concerns found in database for given database id(s): {}".format(rqst_gen_concern_id))
-    else:
-        rqst_errors.append('No valid general concern database IDs provided in request (must be integers)')
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No specific concern instances in db for given general concern name.")
+
+    check_response_data_for_requested_data()
+
+    return response_list
+
+
+def retrieve_specific_concern_data_by_gen_concern_id_subset(specific_concerns, list_of_gen_concern_ids, rqst_errors):
+    specific_concerns = filter_specific_concern_objs_by_gen_concern_id_subset(specific_concerns, list_of_gen_concern_ids)
+
+    response_list = create_response_list_from_db_objects(specific_concerns)
+
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No specific concern instances in db for given subset of general concern ids.")
+
+    check_response_data_for_requested_data()
+
+    return response_list
+
+
+def retrieve_specific_concern_data_by_gen_concern_id(list_of_gen_concern_ids, rqst_errors):
+    response_list = []
+
+    for gen_concern_id in list_of_gen_concern_ids:
+        response_list_component = []
+
+        def add_response_component_to_response_data():
+            response_list.append(response_list_component)
+
+        try:
+            general_concern_instance = ConsumerGeneralConcern.objects.get(id=gen_concern_id)
+
+            related_specific_concerns_qset = general_concern_instance.related_specific_concerns.all()
+            response_list_component = create_response_list_from_db_objects(related_specific_concerns_qset)
+
+            def check_response_data_for_requested_data():
+                if not response_list_component:
+                    rqst_errors.append("No related specific concern instances found in database for general concern id: {}".format(gen_concern_id))
+
+            check_response_data_for_requested_data()
+
+            add_response_component_to_response_data()
+        except ConsumerGeneralConcern.DoesNotExist:
+            rqst_errors.append("General concern instance does not exist for database id: {}".format(gen_concern_id))
+            add_response_component_to_response_data()
+
+    return response_list

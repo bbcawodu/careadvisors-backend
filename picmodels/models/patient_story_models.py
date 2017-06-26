@@ -40,6 +40,8 @@ class ConsumerGeneralConcern(Model):
 
 
 class ConsumerSpecificConcern(Model):
+    RESEARCH_WEIGHT_DEFAULT = 50
+
     question = CharField(max_length=10000, unique=True)
     related_general_concerns = ManyToManyField(ConsumerGeneralConcern, blank=True, related_name='related_specific_concerns')
     research_weight = IntegerField(default=50, validators=[MaxValueValidator(100),])
