@@ -18,7 +18,7 @@ def retrieve_consumer_data_by_id(consumers, rqst_consumer_id, list_of_ids, rqst_
 
     def check_response_data_for_requested_data():
         if not response_list:
-            rqst_errors.append("No consumers instances in db for given ids")
+            rqst_errors.append("No consumer instances in db for given ids")
         else:
             if list_of_ids:
                 for db_id in list_of_ids:

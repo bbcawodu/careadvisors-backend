@@ -21,16 +21,6 @@ from django import forms
 
 
 def validate_rqst_params_and_add_instance(rqst_consumer_info, post_errors):
-    """
-    This function takes dictionary populated with PIC consumer info, parses for errors, adds the consumer
-    to the database if there are none, and adds the consumer info to given response data.
-
-    :param response_raw_data: (type: dictionary) dictionary that contains response data
-    :param rqst_consumer_info: (type: dictionary) dictionary that contains consumer info
-    :param post_errors: (type: list) list of error messages
-    :return: (type: dictionary) dictionary that contains response data
-    """
-
     add_consumer_params = get_consumer_mgmt_put_params(rqst_consumer_info, post_errors)
     if not add_consumer_params['rqst_cps_consumer']:
         add_consumer_params['rqst_cps_consumer'] = False

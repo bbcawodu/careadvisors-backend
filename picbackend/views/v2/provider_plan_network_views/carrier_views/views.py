@@ -16,12 +16,12 @@ from ...utils import build_search_params
 from ...utils import init_v2_response_data
 from ...base import JSONPUTRspMixin
 from ...base import JSONGETRspMixin
-from .tools import add_carrier
-from .tools import modify_carrier
-from .tools import delete_carrier
-from .tools import retrieve_id_carriers
-from .tools import retrieve_name_carriers
-from .tools import retrieve_state_carriers
+from .tools import validate_rqst_params_and_add_instance
+from .tools import validate_rqst_params_and_modify_instance
+from .tools import validate_rqst_params_and_delete_instance
+from .tools import retrieve_carrier_data_by_id
+from .tools import retrieve_carrier_data_by_name
+from .tools import retrieve_carrier_data_by_state
 
 
 #Need to abstract common variables in get and post class methods into class attributes
@@ -40,14 +40,21 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
         # If there are no parsing errors, process PUT data based on database action
         if not post_errors:
+            healthcare_carrier_obj = None
             if rqst_action == "Carrier Addition":
-                add_carrier(response_raw_data, post_data, post_errors)
+                healthcare_carrier_obj = validate_rqst_params_and_add_instance(post_data, post_errors)
             elif rqst_action == "Carrier Modification":
-                modify_carrier(response_raw_data, post_data, post_errors)
+                healthcare_carrier_obj = validate_rqst_params_and_modify_instance(post_data, post_errors)
             elif rqst_action == "Carrier Deletion":
-                delete_carrier(response_raw_data, post_data, post_errors)
+                validate_rqst_params_and_delete_instance(post_data, post_errors)
+
+                if not post_errors:
+                    response_raw_data['Data']["Database ID"] = "Deleted"
             else:
                 post_errors.append("No valid 'Database Action' provided.")
+
+            if healthcare_carrier_obj:
+                response_raw_data['Data']["Database ID"] = healthcare_carrier_obj.id
 
     def carriers_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         carriers = [HealthcareCarrier.objects.all()]
@@ -67,24 +74,28 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         filter_results_by_secondary_params()
 
         def retrieve_data_by_primary_params_and_add_to_response():
+            data_list = []
+
             if 'id' in search_params:
                 rqst_carrier_id = search_params['id']
                 if rqst_carrier_id != 'all':
                     list_of_ids = search_params['id list']
                 else:
                     list_of_ids = None
-                retrieve_id_carriers(response_raw_data, rqst_errors, carriers[0], rqst_carrier_id, list_of_ids)
+
+                data_list = retrieve_carrier_data_by_id(carriers[0], rqst_carrier_id, list_of_ids, rqst_errors)
             elif 'name' in search_params:
                 rqst_name = search_params['name']
 
-                retrieve_name_carriers(response_raw_data, rqst_errors, carriers[0], rqst_name)
+                data_list = retrieve_carrier_data_by_name(carriers[0], rqst_name, rqst_errors)
             elif 'state' in search_params:
-                rqst_state = search_params['state']
                 list_of_states = search_params['state list']
 
-                retrieve_state_carriers(response_raw_data, rqst_errors, carriers[0], rqst_state, list_of_states)
+                data_list = retrieve_carrier_data_by_state(carriers[0], list_of_states, rqst_errors)
             else:
                 rqst_errors.append('No Valid Parameters')
+
+            response_raw_data['Data'] = data_list
 
         retrieve_data_by_primary_params_and_add_to_response()
 

@@ -307,6 +307,14 @@ def build_search_params(rqst_params, rqst_errors):
     if "state" in rqst_params:
         search_params['state'] = rqst_params['state']
         search_params['state list'] = re.findall(r"[\w. '-]+", search_params['state'])
+
+        number_of_commas = len(re.findall(r",", search_params['state']))
+        number_of_parameters_there_should_be = number_of_commas + 1
+        if number_of_parameters_there_should_be != len(search_params['state list']):
+            rqst_errors.append('List of states is formatted wrong. Values must be ascii strings separated by commas')
+
+        if not search_params['state list']:
+            rqst_errors.append('Invalid state, states must be ascii strings.')
     if 'has_sample_id_card' in rqst_params:
         search_params['has_sample_id_card'] = rqst_params['has_sample_id_card'].lower()
         if search_params['has_sample_id_card'] not in ('true', 'false'):
