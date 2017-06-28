@@ -1,99 +1,84 @@
-def retrieve_provider_locations_by_id(response_raw_data, rqst_errors, provider_locations, rqst_provider_location_id, list_of_ids):
-    if rqst_provider_location_id == "all":
-        all_provider_locations = provider_locations
-        provider_locations_dict = {}
-        for provider_location in all_provider_locations:
-            provider_locations_dict[provider_location.id] = provider_location.return_values_dict()
-        provider_locations_list = []
-        for provider_location_key, provider_location_entry in provider_locations_dict.items():
-            provider_locations_list.append(provider_location_entry)
+from picmodels.services import filter_db_queryset_by_id
+from picmodels.services.provider_plan_network_services.provider_location_services import filter_provider_location_instances_by_name
+from picmodels.services.provider_plan_network_services.provider_location_services import filter_provider_location_instances_by_provider_network_name
+from picmodels.services.provider_plan_network_services.provider_location_services import filter_provider_location_instances_by_provider_network_id
 
-        response_raw_data["Data"] = provider_locations_list
-    elif list_of_ids:
-        if len(list_of_ids) > 0:
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            provider_locations = provider_locations.filter(id__in=list_of_ids)
-            if len(provider_locations) > 0:
 
-                provider_locations_dict = {}
-                for provider_location in provider_locations:
-                    provider_locations_dict[provider_location.id] = provider_location.return_values_dict()
-                provider_locations_list = []
-                for provider_location_key, provider_location_entry in provider_locations_dict.items():
-                    provider_locations_list.append(provider_location_entry)
-                response_raw_data["Data"] = provider_locations_list
+def retrieve_provider_locations_by_id(provider_location_qset, rqst_provider_location_id, list_of_ids, rqst_errors):
+    provider_location_qset = filter_db_queryset_by_id(provider_location_qset, rqst_provider_location_id, list_of_ids)
 
-                for provider_location_id in list_of_ids:
-                    if provider_location_id not in provider_locations_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('Provider location with id: {!s} not found in database'.format(str(provider_location_id)))
-            else:
-                rqst_errors.append('No provider locations found for database ID(s): ' + rqst_provider_location_id)
+    response_list = create_response_list_from_db_objects(provider_location_qset)
+
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No provider location instances in db for given ids")
         else:
-            rqst_errors.append('No valid provider location IDs provided in request (must be integers)')
+            if list_of_ids:
+                for db_id in list_of_ids:
+                    tuple_of_bools_if_id_in_data = (instance_data['Database ID'] == db_id for instance_data in
+                                                    response_list)
+                    if not any(tuple_of_bools_if_id_in_data):
+                        rqst_errors.append('Provider location instance with id: {} not found in database'.format(db_id))
+
+    check_response_data_for_requested_data()
+
+    return response_list
 
 
-def retrieve_provider_locations_by_name(response_raw_data, rqst_errors, provider_locations, rqst_name):
-    provider_locations_list = []
-    provider_locations = provider_locations.filter(name__iexact=rqst_name)
+def create_response_list_from_db_objects(db_objects):
+    return_list = []
 
-    if provider_locations:
-        for provider_location in provider_locations:
-            provider_locations_list.append(provider_location.return_values_dict())
-        response_raw_data["Data"] = provider_locations_list
-    else:
-        rqst_errors.append('No provider locations with name: {!s} not found in database'.format(rqst_name))
+    for db_instance in db_objects:
+        return_list.append(db_instance.return_values_dict())
+
+    return return_list
 
 
-def retrieve_provider_locations_by_network_name(response_raw_data, rqst_errors, provider_locations, rqst_network_name):
-    provider_locations_list = []
-    provider_locations = provider_locations.filter(provider_network__name__iexact=rqst_network_name)
+def retrieve_provider_locations_by_name(provider_location_qset, rqst_name, rqst_errors):
+    provider_location_qset = filter_provider_location_instances_by_name(provider_location_qset, rqst_name)
 
-    if provider_locations:
-        for provider_location in provider_locations:
-            provider_locations_list.append(provider_location.return_values_dict())
-        response_raw_data["Data"] = provider_locations_list
-    else:
-        rqst_errors.append('No provider locations with a provider network with the name: {!s} found in database'.format(rqst_network_name))
+    response_list = create_response_list_from_db_objects(provider_location_qset)
+
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No provider location instances in db for given name.")
+
+    check_response_data_for_requested_data()
+
+    return response_list
 
 
-def retrieve_provider_locations_by_network_id(response_raw_data, rqst_errors, provider_locations, rqst_network_id, list_of_network_ids):
-    if rqst_network_id == "all":
-        all_provider_locations = provider_locations
-        provider_locations_dict = {}
-        for provider_location in all_provider_locations:
-            provider_locations_dict[provider_location.id] = provider_location.return_values_dict()
-        provider_locations_list = []
-        for provider_location_key, provider_location_entry in provider_locations_dict.items():
-            provider_locations_list.append(provider_location_entry)
+def retrieve_provider_locations_by_network_name(provider_location_qset, rqst_network_name, rqst_errors):
+    provider_location_qset = filter_provider_location_instances_by_provider_network_name(provider_location_qset, rqst_network_name)
 
-        response_raw_data["Data"] = provider_locations_list
-    elif list_of_network_ids:
-        if len(list_of_network_ids) > 0:
-            for indx, element in enumerate(list_of_network_ids):
-                list_of_network_ids[indx] = int(element)
-            provider_locations = provider_locations.filter(provider_network__id__in=list_of_network_ids)
-            if len(provider_locations) > 0:
+    response_list = create_response_list_from_db_objects(provider_location_qset)
 
-                provider_locations_dict = {}
-                for provider_location in provider_locations:
-                    if provider_location.provider_network.id not in provider_locations_dict:
-                        provider_locations_dict[provider_location.provider_network.id] = [provider_location.return_values_dict()]
-                    else:
-                        provider_locations_dict[provider_location.provider_network.id].append(provider_location.return_values_dict())
-                provider_locations_list = []
-                for provider_location_key, provider_location_entry in provider_locations_dict.items():
-                    provider_locations_list.append(provider_location_entry)
-                response_raw_data["Data"] = provider_locations_list
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No provider location instances in db for given provider network name")
 
-                for network_id in list_of_network_ids:
-                    if network_id not in provider_locations_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('Provider location with provider network id: {!s} not found in database'.format(str(network_id)))
-            else:
-                rqst_errors.append('No provider locations found for provider network database ID(s): ' + rqst_network_id)
-        else:
-            rqst_errors.append('No valid provider network database IDs provided in request (must be integers)')
+    check_response_data_for_requested_data()
+
+    return response_list
+
+
+def retrieve_provider_locations_by_network_id(provider_location_qset, list_of_network_ids, rqst_errors):
+    response_list = []
+
+    for network_id in list_of_network_ids:
+        filtered_provider_location_qset = filter_provider_location_instances_by_provider_network_id(provider_location_qset, network_id)
+
+        response_list_component = create_response_list_from_db_objects(filtered_provider_location_qset)
+
+        def check_response_component_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append(rqst_errors.append("No provider location instances in network for provider network with id: {}".format(network_id)))
+
+        check_response_component_for_requested_data()
+
+        def add_response_component_to_response_data():
+            response_list.append(response_list_component)
+
+        add_response_component_to_response_data()
+
+    return response_list

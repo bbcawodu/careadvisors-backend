@@ -1,182 +1,189 @@
 from picmodels.models import ProviderLocation
+from picmodels.models import HealthcareCarrier
+from picmodels.models import HealthcarePlan
+from picmodels.services import filter_db_queryset_by_id
+from picmodels.services.provider_plan_network_services.healthcare_plan_services import filter_plan_qset_by_name
+from picmodels.services.provider_plan_network_services.healthcare_plan_services import filter_plan_qset_by_carrier_name
+from picmodels.services.provider_plan_network_services.healthcare_carrier_services import filter_carrier_objs_by_state
 
 
-def retrieve_id_plans(response_raw_data, rqst_errors, plans, rqst_plan_id, list_of_ids, include_summary_report=False, include_detailed_report=False):
-    if rqst_plan_id == "all":
-        all_plans = plans
-        plan_dict = {}
-        for plan in all_plans:
-            plan_dict[plan.id] = plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)
-        plan_list = []
-        for plan_key, plan_entry in plan_dict.items():
-            plan_list.append(plan_entry)
+def retrieve_plan_data_by_id(search_params, rqst_plan_id, list_of_ids, rqst_errors):
+    plan_qset = filter_db_queryset_by_id(HealthcarePlan.objects.all(), rqst_plan_id, list_of_ids)
+    plan_qset, include_summary_report_fields, include_detailed_report_fields = filter_db_objects_by_secondary_params(search_params, plan_qset)
 
-        response_raw_data["Data"] = plan_list
-    elif list_of_ids:
-        if len(list_of_ids) > 0:
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            plans = plans.filter(id__in=list_of_ids)
-            if len(plans) > 0:
+    response_list = create_response_list_from_db_objects(plan_qset, include_summary_report_fields, include_detailed_report_fields)
 
-                plan_dict = {}
-                for plan in plans:
-                    plan_dict[plan.id] = plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)
-                plan_list = []
-                for plan_key, plan_entry in plan_dict.items():
-                    plan_list.append(plan_entry)
-                response_raw_data["Data"] = plan_list
-
-                for plan_id in list_of_ids:
-                    if plan_id not in plan_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('Plan with id: {!s} not found in database'.format(str(plan_id)))
-            else:
-                rqst_errors.append('No plans found for database ID(s): ' + rqst_plan_id)
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No healthcare plan instances in db for given ids")
         else:
-            rqst_errors.append('No valid plan IDs provided in request (must be integers)')
+            if list_of_ids:
+                for db_id in list_of_ids:
+                    tuple_of_bools_if_id_in_data = (instance_data['Database ID'] == db_id for instance_data in
+                                                    response_list)
+                    if not any(tuple_of_bools_if_id_in_data):
+                        rqst_errors.append('Healthcare plan instance with id: {} not found in database'.format(db_id))
+
+    check_response_data_for_requested_data()
+
+    return response_list
 
 
-def retrieve_name_plans(response_raw_data, rqst_errors, plans, rqst_name, include_summary_report=False, include_detailed_report=False):
-    plans_list = []
-    plans = plans.filter(name__iexact=rqst_name)
-
-    if plans:
-        for plan in plans:
-            plans_list.append(plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report))
-        response_raw_data["Data"] = plans_list
+def filter_db_objects_by_secondary_params(search_params, db_objects):
+    if 'include_summary_report' in search_params:
+        include_summary_report_fields = search_params['include_summary_report']
     else:
-        rqst_errors.append('No plans with name: {!s} not found in database'.format(rqst_name))
-
-
-def retrieve_plans_by_carrier_id(response_raw_data, rqst_errors, plans, rqst_carrier_id, list_of_carrier_ids, include_summary_report=False, include_detailed_report=False):
-    if rqst_carrier_id == "all":
-        all_plans = plans
-        plan_dict = {}
-        for plan in all_plans:
-            plan_dict[plan.id] = plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)
-        plan_list = []
-        for plan_key, plan_entry in plan_dict.items():
-            plan_list.append(plan_entry)
-
-        response_raw_data["Data"] = plan_list
-    elif list_of_carrier_ids:
-        if len(list_of_carrier_ids) > 0:
-            for indx, element in enumerate(list_of_carrier_ids):
-                list_of_carrier_ids[indx] = int(element)
-            plans = plans.filter(carrier__id__in=list_of_carrier_ids)
-            if len(plans) > 0:
-
-                plan_dict = {}
-                for plan in plans:
-                    if plan.carrier.id not in plan_dict:
-                        plan_dict[plan.carrier.id] = [plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)]
-                    else:
-                        plan_dict[plan.carrier.id].append(plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report))
-                plan_list = []
-                for plan_key, plan_entry in plan_dict.items():
-                    plan_list.append(plan_entry)
-                response_raw_data["Data"] = plan_list
-
-                for carrier_id in list_of_carrier_ids:
-                    if carrier_id not in plan_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('Plan with carrier id: {!s} not found in database'.format(str(carrier_id)))
+        include_summary_report_fields = False
+    if 'include_detailed_report' in search_params:
+        include_detailed_report_fields = search_params['include_detailed_report']
+    else:
+        include_detailed_report_fields = False
+    if 'premium_type' in search_params:
+        matching_db_objects = None
+        for rqst_premium_type in search_params['premium_type list']:
+            if matching_db_objects:
+                matching_db_objects = matching_db_objects | db_objects.filter(premium_type__iexact=rqst_premium_type)
             else:
-                rqst_errors.append('No plans found for carrier database ID(s): ' + rqst_carrier_id)
+                matching_db_objects = db_objects.filter(premium_type__iexact=rqst_premium_type)
+        db_objects = matching_db_objects
+
+    return db_objects, include_summary_report_fields, include_detailed_report_fields
+
+
+def create_response_list_from_db_objects(db_qset, include_summary_report=False, include_detailed_report=False):
+    return_list = []
+
+    for db_instance in db_qset:
+        return_list.append(db_instance.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report))
+
+    return return_list
+
+
+def retrieve_plan_data_by_name(search_params, rqst_name, rqst_errors):
+    plan_qset = filter_plan_qset_by_name(HealthcarePlan.objects.all(), rqst_name)
+    plan_qset, include_summary_report_fields, include_detailed_report_fields = filter_db_objects_by_secondary_params(search_params, plan_qset)
+
+    response_list = create_response_list_from_db_objects(plan_qset, include_summary_report_fields, include_detailed_report_fields)
+
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No healthcare plan instances in db for given name.")
+
+    check_response_data_for_requested_data()
+
+    return response_list
+
+
+def retrieve_plan_data_by_carrier_id(search_params, list_of_carrier_ids, rqst_errors):
+    response_list = []
+
+    for carrier_id in list_of_carrier_ids:
+        response_list_component = []
+
+        try:
+            carrier_instance = HealthcareCarrier.objects.get(id=carrier_id)
+            plan_qset = carrier_instance.healthcareplan_set.all()
+            plan_qset, include_summary_report_fields, include_detailed_report_fields = filter_db_objects_by_secondary_params(search_params, plan_qset)
+
+            response_list_component = create_response_list_from_db_objects(plan_qset, include_summary_report_fields, include_detailed_report_fields)
+
+            def check_response_data_for_requested_data():
+                if not response_list_component:
+                    rqst_errors.append("No healthcare plan instances in db for healthcare carrier with id: {}".format(carrier_id))
+
+            check_response_data_for_requested_data()
+        except HealthcareCarrier.DoesNotExist:
+            rqst_errors.append("No healthcare carrier instance found for id: {}".format(carrier_id))
+
+        def add_response_component_to_response_data():
+            response_list.append(response_list_component)
+
+        add_response_component_to_response_data()
+
+    return response_list
+
+
+def retrieve_plan_data_by_carrier_state(search_params, list_of_carrier_states, rqst_errors):
+    response_list = []
+
+    for carrier_state in list_of_carrier_states:
+        response_list_component = []
+
+        carrier_qset = filter_carrier_objs_by_state(HealthcareCarrier.objects.all(), carrier_state)
+        if len(carrier_qset):
+            plan_qset = None
+            for carrier_instance in carrier_qset:
+                if plan_qset:
+                    plan_qset = plan_qset | carrier_instance.healthcareplan_set.all()
+                else:
+                    plan_qset = carrier_instance.healthcareplan_set.all()
+
+            plan_qset, include_summary_report_fields, include_detailed_report_fields = filter_db_objects_by_secondary_params(
+                search_params, plan_qset)
+
+            response_list_component = create_response_list_from_db_objects(plan_qset, include_summary_report_fields,
+                                                                           include_detailed_report_fields)
+
+            def check_response_data_for_requested_data():
+                if not response_list_component:
+                    rqst_errors.append(
+                        "No healthcare plan instances in db for healthcare carriers in state: {}".format(carrier_state))
+
+            check_response_data_for_requested_data()
         else:
-            rqst_errors.append('No valid carrier database IDs provided in request (must be integers)')
+            rqst_errors.append("No healthcare carrier instances for state: {}".format(carrier_state))
+
+        def add_response_component_to_response_data():
+            response_list.append(response_list_component)
+
+        add_response_component_to_response_data()
+
+    return response_list
 
 
-def retrieve_plans_by_carrier_state(response_raw_data, rqst_errors, plans, rqst_carrier_state, list_of_carrier_states, include_summary_report=False, include_detailed_report=False):
-    plans_dict = {}
-    plans_object = plans
-    for state in list_of_carrier_states:
-        plans = plans_object.filter(carrier__state_province__iexact=state)
-        for plan in plans:
-            if state not in plans_dict:
-                plans_dict[state] = [plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)]
-            else:
-                plans_dict[state].append(plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report))
-    if len(plans_dict) > 0:
-        plans_list = []
-        for plan_key, plan_entry in plans_dict.items():
-            plans_list.append(plan_entry)
-        response_raw_data["Data"] = plans_list
-        for state in list_of_carrier_states:
-            if state not in plans_dict:
-                if response_raw_data['Status']['Error Code'] != 2:
-                    response_raw_data['Status']['Error Code'] = 2
-                rqst_errors.append('No plans with a carrier in state: {!s} found in database'.format(state))
-    else:
-        rqst_errors.append('No plans with a carrier in state(s): {!s} found in database'.format(rqst_carrier_state))
+def retrieve_plan_data_by_carrier_name(search_params, rqst_carrier_name, rqst_errors):
+    plan_qset = filter_plan_qset_by_carrier_name(HealthcarePlan.objects.all(), rqst_carrier_name)
+    plan_qset, include_summary_report_fields, include_detailed_report_fields = filter_db_objects_by_secondary_params(
+        search_params, plan_qset)
+
+    response_list = create_response_list_from_db_objects(plan_qset, include_summary_report_fields,
+                                                         include_detailed_report_fields)
+
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No healthcare plan instances in db for given name.")
+
+    check_response_data_for_requested_data()
+
+    return response_list
 
 
-def retrieve_plans_by_carrier_name(response_raw_data, rqst_errors, plans, rqst_carrier_name, include_summary_report=False, include_detailed_report=False):
-    plans_list = []
-    plans = plans.filter(carrier__name__iexact=rqst_carrier_name)
+def retrieve_plan_data_by_accepted_location_id(search_params, list_of_accepted_location_ids, rqst_errors):
+    response_list = []
 
-    if plans:
-        for plan in plans:
-            plans_list.append(plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report))
-        response_raw_data["Data"] = plans_list
-    else:
-        rqst_errors.append('No Plans with a carrier with the name: {!s} found in database'.format(rqst_carrier_name))
+    for provider_location_id in list_of_accepted_location_ids:
+        response_list_component = []
 
+        try:
+            provider_location_instance = ProviderLocation.objects.get(id=provider_location_id)
+            plan_qset = provider_location_instance.accepted_plans.all()
+            plan_qset, include_summary_report_fields, include_detailed_report_fields = filter_db_objects_by_secondary_params(search_params, plan_qset)
 
-def retrieve_plans_by_accepted_location_id(response_raw_data, rqst_errors, plans, rqst_accepted_location_id, list_of_accepted_location_ids, include_summary_report=False, include_detailed_report=False):
-    if rqst_accepted_location_id == "all":
-        all_plans = plans
-        plan_dict = {}
-        for plan in all_plans:
-            plan_dict[plan.id] = plan.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)
-        plan_list = []
-        for plan_key, plan_entry in plan_dict.items():
-            plan_list.append(plan_entry)
+            response_list_component = create_response_list_from_db_objects(plan_qset, include_summary_report_fields,
+                                                                           include_detailed_report_fields)
 
-        response_raw_data["Data"] = plan_list
-    elif list_of_accepted_location_ids:
-        if len(list_of_accepted_location_ids) > 0:
+            def check_response_data_for_requested_data():
+                if not response_list_component:
+                    rqst_errors.append(
+                        "No healthcare plan instances in db are accepted for provider location with id: {}".format(provider_location_id))
 
-            for indx, element in enumerate(list_of_accepted_location_ids):
-                integer_id = int(element)
-                list_of_accepted_location_ids[indx] = integer_id
+            check_response_data_for_requested_data()
+        except ProviderLocation.DoesNotExist:
+            rqst_errors.append("No provider location instance found for id: {}".format(provider_location_id))
 
-            provider_locations = ProviderLocation.objects.all().filter(id__in=list_of_accepted_location_ids)
-            if provider_locations.count():
-                plan_dict = {}
+        def add_response_component_to_response_data():
+            response_list.append(response_list_component)
 
-                for location_object in provider_locations:
-                    location_id = location_object.id
+        add_response_component_to_response_data()
 
-                    accepted_plan_objects = location_object.accepted_plans.all()
-                    if accepted_plan_objects.count():
-                        for accepted_plan_object in accepted_plan_objects:
-                            if location_id in plan_dict:
-                                plan_dict[location_id].append(accepted_plan_object.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report))
-                            else:
-                                plan_dict[location_id] = [accepted_plan_object.return_values_dict(include_summary_report=include_summary_report, include_detailed_report=include_detailed_report)]
-                    else:
-                        plan_dict[location_id] = []
-
-                plan_list = []
-                for plan_key, plan_entry in plan_dict.items():
-                    if plan_entry:
-                        plan_list.append(plan_entry)
-                response_raw_data["Data"] = plan_list
-
-                for accepted_location_id in list_of_accepted_location_ids:
-                    if accepted_location_id in plan_dict:
-                        if not plan_dict[accepted_location_id]:
-                            if response_raw_data['Status']['Error Code'] != 2:
-                                response_raw_data['Status']['Error Code'] = 2
-                            rqst_errors.append('Provider location with id: {!s} has no accepted plans'.format(str(accepted_location_id)))
-                    else:
-                        rqst_errors.append("No provider location found for id: {}".format(accepted_location_id))
-            else:
-                rqst_errors.append('No provider locations found for database ID(s): ' + rqst_accepted_location_id)
-
-        else:
-            rqst_errors.append('No valid provider location database IDs provided in request (must be integers)')
+    return response_list
