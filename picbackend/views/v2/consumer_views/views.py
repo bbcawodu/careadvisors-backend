@@ -13,12 +13,12 @@ from ..utils import clean_string_value_from_dict_object
 from .tools import validate_rqst_params_and_add_instance
 from .tools import validate_rqst_params_and_modify_instance
 from .tools import validate_rqst_params_and_delete_instance
-from .tools import retrieve_f_l_name_consumers
-from .tools import retrieve_email_consumers
-from .tools import retrieve_first_name_consumers
-from .tools import retrieve_last_name_consumers
-from .tools import retrieve_id_consumers
-from .tools import break_results_into_pages
+from .tools import retrieve_consumer_data_by_f_and_l_name
+from .tools import retrieve_consumer_data_by_email
+from .tools import retrieve_consumer_data_by_first_name
+from .tools import retrieve_consumer_data_by_last_name
+from .tools import retrieve_consumer_data_by_id
+from .tools import paginate_result_list_by_changing_excess_data_to_ids
 from ..base import JSONPUTRspMixin
 from ..base import JSONGETRspMixin
 
@@ -43,11 +43,34 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         # If there are no parsing errors, process POST data based on database action
         if not post_errors:
             if rqst_action == "Consumer Addition":
-                validate_rqst_params_and_add_instance(response_raw_data, post_data, post_errors)
+                matching_consumer_instances, consumer_instance, backup_consumer_obj = validate_rqst_params_and_add_instance(post_data, post_errors)
+
+                if matching_consumer_instances:
+                    consumer_match_data = []
+                    for consumer in matching_consumer_instances:
+                        consumer_match_data.append(consumer.return_values_dict())
+                    response_raw_data['Data']['Possible Consumer Matches'] = consumer_match_data
+                else:
+                    if consumer_instance:
+                        response_raw_data['Data']["Database ID"] = consumer_instance.id
+                    if backup_consumer_obj:
+                        response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
             elif rqst_action == "Consumer Modification":
-                validate_rqst_params_and_modify_instance(response_raw_data, post_data, post_errors)
+                consumer_instance, backup_consumer_obj = validate_rqst_params_and_modify_instance(post_data, post_errors)
+
+                if not post_errors:
+                    if consumer_instance:
+                        response_raw_data['Data']["Database ID"] = consumer_instance.id
+                    if backup_consumer_obj:
+                        response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
             elif rqst_action == "Consumer Deletion":
-                validate_rqst_params_and_delete_instance(response_raw_data, post_data, post_errors)
+                backup_consumer_obj = validate_rqst_params_and_delete_instance(post_data, post_errors)
+
+                if not post_errors:
+                    response_raw_data['Data']["Database ID"] = "Deleted"
+
+                    if backup_consumer_obj:
+                        response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
             else:
                 post_errors.append("No valid 'Database Action' provided.")
 
@@ -82,7 +105,7 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
 def get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors):
     # Filter consumer objects based on GET parameters
-    def filter_results_by_secondary_params(db_objects):
+    def filter_db_objects_by_secondary_params(db_objects):
         if 'navigator id list' in search_params:
             list_of_nav_ids = search_params['navigator id list']
             db_objects = db_objects.filter(navigator__in=list_of_nav_ids)
@@ -92,37 +115,49 @@ def get_and_add_consumer_data_to_response(consumers, request, search_params, res
 
         return db_objects
 
-    consumers = filter_results_by_secondary_params(consumers)
+    consumers = filter_db_objects_by_secondary_params(consumers)
 
-    if 'first name' in search_params and 'last name' in search_params:
-        rqst_first_name = search_params['first name']
-        rqst_last_name = search_params['last name']
-        retrieve_f_l_name_consumers(response_raw_data, rqst_errors, consumers, rqst_first_name, rqst_last_name)
-    elif 'email' in search_params:
-        rqst_email = search_params['email']
-        list_of_emails = search_params['email list']
-        retrieve_email_consumers(response_raw_data, rqst_errors, consumers, rqst_email, list_of_emails)
-    elif 'first name' in search_params:
-        rqst_first_name = search_params['first name']
-        list_of_first_names = search_params['first name list']
-        retrieve_first_name_consumers(response_raw_data, rqst_errors, consumers, rqst_first_name, list_of_first_names)
-    elif 'last name' in search_params:
-        rqst_last_name = search_params['last name']
-        list_of_last_names = search_params['last name list']
-        retrieve_last_name_consumers(response_raw_data, rqst_errors, consumers, rqst_last_name, list_of_last_names)
-    elif 'id' in search_params:
-        rqst_consumer_id = search_params['id']
-        if rqst_consumer_id != 'all':
-            list_of_ids = search_params['id list']
+    def retrieve_data_by_primary_params_and_add_to_response(db_objects):
+        data_list = []
+
+        if 'first name' in search_params and 'last name' in search_params:
+            rqst_first_name = search_params['first name']
+            rqst_last_name = search_params['last name']
+
+            data_list = retrieve_consumer_data_by_f_and_l_name(db_objects, rqst_first_name, rqst_last_name, rqst_errors)
+        elif 'email' in search_params:
+            list_of_emails = search_params['email list']
+
+            data_list = retrieve_consumer_data_by_email(db_objects, list_of_emails, rqst_errors)
+        elif 'first name' in search_params:
+            list_of_first_names = search_params['first name list']
+
+            data_list = retrieve_consumer_data_by_first_name(db_objects, list_of_first_names, rqst_errors)
+        elif 'last name' in search_params:
+            list_of_last_names = search_params['last name list']
+
+            data_list = retrieve_consumer_data_by_last_name(db_objects, list_of_last_names, rqst_errors)
+        elif 'id' in search_params:
+            rqst_consumer_id = search_params['id']
+            if rqst_consumer_id != 'all':
+                list_of_ids = search_params['id list']
+            else:
+                list_of_ids = None
+
+            data_list = retrieve_consumer_data_by_id(db_objects, rqst_consumer_id, list_of_ids, rqst_errors)
+
+            def paginate_results():
+                rqst_page_no = search_params['page number'] if 'page number' in search_params else None
+                base_url = request.build_absolute_uri(None)
+
+                extra_urls = paginate_result_list_by_changing_excess_data_to_ids(data_list, CONSUMERS_PER_PAGE, rqst_page_no, base_url)
+                if extra_urls:
+                    response_raw_data['Page URLs'] = extra_urls
+
+            paginate_results()
         else:
-            list_of_ids = None
-        retrieve_id_consumers(response_raw_data, rqst_errors, consumers, rqst_consumer_id, list_of_ids)
-    else:
-        rqst_errors.append('No Valid Parameters')
+            rqst_errors.append('No Valid Parameters')
 
-    # Break consumer results into pages so that results aren't too unruly
-    if "Data" in response_raw_data:
-        rqst_page_no = search_params['page number'] if 'page number' in search_params else None
-        base_url = request.build_absolute_uri(None)
+        response_raw_data['Data'] = data_list
 
-        break_results_into_pages(response_raw_data, CONSUMERS_PER_PAGE, rqst_page_no, base_url)
+    retrieve_data_by_primary_params_and_add_to_response(consumers)

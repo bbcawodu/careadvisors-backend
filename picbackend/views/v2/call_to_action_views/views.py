@@ -66,28 +66,27 @@ def manage_cta_request(request):
 
 # Need to abstract common variables in get and post class methods into class attributes
 class ViewCTAView(JSONGETRspMixin, View):
-    """
-    Defines views that handles Patient Innovation Center navigator hub location instance related requests
-    """
-
     def view_cta_get_logic(self, request, search_params, response_raw_data, rqst_errors):
-        cta_return_list = []
-        if 'intent' in search_params:
-            try:
-                if search_params['intent'] == 'all':
-                    cta_objects = CallToAction.objects.all()
+        def retrieve_data_by_primary_params_and_add_to_response():
+            cta_return_list = []
+            if 'intent' in search_params:
+                try:
+                    if search_params['intent'] == 'all':
+                        cta_objects = CallToAction.objects.all()
 
-                    for cta_object in cta_objects:
+                        for cta_object in cta_objects:
+                            cta_return_list.append(cta_object.return_values_dict())
+                    else:
+                        cta_object = CallToAction.objects.get(intent__iexact=search_params['intent'])
+
                         cta_return_list.append(cta_object.return_values_dict())
-                else:
-                    cta_object = CallToAction.objects.get(intent__iexact=search_params['intent'])
+                except CallToAction.DoesNotExist:
+                    rqst_errors.append("No Call to Action object found for intent keyword: {}".format(search_params["intent"]))
+            else:
+                rqst_errors.append("'intent' must be in GET parameters")
 
-                    cta_return_list.append(cta_object.return_values_dict())
-            except CallToAction.DoesNotExist:
-                rqst_errors.append("No Call to Action object found for intent keyword: {}".format(search_params["intent"]))
-        else:
-            rqst_errors.append("'intent' must be in GET parameters")
+            response_raw_data["Data"] = cta_return_list
 
-        response_raw_data["Data"] = cta_return_list
+        retrieve_data_by_primary_params_and_add_to_response()
 
     get_logic_function = view_cta_get_logic

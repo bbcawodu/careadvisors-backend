@@ -37,15 +37,18 @@ class TradingPartnerView(JSONGETRspMixin, View):
     """
 
     def trading_partner_logic(self, request, search_params, response_raw_data, rqst_errors):
-        # create Pokitdok API object
-        pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
+        def retrieve_data_by_primary_params_and_add_to_response():
+            # create Pokitdok API object
+            pd = pokitdok.api.connect('fbSgQ0sM3xQNI5m8TyxR', 'du6JkRfNcHt8wNashtpf7Mdr96thZyn8Kilo9xoB')
 
-        # make request to pokitdok
-        if "partnerid" in search_params:
-            trading_partners = pd.trading_partners(search_params["partnerid"])
-        else:
-            trading_partners = pd.trading_partners()
+            # make request to pokitdok
+            if "partnerid" in search_params:
+                trading_partners = pd.trading_partners(search_params["partnerid"])
+            else:
+                trading_partners = pd.trading_partners()
 
-        response_raw_data["Data"] = trading_partners["data"]
+            response_raw_data["Data"] = trading_partners["data"]
+
+        retrieve_data_by_primary_params_and_add_to_response()
 
     get_logic_function = trading_partner_logic

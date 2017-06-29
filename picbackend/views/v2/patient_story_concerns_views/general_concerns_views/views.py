@@ -7,9 +7,9 @@ from django.views.generic import View
 from django.utils.decorators import method_decorator
 from ...utils import clean_string_value_from_dict_object
 from picmodels.models import ConsumerGeneralConcern
-from .tools import add_general_concern_using_api_rqst_params
-from .tools import modify_general_concern_using_api_rqst_params
-from .tools import delete_general_concern_using_api_rqst_params
+from .tools import validate_rqst_params_and_add_instance
+from .tools import validate_rqst_params_and_modify_instance
+from .tools import validate_rqst_params_and_delete_instance
 from .tools import retrieve_general_concerns_by_id
 from .tools import retrieve_general_concerns_by_name
 from django.views.decorators.csrf import csrf_exempt
@@ -34,30 +34,47 @@ class GeneralConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         # If there are no parsing errors, process PUT data based on database action
         if not post_errors:
             if rqst_action == "Concern Addition":
-                add_general_concern_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                general_concern_obj = validate_rqst_params_and_add_instance(post_data, post_errors)
+
+                if general_concern_obj:
+                    response_raw_data['Data']["Database ID"] = general_concern_obj.id
             elif rqst_action == "Concern Modification":
-                modify_general_concern_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                general_concern_obj = validate_rqst_params_and_modify_instance(post_data, post_errors)
+
+                if general_concern_obj:
+                    response_raw_data['Data']["Database ID"] = general_concern_obj.id
             elif rqst_action == "Concern Deletion":
-                delete_general_concern_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                validate_rqst_params_and_delete_instance(post_data, post_errors)
+
+                if not post_errors:
+                    response_raw_data['Data']["Database ID"] = "Deleted"
             else:
                 post_errors.append("No valid 'Database Action' provided.")
 
     def general_concerns_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         general_concerns = ConsumerGeneralConcern.objects.all()
 
-        if 'id' in search_params:
-            rqst_carrier_id = search_params['id']
-            if rqst_carrier_id != 'all':
-                list_of_ids = search_params['id list']
-            else:
-                list_of_ids = None
-            retrieve_general_concerns_by_id(response_raw_data, rqst_errors, general_concerns, rqst_carrier_id, list_of_ids)
-        elif 'name' in search_params:
-            rqst_name = search_params['name']
+        def retrieve_data_by_primary_params_and_add_to_response(db_objects):
+            data_list = []
 
-            retrieve_general_concerns_by_name(response_raw_data, rqst_errors, general_concerns, rqst_name)
-        else:
-            rqst_errors.append('No Valid Parameters')
+            if 'id' in search_params:
+                rqst_general_concerns_id = search_params['id']
+                if rqst_general_concerns_id != 'all':
+                    list_of_ids = search_params['id list']
+                else:
+                    list_of_ids = None
+
+                data_list = retrieve_general_concerns_by_id(db_objects, rqst_general_concerns_id, list_of_ids, rqst_errors)
+            elif 'name' in search_params:
+                rqst_name = search_params['name']
+
+                data_list = retrieve_general_concerns_by_name(db_objects, rqst_name, rqst_errors)
+            else:
+                rqst_errors.append('No Valid Parameters')
+
+            response_raw_data['Data'] = data_list
+
+        retrieve_data_by_primary_params_and_add_to_response(general_concerns)
 
     put_logic_function = general_concerns_management_put_logic
     get_logic_function = general_concerns_management_get_logic

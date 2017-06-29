@@ -126,15 +126,17 @@ class PICStaff(models.Model):
         super(PICStaff, self).save(*args, **kwargs)
 
     class Meta:
+        unique_together = ("email",)
         # maps model to the picmodels module
         app_label = 'picmodels'
 
 
 @receiver(models.signals.post_delete, sender=PICStaff)
 def remove_file_from_s3(sender, instance, using, **kwargs):
-    default_pic_url = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_STAFF_PIC_URL)
-    if instance.staff_pic.url != default_pic_url:
-        instance.staff_pic.delete(save=False)
+    if instance.staff_pic:
+        default_pic_url = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_STAFF_PIC_URL)
+        if instance.staff_pic.url != default_pic_url:
+            instance.staff_pic.delete(save=False)
 
 
 # Maybe add some sort of authorization to our API? OAuth? OAuth2? Some shit?

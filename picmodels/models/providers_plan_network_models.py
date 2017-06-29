@@ -362,6 +362,7 @@ class HealthcareServiceCostEntry(models.Model):
         # maps model to the picmodels module
         app_label = 'picmodels'
 
+
 class ProviderNetwork(models.Model):
     name = models.CharField(max_length=10000)
 

@@ -48,26 +48,30 @@ class HospitalWebTrafficCalculatorDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
 
     def hospital_web_traffic_calculator_data_mgr_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         web_traffic_calculator_data = HospitalWebTrafficData.objects.all()
-        data_list = []
 
-        if 'id' in search_params:
-            rqst_hospital_web_traffic_calculator_data_id = search_params['id']
-            if rqst_hospital_web_traffic_calculator_data_id != 'all':
-                list_of_ids = search_params['id list']
+        def retrieve_data_by_primary_params_and_add_to_response(db_objects):
+            data_list = []
+
+            if 'id' in search_params:
+                rqst_hospital_web_traffic_calculator_data_id = search_params['id']
+                if rqst_hospital_web_traffic_calculator_data_id != 'all':
+                    list_of_ids = search_params['id list']
+                else:
+                    list_of_ids = []
+                data_list = retrieve_hospital_web_traffic_calculator_data_by_id(db_objects,
+                                                                                rqst_hospital_web_traffic_calculator_data_id,
+                                                                                list_of_ids, rqst_errors)
+            elif 'hospital_name' in search_params:
+                rqst_hospital_name = search_params['hospital_name']
+
+                data_list = retrieve_web_traffic_calculator_data_by_hospital_name(db_objects,
+                                                                                  rqst_hospital_name, rqst_errors)
             else:
-                list_of_ids = []
-            data_list = retrieve_hospital_web_traffic_calculator_data_by_id(web_traffic_calculator_data,
-                                                                            rqst_hospital_web_traffic_calculator_data_id,
-                                                                            list_of_ids, rqst_errors)
-        elif 'hospital_name' in search_params:
-            rqst_hospital_name = search_params['hospital_name']
+                rqst_errors.append('No Valid Parameters')
 
-            data_list = retrieve_web_traffic_calculator_data_by_hospital_name(web_traffic_calculator_data,
-                                                                              rqst_hospital_name, rqst_errors)
-        else:
-            rqst_errors.append('No Valid Parameters')
+            response_raw_data['Data'] = data_list
 
-        response_raw_data['Data'] = data_list
+        retrieve_data_by_primary_params_and_add_to_response(web_traffic_calculator_data)
 
     put_logic_function = hospital_web_traffic_calculator_data_mgr_put_logic
     get_logic_function = hospital_web_traffic_calculator_data_mgr_get_logic

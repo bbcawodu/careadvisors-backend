@@ -44,26 +44,30 @@ class HealthcareSubsidyEligibilityDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
 
     def healthcare_subsidy_eligibility_data_mgr_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         healthcare_subsidy_eligibility_data_objs = HealthcareSubsidyEligibilityByFamSize.objects.all()
-        data_list = []
 
-        if 'id' in search_params:
-            rqst_healthcare_subsidy_eligibility_data_id = search_params['id']
-            if rqst_healthcare_subsidy_eligibility_data_id != 'all':
-                list_of_ids = search_params['id list']
+        def retrieve_data_by_primary_params_and_add_to_response(db_objs):
+            data_list = []
+
+            if 'id' in search_params:
+                rqst_healthcare_subsidy_eligibility_data_id = search_params['id']
+                if rqst_healthcare_subsidy_eligibility_data_id != 'all':
+                    list_of_ids = search_params['id list']
+                else:
+                    list_of_ids = []
+                data_list = retrieve_healthcare_subsidy_eligibility_data_by_id(db_objs,
+                                                                               rqst_healthcare_subsidy_eligibility_data_id,
+                                                                               list_of_ids, rqst_errors)
+            elif 'family_size' in search_params:
+                list_of_family_sizes = search_params['family_size_list']
+
+                data_list = retrieve_healthcare_subsidy_eligibility_data_by_family_size(db_objs,
+                                                                                        list_of_family_sizes, rqst_errors)
             else:
-                list_of_ids = []
-            data_list = retrieve_healthcare_subsidy_eligibility_data_by_id(healthcare_subsidy_eligibility_data_objs,
-                                                                           rqst_healthcare_subsidy_eligibility_data_id,
-                                                                           list_of_ids, rqst_errors)
-        elif 'family_size' in search_params:
-            list_of_family_sizes = search_params['family_size_list']
+                rqst_errors.append('No Valid Parameters')
 
-            data_list = retrieve_healthcare_subsidy_eligibility_data_by_family_size(healthcare_subsidy_eligibility_data_objs,
-                                                                                    list_of_family_sizes, rqst_errors)
-        else:
-            rqst_errors.append('No Valid Parameters')
+            response_raw_data['Data'] = data_list
 
-        response_raw_data['Data'] = data_list
+        retrieve_data_by_primary_params_and_add_to_response(healthcare_subsidy_eligibility_data_objs)
 
     put_logic_function = healthcare_subsidy_eligibility_data_mgr_put_logic
     get_logic_function = healthcare_subsidy_eligibility_data_mgr_get_logic
