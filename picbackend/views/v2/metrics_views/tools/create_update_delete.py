@@ -7,25 +7,23 @@ from ...utils import clean_string_value_from_dict_object
 from ...utils import clean_int_value_from_dict_object
 from ...utils import clean_list_value_from_dict_object
 from ...utils import clean_dict_value_from_dict_object
-from picmodels.models import MetricsSubmission
 from picmodels.models import PlanStat
 from picmodels.models import NavMetricsLocation
-from picmodels.models import PICStaff
+from picmodels.services.metrics_submission_services import create_or_update_metrics_obj_using_validated_params
 
 
-def add_or_update_metrics_instance_using_api_rqst_params(response_raw_data, post_data, post_errors):
-    rqst_metrics_put_params = get_metrics_mgmt_put_params(post_data, post_errors)
+def validate_rqst_params_then_add_or_update_metrics_instance(post_data, post_errors):
+    rqst_metrics_params = validate_metrics_mgmt_params(post_data, post_errors)
 
-    # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
-    # create and save database entry for appointment
-    if len(post_errors) == 0:
-        metrics_instance, metrics_instance_message = create_or_update_metrics_obj(rqst_metrics_put_params, post_errors)
+    metrics_instance = None
+    metrics_instance_message = None
+    if not post_errors:
+        metrics_instance, metrics_instance_message = create_or_update_metrics_obj_using_validated_params(rqst_metrics_params, post_errors)
 
-        if len(post_errors) == 0 and metrics_instance and metrics_instance_message:
-            response_raw_data["Status"]["Message"] = [metrics_instance_message]
+    return metrics_instance, metrics_instance_message
 
 
-def get_metrics_mgmt_put_params(rqst_data, rqst_errors):
+def validate_metrics_mgmt_params(rqst_data, rqst_errors):
     consumer_metrics = clean_dict_value_from_dict_object(rqst_data, "root", "Consumer Metrics", rqst_errors)
     if not consumer_metrics:
         consumer_metrics = {}
@@ -122,67 +120,3 @@ def get_metrics_mgmt_put_params(rqst_data, rqst_errors):
         "unsaved_plan_stat_objs": unsaved_plan_stat_objs,
         "metrics_date": metrics_date
     }
-
-
-def create_or_update_metrics_obj(rqst_metrics_params, rqst_errors):
-    metrics_instance = None
-    metrics_action_message = None
-
-    rqst_usr_email = rqst_metrics_params['rqst_usr_email']
-    metrics_date = rqst_metrics_params['metrics_date']
-    location_instance_for_metrics = rqst_metrics_params['location_instance_for_metrics']
-
-    try:
-        user_instance = PICStaff.objects.get(email__iexact=rqst_metrics_params['rqst_usr_email'])
-    except PICStaff.DoesNotExist:
-        rqst_errors.append("Staff database entry does not exist for email: {!s}".format(rqst_usr_email))
-    else:
-        try:
-            metrics_instance = MetricsSubmission.objects.get(staff_member=user_instance, submission_date=metrics_date)
-            metrics_action_message = 'Metrics Entry Updated'
-        except MetricsSubmission.DoesNotExist:
-            metrics_instance = MetricsSubmission(staff_member=user_instance, submission_date=metrics_date)
-            metrics_action_message = 'Metrics Entry Created'
-        except MetricsSubmission.MultipleObjectsReturned:
-            rqst_errors.append("Multiple metrics entries exist for this date")
-
-        if metrics_instance:
-            metrics_instance.no_general_assis = rqst_metrics_params['rqst_no_general_assis']
-            metrics_instance.no_plan_usage_assis = rqst_metrics_params['rqst_no_plan_usage_assis']
-            metrics_instance.no_locating_provider_assis = rqst_metrics_params['rqst_no_locating_provider_assis']
-            metrics_instance.no_billing_assis = rqst_metrics_params['rqst_no_billing_assis']
-            metrics_instance.no_enroll_apps_started = rqst_metrics_params['rqst_no_enroll_apps_started']
-            metrics_instance.no_enroll_qhp = rqst_metrics_params['rqst_no_enroll_qhp']
-            metrics_instance.no_enroll_abe_chip = rqst_metrics_params['rqst_no_enroll_abe_chip']
-            metrics_instance.no_enroll_shop = rqst_metrics_params['rqst_no_enroll_shop']
-            metrics_instance.no_referrals_agents_brokers = rqst_metrics_params['rqst_no_referrals_agents_brokers']
-            metrics_instance.no_referrals_ship_medicare = rqst_metrics_params['rqst_no_referrals_ship_medicare']
-            metrics_instance.no_referrals_other_assis_programs = rqst_metrics_params['rqst_no_referrals_other_assis_programs']
-            metrics_instance.no_referrals_issuers = rqst_metrics_params['rqst_no_referrals_issuers']
-            metrics_instance.no_referrals_doi = rqst_metrics_params['rqst_no_referrals_doi']
-            metrics_instance.no_mplace_tax_form_assis = rqst_metrics_params['rqst_no_mplace_tax_form_assis']
-            metrics_instance.no_mplace_exempt_assis = rqst_metrics_params['rqst_no_mplace_exempt_assis']
-            metrics_instance.no_qhp_abe_appeals = rqst_metrics_params['rqst_no_qhp_abe_appeals']
-            metrics_instance.no_data_matching_mplace_issues = rqst_metrics_params['rqst_no_data_matching_mplace_issues']
-            metrics_instance.no_sep_eligible = rqst_metrics_params['rqst_no_sep_eligible']
-            metrics_instance.no_employ_spons_cov_issues = rqst_metrics_params['rqst_no_employ_spons_cov_issues']
-            metrics_instance.no_aptc_csr_assis = rqst_metrics_params['rqst_no_aptc_csr_assis']
-            metrics_instance.no_cps_consumers = rqst_metrics_params['rqst_no_cps_consumers']
-            metrics_instance.cmplx_cases_mplace_issues = rqst_metrics_params['rqst_cmplx_cases_mplace_issues']
-            metrics_instance.county = rqst_metrics_params['rqst_metrics_county']
-            metrics_instance.location = location_instance_for_metrics
-            metrics_instance.zipcode = location_instance_for_metrics.address.zipcode
-
-            if len(rqst_errors) == 0:
-                metrics_instance.save()
-
-                metrics_instance_current_plan_stats = metrics_instance.planstat_set.all()
-                for current_plan_stat_instance in metrics_instance_current_plan_stats:
-                    current_plan_stat_instance.delete()
-
-                unsaved_plan_stat_objs = rqst_metrics_params['unsaved_plan_stat_objs']
-                for unsaved_plan_stat_obj in unsaved_plan_stat_objs:
-                    unsaved_plan_stat_obj.metrics_submission = metrics_instance
-                    unsaved_plan_stat_obj.save()
-
-    return metrics_instance, metrics_action_message

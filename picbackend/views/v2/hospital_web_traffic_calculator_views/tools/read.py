@@ -12,10 +12,11 @@ def retrieve_hospital_web_traffic_calculator_data_by_id(web_traffic_calculator_d
         if not response_list:
             rqst_errors.append("No hospital web traffic data instances in db for given ids")
         else:
-            for rqst_id in list_of_ids:
-                tuple_of_bool_if_id_in_data = (instance_data['Database ID'] == rqst_id for instance_data in response_list)
-                if not any(tuple_of_bool_if_id_in_data):
-                    rqst_errors.append('Hospital web traffic data instance with id: {} not found in database'.format(rqst_id))
+            if list_of_ids:
+                for rqst_id in list_of_ids:
+                    tuple_of_bool_if_id_in_data = (instance_data['Database ID'] == rqst_id for instance_data in response_list)
+                    if not any(tuple_of_bool_if_id_in_data):
+                        rqst_errors.append('Hospital web traffic data instance with id: {} not found in database'.format(rqst_id))
 
     check_response_list_for_requested_data()
 

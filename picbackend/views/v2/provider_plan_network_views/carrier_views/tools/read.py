@@ -1,128 +1,69 @@
-def retrieve_id_carriers(response_raw_data, rqst_errors, carriers, rqst_carrier_id, list_of_ids):
-    """
-    This function takes a list of ids and a QueryList of HealthcareCarrier instances as parameters,
-    filters the database with the parameters, and adds the carrier info the given dictionary of response data
+from picmodels.services import filter_db_queryset_by_id
+from picmodels.services.provider_plan_network_services.healthcare_carrier_services import filter_carrier_objs_by_state
+from picmodels.services.provider_plan_network_services.healthcare_carrier_services import filter_carrier_objs_by_name
 
-    :param response_raw_data: (type: dictionary) response data
-    :param rqst_errors: (type: list) list of error messages
-    :param carriers: (type: QueryList) QueryList of carriers
-    :param rqst_carrier_id: (type: integer) carrier id
-    :param list_of_ids: (type: list) list of carrier ids
-    :return: (type: dictionary and list) response data and list of error messages
-    """
 
-    if rqst_carrier_id == "all":
-        all_carriers = carriers
-        carrier_dict = {}
-        for carrier in all_carriers:
-            carrier_dict[carrier.id] = carrier.return_values_dict()
-        carrier_list = []
-        for carrier_key, carrier_entry in carrier_dict.items():
-            carrier_list.append(carrier_entry)
+def retrieve_carrier_data_by_id(carrier_qset, rqst_carrier_id, list_of_ids, rqst_errors):
+    carrier_qset = filter_db_queryset_by_id(carrier_qset, rqst_carrier_id, list_of_ids)
 
-        response_raw_data["Data"] = carrier_list
-    elif list_of_ids:
-        if len(list_of_ids) > 0:
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            carriers = carriers.filter(id__in=list_of_ids)
-            if len(carriers) > 0:
+    response_list = create_response_list_from_db_objects(carrier_qset)
 
-                carrier_dict = {}
-                for carrier in carriers:
-                    carrier_dict[carrier.id] = carrier.return_values_dict()
-                carrier_list = []
-                for carrier_key, carrier_entry in carrier_dict.items():
-                    carrier_list.append(carrier_entry)
-                response_raw_data["Data"] = carrier_list
-
-                for carrier_id in list_of_ids:
-                    if carrier_id not in carrier_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('Carrier with id: {!s} not found in database'.format(str(carrier_id)))
-            else:
-                rqst_errors.append('No carriers found for database ID(s): ' + rqst_carrier_id)
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No carrier instances in db for given ids.")
         else:
-            rqst_errors.append('No valid carrier IDs provided in request (must be integers)')
+            if list_of_ids:
+                for db_id in list_of_ids:
+                    tuple_of_bools_if_id_in_data = (instance_data['Database ID'] == db_id for instance_data in response_list)
+                    if not any(tuple_of_bools_if_id_in_data):
+                        rqst_errors.append('Carrier instance with id: {} not found in database'.format(db_id))
+
+    check_response_data_for_requested_data()
+
+    return response_list
 
 
-def retrieve_state_carriers(response_raw_data, rqst_errors, carriers, rqst_state, list_of_states):
-    carrier_dict = {}
+def create_response_list_from_db_objects(db_objects):
+    return_list = []
+
+    for db_instance in db_objects:
+        return_list.append(db_instance.return_values_dict())
+
+    return return_list
+
+
+def retrieve_carrier_data_by_state(carrier_qset, list_of_states, rqst_errors):
+    response_list = []
+
     for state in list_of_states:
-        name_carriers = carriers.filter(state_province__iexact=state)
-        for carrier in name_carriers:
-            if state not in carrier_dict:
-                carrier_dict[state] = [carrier.return_values_dict()]
-            else:
-                carrier_dict[state].append(carrier.return_values_dict())
-    if len(carrier_dict) > 0:
-        carrier_list = []
-        for carrier_key, carrier_entry in carrier_dict.items():
-            carrier_list.append(carrier_entry)
-        response_raw_data["Data"] = carrier_list
-        for state in list_of_states:
-            if state not in carrier_dict:
-                if response_raw_data['Status']['Error Code'] != 2:
-                    response_raw_data['Status']['Error Code'] = 2
-                rqst_errors.append('Carriers in the state: {!s} not found in database'.format(state))
-    else:
-        rqst_errors.append('Carriers in the state(s): {!s} not found in database'.format(rqst_state))
+        filtered_carrier_qset = filter_carrier_objs_by_state(carrier_qset, state)
+
+        response_list_component = create_response_list_from_db_objects(filtered_carrier_qset)
+
+        def check_response_component_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append('Carriers in the state: {} not found in database'.format(state))
+
+        check_response_component_for_requested_data()
+
+        def add_response_component_to_response_data():
+            if response_list_component:
+                response_list.append(response_list_component)
+
+        add_response_component_to_response_data()
+
+    return response_list
 
 
-def retrieve_name_carriers(response_raw_data, rqst_errors, carriers, rqst_name):
-    """
-    This function takes a carrier name and a QueryList of HealthcareCarrier instances as parameters,
-    filters the database with the parameters, and adds the carrier info the given dictionary of response data
+def retrieve_carrier_data_by_name(carrier_qset, rqst_name, rqst_errors):
+    carrier_qset = filter_carrier_objs_by_name(carrier_qset, rqst_name)
 
-    :param response_raw_data: (type: dictionary) response data
-    :param rqst_errors: (type: list) list of error messages
-    :param carriers: (type: QueryList) QueryList of consumers
-    :param rqst_name: (type: string) consumer last name
-    :return: (type: dictionary and list) response data and list of error messages
-    """
+    response_list = create_response_list_from_db_objects(carrier_qset)
 
-    carrier_list = []
-    carriers = carriers.filter(name__iexact=rqst_name)
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No carrier instances in db for given name.")
 
-    if carriers:
-        if len(carriers) > 1:
-            if response_raw_data['Status']['Error Code'] != 2:
-                response_raw_data['Status']['Error Code'] = 2
-            rqst_errors.append('Multiple carriers found in db for name: {!s}'.format(rqst_name))
+    check_response_data_for_requested_data()
 
-        for carrier in carriers:
-            carrier_list.append(carrier.return_values_dict())
-        response_raw_data["Data"] = carrier_list
-    else:
-        rqst_errors.append('Carrier with name: {!s} not found in database'.format(rqst_name))
-
-
-# def retrieve_name_carriers(response_raw_data, rqst_errors, carriers, rqst_name, list_of_names):
-#     """
-#     This function takes a carrier name and a QueryList of HealthcareCarrier instances as parameters,
-#     filters the database with the parameters, and adds the carrier info the given dictionary of response data
-#
-#     :param response_raw_data: (type: dictionary) response data
-#     :param rqst_errors: (type: list) list of error messages
-#     :param carriers: (type: QueryList) QueryList of consumers
-#     :param rqst_name: (type: string) consumer last name
-#     :return: (type: dictionary and list) response data and list of error messages
-#     """
-#
-#     carrier_list = []
-#     carriers = carriers.filter(name__iexact=rqst_name)
-#
-#     if carriers:
-#         if len(carriers) > 1:
-#             if response_raw_data['Status']['Error Code'] != 2:
-#                 response_raw_data['Status']['Error Code'] = 2
-#             rqst_errors.append('Multiple carriers found in db for name: {!s}'.format(rqst_name))
-#
-#         for carrier in carriers:
-#             carrier_list.append(carrier.return_values_dict())
-#         response_raw_data["Data"] = carrier_list
-#     else:
-#         rqst_errors.append('Carrier with name: {!s} not found in database'.format(rqst_name))
-#
-#     return response_raw_data, rqst_errors
+    return response_list

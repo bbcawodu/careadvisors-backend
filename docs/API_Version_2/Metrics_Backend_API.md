@@ -308,8 +308,6 @@ In response, a JSON document will be displayed with the following format:
             - Corresponds to a comma separated list of fields that you would like each metrics report to include.
                 - all non ASCII characters of a field must be url encoded before separating by commas
             - If no valid fields are given, all fields of each metrics report will be returned
-            
-        - "grouby" can be "zipcode" to group the metrics submissions returned by zipcode (IN DEVELOPMENT)
         
 - The response will be a JSON document with the following format:
     ```

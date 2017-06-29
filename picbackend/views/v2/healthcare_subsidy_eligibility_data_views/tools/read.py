@@ -11,10 +11,11 @@ def retrieve_healthcare_subsidy_eligibility_data_by_id(healthcare_subsidy_eligib
         if not response_list:
             rqst_errors.append("No healthcare subsidy eligibility data instances in db for given ids")
         else:
-            for healthcare_subsidy_eligibility_data_id in list_of_ids:
-                tuple_of_bools_if_id_in_data = (instance_data['Database ID'] == healthcare_subsidy_eligibility_data_id for instance_data in response_list)
-                if not any(tuple_of_bools_if_id_in_data):
-                    rqst_errors.append('Healthcare subsidy eligibility data instance with id: {} not found in database'.format(healthcare_subsidy_eligibility_data_id))
+            if list_of_ids:
+                for healthcare_subsidy_eligibility_data_id in list_of_ids:
+                    tuple_of_bools_if_id_in_data = (instance_data['Database ID'] == healthcare_subsidy_eligibility_data_id for instance_data in response_list)
+                    if not any(tuple_of_bools_if_id_in_data):
+                        rqst_errors.append('Healthcare subsidy eligibility data instance with id: {} not found in database'.format(healthcare_subsidy_eligibility_data_id))
 
     check_response_data_for_requested_data()
 

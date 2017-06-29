@@ -347,7 +347,5 @@ def delete_instance_using_validated_params(rqst_consumer_id, rqst_create_backup,
         consumer_instance.delete()
     except PICConsumer.DoesNotExist:
         post_errors.append('Consumer database entry does not exist for the id: {}'.format(rqst_consumer_id))
-    except PICConsumer.MultipleObjectsReturned:
-        post_errors.append('Multiple database entries exist for the id: {}'.format(rqst_consumer_id))
 
     return backup_consumer_obj

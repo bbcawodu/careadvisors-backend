@@ -3,404 +3,205 @@ Defines utility functions and classes for consumer metrics views
 """
 
 from picmodels.models import PICStaff
+from picmodels.services import filter_db_queryset_by_id
+from picmodels.services.metrics_submission_services import filter_metrics_db_instances_by_secondary_params
+from picmodels.services.staff_consumer_models_services import filter_staff_objs_by_f_and_l_name
+from picmodels.services.staff_consumer_models_services import filter_staff_objs_by_first_name
+from picmodels.services.staff_consumer_models_services import filter_staff_objs_by_last_name
+from picmodels.services.staff_consumer_models_services import filter_staff_objs_by_email
+from picmodels.services.staff_consumer_models_services import filter_staff_objs_by_mpn
 
 
-# defines function to group metrics by given parameter
-def group_metrics_by_rqst_param(metrics_dict, grouping_parameter):
-    return_dict = {}
-    if grouping_parameter == "County":
-        for staff_key, staff_dict in metrics_dict.items():
-            for metrics_entry in staff_dict["Metrics Data"]:
-                if metrics_entry[grouping_parameter] not in return_dict:
-                    return_dict[metrics_entry[grouping_parameter]] = {staff_key: {"Metrics Data": [metrics_entry],
-                                                                      "Staff Information": staff_dict["Staff Information"]}}
-                else:
-                    if staff_key not in return_dict[metrics_entry[grouping_parameter]]:
-                        return_dict[metrics_entry[grouping_parameter]][staff_key] = {"Metrics Data": [metrics_entry],
-                                                                                     "Staff Information": staff_dict["Staff Information"]}
-                    else:
-                        return_dict[metrics_entry[grouping_parameter]][staff_key]["Metrics Data"].append(metrics_entry)
+def retrieve_metrics_data_by_staff_id(rqst_staff_id, list_of_ids, search_params, rqst_errors, fields=None):
+    staff_instances = filter_db_queryset_by_id(PICStaff.objects.all(), rqst_staff_id, list_of_ids)
 
-    elif grouping_parameter == "Zipcode":
-        for staff_key, staff_dict in metrics_dict.items():
-            for metrics_entry in staff_dict["Metrics Data"]:
-                if metrics_entry["Location"][grouping_parameter] not in return_dict:
-                    return_dict[metrics_entry["Location"][grouping_parameter]] = {staff_key: {"Metrics Data": [metrics_entry],
-                                                                      "Staff Information": staff_dict["Staff Information"]}}
-                else:
-                    if staff_key not in return_dict[metrics_entry["Location"][grouping_parameter]]:
-                        return_dict[metrics_entry["Location"][grouping_parameter]][staff_key] = {"Metrics Data": [metrics_entry],
-                                                                                     "Staff Information": staff_dict["Staff Information"]}
-                    else:
-                        return_dict[metrics_entry["Location"][grouping_parameter]][staff_key]["Metrics Data"].append(metrics_entry)
-    return return_dict
+    response_list = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(staff_instances, search_params, fields)
+
+    def check_response_data_for_requested_data():
+        missing_parameter_list = []
+
+        if not response_list:
+            rqst_errors.append("No metrics entries found in database for given staff id(s).")
+            missing_parameter_list = list_of_ids
+        else:
+            if list_of_ids:
+                for db_id in list_of_ids:
+                    tuple_of_bools_if_id_in_data = (metrics_data_entry["Staff Information"]['Database ID'] == db_id for metrics_data_entry in response_list)
+                    if not any(tuple_of_bools_if_id_in_data):
+                        rqst_errors.append('Metrics for staff Member with id: {} not found in database'.format(db_id))
+                        missing_parameter_list.append(db_id)
+
+        return missing_parameter_list
+
+    missing_primary_parameters = check_response_data_for_requested_data()
+
+    return response_list, missing_primary_parameters
 
 
-def retrieve_id_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_staff_id, list_of_ids, fields=None):
-    if rqst_staff_id.lower() != "all":
-        metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
+def create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(staff_objects, search_params, requested_fields):
+    response_list = []
 
-    metrics_dict = {}
-    if len(metrics_submissions) > 0:
-        for metrics_submission in metrics_submissions:
-            values_dict = metrics_submission.return_values_dict()
-            filtered_values_dict = {}
-            if fields:
-                for field in fields:
-                    filtered_values_dict[field] = values_dict[field]
-            else:
-                filtered_values_dict = values_dict
+    for staff_instance in staff_objects:
+        response_list_entry = {"Staff Information": staff_instance.return_values_dict()}
 
-            if metrics_submission.staff_member_id not in metrics_dict:
-                metrics_dict[metrics_submission.staff_member_id] = {"Metrics Data": [filtered_values_dict]}
-                metrics_dict[metrics_submission.staff_member_id]["Staff Information"] = metrics_submission.staff_member.return_values_dict()
-            else:
-                metrics_dict[metrics_submission.staff_member_id]["Metrics Data"].append(filtered_values_dict)
+        metrics_db_objects_for_this_staff_instance = staff_instance.metricssubmission_set.all()
+        filtered_metrics_instances = filter_metrics_db_instances_by_secondary_params(search_params, metrics_db_objects_for_this_staff_instance)
 
-        if rqst_staff_id.lower() != "all":
-            for staff_id in list_of_ids:
-                if staff_id not in metrics_dict:
-                    if response_raw_data['Status']['Error Code'] != 2:
-                        response_raw_data['Status']['Error Code'] = 2
-                    rqst_errors.append('Metrics for staff Member with id: {!s} not found in database'.format(str(staff_id)))
-                    response_raw_data["Status"]["Missing Parameters"].append(str(staff_id))
+        metrics_data_list = []
+        for metrics_instance in filtered_metrics_instances:
+            metrics_data_entry = create_metrics_data_response_entry_including_requested_fields(metrics_instance, requested_fields)
+            metrics_data_list.append(metrics_data_entry)
+
+        if metrics_data_list:
+            response_list_entry["Metrics Data"] = metrics_data_list
+
+            response_list.append(response_list_entry)
+
+    return response_list
+
+
+def create_metrics_data_response_entry_including_requested_fields(metrics_instance, requested_fields):
+    complete_metrics_data_entry = metrics_instance.return_values_dict()
+
+    filtered_metrics_data_entry = {}
+    if requested_fields:
+        for field in requested_fields:
+            filtered_metrics_data_entry[field] = complete_metrics_data_entry[field]
     else:
-        rqst_errors.append('No metrics entries for staff ID(s): {!s} not found in database'.format(rqst_staff_id))
-        response_raw_data["Status"]["Missing Parameters"].append(rqst_staff_id)
+        filtered_metrics_data_entry = complete_metrics_data_entry
 
-    return metrics_dict
+    return filtered_metrics_data_entry
 
 
-def retrieve_f_l_name_metrics(response_raw_data, rqst_errors, metrics_submissions, list_of_first_names, list_of_last_names, rqst_fname, rqst_lname, fields=None):
-    metrics_dict = {}
+def retrieve_metrics_data_by_staff_f_and_l_name(list_of_first_names, list_of_last_names, search_params, rqst_errors, fields=None):
+    response_list = []
+    missing_primary_parameters = []
+
     if len(list_of_first_names) == len(list_of_last_names):
-        list_of_ids = []
-        for i, first_name in enumerate(list_of_first_names):
+        for i in range(len(list_of_first_names)):
+            first_name = list_of_first_names[i]
             last_name = list_of_last_names[i]
-            name_ids = PICStaff.objects.filter(first_name__iexact=first_name, last_name__iexact=last_name).values_list('id', flat=True)
-            if len(name_ids) > 0:
-                list_of_ids.append(name_ids)
-            else:
-                if response_raw_data['Status']['Error Code'] != 2:
-                    response_raw_data['Status']['Error Code'] = 2
-                rqst_errors.append('Metrics for staff member with name: {!s} {!s} not found in database'.format(first_name, last_name))
-                response_raw_data["Status"]["Missing Parameters"].append(first_name + last_name)
-        list_of_ids = list(set().union(*list_of_ids))
-        if len(list_of_ids) > 0:
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
-        else:
-            if response_raw_data['Status']['Error Code'] != 2:
-                rqst_errors.append('No metrics entries for first names(s): {!s}; and last names(s): {!s} not found in database'.format(rqst_fname, rqst_lname))
-                response_raw_data["Status"]["Missing Parameters"].append(rqst_fname + rqst_lname)
 
-        if len(metrics_submissions) > 0:
-            for metrics_submission in metrics_submissions:
-                values_dict = metrics_submission.return_values_dict()
-                filtered_values_dict = {}
-                if fields:
-                    for field in fields:
-                        filtered_values_dict[field] = values_dict[field]
-                else:
-                    filtered_values_dict = values_dict
+            staff_instances = filter_staff_objs_by_f_and_l_name(PICStaff.objects.all(), first_name, last_name)
 
-                staff_id = metrics_submission.staff_member.id
-                staff_info_dict = metrics_submission.staff_member.return_values_dict()
+            response_list_component = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(staff_instances, search_params, fields)
 
-                metrics_params_dict_entry = {
-                    "Metrics Data": [filtered_values_dict],
-                    "Staff Information": staff_info_dict
-                }
+            def check_response_data_for_requested_data():
+                if not response_list_component:
+                    rqst_errors.append("No metrics entries found in database for {} {}".format(first_name, last_name))
+                    missing_primary_parameters.append("{} {}".format(first_name, last_name))
 
-                name = '{!s} {!s}'.format(metrics_submission.staff_member.first_name, metrics_submission.staff_member.last_name)
-                if name not in metrics_dict:
-                    metrics_dict[name] = {staff_id: metrics_params_dict_entry}
-                else:
-                    metrics_param_dict = metrics_dict[name]
+            check_response_data_for_requested_data()
 
-                    if staff_id in metrics_param_dict:
-                        metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
-                    else:
-                        metrics_param_dict[staff_id] = metrics_params_dict_entry
-        else:
-            if response_raw_data['Status']['Error Code'] != 2:
-                rqst_errors.append('No metrics entries for first names(s): {!s}; and last names(s): {!s} not found in database'.format(rqst_fname, rqst_lname))
-                response_raw_data["Status"]["Missing Parameters"].append(rqst_fname + rqst_lname)
+            def add_response_component_to_response_data():
+                if response_list_component:
+                    response_list.append(response_list_component)
+
+            add_response_component_to_response_data()
     else:
         rqst_errors.append('Length of first name list must be equal to length of last name list')
 
-    return metrics_dict
+    return response_list, missing_primary_parameters
 
 
-def retrieve_first_name_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_fname, list_of_first_names, fields=None):
-    list_of_ids = []
-    metrics_dict = {}
+def retrieve_metrics_data_by_staff_first_name(list_of_first_names, search_params, rqst_errors, fields=None):
+    response_list = []
+    missing_primary_parameters = []
 
     for first_name in list_of_first_names:
-        first_name_ids = PICStaff.objects.filter(first_name__iexact=first_name).values_list('id', flat=True)
-        if len(first_name_ids) > 0:
-            list_of_ids.append(first_name_ids)
-        else:
-            if response_raw_data['Status']['Error Code'] != 2:
-                response_raw_data['Status']['Error Code'] = 2
-            rqst_errors.append('Metrics for staff member with first name: {!s} not found in database'.format(first_name))
-            response_raw_data["Status"]["Missing Parameters"].append(first_name)
-    list_of_ids = list(set().union(*list_of_ids))
-    if len(list_of_ids) > 0:
-        for indx, element in enumerate(list_of_ids):
-            list_of_ids[indx] = int(element)
-        metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
+        staff_instances = filter_staff_objs_by_first_name(PICStaff.objects.all(), first_name)
 
-        if len(metrics_submissions) > 0:
-            for metrics_submission in metrics_submissions:
-                values_dict = metrics_submission.return_values_dict()
-                filtered_values_dict = {}
-                if fields:
-                    for field in fields:
-                        filtered_values_dict[field] = values_dict[field]
-                else:
-                    filtered_values_dict = values_dict
+        response_list_component = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(staff_instances,
+                                                                                                                search_params,
+                                                                                                                fields)
 
-                staff_id = metrics_submission.staff_member.id
-                staff_info_dict = metrics_submission.staff_member.return_values_dict()
+        def check_response_data_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append("No metrics entries found in database for {}".format(first_name))
+                missing_primary_parameters.append(first_name)
 
-                metrics_params_dict_entry = {
-                    "Metrics Data": [filtered_values_dict],
-                    "Staff Information": staff_info_dict
-                }
-                if metrics_submission.staff_member.first_name not in metrics_dict:
-                    metrics_dict[metrics_submission.staff_member.first_name] = {staff_id: metrics_params_dict_entry}
-                else:
-                    metrics_param_dict = metrics_dict[metrics_submission.staff_member.first_name]
+        check_response_data_for_requested_data()
 
-                    if staff_id in metrics_param_dict:
-                        metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
-                    else:
-                        metrics_param_dict[staff_id] = metrics_params_dict_entry
-        else:
-            if response_raw_data['Status']['Error Code'] != 2:
-                rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_fname))
-                response_raw_data["Status"]["Missing Parameters"].append(rqst_fname)
-    else:
-        if response_raw_data['Status']['Error Code'] != 2:
-            rqst_errors.append('No metrics entries for first name(s): {!s} not found in database'.format(rqst_fname))
-            response_raw_data["Status"]["Missing Parameters"].append(rqst_fname)
+        def add_response_component_to_response_data():
+            if response_list_component:
+                response_list.append(response_list_component)
 
-    return metrics_dict
+        add_response_component_to_response_data()
+
+    return response_list, missing_primary_parameters
 
 
-def retrieve_last_name_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_lname, list_of_last_names, fields=None):
-    list_of_ids = []
-    metrics_dict = {}
+def retrieve_metrics_data_by_staff_last_name(list_of_last_names, search_params, rqst_errors, fields=None):
+    response_list = []
+    missing_primary_parameters = []
 
     for last_name in list_of_last_names:
-        last_name_ids = PICStaff.objects.filter(last_name__iexact=last_name).values_list('id', flat=True)
-        if len(last_name_ids) > 0:
-            list_of_ids.append(last_name_ids)
-        else:
-            if response_raw_data['Status']['Error Code'] != 2:
-                response_raw_data['Status']['Error Code'] = 2
-            rqst_errors.append('Metrics for staff member with last name: {!s} not found in database'.format(last_name))
-            response_raw_data["Status"]["Missing Parameters"].append(last_name)
-    list_of_ids = list(set().union(*list_of_ids))
-    if len(list_of_ids) > 0:
-        for indx, element in enumerate(list_of_ids):
-            list_of_ids[indx] = int(element)
-        metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
+        staff_instances = filter_staff_objs_by_last_name(PICStaff.objects.all(), last_name)
 
-        if len(metrics_submissions) > 0:
-            for metrics_submission in metrics_submissions:
-                values_dict = metrics_submission.return_values_dict()
-                filtered_values_dict = {}
-                if fields:
-                    for field in fields:
-                        filtered_values_dict[field] = values_dict[field]
-                else:
-                    filtered_values_dict = values_dict
+        response_list_component = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(staff_instances, search_params, fields)
 
-                staff_id = metrics_submission.staff_member.id
-                staff_info_dict = metrics_submission.staff_member.return_values_dict()
+        def check_response_data_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append("No metrics entries found in database for {}".format(last_name))
+                missing_primary_parameters.append(last_name)
 
-                metrics_params_dict_entry = {
-                    "Metrics Data": [filtered_values_dict],
-                    "Staff Information": staff_info_dict
-                }
+        check_response_data_for_requested_data()
 
-                if metrics_submission.staff_member.last_name not in metrics_dict:
-                    metrics_dict[metrics_submission.staff_member.last_name] = {staff_id: metrics_params_dict_entry}
-                else:
-                    metrics_param_dict = metrics_dict[metrics_submission.staff_member.last_name]
+        def add_response_component_to_response_data():
+            if response_list_component:
+                response_list.append(response_list_component)
 
-                    if staff_id in metrics_param_dict:
-                        metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
-                    else:
-                        metrics_param_dict[staff_id] = metrics_params_dict_entry
-        else:
-            if response_raw_data['Status']['Error Code'] != 2:
-                rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_lname))
-                response_raw_data["Status"]["Missing Parameters"].append(rqst_lname)
-    else:
-        if response_raw_data['Status']['Error Code'] != 2:
-            rqst_errors.append('No metrics entries for last name(s): {!s} not found in database'.format(rqst_lname))
-            response_raw_data["Status"]["Missing Parameters"].append(rqst_lname)
+        add_response_component_to_response_data()
 
-    return metrics_dict
+    return response_list, missing_primary_parameters
 
 
-def retrieve_email_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_staff_email, list_of_emails, fields=None):
-    list_of_ids = []
-    metrics_dict = {}
+def retrieve_metrics_data_by_staff_email(list_of_emails, search_params, rqst_errors, fields=None):
+    response_list = []
+    missing_primary_parameters = []
 
     for email in list_of_emails:
-        email_ids = PICStaff.objects.filter(email__iexact=email).values_list('id', flat=True)
-        if len(email_ids) > 0:
-            list_of_ids.append(email_ids)
-        else:
-            if response_raw_data['Status']['Error Code'] != 2:
-                response_raw_data['Status']['Error Code'] = 2
-            rqst_errors.append('Staff member with email: {!s} not found in database'.format(email))
-            response_raw_data["Status"]["Missing Parameters"].append(email)
-    list_of_ids = list(set().union(*list_of_ids))
-    if len(list_of_ids) > 0:
-        for indx, element in enumerate(list_of_ids):
-            list_of_ids[indx] = int(element)
-        metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
+        staff_instances = filter_staff_objs_by_email(PICStaff.objects.all(), email)
 
-        if len(metrics_submissions) > 0:
-            for metrics_submission in metrics_submissions:
-                values_dict = metrics_submission.return_values_dict()
-                filtered_values_dict = {}
-                if fields:
-                    for field in fields:
-                        filtered_values_dict[field] = values_dict[field]
-                else:
-                    filtered_values_dict = values_dict
+        response_list_component = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(staff_instances, search_params, fields)
 
-                staff_id = metrics_submission.staff_member.id
-                staff_info_dict = metrics_submission.staff_member.return_values_dict()
+        def check_response_data_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append("No metrics entries found in database for {}".format(email))
+                missing_primary_parameters.append(email)
 
-                metrics_params_dict_entry = {
-                    "Metrics Data": [filtered_values_dict],
-                    "Staff Information": staff_info_dict
-                }
+        check_response_data_for_requested_data()
 
-                if metrics_submission.staff_member.email not in metrics_dict:
-                    metrics_dict[metrics_submission.staff_member.email] = {staff_id: metrics_params_dict_entry}
-                else:
-                    metrics_param_dict = metrics_dict[metrics_submission.staff_member.email]
+        def add_response_component_to_response_data():
+            if response_list_component:
+                response_list.append(response_list_component)
 
-                    if staff_id in metrics_param_dict:
-                        metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
-                    else:
-                        metrics_param_dict[staff_id] = metrics_params_dict_entry
-        else:
-            if response_raw_data['Status']['Error Code'] != 2:
-                rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_staff_email))
-                response_raw_data["Status"]["Missing Parameters"].append(rqst_staff_email)
-    else:
-        if response_raw_data['Status']['Error Code'] != 2:
-            rqst_errors.append('No metrics entries for email(s): {!s} not found in database'.format(rqst_staff_email))
-            response_raw_data["Status"]["Missing Parameters"].append(rqst_staff_email)
+        add_response_component_to_response_data()
 
-    return metrics_dict
+    return response_list, missing_primary_parameters
 
 
-def retrieve_mpn_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_staff_mpn, list_of_mpns, fields=None):
-    list_of_ids = []
-    metrics_dict = {}
+def retrieve_metrics_data_by_staff_mpn(list_of_staff_mpns, search_params, rqst_errors, fields=None):
+    response_list = []
+    missing_primary_parameters = []
 
-    for mpn in list_of_mpns:
-        mpn_ids = PICStaff.objects.filter(mpn__iexact=mpn).values_list('id', flat=True)
-        if len(mpn_ids) > 0:
-            list_of_ids.append(mpn_ids)
-        else:
-            if response_raw_data['Status']['Error Code'] != 2:
-                response_raw_data['Status']['Error Code'] = 2
-            rqst_errors.append('Staff member with mpn: {!s} not found in database'.format(mpn))
-            response_raw_data["Status"]["Missing Parameters"].append(mpn)
-    list_of_ids = list(set().union(*list_of_ids))
-    if len(list_of_ids) > 0:
-        for indx, element in enumerate(list_of_ids):
-            list_of_ids[indx] = int(element)
-        metrics_submissions = metrics_submissions.filter(staff_member__in=list_of_ids)
+    for staff_mpn in list_of_staff_mpns:
+        staff_instances = filter_staff_objs_by_mpn(PICStaff.objects.all(), staff_mpn)
 
-        if len(metrics_submissions) > 0:
-            for metrics_submission in metrics_submissions:
-                values_dict = metrics_submission.return_values_dict()
-                filtered_values_dict = {}
-                if fields:
-                    for field in fields:
-                        filtered_values_dict[field] = values_dict[field]
-                else:
-                    filtered_values_dict = values_dict
+        response_list_component = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(
+            staff_instances, search_params, fields)
 
-                staff_id = metrics_submission.staff_member.id
-                staff_info_dict = metrics_submission.staff_member.return_values_dict()
+        def check_response_data_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append("No metrics entries found in database for {}".format(staff_mpn))
+                missing_primary_parameters.append(staff_mpn)
 
-                metrics_params_dict_entry = {
-                    "Metrics Data": [filtered_values_dict],
-                    "Staff Information": staff_info_dict
-                }
+        check_response_data_for_requested_data()
 
-                staff_mpn = metrics_submission.staff_member.mpn
-                if staff_mpn == '':
-                    staff_mpn = "None"
-                if staff_mpn not in metrics_dict:
-                    metrics_dict[staff_mpn] = {staff_id: metrics_params_dict_entry}
-                else:
-                    metrics_param_dict = metrics_dict[staff_mpn]
+        def add_response_component_to_response_data():
+            if response_list_component:
+                response_list.append(response_list_component)
 
-                    if staff_id in metrics_param_dict:
-                        metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
-                    else:
-                        metrics_param_dict[staff_id] = metrics_params_dict_entry
-        else:
-            if response_raw_data['Status']['Error Code'] != 2:
-                rqst_errors.append('No metrics entries for mpn(s): {!s} not found in database'.format(rqst_staff_mpn))
-                response_raw_data["Status"]["Missing Parameters"].append(rqst_staff_mpn)
-    else:
-        if response_raw_data['Status']['Error Code'] != 2:
-            rqst_errors.append('No metrics entries for mpn(s): {!s} not found in database'.format(rqst_staff_mpn))
-            response_raw_data["Status"]["Missing Parameters"].append(rqst_staff_mpn)
+        add_response_component_to_response_data()
 
-    return metrics_dict
-
-
-# def retrieve_location_metrics(response_raw_data, rqst_errors, metrics_submissions, rqst_location, fields=None):
-#     metrics_submissions = metrics_submissions.filter(location__name__iexact=rqst_location)
-#
-#     metrics_dict = {}
-#     if len(metrics_submissions) > 0:
-#         for metrics_submission in metrics_submissions:
-#             values_dict = metrics_submission.return_values_dict()
-#             filtered_values_dict = {}
-#             if fields:
-#                 for field in fields:
-#                     filtered_values_dict[field] = values_dict[field]
-#             else:
-#                 filtered_values_dict = values_dict
-#
-#             staff_id = metrics_submission.staff_member.id
-#             staff_info_dict = metrics_submission.staff_member.return_values_dict()
-#
-#             metrics_params_dict_entry = {
-#                 "Metrics Data": [filtered_values_dict],
-#                 "Staff Information": staff_info_dict
-#             }
-#
-#             location_name = metrics_submission.location.name
-#             if location_name not in metrics_dict:
-#                 metrics_dict[location_name] = {staff_id: metrics_params_dict_entry}
-#             else:
-#                 metrics_param_dict = metrics_dict[location_name]
-#
-#                 if staff_id in metrics_param_dict:
-#                     metrics_param_dict[staff_id]["Metrics Data"].append(filtered_values_dict)
-#                 else:
-#                     metrics_param_dict[staff_id] = metrics_params_dict_entry
-#     else:
-#         if response_raw_data['Status']['Error Code'] != 2:
-#             rqst_errors.append('No metrics entries for location(s): {!s} found in database'.format(rqst_location))
-#
-#     return metrics_dict
+    return response_list, missing_primary_parameters

@@ -202,15 +202,27 @@ def build_search_params(rqst_params, rqst_errors):
     if 'fname' in rqst_params:
         search_params['first name'] = rqst_params['fname']
         search_params['first name list'] = re.findall(r"[\w. '-]+", search_params['first name'])
+
+        if not search_params['first name list']:
+            rqst_errors.append('Invalid first name, first names must be ascii strings.')
     if 'lname' in rqst_params:
         search_params['last name'] = rqst_params['lname']
         search_params['last name list'] = re.findall(r"[\w. '-]+", search_params['last name'])
+
+        if not search_params['last name list']:
+            rqst_errors.append('Invalid last name, last names must be ascii strings.')
     if 'email' in rqst_params:
         search_params['email'] = rqst_params['email']
         search_params['email list'] = re.findall(r"[@\w. '-]+", search_params['email'])
+
+        if not search_params['email list']:
+            rqst_errors.append('Invalid email.')
     if 'mpn' in rqst_params:
         search_params['mpn'] = rqst_params['mpn']
         search_params['mpn list'] = re.findall(r"[@\w. '-]+", search_params['mpn'])
+
+        if not search_params['mpn list']:
+            rqst_errors.append('Invalid mpn.')
     if 'region' in rqst_params:
         search_params['region'] = rqst_params['region']
         search_params['region list'] = re.findall(r"[@\w. '-]+", search_params['region'])
@@ -295,6 +307,14 @@ def build_search_params(rqst_params, rqst_errors):
     if "state" in rqst_params:
         search_params['state'] = rqst_params['state']
         search_params['state list'] = re.findall(r"[\w. '-]+", search_params['state'])
+
+        number_of_commas = len(re.findall(r",", search_params['state']))
+        number_of_parameters_there_should_be = number_of_commas + 1
+        if number_of_parameters_there_should_be != len(search_params['state list']):
+            rqst_errors.append('List of states is formatted wrong. Values must be ascii strings separated by commas')
+
+        if not search_params['state list']:
+            rqst_errors.append('Invalid state, states must be ascii strings.')
     if 'has_sample_id_card' in rqst_params:
         search_params['has_sample_id_card'] = rqst_params['has_sample_id_card'].lower()
         if search_params['has_sample_id_card'] not in ('true', 'false'):
