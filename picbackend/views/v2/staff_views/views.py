@@ -18,9 +18,9 @@ from ..utils import init_v2_response_data
 from ..utils import clean_string_value_from_dict_object
 from ..base import JSONPUTRspMixin
 from ..base import JSONGETRspMixin
-from .tools import add_staff_using_api_rqst_params
-from .tools import modify_staff_using_api_rqst_params
-from .tools import delete_staff_using_api_rqst_params
+from .tools import validate_rqst_params_and_add_instance
+from .tools import validate_rqst_params_and_modify_instance
+from .tools import validate_rqst_params_and_delete_instance
 from .tools import retrieve_f_l_name_staff
 from .tools import retrieve_email_staff
 from .tools import retrieve_first_name_staff
@@ -42,20 +42,25 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         return super(StaffManagementView, self).dispatch(request, *args, **kwargs)
 
     def staff_management_put_logic(self, post_data, response_raw_data, post_errors):
-        # Code to parse POSTed json request
         rqst_action = clean_string_value_from_dict_object(post_data, "root", "Database Action", post_errors)
 
-        # if there are no parsing errors, get or create database entries for consumer, location, and point of contact
-        # create and save database entry for appointment
-        if len(post_errors) == 0:
+        if not post_errors:
+            staff_instance = None
+
             if rqst_action == "Staff Addition":
-                add_staff_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                staff_instance = validate_rqst_params_and_add_instance(post_data, post_errors)
             elif rqst_action == "Staff Modification":
-                modify_staff_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                staff_instance = validate_rqst_params_and_modify_instance(post_data, post_errors)
             elif rqst_action == "Staff Deletion":
-                delete_staff_using_api_rqst_params(response_raw_data, post_data, post_errors)
+                validate_rqst_params_and_delete_instance(post_data, post_errors)
+
+                if not post_errors:
+                    response_raw_data['Data']["Database ID"] = "Deleted"
             else:
                 post_errors.append("No valid 'Database Action' provided.")
+
+            if staff_instance:
+                response_raw_data['Data'] = {"Database ID": staff_instance.id}
 
     def staff_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         staff_members = PICStaff.objects.all()
