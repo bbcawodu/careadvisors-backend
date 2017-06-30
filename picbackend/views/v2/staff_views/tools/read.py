@@ -3,208 +3,206 @@ Defines utility functions and classes for staff views
 """
 
 from picmodels.models import PICStaff
+from picmodels.services import filter_db_queryset_by_id
+from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_f_and_l_name
+from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_first_name
+from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_last_name
+from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_email
+from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_mpn
+from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_county
 
 
-def retrieve_f_l_name_staff(response_raw_data, rqst_errors, staff_members, rqst_first_name, rqst_last_name):
-    staff_members = staff_members.filter(first_name__iexact=rqst_first_name, last_name__iexact=rqst_last_name)
-    if len(staff_members) > 0:
-        staff_member_dict = {}
-        rqst_full_name = rqst_first_name + " " + rqst_last_name
-        for staff_member in staff_members:
-            if rqst_full_name not in staff_member_dict:
-                staff_member_dict[rqst_full_name] = [staff_member.return_values_dict()]
-            else:
-                staff_member_dict[rqst_full_name].append(staff_member.return_values_dict())
+def retrieve_staff_data_by_f_and_l_name(rqst_first_name, rqst_last_name, rqst_errors):
+    staff_qset = filter_staff_objs_by_f_and_l_name(PICStaff.objects.all(), rqst_first_name, rqst_last_name)
 
-        staff_member_list = []
-        for staff_key, staff_entry in staff_member_dict.items():
-            staff_member_list.append(staff_entry)
-        response_raw_data["Data"] = staff_member_list
-    else:
-        rqst_errors.append('Staff Member with name: {!s} {!s} not found in database'.format(rqst_first_name,
-                                                                                            rqst_last_name))
+    response_list = create_response_list_from_db_objects(staff_qset)
+
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No staff instances in db for given first and last name")
+
+    check_response_data_for_requested_data()
+
+    response_list = [response_list]
+
+    return response_list
 
 
-def retrieve_email_staff(response_raw_data, rqst_errors, rqst_email, list_of_emails):
-    staff_dict = {}
+def create_response_list_from_db_objects(db_objects):
+    return_list = []
+
+    for db_instance in db_objects:
+        return_list.append(db_instance.return_values_dict())
+
+    return return_list
+
+
+def retrieve_staff_data_by_email(list_of_emails, rqst_errors):
+    response_list = []
+
     for email in list_of_emails:
-        staff_members = PICStaff.objects.filter(email__iexact=email)
-        for staff_member in staff_members:
-            if email not in staff_dict:
-                staff_dict[email] = [staff_member.return_values_dict()]
-            else:
-                staff_dict[email].append(staff_member.return_values_dict())
-    if len(staff_dict) > 0:
-        staff_list = []
-        for staff_key, staff_entry in staff_dict.items():
-            staff_list.append(staff_entry)
-        response_raw_data["Data"] = staff_list
-        for email in list_of_emails:
-            if email not in staff_dict:
-                if response_raw_data['Status']['Error Code'] != 2:
-                    response_raw_data['Status']['Error Code'] = 2
-                rqst_errors.append('Staff Member with email: {!s} not found in database'.format(email))
-    else:
-        rqst_errors.append('Staff Member with email(s): {!s} not found in database'.format(rqst_email))
+        filtered_staff_qset = filter_staff_objs_by_email(PICStaff.objects.all(), email)
+
+        response_list_component = create_response_list_from_db_objects(filtered_staff_qset)
+
+        def check_response_component_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append('Staff instance with email: {} not found in database'.format(email))
+
+        check_response_component_for_requested_data()
+
+        def add_response_component_to_response_data():
+            if response_list_component:
+                response_list.append(response_list_component)
+
+        add_response_component_to_response_data()
+
+    return response_list
 
 
-def retrieve_first_name_staff(response_raw_data, rqst_errors, rqst_first_name, list_of_first_names):
-    staff_dict = {}
+def retrieve_staff_data_by_first_name(list_of_first_names, rqst_errors):
+    response_list = []
+
     for first_name in list_of_first_names:
-        staff_members = PICStaff.objects.filter(first_name__iexact=first_name)
-        for staff_member in staff_members:
-            if first_name not in staff_dict:
-                staff_dict[first_name] = [staff_member.return_values_dict()]
-            else:
-                staff_dict[first_name].append(staff_member.return_values_dict())
-    if len(staff_dict) > 0:
-        staff_list = []
-        for staff_key, staff_entry in staff_dict.items():
-            staff_list.append(staff_entry)
-        response_raw_data["Data"] = staff_list
-        for name in list_of_first_names:
-            if name not in staff_dict:
-                if response_raw_data['Status']['Error Code'] != 2:
-                    response_raw_data['Status']['Error Code'] = 2
-                rqst_errors.append('Staff Member with first name: {!s} not found in database'.format(name))
-    else:
-        rqst_errors.append('Staff Member with first name(s): {!s} not found in database'.format(rqst_first_name))
+        filtered_staff_qset = filter_staff_objs_by_first_name(PICStaff.objects.all(), first_name)
+
+        response_list_component = create_response_list_from_db_objects(filtered_staff_qset)
+
+        def check_response_component_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append('Staff instance with first name: {} not found in database'.format(first_name))
+
+        check_response_component_for_requested_data()
+
+        def add_response_component_to_response_data():
+            if response_list_component:
+                response_list.append(response_list_component)
+
+        add_response_component_to_response_data()
+
+    return response_list
 
 
-def retrieve_last_name_staff(response_raw_data, rqst_errors, rqst_last_name, list_of_last_names):
-    staff_dict = {}
+def retrieve_staff_data_by_last_name(list_of_last_names, rqst_errors):
+    response_list = []
+
     for last_name in list_of_last_names:
-        staff_members = PICStaff.objects.filter(last_name__iexact=last_name)
-        for staff_member in staff_members:
-            if last_name not in staff_dict:
-                staff_dict[last_name] = [staff_member.return_values_dict()]
-            else:
-                staff_dict[last_name].append(staff_member.return_values_dict())
-    if len(staff_dict) > 0:
-        staff_list = []
-        for staff_key, staff_entry in staff_dict.items():
-            staff_list.append(staff_entry)
-        response_raw_data["Data"] = staff_list
-        for name in list_of_last_names:
-            if name not in staff_dict:
-                if response_raw_data['Status']['Error Code'] != 2:
-                    response_raw_data['Status']['Error Code'] = 2
-                rqst_errors.append('Staff Member with last name: {!s} not found in database'.format(name))
-    else:
-        rqst_errors.append('Staff Member with last name(s): {!s} not found in database'.format(rqst_last_name))
+        filtered_staff_qset = filter_staff_objs_by_last_name(PICStaff.objects.all(), last_name)
+
+        response_list_component = create_response_list_from_db_objects(filtered_staff_qset)
+
+        def check_response_component_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append('Staff instance with last name: {} not found in database'.format(last_name))
+
+        check_response_component_for_requested_data()
+
+        def add_response_component_to_response_data():
+            if response_list_component:
+                response_list.append(response_list_component)
+
+        add_response_component_to_response_data()
+
+    return response_list
 
 
-def retrieve_county_staff(response_raw_data, rqst_errors, rqst_county, list_of_counties):
-    staff_dict = {}
+def retrieve_staff_data_by_county(list_of_counties, rqst_errors):
+    response_list = []
+
     for county in list_of_counties:
-        staff_members = PICStaff.objects.filter(county__iexact=county)
-        for staff_member in staff_members:
-            if county not in staff_dict:
-                staff_dict[county] = [staff_member.return_values_dict()]
-            else:
-                staff_dict[county].append(staff_member.return_values_dict())
-    if len(staff_dict) > 0:
-        staff_list = []
-        for staff_key, staff_entry in staff_dict.items():
-            staff_list.append(staff_entry)
-        response_raw_data["Data"] = staff_list
-        for county in list_of_counties:
-            if county not in staff_dict:
-                if response_raw_data['Status']['Error Code'] != 2:
-                    response_raw_data['Status']['Error Code'] = 2
-                rqst_errors.append('Staff Member(s) with county: {!s} not found in database'.format(county))
-    else:
-        rqst_errors.append('Staff Member(s) with county(s): {!s} not found in database'.format(rqst_county))
+        filtered_staff_qset = filter_staff_objs_by_county(PICStaff.objects.all(), county)
+
+        response_list_component = create_response_list_from_db_objects(filtered_staff_qset)
+
+        def check_response_component_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append('Staff instances with a default county of: {} not found in database'.format(county))
+
+        check_response_component_for_requested_data()
+
+        def add_response_component_to_response_data():
+            if response_list_component:
+                response_list.append(response_list_component)
+
+        add_response_component_to_response_data()
+
+    return response_list
 
 
-def retrieve_region_staff(response_raw_data, rqst_errors, rqst_region, list_of_regions):
-    staff_dict = {}
+def retrieve_staff_data_by_region(list_of_regions, rqst_errors):
+    response_list = []
 
-    region_mappings = PICStaff.REGIONS
+    counties_mapped_to_regions = PICStaff.REGIONS
     for region in list_of_regions:
-        region_counties = region_mappings[region]
-        for county in region_counties:
-            staff_members = PICStaff.objects.filter(county__iexact=county)
-            for staff_member in staff_members:
-                if region not in staff_dict:
-                    staff_dict[region] = [staff_member.return_values_dict()]
-                else:
-                    staff_dict[region].append(staff_member.return_values_dict())
-
-    # staff_members = PICStaff.objects.filter(region__in=list_of_regions)
-    # if len(staff_members) > 0:
-    #     staff_dict = {}
-    #     for staff_member in staff_members:
-    #         staff_dict[staff_member.region] = staff_member.return_values_dict()
-
-    if len(staff_dict) > 0:
-        staff_list = []
-        for staff_key, staff_entry in staff_dict.items():
-            staff_list.append(staff_entry)
-        response_raw_data["Data"] = staff_list
-        for region in list_of_regions:
-            if region not in staff_dict:
-                if response_raw_data['Status']['Error Code'] != 2:
-                    response_raw_data['Status']['Error Code'] = 2
-                rqst_errors.append('Staff Member(s) with region: {!s} not found in database'.format(region))
-    else:
-        rqst_errors.append('Staff Member(s) with region(s): {!s} not found in database'.format(rqst_region))
-
-
-def retrieve_mpn_staff(response_raw_data, rqst_errors, rqst_mpn, list_of_mpns):
-    staff_dict = {}
-    for mpn in list_of_mpns:
-        staff_members = PICStaff.objects.filter(mpn__iexact=mpn)
-        for staff_member in staff_members:
-            if mpn not in staff_dict:
-                staff_dict[mpn] = [staff_member.return_values_dict()]
-            else:
-                staff_dict[mpn].append(staff_member.return_values_dict())
-    if len(staff_dict) > 0:
-        staff_list = []
-        for staff_key, staff_entry in staff_dict.items():
-            staff_list.append(staff_entry)
-        response_raw_data["Data"] = staff_list
-        for mpn in list_of_mpns:
-            if mpn not in staff_dict:
-                if response_raw_data['Status']['Error Code'] != 2:
-                    response_raw_data['Status']['Error Code'] = 2
-                rqst_errors.append('Staff Member with mpn: {!s} not found in database'.format(mpn))
-    else:
-        rqst_errors.append('Staff Member with mpn(s): {!s} not found in database'.format(rqst_mpn))
-
-
-def retrieve_id_staff(response_raw_data, rqst_errors, rqst_staff_id, list_of_ids):
-    if rqst_staff_id == "all":
-        all_staff_members = PICStaff.objects.all()
-        staff_member_dict = {}
-        for staff_member in all_staff_members:
-            staff_member_dict[staff_member.id] = staff_member.return_values_dict()
-        staff_list = []
-        for staff_key, staff_entry in staff_member_dict.items():
-            staff_list.append(staff_entry)
-        response_raw_data["Data"] = staff_list
-    elif list_of_ids:
-        if len(list_of_ids) > 0:
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            staff_members = PICStaff.objects.filter(id__in=list_of_ids)
-            if len(staff_members) > 0:
-                staff_dict = {}
-                for staff_member in staff_members:
-                    staff_dict[staff_member.id] = staff_member.return_values_dict()
-                staff_list = []
-                for staff_key, staff_entry in staff_dict.items():
-                    staff_list.append(staff_entry)
-                response_raw_data["Data"] = staff_list
-                # response_raw_data["Data"] = staff_dict
-
-                for staff_id in list_of_ids:
-                    if staff_id not in staff_dict:
-                        if response_raw_data['Status']['Error Code'] != 2:
-                            response_raw_data['Status']['Error Code'] = 2
-                        rqst_errors.append('Staff Member with id: {!s} not found in database'.format(str(staff_id)))
-            else:
-                rqst_errors.append('No staff members found for database ID(s): ' + rqst_staff_id)
+        if region not in counties_mapped_to_regions:
+            rqst_errors.append("{} is not a valid region stored in the db.".format(region))
         else:
-            rqst_errors.append('No valid staff IDs provided in request (must be integers)')
+            counties_in_this_region = counties_mapped_to_regions[region]
+            response_list_component = []
+
+            for county in counties_in_this_region:
+                def add_staff_data_from_county_to_response_component():
+                    filtered_staff_qset = filter_staff_objs_by_county(PICStaff.objects.all(), county)
+
+                    staff_data_for_this_county = create_response_list_from_db_objects(filtered_staff_qset)
+                    for staff_data in staff_data_for_this_county:
+                        response_list_component.append(staff_data)
+
+                add_staff_data_from_county_to_response_component()
+
+            def check_response_component_for_requested_data():
+                if not response_list_component:
+                    rqst_errors.append('Staff instances with a default county in region: {} not found in database'.format(region))
+
+            check_response_component_for_requested_data()
+
+            def add_response_component_to_response_data():
+                if response_list_component:
+                    response_list.append(response_list_component)
+
+            add_response_component_to_response_data()
+
+    return response_list
+
+
+def retrieve_staff_data_by_mpn(list_of_mpns, rqst_errors):
+    response_list = []
+
+    for mpn in list_of_mpns:
+        filtered_staff_qset = filter_staff_objs_by_mpn(PICStaff.objects.all(), mpn)
+
+        response_list_component = create_response_list_from_db_objects(filtered_staff_qset)
+
+        def check_response_component_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append('Staff instance with MPN: {} not found in database'.format(mpn))
+
+        check_response_component_for_requested_data()
+
+        def add_response_component_to_response_data():
+            if response_list_component:
+                response_list.append(response_list_component)
+
+        add_response_component_to_response_data()
+
+    return response_list
+
+
+def retrieve_staff_data_by_id(rqst_staff_id, list_of_ids, rqst_errors):
+    staff_qset = filter_db_queryset_by_id(PICStaff.objects.all(), rqst_staff_id, list_of_ids)
+
+    response_list = create_response_list_from_db_objects(staff_qset)
+
+    def check_response_data_for_requested_data():
+        if not response_list:
+            rqst_errors.append("No staff instances in db for given ids")
+        else:
+            if list_of_ids:
+                for db_id in list_of_ids:
+                    tuple_of_bools_if_id_in_data = (instance_data['Database ID'] == db_id for instance_data in response_list)
+                    if not any(tuple_of_bools_if_id_in_data):
+                        rqst_errors.append('Staff instance with id: {} not found in database'.format(db_id))
+
+    check_response_data_for_requested_data()
+
+    return response_list
