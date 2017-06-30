@@ -22,6 +22,12 @@ def filter_staff_objs_by_email(staff_objs, rqst_email):
     return staff_objs
 
 
+def filter_staff_objs_by_county(staff_objs, rqst_county):
+    staff_objs = staff_objs.filter(county__iexact=rqst_county)
+
+    return staff_objs
+
+
 def filter_staff_objs_by_mpn(staff_objs, rqst_mpn):
     staff_objs = staff_objs.filter(mpn__iexact=rqst_mpn)
 
