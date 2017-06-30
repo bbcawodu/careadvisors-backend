@@ -21,14 +21,14 @@ from ..base import JSONGETRspMixin
 from .tools import validate_rqst_params_and_add_instance
 from .tools import validate_rqst_params_and_modify_instance
 from .tools import validate_rqst_params_and_delete_instance
-from .tools import retrieve_f_l_name_staff
-from .tools import retrieve_email_staff
-from .tools import retrieve_first_name_staff
-from .tools import retrieve_last_name_staff
-from .tools import retrieve_id_staff
-from .tools import retrieve_mpn_staff
-from .tools import retrieve_county_staff
-from .tools import retrieve_region_staff
+from .tools import retrieve_staff_data_by_f_and_l_name
+from .tools import retrieve_staff_data_by_email
+from .tools import retrieve_staff_data_by_first_name
+from .tools import retrieve_staff_data_by_last_name
+from .tools import retrieve_staff_data_by_id
+from .tools import retrieve_staff_data_by_mpn
+from .tools import retrieve_staff_data_by_county
+from .tools import retrieve_staff_data_by_region
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -63,44 +63,38 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 response_raw_data['Data'] = {"Database ID": staff_instance.id}
 
     def staff_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
-        staff_members = PICStaff.objects.all()
+        def retrieve_data_by_primary_params_and_add_to_response():
+            data_list = []
 
-        def retrieve_data_by_primary_params_and_add_to_response(db_objects):
             if 'first name' in search_params and 'last name' in search_params:
                 rqst_first_name = search_params['first name']
                 rqst_last_name = search_params['last name']
 
-                retrieve_f_l_name_staff(response_raw_data, rqst_errors, db_objects, rqst_first_name, rqst_last_name)
+                data_list = retrieve_staff_data_by_f_and_l_name(rqst_first_name, rqst_last_name, rqst_errors)
             elif 'email' in search_params:
-                rqst_email = search_params['email']
                 list_of_emails = search_params['email list']
 
-                retrieve_email_staff(response_raw_data, rqst_errors, rqst_email, list_of_emails)
+                data_list = retrieve_staff_data_by_email(list_of_emails, rqst_errors)
             elif 'mpn' in search_params:
-                rqst_mpn = search_params['mpn']
                 list_of_mpns = search_params['mpn list']
 
-                retrieve_mpn_staff(response_raw_data, rqst_errors, rqst_mpn, list_of_mpns)
+                data_list = retrieve_staff_data_by_mpn(list_of_mpns, rqst_errors)
             elif 'first name' in search_params:
-                rqst_first_name = search_params['first name']
                 list_of_first_names = search_params['first name list']
 
-                retrieve_first_name_staff(response_raw_data, rqst_errors, rqst_first_name, list_of_first_names)
+                data_list = retrieve_staff_data_by_first_name(list_of_first_names, rqst_errors)
             elif 'last name' in search_params:
-                rqst_last_name = search_params['last name']
                 list_of_last_names = search_params['last name list']
 
-                retrieve_last_name_staff(response_raw_data, rqst_errors, rqst_last_name, list_of_last_names)
+                data_list = retrieve_staff_data_by_last_name(list_of_last_names, rqst_errors)
             elif 'county' in search_params:
-                rqst_county = search_params['county']
                 list_of_counties = search_params['county list']
 
-                retrieve_county_staff(response_raw_data, rqst_errors, rqst_county, list_of_counties)
+                data_list = retrieve_staff_data_by_county(list_of_counties, rqst_errors)
             elif 'region' in search_params:
-                rqst_region = search_params['region']
                 list_of_regions = search_params['region list']
 
-                retrieve_region_staff(response_raw_data, rqst_errors, rqst_region, list_of_regions)
+                data_list = retrieve_staff_data_by_region(list_of_regions, rqst_errors)
             elif 'id' in search_params:
                 rqst_staff_id = search_params['id']
                 if rqst_staff_id != 'all':
@@ -108,13 +102,14 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 else:
                     list_of_ids = None
 
-                retrieve_id_staff(response_raw_data, rqst_errors, rqst_staff_id, list_of_ids)
+                data_list = retrieve_staff_data_by_id(rqst_staff_id, list_of_ids, rqst_errors)
             else:
                 rqst_errors.append('No Valid Parameters')
 
+            response_raw_data['Data'] = data_list
             response_raw_data["s3_url"] = settings.AWS_S3_CUSTOM_DOMAIN
 
-        retrieve_data_by_primary_params_and_add_to_response(staff_members)
+        retrieve_data_by_primary_params_and_add_to_response()
 
     put_logic_function = staff_management_put_logic
     get_logic_function = staff_management_get_logic
