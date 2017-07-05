@@ -10,6 +10,7 @@ from ...utils import clean_dict_value_from_dict_object
 from picmodels.models import PlanStat
 from picmodels.models import NavMetricsLocation
 from picmodels.services.metrics_submission_services import create_or_update_metrics_obj_using_validated_params
+from picmodels.services.metrics_submission_services import delete_instance_using_validated_params
 
 
 def validate_rqst_params_then_add_or_update_metrics_instance(post_data, post_errors):
@@ -120,3 +121,10 @@ def validate_metrics_mgmt_params(rqst_data, rqst_errors):
         "unsaved_plan_stat_objs": unsaved_plan_stat_objs,
         "metrics_date": metrics_date
     }
+
+
+def validate_rqst_params_and_delete_instance(rqst_data, post_errors):
+    rqst_id = clean_int_value_from_dict_object(rqst_data, "root", "Database ID", post_errors)
+
+    if not post_errors:
+        delete_instance_using_validated_params(rqst_id, post_errors)

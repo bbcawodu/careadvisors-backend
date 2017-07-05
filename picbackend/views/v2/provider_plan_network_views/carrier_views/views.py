@@ -12,7 +12,7 @@ from django.conf import settings
 from picmodels.models import HealthcareCarrier
 from picmodels.forms import CarrierSampleIDCardUploadForm
 from ...utils import clean_string_value_from_dict_object
-from ...utils import build_search_params
+from ...utils import validate_get_request_parameters
 from ...utils import init_v2_response_data
 from ...base import JSONPUTRspMixin
 from ...base import JSONGETRspMixin
@@ -106,7 +106,7 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 def handle_carrier_sample_id_card_mgmt_rqst(request):
     if request.method == 'GET':
         response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = build_search_params(request.GET, rqst_errors)
+        search_params = validate_get_request_parameters(request.GET, rqst_errors)
 
         if 'id' in search_params:
             rqst_carrier_id = search_params['id']
