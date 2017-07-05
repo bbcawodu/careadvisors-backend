@@ -6,14 +6,14 @@ from django.http import HttpResponseForbidden
 from ..base import JSONGETRspMixin
 from picmodels.models import CallToAction
 from picmodels.forms import CTAManagementForm
-from ..utils import build_search_params
+from ..utils import validate_get_request_parameters
 from ..utils import init_v2_response_data
 
 
 def manage_cta_request(request):
     if request.method == 'GET':
         response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = build_search_params(request.GET, rqst_errors)
+        search_params = validate_get_request_parameters(request.GET, rqst_errors)
         cta_messages = []
         form = CTAManagementForm()
 

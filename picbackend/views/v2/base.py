@@ -5,7 +5,7 @@ API Version 2
 
 from django.http import HttpResponse
 import json
-from .utils import build_search_params
+from .utils import validate_get_request_parameters
 from .utils import init_v2_response_data
 from .utils import parse_and_log_errors
 
@@ -25,7 +25,7 @@ class JSONGETRspMixin(object):
             response_raw_data, rqst_errors = init_v2_response_data()
 
             # Build dictionary that contains valid Patient Innovation Center GET parameters
-            search_params = build_search_params(request.GET, rqst_errors)
+            search_params = validate_get_request_parameters(request.GET, rqst_errors)
 
             if not rqst_errors:
                 self.get_logic_function(request, search_params, response_raw_data, rqst_errors)
@@ -33,6 +33,8 @@ class JSONGETRspMixin(object):
             parse_and_log_errors(response_raw_data, rqst_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
             return response
+        else:
+            raise NotImplementedError("Need to set class attribute, 'get_logic_function'.")
 
 
 class JSONPOSTRspMixin(object):
@@ -57,6 +59,8 @@ class JSONPOSTRspMixin(object):
             parse_and_log_errors(response_raw_data, post_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
             return response
+        else:
+            raise NotImplementedError("Need to set class attribute, 'post_logic_function'.")
 
 
 class JSONPUTRspMixin(object):
@@ -81,6 +85,8 @@ class JSONPUTRspMixin(object):
             parse_and_log_errors(response_raw_data, post_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
             return response
+        else:
+            raise NotImplementedError("Need to set class attribute, 'put_logic_function'.")
 
 
 class JSONDELETERspMixin(object):
@@ -105,6 +111,8 @@ class JSONDELETERspMixin(object):
             parse_and_log_errors(response_raw_data, post_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
             return response
+        else:
+            raise NotImplementedError("Need to set class attribute, 'delete_logic_function'.")
 
 
 class JSONRspMixin(object):

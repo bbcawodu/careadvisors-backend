@@ -25,7 +25,7 @@ from picmodels.models import CredentialsModel
 from ..utils import init_v2_response_data
 from ..utils import parse_and_log_errors
 from ..utils import clean_list_value_from_dict_object
-from ..utils import build_search_params
+from ..utils import validate_get_request_parameters
 from .tools import check_or_create_navigator_google_cal
 from .tools import add_nav_apt_to_google_calendar
 from .tools import delete_nav_apt_from_google_calendar
@@ -53,7 +53,7 @@ class NavGoogleCalendarAccessRequestView(View):
         """
 
         response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = build_search_params(request.GET, rqst_errors)
+        search_params = validate_get_request_parameters(request.GET, rqst_errors)
         if 'navigator id' in search_params:
             nav_id = search_params["navigator id"]
             try:
@@ -97,7 +97,7 @@ class GoogleCalendarAuthReturnView(View):
         """
 
         response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = build_search_params(request.GET, rqst_errors)
+        search_params = validate_get_request_parameters(request.GET, rqst_errors)
 
         state_string = request.GET['state']
         state_dict = json.loads(base64.urlsafe_b64decode(state_string).decode('ascii'))

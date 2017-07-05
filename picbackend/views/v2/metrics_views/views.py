@@ -6,7 +6,9 @@ API Version 2
 from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from ..utils import clean_string_value_from_dict_object
 from .tools import validate_rqst_params_then_add_or_update_metrics_instance
+from .tools import validate_rqst_params_and_delete_instance
 from .tools import retrieve_metrics_data_by_staff_id
 from .tools import retrieve_metrics_data_by_staff_f_and_l_name
 from .tools import retrieve_metrics_data_by_staff_first_name
@@ -28,11 +30,20 @@ class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         return super(ConsumerMetricsManagementView, self).dispatch(request, *args, **kwargs)
 
     def metrics_management_put_logic(self, post_data, response_raw_data, post_errors):
-        metrics_instance, metrics_instance_message = validate_rqst_params_then_add_or_update_metrics_instance(post_data, post_errors)
+        rqst_action = clean_string_value_from_dict_object(post_data, "root", "Database Action", post_errors, no_key_allowed=True)
 
-        if not post_errors:
-            if metrics_instance and metrics_instance_message:
-                response_raw_data["Status"]["Message"] = [metrics_instance_message]
+        if rqst_action:
+            if rqst_action == "Instance Deletion":
+                validate_rqst_params_and_delete_instance(post_data, post_errors)
+
+                if not post_errors:
+                    response_raw_data['Data']["Database ID"] = "Deleted"
+        else:
+            metrics_instance, metrics_instance_message = validate_rqst_params_then_add_or_update_metrics_instance(post_data, post_errors)
+
+            if not post_errors:
+                if metrics_instance and metrics_instance_message:
+                    response_raw_data["Status"]["Message"] = [metrics_instance_message]
 
     def metrics_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
         validated_fields = retrieve_data_fields_to_return(search_params, rqst_errors)
