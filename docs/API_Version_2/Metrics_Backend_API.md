@@ -48,6 +48,9 @@ The body of the request should be a JSON document which has the following format
                                     ....
                                   ],
                     }
+
+"Database Action": String (Can be omitted),
+"Database ID": Integer(Required when "Database Action" == "Instance Deletion"),
 }
 ```
 
@@ -250,6 +253,11 @@ In response, a JSON document will be displayed with the following format:
            }
 }
 ```
+
+- Deleting a Metrics database entry.
+    - To delete a Metrics database entry, the value for "Database Action" in the JSON Body must equal "Instance Deletion".
+    - The only other field should be "Database ID".
+    - The response JSON document will have a "Deleted" as the value for the "Data" key.
 
 - If there are no errors in the JSON Body doc:
     - "Error Code" will be 0.

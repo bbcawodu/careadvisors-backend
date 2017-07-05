@@ -60,6 +60,7 @@ class MetricsSubmission(models.Model):
                       "no_aptc_csr_assis": self.no_aptc_csr_assis,
                       "cmplx_cases_mplace_issues": self.cmplx_cases_mplace_issues,
                       "no_cps_consumers": self.no_cps_consumers,
+                      "Database ID": self.id,
 
                       "Staff Member ID": self.staff_member_id,
                       "Date Created": self.date_created.isoformat(),

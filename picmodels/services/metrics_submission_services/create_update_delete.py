@@ -64,3 +64,11 @@ def create_or_update_metrics_obj_using_validated_params(validated_metrics_params
                     unsaved_plan_stat_obj.save()
 
     return metrics_instance, metrics_action_message
+
+
+def delete_instance_using_validated_params(rqst_id, post_errors):
+    try:
+        metrics_instance = MetricsSubmission.objects.get(id=rqst_id)
+        metrics_instance.delete()
+    except MetricsSubmission.DoesNotExist:
+        post_errors.append("Metrics instance does not exist for database id: {}".format(rqst_id))
