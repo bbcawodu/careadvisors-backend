@@ -50,18 +50,21 @@ def validate_metrics_mgmt_params(rqst_data, rqst_errors):
     metrics_date = None
     if metrics_date_dict is not None:
         month = clean_int_value_from_dict_object(metrics_date_dict, "Metrics Date", "Month", rqst_errors)
-        if month < 1 or month > 12:
-            rqst_errors.append("Month must be between 1 and 12 inclusive")
+        if month:
+            if month < 1 or month > 12:
+                rqst_errors.append("Month must be between 1 and 12 inclusive")
 
         day = clean_int_value_from_dict_object(metrics_date_dict, "Metrics Date", "Day", rqst_errors)
-        if day < 1 or day > 31:
-            rqst_errors.append("Day must be between 1 and 31 inclusive")
+        if day:
+            if day < 1 or day > 31:
+                rqst_errors.append("Day must be between 1 and 31 inclusive")
 
         year = clean_int_value_from_dict_object(metrics_date_dict, "Metrics Date", "Year", rqst_errors)
-        if year < 1 or year > 9999:
-            rqst_errors.append("Year must be between 1 and 9999 inclusive")
+        if year:
+            if year < 1 or year > 9999:
+                rqst_errors.append("Year must be between 1 and 9999 inclusive")
 
-        if len(rqst_errors) == 0:
+        if not rqst_errors:
             metrics_date = datetime.date(year, month, day)
 
     rqst_plan_stats = clean_list_value_from_dict_object(consumer_metrics, "Consumer Metrics", "Plan Stats", rqst_errors, empty_list_allowed=True)
