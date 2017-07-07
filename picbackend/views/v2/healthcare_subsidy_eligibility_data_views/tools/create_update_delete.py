@@ -17,20 +17,24 @@ def validate_rqst_params_and_add_instance(rqst_healthcare_subsidy_eligibility_da
 
 def get_healthcare_subsidy_eligibility_data_mgmt_put_params(rqst_healthcare_subsidy_eligibility_data_info, post_errors):
     family_size = clean_int_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "family_size", post_errors)
-    if family_size and family_size < 0:
-        post_errors.append("family_size must be greater than 0")
+    if family_size:
+        if family_size < 0:
+            post_errors.append("family_size must be greater than 0")
 
     medicaid_income_limit = clean_float_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "medicaid_income_limit", post_errors)
-    if medicaid_income_limit and medicaid_income_limit < 0:
-        post_errors.append("medicaid_income_limit must be greater than 0")
+    if medicaid_income_limit:
+        if medicaid_income_limit < 0:
+            post_errors.append("medicaid_income_limit must be greater than 0")
 
     tax_cred_for_marketplace_income_limit = clean_float_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "tax_cred_for_marketplace_income_limit", post_errors)
-    if tax_cred_for_marketplace_income_limit and tax_cred_for_marketplace_income_limit < 0:
-        post_errors.append("tax_cred_for_marketplace_income_limit must be greater than 0")
+    if tax_cred_for_marketplace_income_limit:
+        if tax_cred_for_marketplace_income_limit < 0:
+            post_errors.append("tax_cred_for_marketplace_income_limit must be greater than 0")
 
     marketplace_without_subsidies_income_level = clean_float_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "marketplace_without_subsidies_income_level", post_errors)
-    if marketplace_without_subsidies_income_level and marketplace_without_subsidies_income_level < 0:
-        post_errors.append("marketplace_without_subsidies_income_level must be greater than 0")
+    if marketplace_without_subsidies_income_level:
+        if marketplace_without_subsidies_income_level < 0:
+            post_errors.append("marketplace_without_subsidies_income_level must be greater than 0")
 
     return {
         "family_size": family_size,

@@ -11,10 +11,10 @@ The body of the request should be a JSON document using the following template:
 ```
 {
 "First Name": String,
-"Middle Name": String (Can be empty),
+"Middle Name": String,
 "Last Name": String,
-"Email": String (Can be empty),
-"Phone Number": String (Can be empty),
+"Email": String,
+"Phone Number": String,
 "Met Navigator At": String,
 "Household Size": Integer,
 "Navigator Notes": [
@@ -22,27 +22,28 @@ The body of the request should be a JSON document using the following template:
                         "sample notes",
                         "navigators write about consumers",
                         ...
-                    ](Can be an empty array),
-"Plan": String (Can be empty),
-"Preferred Language": String (Can be empty),
+                    ],
+"Plan": String,
+"Preferred Language": String,
 "Navigator Database ID": Integer,
 
-Address(Every field within address can be given as an empty string. Address will only be recorded/updated iff a full address is given)
-"Address Line 1": String (Can be empty),
-"Address Line 2": String (Can be empty),
-"City": String (Can be empty),
-"State": String (Can be empty),
-"Zipcode": String (Can be empty),
-"date_met_nav":(Can be Null) or {"Day": Integer,
-                                "Month": Integer,
-                                "Year": Integer,},
+Address Keys(Every field within address can be given as an empty string. Address will only be recorded/updated iff a full address is given)
+"Address Line 1": String,
+"Address Line 2": String,
+"City": String,
+"State": String,
+"Zipcode": String,
+
+"date_met_nav":{"Day": Integer,
+                "Month": Integer,
+                "Year": Integer},
                                 
-"cps_consumer": Boolean (Whether or not this consumer is a CPS consumer)(Key can be omitted),
+"cps_consumer": Boolean (Whether or not this consumer is a CPS consumer),
 "cps_info": {
                 "primary_dependent": {
-                                        "first_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
-                                        "last_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
-                                        "Consumer Database ID": Integer (Key can be omitted)(Required when "first_name" and "last_name" are omitted)
+                                        "first_name": String (Required when "Consumer Database ID" is omitted),
+                                        "last_name": String (Required when "Consumer Database ID" is omitted),
+                                        "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted)
                                      },
                 "cps_location": String (Must be the name of a NavMetricsLocation instance with cps_location=True),
                 "apt_date": {
@@ -56,20 +57,20 @@ Address(Every field within address can be given as an empty string. Address will
                 "case_mgmt_status": String (Must be one of these choices: "Open", "Resolved", "Not Available"),
                 "secondary_dependents": [
                                              {
-                                                "first_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
-                                                "last_name": String (Key can be omitted)(Required when "Consumer Database ID" is omitted),
-                                                "Consumer Database ID": Integer (Key can be omitted)(Required when "first_name" and "last_name" are omitted)
+                                                "first_name": String (Required when "Consumer Database ID" is omitted),
+                                                "last_name": String (Required when "Consumer Database ID" is omitted),
+                                                "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted)
                                              },
                                              ...
-                                        ](Key can be omitted)(If key present, must not be empty),
+                                        ],
                 "app_type": String (Must be one of these choices: "Medicaid", "SNAP", "Not Available"),
                 "app_status": String (Must be one of these choices: "Submitted", "Pending", "Approved", "Denied", "Not Available"),
-            }(Must be present and is only red when if cps_consumer is True)(contains relevant CPS info)(Key can be omitted),
+            }(Contains relevant CPS info),
 
-"Consumer Database ID": Integer(Required when "Database Action" == "Consumer Modification" or "Consumer Deletion"),
+"Consumer Database ID": Integer,
 "Database Action": String,
-"create_backup": Boolean (Whether or not to create a backup instance of this consumer)(Key can be omitted),
-"force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db)(Key can be omitted),
+"create_backup": Boolean (Whether or not to create a backup instance of this consumer),
+"force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
 }
 ```
 
@@ -88,28 +89,79 @@ In response, a JSON document will be displayed with the following format:
 
 - Adding a consumer database entry.
     - To add a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Addition".
-    - All other fields except "Consumer Database ID" must be filled.
+    
+        - Keys that can be omitted:
+            - "create_backup"
+            - "force_create_consumer"
+            - "cps_consumer"(Must be present and True if "cps_info" is present.)
+            - "cps_info" (Must be present if "cps_consumer" is True.)
+            - cps_info["primary_dependent"]["first_name"]
+            - cps_info["primary_dependent"]["last_name"]
+            - cps_info["primary_dependent"]["Consumer Database ID"]
+            - cps_info["secondary_dependents"]
+            - cps_info["secondary_dependents"][index]["first_name"]
+            - cps_info["secondary_dependents"][index]["last_name"]
+            - cps_info["secondary_dependents"][index]["Consumer Database ID"]
+            - "Consumer Database ID"
+            
+        - Keys that can be empty strings:
+            - "Middle Name"
+            - "Email"
+            - "Phone Number"
+            - "Plan"
+            - "Preferred Language"
+            - "Address Line 1"
+            - "Address Line 2"
+            - "City"
+            - "State"
+            - "Zipcode"
+        
+        - Keys that can be empty arrays
+            - "Navigator Notes"
+            - cps_info["secondary_dependents"]
+        
+        - Keys that can be Null
+            - "date_met_nav"
+        
     - The response JSON document will have a dictionary object as the value for the "Data" key.
         - It contains the key "Database ID", the value for which is the database id of the created entry
     
 - Modifying a consumer database entry.
     - To modify a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Modification".
-    - All other fields must be filled.
     - All key value pairs in the JSON Body document correspond to updated fields for specified "Consumer Database ID"
-    - 'cps_consumer' key must be present in order to modify cps consumer info
-        - If 'cps_consumer' key is not present
-            - no change to 'cps_consumer' and 'cps_info' fields for related consumer
-        - If 'cps_consumer'=False
-            - And there is existing 'cps_info' for the consumer, it will be deleted
-            - And there is no 'cps_info' for the consumer, no change
-        - If 'cps_consumer'=True
-            - 'cps_consumer' and 'cps_info' fields for related consumer will be modified
+    
+        - Keys that can be omitted:
+            - all except "Consumer Database ID" and "Database Action"
+        
+        - Keys that can be empty strings:
+            - "Middle Name"
+            - "Email"
+            - "Phone Number"
+            - "Plan"
+            - "Preferred Language"
+            - "Address Line 1"
+            - "Address Line 2"
+            - "City"
+            - "State"
+            - "Zipcode"
+         
+         - Keys that can be empty arrays
+            - "Navigator Notes"
+            - cps_info["secondary_dependents"]
+        
+        - Keys that can be Null
+            - "date_met_nav"
+            - "cps_info"
+        
     - The response JSON document will have a dictionary object as the value for the "Data" key.
         - It contains the key "Database ID", the value for which is the database id of the updated entry
 
 - Deleting a consumer database entry.
     - To delete a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Deletion".
-    - The only other field should be "Consumer Database ID".
+    
+        - Keys that can be omitted:
+            - all except "Consumer Database ID" and "Database Action"
+        
     - The response JSON document will have a "Deleted" as the value for the "Data" key.
     
 - If there are errors in the JSON Body document:
