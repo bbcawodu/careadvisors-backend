@@ -129,6 +129,7 @@ In response, a JSON document will be displayed with the following format:
 - Modifying a consumer database entry.
     - To modify a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Modification".
     - All key value pairs in the JSON Body document correspond to updated fields for specified "Consumer Database ID"
+    - Note: at least one key other than "Consumer Database ID" and "Database Action" must be present
     
         - Keys that can be omitted:
             - all except "Consumer Database ID" and "Database Action"

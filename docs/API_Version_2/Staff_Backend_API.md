@@ -79,6 +79,8 @@ In response, a JSON document will be displayed with the following format:
         - "county" corresponds to navigator county.
             - Must be a string
             - Can be multiple values separated by commas.
+        - "region" corresponds to the staff's default region.
+            - Must be a string
         - "id" corresponds to database id.
             - Must be an integer
             - Can be multiple values separated by commas.

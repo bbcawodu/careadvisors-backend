@@ -19,8 +19,8 @@ from .tools import retrieve_consumer_data_by_first_name
 from .tools import retrieve_consumer_data_by_last_name
 from .tools import retrieve_consumer_data_by_id
 from .tools import paginate_result_list_by_changing_excess_data_to_ids
-from ..base import JSONPUTRspMixin
-from ..base import JSONGETRspMixin
+from ..utils import JSONPUTRspMixin
+from ..utils import JSONGETRspMixin
 
 
 CONSUMERS_PER_PAGE = 20
@@ -81,6 +81,15 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
 
     put_logic_function = consumer_management_put_logic
+
+    accepted_get_parameters = [
+        "navid",
+        "is_cps_consumer",
+        "fname",
+        "lname",
+        "email",
+        "id",
+    ]
     get_logic_function = consumer_management_get_logic
 
 
@@ -100,6 +109,14 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
         get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
 
+    accepted_get_parameters = [
+        "navid",
+        "is_cps_consumer",
+        "fname",
+        "lname",
+        "email",
+        "id",
+    ]
     get_logic_function = consumer_management_get_logic
 
 
