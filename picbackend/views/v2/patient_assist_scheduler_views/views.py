@@ -16,10 +16,10 @@ from django.views.decorators.csrf import csrf_exempt
 from oauth2client.contrib.django_util.storage import DjangoORMStorage
 from oauth2client.contrib import xsrfutil
 from oauth2client.client import flow_from_clientsecrets
-from ..base import JSONPUTRspMixin
-from ..base import JSONGETRspMixin
-from ..base import JSONPOSTRspMixin
-from ..base import JSONDELETERspMixin
+from ..utils import JSONPUTRspMixin
+from ..utils import JSONGETRspMixin
+from ..utils import JSONPOSTRspMixin
+from ..utils import JSONDELETERspMixin
 from picmodels.models import PICStaff
 from picmodels.models import CredentialsModel
 from ..utils import init_v2_response_data
@@ -53,7 +53,8 @@ class NavGoogleCalendarAccessRequestView(View):
         """
 
         response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = validate_get_request_parameters(request.GET, rqst_errors)
+        search_params = validate_get_request_parameters(request.GET, ["navid"], rqst_errors)
+
         if 'navigator id' in search_params:
             nav_id = search_params["navigator id"]
             try:
@@ -95,9 +96,6 @@ class GoogleCalendarAuthReturnView(View):
         :param request: django request instance object
         :rtype: HttpResponse
         """
-
-        response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = validate_get_request_parameters(request.GET, rqst_errors)
 
         state_string = request.GET['state']
         state_dict = json.loads(base64.urlsafe_b64decode(state_string).decode('ascii'))
@@ -180,6 +178,10 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
         response_raw_data["Data"]["Deleted Appointment"] = delete_nav_apt_from_google_calendar(post_data, post_errors)
 
     put_logic_function = add_nav_scheduled_appointment_logic
-    get_logic_function = nav_scheduled_appointments_logic
     post_logic_function = available_nav_appointments_logic
     delete_logic_function = delete_nav_scheduled_appointment_logic
+
+    accepted_get_parameters = [
+        "navid"
+    ]
+    get_logic_function = nav_scheduled_appointments_logic

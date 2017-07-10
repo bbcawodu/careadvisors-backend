@@ -13,8 +13,8 @@ from .tools import validate_rqst_params_and_delete_instance
 from .tools import retrieve_general_concerns_by_id
 from .tools import retrieve_general_concerns_by_name
 from django.views.decorators.csrf import csrf_exempt
-from ...base import JSONPUTRspMixin
-from ...base import JSONGETRspMixin
+from ...utils import JSONPUTRspMixin
+from ...utils import JSONGETRspMixin
 
 
 #Need to abstract common variables in get and post class methods into class attributes
@@ -77,4 +77,9 @@ class GeneralConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         retrieve_data_by_primary_params_and_add_to_response(general_concerns)
 
     put_logic_function = general_concerns_management_put_logic
+
+    accepted_get_parameters = [
+        "id",
+        "name"
+    ]
     get_logic_function = general_concerns_management_get_logic

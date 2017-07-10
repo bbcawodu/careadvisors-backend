@@ -7,8 +7,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from picmodels.models import ProviderLocation
 from ...utils import clean_string_value_from_dict_object
-from ...base import JSONPUTRspMixin
-from ...base import JSONGETRspMixin
+from ...utils import JSONPUTRspMixin
+from ...utils import JSONGETRspMixin
 from .tools import validate_rqst_params_and_add_instance
 from .tools import validate_rqst_params_and_modify_instance
 from .tools import validate_rqst_params_and_add_accepted_plans_to_instance
@@ -89,4 +89,11 @@ class ProviderLocationsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         retrieve_data_by_primary_params_and_add_to_response(provider_locations)
 
     put_logic_function = provider_locations_management_put_logic
+
+    accepted_get_parameters = [
+        "id",
+        "name",
+        "network_name",
+        "network_id"
+    ]
     get_logic_function = provider_locations_management_get_logic

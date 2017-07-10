@@ -3,10 +3,159 @@ This module defines utility functions that are used throughout the project
 """
 
 import sys
-import urllib
-import re
-import datetime
-from picmodels.models import HealthcarePlan
+import json
+from django.http import HttpResponse
+from .get_parameter_validation_functions import GET_PARAMETER_VALIDATION_FUNCTIONS
+
+
+class JSONGETRspMixin(object):
+    get_logic_function = None
+    accepted_get_parameters = None
+
+    def get(self, request, *args, **kwargs):
+        """
+        Defines view that handles Patient Innovation Center GET requests that return json objects in the body
+        :param request: django request instance object
+        :rtype: HttpResponse
+        """
+
+        if self.get_logic_function is None:
+            raise NotImplementedError("Need to set class attribute, 'get_logic_function'.")
+        elif self.accepted_get_parameters is None:
+            raise NotImplementedError("Need to set class attribute, 'accepted_parameters'. If no parameters are needed, set class attribute to an empty list.")
+        else:
+            # Initialize dictionary for response data, initialize list for parsing errors
+            response_raw_data, rqst_errors = init_v2_response_data()
+
+            # Build dictionary that contains valid Patient Innovation Center GET parameters
+            search_params = validate_get_request_parameters(request.GET, self.accepted_get_parameters, rqst_errors)
+
+            if not rqst_errors:
+                self.get_logic_function(request, search_params, response_raw_data, rqst_errors)
+
+            parse_and_log_errors(response_raw_data, rqst_errors)
+            response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+            return response
+
+
+class JSONPOSTRspMixin(object):
+    post_logic_function = None
+
+    def post(self, request, *args, **kwargs):
+        """
+        Defines view that handles Patient Innovation Center POST requests that accept and return json objects in the body
+        :param request: django request instance object
+        :rtype: HttpResponse
+        """
+
+        if self.post_logic_function:
+            # Initialize dictionary for response data, initialize list for parsing errors
+            response_raw_data, post_errors = init_v2_response_data()
+
+            post_json = request.body.decode('utf-8')
+            post_data = json.loads(post_json)
+
+            self.post_logic_function(post_data, response_raw_data, post_errors)
+
+            parse_and_log_errors(response_raw_data, post_errors)
+            response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+            return response
+        else:
+            raise NotImplementedError("Need to set class attribute, 'post_logic_function'.")
+
+
+class JSONPUTRspMixin(object):
+    put_logic_function = None
+
+    def put(self, request, *args, **kwargs):
+        """
+        Defines view that handles Patient Innovation Center PUT requests that accept and return json objects in the body
+        :param request: django request instance object
+        :rtype: HttpResponse
+        """
+
+        if self.put_logic_function:
+            # Initialize dictionary for response data, initialize list for parsing errors
+            response_raw_data, post_errors = init_v2_response_data()
+
+            post_json = request.body.decode('utf-8')
+            post_data = json.loads(post_json)
+
+            self.put_logic_function(post_data, response_raw_data, post_errors)
+
+            parse_and_log_errors(response_raw_data, post_errors)
+            response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+            return response
+        else:
+            raise NotImplementedError("Need to set class attribute, 'put_logic_function'.")
+
+
+class JSONDELETERspMixin(object):
+    delete_logic_function = None
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Defines view that handles Patient Innovation Center DELETE requests that accept and return json objects in the body
+        :param request: django request instance object
+        :rtype: HttpResponse
+        """
+
+        if self.delete_logic_function:
+            # Initialize dictionary for response data, initialize list for parsing errors
+            response_raw_data, post_errors = init_v2_response_data()
+
+            post_json = request.body.decode('utf-8')
+            post_data = json.loads(post_json)
+
+            self.delete_logic_function(post_data, response_raw_data, post_errors)
+
+            parse_and_log_errors(response_raw_data, post_errors)
+            response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
+            return response
+        else:
+            raise NotImplementedError("Need to set class attribute, 'delete_logic_function'.")
+
+
+class JSONRspMixin(object):
+    put_logic_function = None
+    get_logic_function = None
+
+    # def get_template(self):
+    #     if self.template == '':
+    #         raise ImproperlyConfigured(
+    #             '"template" variable  not defined in %s'
+    #             % self.__class__.__name__)
+    #     return self.template
+    #
+    # def get_redirect_url(self,obj):
+    #     if self.redirect:
+    #         url = self.redirect
+    #     else:
+    #         try:
+    #             url = obj.get_absolute_url()
+    #         except AttributeError:
+    #             raise ImproperlyConfigured(
+    #                 '"redirect" variable must be defined '
+    #                 'in %s when redirecting %s objects.'
+    #                 % (self.__class__.__name__,
+    #                    obj.__class__.__name__))
+    #     return url
+    #
+    # def get(self, request):
+    #     form = self.form()
+    #     return render(request,
+    #                   self.get_template(),
+    #                   {'form': form})
+    #
+    # def post(self, request):
+    #     form = self.form(request.POST)
+    #     if form.is_valid():
+    #         new_obj = form.save()
+    #         return redirect(self.get_redirect_url(new_obj))
+    #     else:
+    #         return render(request,
+    #                       self.get_template(),
+    #                       {'form': form})
 
 
 def clean_string_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, empty_string_allowed=False,
@@ -183,91 +332,7 @@ def clean_bool_value_from_dict_object(dict_object, dict_name, dict_key, post_err
         return dict_object[dict_key]
 
 
-def validate_get_rqst_parameter_id(get_rqst_params, validated_params, rqst_errors):
-    if 'id' in get_rqst_params:
-        validated_params['id'] = get_rqst_params['id']
-        if validated_params['id'] != "all":
-            list_of_ids = re.findall("\d+", validated_params['id'])
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            validated_params['id list'] = list_of_ids
-
-            if not validated_params['id list']:
-                rqst_errors.append('Invalid id, ids must be base 10 integers')
-
-
-def validate_get_rqst_parameter_fname(get_rqst_params, validated_params, rqst_errors):
-    if 'fname' in get_rqst_params:
-        validated_params['first name'] = get_rqst_params['fname']
-        validated_params['first name list'] = re.findall(r"[\w. '-]+", validated_params['first name'])
-
-        if not validated_params['first name list']:
-            rqst_errors.append('Invalid first name, first names must be ascii strings.')
-
-
-def validate_get_rqst_parameter_lname(get_rqst_params, validated_params, rqst_errors):
-    if 'lname' in get_rqst_params:
-        validated_params['last name'] = get_rqst_params['lname']
-        validated_params['last name list'] = re.findall(r"[\w. '-]+", validated_params['last name'])
-
-        if not validated_params['last name list']:
-            rqst_errors.append('Invalid last name, last names must be ascii strings.')
-
-
-def validate_get_rqst_parameter_email(get_rqst_params, validated_params, rqst_errors):
-    if 'email' in get_rqst_params:
-        validated_params['email'] = get_rqst_params['email']
-        validated_params['email list'] = re.findall(r"[@\w. '-]+", validated_params['email'])
-
-        if not validated_params['email list']:
-            rqst_errors.append('Invalid email parameter.')
-
-
-def validate_get_rqst_parameter_mpn(get_rqst_params, validated_params, rqst_errors):
-    if 'mpn' in get_rqst_params:
-        validated_params['mpn'] = get_rqst_params['mpn']
-        validated_params['mpn list'] = re.findall(r"[@\w. '-]+", validated_params['mpn'])
-
-        if not validated_params['mpn list']:
-            rqst_errors.append('Invalid mpn parameter.')
-
-
-def validate_get_rqst_parameter_region(get_rqst_params, validated_params, rqst_errors):
-    if 'region' in get_rqst_params:
-        validated_params['region'] = get_rqst_params['region']
-        validated_params['region list'] = re.findall(r"[@\w. '-]+", validated_params['region'])
-
-        if not validated_params['region list']:
-            rqst_errors.append('Invalid region, regions must be ascii strings.')
-
-
-def validate_get_rqst_parameter_location(get_rqst_params, validated_params, rqst_errors):
-    if 'location' in get_rqst_params:
-        validated_params['location'] = urllib.parse.unquote(get_rqst_params['location'])
-
-
-def validate_get_rqst_parameter_fields(get_rqst_params, validated_params, rqst_errors):
-    if 'fields' in get_rqst_params:
-        validated_params['fields'] = urllib.parse.unquote(get_rqst_params['fields'])
-        validated_params['fields list'] = re.findall(r"[@\w. '-]+", validated_params['fields'])
-
-        if not validated_params['fields list']:
-            rqst_errors.append('Invalid fields parameter, field parameters must be ascii strings.')
-
-
-GET_PARAMETER_VALIDATION_FUNCTIONS = {
-    "id": validate_get_rqst_parameter_id,
-    "fname": validate_get_rqst_parameter_fname,
-    "lname": validate_get_rqst_parameter_lname,
-    "email": validate_get_rqst_parameter_email,
-    "mpn": validate_get_rqst_parameter_mpn,
-    "region": validate_get_rqst_parameter_region,
-    "location": validate_get_rqst_parameter_location,
-    'fields': validate_get_rqst_parameter_fields,
-}
-
-
-def validate_get_request_parameters(get_rqst_params, rqst_errors, params_to_validate=None):
+def validate_get_request_parameters(get_rqst_params, params_to_validate, rqst_errors):
     validated_params = {}
 
     def run_validation_functions():
@@ -278,205 +343,7 @@ def validate_get_request_parameters(get_rqst_params, rqst_errors, params_to_vali
             else:
                 raise NotImplementedError("GET parameter :{} does not have a validation function implemented.")
 
-    if params_to_validate:
-        run_validation_functions()
-    else:
-        validate_get_rqst_parameter_fname(get_rqst_params, validated_params, rqst_errors)
-        validate_get_rqst_parameter_lname(get_rqst_params, validated_params, rqst_errors)
-        validate_get_rqst_parameter_id(get_rqst_params, validated_params, rqst_errors)
-        validate_get_rqst_parameter_location(get_rqst_params, validated_params, rqst_errors)
-        validate_get_rqst_parameter_fields(get_rqst_params, validated_params, rqst_errors)
-        validate_get_rqst_parameter_email(get_rqst_params, validated_params, rqst_errors)
-        validate_get_rqst_parameter_mpn(get_rqst_params, validated_params, rqst_errors)
-        validate_get_rqst_parameter_region(get_rqst_params, validated_params, rqst_errors)
-
-        if 'partnerid' in get_rqst_params:
-            validated_params['partnerid'] = get_rqst_params['partnerid']
-            list_of_ids = re.findall("[@\w. '-_]+", validated_params['partnerid'])
-            validated_params['partnerid list'] = list_of_ids
-        if 'navid' in get_rqst_params:
-            validated_params['navigator id'] = get_rqst_params['navid']
-
-            list_of_nav_ids = re.findall("\d+", validated_params['navigator id'])
-            for indx, element in enumerate(list_of_nav_ids):
-                list_of_nav_ids[indx] = int(element)
-            validated_params['navigator id list'] = list_of_nav_ids
-
-            if not validated_params['navigator id list']:
-                rqst_errors.append('Invalid navigator id, navigator ids must be base 10 integers')
-        if 'location_id' in get_rqst_params:
-            validated_params['location_id'] = get_rqst_params['location_id']
-
-            list_of_ids = re.findall("\d+", validated_params['location_id'])
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            validated_params['location_id list'] = list_of_ids
-
-            if not validated_params['location_id list']:
-                rqst_errors.append('Invalid location_id, ids must be base 10 integers')
-        if 'is_cps_consumer' in get_rqst_params:
-            validated_params['is_cps_consumer'] = get_rqst_params['is_cps_consumer'].lower()
-            if validated_params['is_cps_consumer'] not in ('true', 'false'):
-                rqst_errors.append("Value for is_cps_consumer is not type boolean")
-            else:
-                validated_params['is_cps_consumer'] = validated_params['is_cps_consumer'] in ('true')
-        if 'page' in get_rqst_params:
-            validated_params['page number'] = int(get_rqst_params['page'])
-        if "county" in get_rqst_params:
-            validated_params['county'] = get_rqst_params['county']
-            validated_params['county list'] = re.findall(r"[\w. '-]+", validated_params['county'])
-        if "zipcode" in get_rqst_params:
-            validated_params['zipcode'] = get_rqst_params['zipcode']
-            validated_params['zipcode list'] = re.findall(r"\d+", validated_params['zipcode'])
-
-            if not validated_params['zipcode list']:
-                rqst_errors.append('Invalid zipcode, zipcodes must be integers')
-        if "time" in get_rqst_params:
-            try:
-                validated_params['look up date'] = datetime.date.today() - datetime.timedelta(days=int(get_rqst_params['time']))
-                validated_params['time'] = get_rqst_params['time']
-            except ValueError:
-                rqst_errors.append('time parameter must be a valid integer. Metrics returned without time parameter.')
-        if "startdate" in get_rqst_params:
-            try:
-                datetime.datetime.strptime(get_rqst_params["startdate"], '%Y-%m-%d')
-                validated_params['start date'] = get_rqst_params["startdate"]
-            except ValueError:
-                rqst_errors.append('startdate parameter must be a valid date. Metrics returned without startdate parameter.')
-        if "enddate" in get_rqst_params:
-            try:
-                datetime.datetime.strptime(get_rqst_params["enddate"], '%Y-%m-%d')
-                validated_params['end date'] = get_rqst_params["enddate"]
-            except ValueError:
-                rqst_errors.append('enddate parameter must be a valid integer. Metrics returned without enddate parameter.')
-        if "groupby" in get_rqst_params:
-            validated_params['group by'] = get_rqst_params['groupby']
-        if 'nav_location_tags' in get_rqst_params:
-            validated_params['nav_location_tags'] = get_rqst_params['nav_location_tags']
-            validated_params['nav_location_tags list'] = re.findall(r"[@\w. '-]+", validated_params['nav_location_tags'])
-        if 'intent' in get_rqst_params:
-            validated_params['intent'] = urllib.parse.unquote(get_rqst_params['intent'])
-        if 'name' in get_rqst_params:
-            validated_params['name'] = urllib.parse.unquote(get_rqst_params['name'])
-        if "state" in get_rqst_params:
-            validated_params['state'] = get_rqst_params['state']
-            validated_params['state list'] = re.findall(r"[\w. '-]+", validated_params['state'])
-
-            number_of_commas = len(re.findall(r",", validated_params['state']))
-            number_of_parameters_there_should_be = number_of_commas + 1
-            if number_of_parameters_there_should_be != len(validated_params['state list']):
-                rqst_errors.append('List of states is formatted wrong. Values must be ascii strings separated by commas')
-
-            if not validated_params['state list']:
-                rqst_errors.append('Invalid state, states must be ascii strings.')
-        if 'has_sample_id_card' in get_rqst_params:
-            validated_params['has_sample_id_card'] = get_rqst_params['has_sample_id_card'].lower()
-            if validated_params['has_sample_id_card'] not in ('true', 'false'):
-                rqst_errors.append("Value for has_sample_id_card is not type boolean")
-            else:
-                validated_params['has_sample_id_card'] = validated_params['has_sample_id_card'] in ('true')
-        if 'carrier_id' in get_rqst_params:
-            validated_params['carrier id'] = get_rqst_params['carrier_id']
-
-            list_of_carrier_ids = re.findall("\d+", validated_params['carrier id'])
-            for indx, element in enumerate(list_of_carrier_ids):
-                list_of_carrier_ids[indx] = int(element)
-            validated_params['carrier id list'] = list_of_carrier_ids
-
-            if not validated_params['carrier id list']:
-                rqst_errors.append('Invalid carrier id, carrier ids must be base 10 integers')
-        if "carrier_state" in get_rqst_params:
-            validated_params['carrier state'] = get_rqst_params['carrier_state']
-            validated_params['carrier state list'] = re.findall(r"[\w. '-]+", validated_params['carrier state'])
-        if 'carrier_name' in get_rqst_params:
-            validated_params['carrier name'] = urllib.parse.unquote(get_rqst_params['carrier_name'])
-        if 'accepted_location_id' in get_rqst_params:
-            validated_params['accepted_location_id'] = get_rqst_params['accepted_location_id']
-
-            list_of_accepted_location_ids = re.findall("\d+", validated_params['accepted_location_id'])
-            for indx, element in enumerate(list_of_accepted_location_ids):
-                list_of_accepted_location_ids[indx] = int(element)
-            validated_params['accepted_location_id_list'] = list_of_accepted_location_ids
-
-            if not validated_params['accepted_location_id_list']:
-                rqst_errors.append('Invalid accepted_location id, accepted_location ids must be base 10 integers')
-        if 'network_name' in get_rqst_params:
-            validated_params['network_name'] = urllib.parse.unquote(get_rqst_params['network_name'])
-        if 'network_id' in get_rqst_params:
-            validated_params['network_id'] = get_rqst_params['network_id']
-
-            list_of_network_ids = re.findall("\d+", validated_params['network_id'])
-            for indx, element in enumerate(list_of_network_ids):
-                list_of_network_ids[indx] = int(element)
-            validated_params['network_id_list'] = list_of_network_ids
-
-            if not validated_params['network_id_list']:
-                rqst_errors.append('Invalid network id, network ids must be base 10 integers')
-        if 'is_cps_location' in get_rqst_params:
-            validated_params['is_cps_location'] = get_rqst_params['is_cps_location'].lower()
-            if validated_params['is_cps_location'] not in ('true', 'false'):
-                rqst_errors.append("Value for is_cps_location is not type boolean")
-            else:
-                validated_params['is_cps_location'] = validated_params['is_cps_location'] in ('true')
-        if 'question' in get_rqst_params:
-            validated_params['question'] = urllib.parse.unquote(get_rqst_params['question'])
-        if 'gen_concern_name' in get_rqst_params:
-            validated_params['gen_concern_name'] = urllib.parse.unquote(get_rqst_params['gen_concern_name'])
-        if 'gen_concern_id_subset' in get_rqst_params:
-            validated_params['gen_concern_id_subset'] = get_rqst_params['gen_concern_id_subset']
-
-            list_of_gen_concern_ids = re.findall("\d+", validated_params['gen_concern_id_subset'])
-            for indx, element in enumerate(list_of_gen_concern_ids):
-                list_of_gen_concern_ids[indx] = int(element)
-            validated_params['gen_concern_id_subset_list'] = list_of_gen_concern_ids
-
-            if not validated_params['gen_concern_id_subset_list']:
-                rqst_errors.append('Invalid gen_concern id, gen_concern ids must be base 10 integers')
-        if 'gen_concern_id' in get_rqst_params:
-            validated_params['gen_concern_id'] = get_rqst_params['gen_concern_id']
-
-            list_of_gen_concern_ids = re.findall("\d+", validated_params['gen_concern_id'])
-            for indx, element in enumerate(list_of_gen_concern_ids):
-                list_of_gen_concern_ids[indx] = int(element)
-            validated_params['gen_concern_id_list'] = list_of_gen_concern_ids
-
-            if not validated_params['gen_concern_id_list']:
-                rqst_errors.append('Invalid gen_concern id, gen_concern ids must be base 10 integers')
-        if 'include_summary_report' in get_rqst_params:
-            validated_params['include_summary_report'] = get_rqst_params['include_summary_report'].lower()
-            if validated_params['include_summary_report'] not in ('true', 'false'):
-                rqst_errors.append("Value for include_summary_report is not type boolean")
-            else:
-                validated_params['include_summary_report'] = validated_params['include_summary_report'] in ('true')
-        if 'include_detailed_report' in get_rqst_params:
-            validated_params['include_detailed_report'] = get_rqst_params['include_detailed_report'].lower()
-            if validated_params['include_detailed_report'] not in ('true', 'false'):
-                rqst_errors.append("Value for include_detailed_report is not type boolean")
-            else:
-                validated_params['include_detailed_report'] = validated_params['include_detailed_report'] in ('true')
-        if 'hospital_name' in get_rqst_params:
-            validated_params['hospital_name'] = urllib.parse.unquote(get_rqst_params['hospital_name'])
-        if 'family_size' in get_rqst_params:
-            validated_params['family_size'] = get_rqst_params['family_size']
-
-            list_of_family_sizes = re.findall("\d+", validated_params['family_size'])
-            for indx, element in enumerate(list_of_family_sizes):
-                list_of_family_sizes[indx] = int(element)
-            validated_params['family_size_list'] = list_of_family_sizes
-
-            if not validated_params['family_size_list']:
-                rqst_errors.append('Invalid family_size, family_sizes must be base 10 integers')
-        if 'premium_type' in get_rqst_params:
-            validated_params['premium_type'] = get_rqst_params['premium_type']
-            validated_params['premium_type list'] = re.findall(r"[@\w. '-]+", validated_params['premium_type'])
-
-            if not validated_params['premium_type list']:
-                rqst_errors.append('Invalid premium_type.')
-            else:
-                for premium_type in validated_params['premium_type list']:
-                    dummy_plan_object = HealthcarePlan(premium_type=premium_type)
-                    if not dummy_plan_object.check_premium_choices():
-                        rqst_errors.append('The following is an invalid premium_type : {}'.format(premium_type))
+    run_validation_functions()
 
     return validated_params
 
