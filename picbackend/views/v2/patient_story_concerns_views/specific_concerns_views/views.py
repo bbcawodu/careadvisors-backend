@@ -17,8 +17,8 @@ from .tools import retrieve_specific_concern_data_by_question
 from .tools import retrieve_specific_concern_data_by_gen_concern_name
 from .tools import retrieve_specific_concern_data_by_gen_concern_id_subset
 from .tools import retrieve_specific_concern_data_by_gen_concern_id
-from ...base import JSONPUTRspMixin
-from ...base import JSONGETRspMixin
+from ...utils import JSONPUTRspMixin
+from ...utils import JSONGETRspMixin
 
 
 #Need to abstract common variables in get and post class methods into class attributes
@@ -96,4 +96,12 @@ class SpecificConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         retrieve_data_by_primary_params_and_add_to_response(specific_concerns)
 
     put_logic_function = specific_concerns_management_put_logic
+
+    accepted_get_parameters = [
+        "id",
+        "question",
+        "gen_concern_name",
+        "gen_concern_id_subset",
+        "gen_concern_id"
+    ]
     get_logic_function = specific_concerns_management_get_logic

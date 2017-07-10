@@ -8,8 +8,8 @@ from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from .tools import fetch_and_parse_pokit_elig_data
-from ..base import JSONPOSTRspMixin
-from ..base import JSONGETRspMixin
+from ..utils import JSONPOSTRspMixin
+from ..utils import JSONGETRspMixin
 
 
 class ConsumerHealthInsuranceBenefitsView(JSONPOSTRspMixin, View):
@@ -52,3 +52,4 @@ class TradingPartnerView(JSONGETRspMixin, View):
         retrieve_data_by_primary_params_and_add_to_response()
 
     get_logic_function = trading_partner_logic
+    accepted_get_parameters = ["partnerid"]

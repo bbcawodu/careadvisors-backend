@@ -14,8 +14,8 @@ from picmodels.forms import CarrierSampleIDCardUploadForm
 from ...utils import clean_string_value_from_dict_object
 from ...utils import validate_get_request_parameters
 from ...utils import init_v2_response_data
-from ...base import JSONPUTRspMixin
-from ...base import JSONGETRspMixin
+from ...utils import JSONPUTRspMixin
+from ...utils import JSONGETRspMixin
 from .tools import validate_rqst_params_and_add_instance
 from .tools import validate_rqst_params_and_modify_instance
 from .tools import validate_rqst_params_and_delete_instance
@@ -100,13 +100,20 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         retrieve_data_by_primary_params_and_add_to_response()
 
     put_logic_function = carriers_management_put_logic
+
+    accepted_get_parameters = [
+        "id",
+        "name",
+        "state",
+        "has_sample_id_card"
+    ]
     get_logic_function = carriers_management_get_logic
 
 
 def handle_carrier_sample_id_card_mgmt_rqst(request):
     if request.method == 'GET':
         response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = validate_get_request_parameters(request.GET, rqst_errors)
+        search_params = validate_get_request_parameters(request.GET, ["id"], rqst_errors)
 
         if 'id' in search_params:
             rqst_carrier_id = search_params['id']

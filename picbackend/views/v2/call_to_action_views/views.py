@@ -1,9 +1,8 @@
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.conf import settings
 from django.views.generic import View
 from django.http import HttpResponseForbidden
-from ..base import JSONGETRspMixin
+from ..utils import JSONGETRspMixin
 from picmodels.models import CallToAction
 from picmodels.forms import CTAManagementForm
 from ..utils import validate_get_request_parameters
@@ -13,7 +12,7 @@ from ..utils import init_v2_response_data
 def manage_cta_request(request):
     if request.method == 'GET':
         response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = validate_get_request_parameters(request.GET, rqst_errors)
+        search_params = validate_get_request_parameters(request.GET, ['intent'], rqst_errors)
         cta_messages = []
         form = CTAManagementForm()
 
@@ -89,4 +88,5 @@ class ViewCTAView(JSONGETRspMixin, View):
 
         retrieve_data_by_primary_params_and_add_to_response()
 
+    accepted_get_parameters = ["intent"]
     get_logic_function = view_cta_get_logic

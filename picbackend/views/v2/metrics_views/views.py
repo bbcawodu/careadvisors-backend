@@ -15,8 +15,8 @@ from .tools import retrieve_metrics_data_by_staff_first_name
 from .tools import retrieve_metrics_data_by_staff_last_name
 from .tools import retrieve_metrics_data_by_staff_email
 from .tools import retrieve_metrics_data_by_staff_mpn
-from ..base import JSONPUTRspMixin
-from ..base import JSONGETRspMixin
+from ..utils import JSONPUTRspMixin
+from ..utils import JSONGETRspMixin
 
 
 #Need to abstract common variables in get and post class methods into class attributes
@@ -59,6 +59,21 @@ class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             response_raw_data["Status"]["Missing Parameters"].append(missing_parameter)
 
     put_logic_function = metrics_management_put_logic
+
+    accepted_get_parameters = [
+        "id",
+        "fname",
+        "lname",
+        "email",
+        "mpn",
+        "zipcode",
+        "time",
+        "startdate",
+        "enddate",
+        "location",
+        "location_id",
+        "fields"
+    ]
     get_logic_function = metrics_management_get_logic
 
 

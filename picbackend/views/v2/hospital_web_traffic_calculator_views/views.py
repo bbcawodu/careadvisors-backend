@@ -8,8 +8,8 @@ from .tools import validate_rqst_params_and_delete_instance
 from .tools import retrieve_hospital_web_traffic_calculator_data_by_id
 from .tools import retrieve_web_traffic_calculator_data_by_hospital_name
 from django.views.decorators.csrf import csrf_exempt
-from ..base import JSONPUTRspMixin
-from ..base import JSONGETRspMixin
+from ..utils import JSONPUTRspMixin
+from ..utils import JSONGETRspMixin
 
 
 #Need to abstract common variables in get and post class methods into class attributes
@@ -74,4 +74,9 @@ class HospitalWebTrafficCalculatorDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
         retrieve_data_by_primary_params_and_add_to_response(web_traffic_calculator_data)
 
     put_logic_function = hospital_web_traffic_calculator_data_mgr_put_logic
+
+    accepted_get_parameters = [
+        "id",
+        "hospital_name"
+    ]
     get_logic_function = hospital_web_traffic_calculator_data_mgr_get_logic

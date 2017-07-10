@@ -8,8 +8,8 @@ from .tools import validate_rqst_params_and_delete_instance
 from .tools import retrieve_healthcare_subsidy_eligibility_data_by_id
 from .tools import retrieve_healthcare_subsidy_eligibility_data_by_family_size
 from django.views.decorators.csrf import csrf_exempt
-from ..base import JSONPUTRspMixin
-from ..base import JSONGETRspMixin
+from ..utils import JSONPUTRspMixin
+from ..utils import JSONGETRspMixin
 
 
 #Need to abstract common variables in get and post class methods into class attributes
@@ -70,4 +70,9 @@ class HealthcareSubsidyEligibilityDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
         retrieve_data_by_primary_params_and_add_to_response(healthcare_subsidy_eligibility_data_objs)
 
     put_logic_function = healthcare_subsidy_eligibility_data_mgr_put_logic
+
+    accepted_get_parameters = [
+        "id",
+        "family_size"
+    ]
     get_logic_function = healthcare_subsidy_eligibility_data_mgr_get_logic
