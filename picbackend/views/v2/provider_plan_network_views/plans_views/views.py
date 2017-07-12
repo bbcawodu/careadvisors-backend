@@ -94,9 +94,9 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     accepted_get_parameters = [
         "id",
         "name",
-        'carrier state',
-        'carrier name',
-        'carrier id',
+        'carrier_state',
+        'carrier_name',
+        'carrier_id',
         'accepted_location_id',
         "include_summary_report",
         "include_detailed_report",
