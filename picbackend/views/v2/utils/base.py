@@ -341,7 +341,7 @@ def validate_get_request_parameters(get_rqst_params, params_to_validate, rqst_er
                 validation_fucntion = GET_PARAMETER_VALIDATION_FUNCTIONS[parameter_to_validate]
                 validation_fucntion(get_rqst_params, validated_params, rqst_errors)
             else:
-                raise NotImplementedError("GET parameter :{} does not have a validation function implemented.")
+                raise NotImplementedError("GET parameter :{} does not have a validation function implemented.".format(parameter_to_validate))
 
     run_validation_functions()
 
