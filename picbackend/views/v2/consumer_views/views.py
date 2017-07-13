@@ -89,6 +89,7 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         "lname",
         "email",
         "id",
+        "page"
     ]
     get_logic_function = consumer_management_get_logic
 
