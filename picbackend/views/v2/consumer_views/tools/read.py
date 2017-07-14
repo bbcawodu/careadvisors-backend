@@ -131,10 +131,13 @@ def paginate_result_list_by_changing_excess_data_to_ids(consumer_list, CONSUMERS
     len_of_consumer_list = len(consumer_list)
     if len_of_consumer_list > CONSUMERS_PER_PAGE:
         if rqst_page_no:
-            if len_of_consumer_list > ((rqst_page_no - 1) * CONSUMERS_PER_PAGE):
+            end_point_of_first_list_to_change = ((rqst_page_no - 1) * CONSUMERS_PER_PAGE)
+            start_point_of_second_list_to_change = (rqst_page_no * CONSUMERS_PER_PAGE)
+
+            if len_of_consumer_list > end_point_of_first_list_to_change:
                 for i, consumer in enumerate(consumer_list[:(CONSUMERS_PER_PAGE * (rqst_page_no - 1))]):
                     consumer_list[i] = consumer["Database ID"]
-            if len_of_consumer_list > (rqst_page_no * CONSUMERS_PER_PAGE):
+            if len_of_consumer_list > start_point_of_second_list_to_change:
                 for i, consumer in enumerate(consumer_list[(rqst_page_no * CONSUMERS_PER_PAGE):]):
                     consumer_list[(rqst_page_no * CONSUMERS_PER_PAGE)+i] = consumer["Database ID"]
         else:
