@@ -11,7 +11,6 @@ from ...utils import clean_dict_value_from_dict_object
 from ...utils import clean_bool_value_from_dict_object
 from picmodels.models import PICStaff
 from picmodels.models import PICConsumer
-from picmodels.models import NavMetricsLocation
 from picmodels.services.staff_consumer_models_services.pic_consumer_services import add_instance_using_validated_params
 from picmodels.services.staff_consumer_models_services.pic_consumer_services import modify_instance_using_validated_params
 from picmodels.services.staff_consumer_models_services.pic_consumer_services import delete_instance_using_validated_params
@@ -154,22 +153,30 @@ def validate_add_instance_rqst_params(post_data, post_errors):
             "rqst_create_backup": rqst_create_backup}
 
 
-def validate_cps_info_params_for_add_instance_rqst(rqst_cps_info_params, rqst_consumer_met_nav_at, consumer_household_size, nav_instance, post_errors):
+def validate_cps_info_params_for_add_instance_rqst(rqst_cps_info_params, rqst_consumer_met_nav_at, consumer_household_size, nav_instance, rqst_errors):
     rqst_primary_dependent_params = clean_dict_value_from_dict_object(rqst_cps_info_params,
                                                                     "cps_info",
                                                                     "primary_dependent",
-                                                                    post_errors)
+                                                                      rqst_errors)
     primary_dependent_object = None
-    if not post_errors:
+    if not rqst_errors:
         rqst_primary_dependent_database_id = clean_int_value_from_dict_object(rqst_primary_dependent_params,
                                                                               "primary_dependent",
                                                                               "Consumer Database ID",
-                                                                              post_errors,
+                                                                              rqst_errors,
                                                                               no_key_allowed=True)
         if not rqst_primary_dependent_database_id:
-            primary_dependent_found_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
-                rqst_primary_dependent_params, post_errors)
-            if not primary_dependent_found_PICConsumer_entries:
+            found_primary_dependent_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
+                rqst_primary_dependent_params, rqst_errors)
+            rqst_force_create_consumer = clean_bool_value_from_dict_object(rqst_primary_dependent_params, "root",
+                                                                           "force_create_consumer", rqst_errors,
+                                                                           no_key_allowed=True)
+
+            if found_primary_dependent_PICConsumer_entries and not rqst_force_create_consumer:
+                rqst_errors.append(
+                    "The following PICConsumer object id(s) were found for given primary_dependent: {}. If you want to create a new consumer anyway, set cps_info['primary_dependent']['force_create_consumer'] to True.".format(
+                        json.dumps(found_primary_dependent_PICConsumer_entries)))
+            else:
                 try:
                     primary_dependent_object = PICConsumer(first_name=rqst_primary_dependent_params["first_name"],
                                                            last_name=rqst_primary_dependent_params["last_name"],
@@ -178,82 +185,89 @@ def validate_cps_info_params_for_add_instance_rqst(rqst_cps_info_params, rqst_co
                                                            navigator=nav_instance
                                                            )
                 except IntegrityError:
-                    post_errors.append("Error creating primary_dependent database entry for params: {!s}".format(
+                    rqst_errors.append("Error creating primary_dependent database entry for params: {!s}".format(
                         json.dumps(rqst_primary_dependent_params)))
-            else:
-                post_errors.append(
-                    "The following PICConsumer object id(s) were found for given primary_dependent: {}".format(
-                        json.dumps(primary_dependent_found_PICConsumer_entries)))
         else:
             try:
                 primary_dependent_object = PICConsumer.objects.get(id=rqst_primary_dependent_database_id)
             except PICConsumer.DoesNotExist:
-                post_errors.append("PICConsumer object does not exist for primary_dependent Database ID: {!s}".format(
+                rqst_errors.append("PICConsumer object does not exist for primary_dependent Database ID: {!s}".format(
                     str(rqst_primary_dependent_database_id)))
 
-    rqst_cps_location = clean_string_value_from_dict_object(rqst_cps_info_params, "cps_info", "cps_location", post_errors)
+    rqst_cps_location = clean_string_value_from_dict_object(rqst_cps_info_params, "cps_info", "cps_location", rqst_errors)
 
     apt_date_dict = clean_dict_value_from_dict_object(rqst_cps_info_params,
                                                       "cps_info",
                                                       "apt_date",
-                                                      post_errors)
+                                                      rqst_errors)
     rqst_apt_date = None
     if apt_date_dict is not None:
-        month = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Month", post_errors)
+        month = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Month", rqst_errors)
         if month:
             if month < 1 or month > 12:
-                post_errors.append("Month must be between 1 and 12 inclusive")
+                rqst_errors.append("Month must be between 1 and 12 inclusive")
 
-        day = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Day", post_errors)
+        day = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Day", rqst_errors)
         if day:
             if day < 1 or day > 31:
-                post_errors.append("Day must be between 1 and 31 inclusive")
+                rqst_errors.append("Day must be between 1 and 31 inclusive")
 
-        year = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Year", post_errors)
+        year = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Year", rqst_errors)
         if year:
             if year < 1 or year > 9999:
-                post_errors.append("Year must be between 1 and 9999 inclusive")
+                rqst_errors.append("Year must be between 1 and 9999 inclusive")
 
-        if len(post_errors) == 0:
+        if len(rqst_errors) == 0:
             rqst_apt_date = datetime.date(year, month, day)
 
     rqst_target_list = clean_bool_value_from_dict_object(rqst_cps_info_params,
                                                          "cps_info",
                                                          "target_list",
-                                                         post_errors)
+                                                         rqst_errors)
     rqst_phone_apt = clean_bool_value_from_dict_object(rqst_cps_info_params,
                                                        "cps_info",
                                                        "phone_apt",
-                                                       post_errors)
+                                                       rqst_errors)
     rqst_case_mgmt_type = clean_string_value_from_dict_object(rqst_cps_info_params,
                                                               "cps_info",
                                                               "case_mgmt_type",
-                                                              post_errors)
+                                                              rqst_errors)
     rqst_case_mgmt_status = clean_string_value_from_dict_object(rqst_cps_info_params,
                                                                 "cps_info",
                                                                 "case_mgmt_status",
-                                                                post_errors)
+                                                                rqst_errors)
 
     rqst_secondary_dependents = clean_list_value_from_dict_object(rqst_cps_info_params,
                                                                   "cps_info",
                                                                   "secondary_dependents",
-                                                                  post_errors,
+                                                                  rqst_errors,
                                                                   no_key_allowed=True,
                                                                   empty_list_allowed=True)
     secondary_dependents_list = []
     if rqst_secondary_dependents:
         for dependent_index, rqst_secondary_dependent_dict in enumerate(rqst_secondary_dependents):
             secondary_dependent_object = None
-            if len(post_errors) == 0:
+            if not rqst_errors:
                 rqst_secondary_dependent_database_id = clean_int_value_from_dict_object(rqst_secondary_dependent_dict,
                                                                                         "secondary_dependent",
                                                                                         "Consumer Database ID",
-                                                                                        post_errors,
+                                                                                        rqst_errors,
                                                                                         no_key_allowed=True)
+
                 if not rqst_secondary_dependent_database_id:
-                    secondary_dependent_found_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
-                        rqst_secondary_dependent_dict, post_errors)
-                    if not secondary_dependent_found_PICConsumer_entries:
+                    found_secondary_dependent_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
+                        rqst_secondary_dependent_dict, rqst_errors)
+                    rqst_force_create_consumer = clean_bool_value_from_dict_object(rqst_secondary_dependent_dict,
+                                                                                   "root",
+                                                                                   "force_create_consumer", rqst_errors,
+                                                                                   no_key_allowed=True)
+
+                    if found_secondary_dependent_PICConsumer_entries and not rqst_force_create_consumer:
+                        rqst_errors.append(
+                            "The following PICConsumer object id(s) were found for the secondary_dependent at index {}: {}. If you want to create a new consumer anyway, set cps_info['secondary_dependents'][index]['force_create_consumer'] to True.".format(
+                                dependent_index,
+                                json.dumps(found_secondary_dependent_PICConsumer_entries)))
+                    else:
                         try:
                             secondary_dependent_object = PICConsumer(
                                 first_name=rqst_secondary_dependent_dict["first_name"],
@@ -262,19 +276,14 @@ def validate_cps_info_params_for_add_instance_rqst(rqst_cps_info_params, rqst_co
                                 household_size=consumer_household_size,
                                 navigator=nav_instance)
                         except IntegrityError:
-                            post_errors.append(
+                            rqst_errors.append(
                                 "Error creating secondary_dependent database entry for params: {!s}".format(
                                     json.dumps(rqst_secondary_dependent_dict)))
-                    else:
-                        post_errors.append(
-                            "The following PICConsumer object id(s) were found for the secondary_dependent at index {}: {}".format(
-                                dependent_index,
-                                json.dumps(secondary_dependent_found_PICConsumer_entries)))
                 else:
                     try:
                         secondary_dependent_object = PICConsumer.objects.get(id=rqst_secondary_dependent_database_id)
-                    except NavMetricsLocation.DoesNotExist:
-                        post_errors.append(
+                    except PICConsumer.DoesNotExist:
+                        rqst_errors.append(
                             "PICConsumer object does not exist for secondary_dependent with index({!s}) and Database ID: {!s}".format(
                                 str(dependent_index),
                                 str(rqst_secondary_dependent_database_id)))
@@ -284,11 +293,15 @@ def validate_cps_info_params_for_add_instance_rqst(rqst_cps_info_params, rqst_co
     rqst_app_type = clean_string_value_from_dict_object(rqst_cps_info_params,
                                                         "cps_info",
                                                         "app_type",
-                                                        post_errors)
+                                                        rqst_errors)
     rqst_app_status = clean_string_value_from_dict_object(rqst_cps_info_params,
                                                           "cps_info",
                                                           "app_status",
-                                                          post_errors)
+                                                          rqst_errors)
+    rqst_point_of_origin = clean_string_value_from_dict_object(rqst_cps_info_params,
+                                                          "cps_info",
+                                                          "point_of_origin",
+                                                          rqst_errors)
 
     cps_info_params = {
         "rqst_cps_location": rqst_cps_location,
@@ -299,6 +312,7 @@ def validate_cps_info_params_for_add_instance_rqst(rqst_cps_info_params, rqst_co
         "rqst_case_mgmt_status": rqst_case_mgmt_status,
         "rqst_app_type": rqst_app_type,
         "rqst_app_status": rqst_app_status,
+        "rqst_point_of_origin": rqst_point_of_origin,
         "primary_dependent_object": primary_dependent_object,
         "secondary_dependents_list": secondary_dependents_list
     }
@@ -503,7 +517,7 @@ def validate_modify_instance_rqst_params(rqst_params, rqst_errors):
     return validated_params
 
 
-def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, consumer_instance, rqst_consumer_met_nav_at, rqst_consumer_household_size, rqst_nav_instance, post_errors):
+def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, consumer_instance, rqst_consumer_met_nav_at, rqst_consumer_household_size, rqst_nav_instance, rqst_errors):
     validated_params = {}
 
     if not rqst_consumer_met_nav_at:
@@ -517,18 +531,26 @@ def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, cons
         rqst_primary_dependent_dict = clean_dict_value_from_dict_object(rqst_cps_info_params,
                                                                         "cps_info",
                                                                         "primary_dependent",
-                                                                        post_errors)
+                                                                        rqst_errors)
         primary_dependent_object = None
-        if not post_errors:
+        if not rqst_errors:
             rqst_primary_dependent_database_id = clean_int_value_from_dict_object(rqst_primary_dependent_dict,
                                                                                   "primary_dependent",
                                                                                   "Consumer Database ID",
-                                                                                  post_errors,
+                                                                                  rqst_errors,
                                                                                   no_key_allowed=True)
             if not rqst_primary_dependent_database_id:
-                primary_dependent_found_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
-                    rqst_primary_dependent_dict, post_errors)
-                if not primary_dependent_found_PICConsumer_entries:
+                found_primary_dependent_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
+                    rqst_primary_dependent_dict, rqst_errors)
+                rqst_force_create_consumer = clean_bool_value_from_dict_object(rqst_primary_dependent_dict, "root",
+                                                                               "force_create_consumer", rqst_errors,
+                                                                               no_key_allowed=True)
+
+                if found_primary_dependent_PICConsumer_entries and not rqst_force_create_consumer:
+                    rqst_errors.append(
+                        "The following PICConsumer object id(s) were found for given primary_dependent: {}. If you want to create a new consumer anyway, set cps_info['primary_dependent']['force_create_consumer'] to True.".format(
+                            json.dumps(found_primary_dependent_PICConsumer_entries)))
+                else:
                     try:
                         primary_dependent_object = PICConsumer(first_name=rqst_primary_dependent_dict["first_name"],
                                                                last_name=rqst_primary_dependent_dict["last_name"],
@@ -537,17 +559,13 @@ def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, cons
                                                                navigator=rqst_nav_instance
                                                                )
                     except IntegrityError:
-                        post_errors.append("Error creating primary_dependent database entry for params: {!s}".format(
+                        rqst_errors.append("Error creating primary_dependent database entry for params: {!s}".format(
                             json.dumps(rqst_primary_dependent_dict)))
-                else:
-                    post_errors.append(
-                        "The following PICConsumer object id(s) were found for given primary_dependent: {}".format(
-                            json.dumps(primary_dependent_found_PICConsumer_entries)))
             else:
                 try:
                     primary_dependent_object = PICConsumer.objects.get(id=rqst_primary_dependent_database_id)
                 except PICConsumer.DoesNotExist:
-                    post_errors.append("PICConsumer object does not exist for primary_dependent Database ID: {!s}".format(
+                    rqst_errors.append("PICConsumer object does not exist for primary_dependent Database ID: {!s}".format(
                         str(rqst_primary_dependent_database_id)))
 
         validated_params["primary_dependent_object"] = primary_dependent_object
@@ -555,7 +573,7 @@ def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, cons
         rqst_secondary_dependents = clean_list_value_from_dict_object(rqst_cps_info_params,
                                                                       "cps_info",
                                                                       "secondary_dependents",
-                                                                      post_errors,
+                                                                      rqst_errors,
                                                                       no_key_allowed=True,
                                                                       empty_list_allowed=True)
         validated_params["secondary_dependents_list"] = rqst_secondary_dependents
@@ -564,17 +582,28 @@ def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, cons
         if rqst_secondary_dependents:
             for dependent_index, rqst_secondary_dependent_dict in enumerate(rqst_secondary_dependents):
                 secondary_dependent_object = None
-                if len(post_errors) == 0:
+                if len(rqst_errors) == 0:
                     rqst_secondary_dependent_database_id = clean_int_value_from_dict_object(
                         rqst_secondary_dependent_dict,
                         "secondary_dependent",
                         "Consumer Database ID",
-                        post_errors,
+                        rqst_errors,
                         no_key_allowed=True)
                     if not rqst_secondary_dependent_database_id:
-                        secondary_dependent_found_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
-                            rqst_secondary_dependent_dict, post_errors)
-                        if not secondary_dependent_found_PICConsumer_entries:
+                        found_secondary_dependent_PICConsumer_entries = check_consumer_db_entries_for_dependent_info(
+                            rqst_secondary_dependent_dict, rqst_errors)
+                        rqst_force_create_consumer = clean_bool_value_from_dict_object(rqst_secondary_dependent_dict,
+                                                                                       "root",
+                                                                                       "force_create_consumer",
+                                                                                       rqst_errors,
+                                                                                       no_key_allowed=True)
+
+                        if found_secondary_dependent_PICConsumer_entries and not rqst_force_create_consumer:
+                            rqst_errors.append(
+                                "The following PICConsumer object id(s) were found for the secondary_dependent at index {}: {}. If you want to create a new consumer anyway, set cps_info['secondary_dependents'][index]['force_create_consumer'] to True.".format(
+                                    dependent_index,
+                                    json.dumps(found_secondary_dependent_PICConsumer_entries)))
+                        else:
                             try:
                                 secondary_dependent_object = PICConsumer(
                                     first_name=rqst_secondary_dependent_dict["first_name"],
@@ -583,20 +612,15 @@ def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, cons
                                     household_size=rqst_consumer_household_size,
                                     navigator=rqst_nav_instance)
                             except IntegrityError:
-                                post_errors.append(
+                                rqst_errors.append(
                                     "Error creating secondary_dependent database entry for params: {!s}".format(
                                         json.dumps(rqst_secondary_dependent_dict)))
-                        else:
-                            post_errors.append(
-                                "The following PICConsumer object id(s) were found for the secondary_dependent at index {}: {}".format(
-                                    dependent_index,
-                                    json.dumps(secondary_dependent_found_PICConsumer_entries)))
                     else:
                         try:
                             secondary_dependent_object = PICConsumer.objects.get(
                                 id=rqst_secondary_dependent_database_id)
-                        except NavMetricsLocation.DoesNotExist:
-                            post_errors.append(
+                        except PICConsumer.DoesNotExist:
+                            rqst_errors.append(
                                 "PICConsumer object does not exist for secondary_dependent with index({!s}) and Database ID: {!s}".format(
                                     str(dependent_index),
                                     str(rqst_secondary_dependent_database_id)))
@@ -605,32 +629,32 @@ def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, cons
 
             validated_params["secondary_dependents_list"] = secondary_dependents_list
     if "cps_location" in rqst_cps_info_params:
-        rqst_cps_location = clean_string_value_from_dict_object(rqst_cps_info_params, "cps_info", "cps_location", post_errors)
+        rqst_cps_location = clean_string_value_from_dict_object(rqst_cps_info_params, "cps_info", "cps_location", rqst_errors)
 
         validated_params["rqst_cps_location"] = rqst_cps_location
     if "apt_date" in rqst_cps_info_params:
         apt_date_dict = clean_dict_value_from_dict_object(rqst_cps_info_params,
                                                           "cps_info",
                                                           "apt_date",
-                                                          post_errors)
+                                                          rqst_errors)
         rqst_apt_date = None
         if apt_date_dict is not None:
-            month = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Month", post_errors)
+            month = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Month", rqst_errors)
             if month:
                 if month < 1 or month > 12:
-                    post_errors.append("Month must be between 1 and 12 inclusive")
+                    rqst_errors.append("Month must be between 1 and 12 inclusive")
 
-            day = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Day", post_errors)
+            day = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Day", rqst_errors)
             if day:
                 if day < 1 or day > 31:
-                    post_errors.append("Day must be between 1 and 31 inclusive")
+                    rqst_errors.append("Day must be between 1 and 31 inclusive")
 
-            year = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Year", post_errors)
+            year = clean_int_value_from_dict_object(apt_date_dict, "date_met_nav", "Year", rqst_errors)
             if year:
                 if year < 1 or year > 9999:
-                    post_errors.append("Year must be between 1 and 9999 inclusive")
+                    rqst_errors.append("Year must be between 1 and 9999 inclusive")
 
-            if len(post_errors) == 0:
+            if len(rqst_errors) == 0:
                 rqst_apt_date = datetime.date(year, month, day)
 
         validated_params["rqst_apt_date"] = rqst_apt_date
@@ -638,44 +662,51 @@ def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, cons
         rqst_target_list = clean_bool_value_from_dict_object(rqst_cps_info_params,
                                                              "cps_info",
                                                              "target_list",
-                                                             post_errors)
+                                                             rqst_errors)
 
         validated_params["rqst_target_list"] = rqst_target_list
     if "phone_apt" in rqst_cps_info_params:
         rqst_phone_apt = clean_bool_value_from_dict_object(rqst_cps_info_params,
                                                            "cps_info",
                                                            "phone_apt",
-                                                           post_errors)
+                                                           rqst_errors)
 
         validated_params["rqst_phone_apt"] = rqst_phone_apt
     if "case_mgmt_type" in rqst_cps_info_params:
         rqst_case_mgmt_type = clean_string_value_from_dict_object(rqst_cps_info_params,
                                                                   "cps_info",
                                                                   "case_mgmt_type",
-                                                                  post_errors)
+                                                                  rqst_errors)
 
         validated_params["rqst_case_mgmt_type"] = rqst_case_mgmt_type
     if "case_mgmt_status" in rqst_cps_info_params:
         rqst_case_mgmt_status = clean_string_value_from_dict_object(rqst_cps_info_params,
                                                                     "cps_info",
                                                                     "case_mgmt_status",
-                                                                    post_errors)
+                                                                    rqst_errors)
 
         validated_params["rqst_case_mgmt_status"] = rqst_case_mgmt_status
     if "app_type" in rqst_cps_info_params:
         rqst_app_type = clean_string_value_from_dict_object(rqst_cps_info_params,
                                                             "cps_info",
                                                             "app_type",
-                                                            post_errors)
+                                                            rqst_errors)
 
         validated_params["rqst_app_type"] = rqst_app_type
     if "app_status" in rqst_cps_info_params:
         rqst_app_status = clean_string_value_from_dict_object(rqst_cps_info_params,
                                                               "cps_info",
                                                               "app_status",
-                                                              post_errors)
+                                                              rqst_errors)
 
         validated_params["rqst_app_status"] = rqst_app_status
+    if "point_of_origin" in rqst_cps_info_params:
+        rqst_point_of_origin = clean_string_value_from_dict_object(rqst_cps_info_params,
+                                                              "cps_info",
+                                                              "point_of_origin",
+                                                              rqst_errors)
+
+        validated_params["rqst_point_of_origin"] = rqst_point_of_origin
 
     return validated_params
 

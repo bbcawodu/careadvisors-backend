@@ -303,8 +303,20 @@ class ConsumerCPSInfoEntry(models.Model):
 
     MEDICAID = "Medicaid"
     SNAP = "SNAP"
+    MEDICAID_SNAP = "Medicaid/SNAP"
+    REDETERMINATION = "Redetermination"
+    PLAN_SELECTION = "Plan Selection"
+    FAX_FCRC = "Fax FCRC"
+    EDUCATION = "Education"
+    MMCO = "MMCO"
     APP_TYPE_CHOICES = ((MEDICAID, "Medicaid"),
                         (SNAP, "SNAP"),
+                        (MEDICAID_SNAP, "Medicaid/SNAP"),
+                        (REDETERMINATION, "Redetermination"),
+                        (PLAN_SELECTION, "Plan Selection"),
+                        (FAX_FCRC, "Fax FCRC"),
+                        (EDUCATION, "Education"),
+                        (MMCO, "MMCO"),
                         (N_A, "Not Available"))
 
     SUBMITTED = "Submitted"
@@ -316,6 +328,20 @@ class ConsumerCPSInfoEntry(models.Model):
                           (APPROVED, "Approved"),
                           (DENIED, "Denied"),
                           (N_A, "Not Available"))
+
+    WALK_IN = "Walk-in"
+    APPOINTMENT = "Appointment"
+    REFERRAL_FROM_CALL = "Referral from call"
+    REFERRAL_FROM_SCHOOL_LETTER = "Referral from school letter"
+    ENROLLMENT_EVENT = "Enrollment event"
+    POINT_OF_ORIGIN_CHOICES = (
+        (WALK_IN, "Walk-in"),
+        (APPOINTMENT, "Appointment"),
+        (REFERRAL_FROM_CALL, "Referral from call"),
+        (REFERRAL_FROM_SCHOOL_LETTER, "Referral from school letter"),
+        (ENROLLMENT_EVENT, "Enrollment event"),
+        (N_A, "Not Available")
+    )
 
     primary_dependent = models.ForeignKey(PICConsumer, on_delete=models.SET_NULL, blank=True, null=True, related_name='primary_guardian')
     secondary_dependents = models.ManyToManyField(PICConsumer, blank=True, related_name='secondary_guardians')
@@ -329,6 +355,7 @@ class ConsumerCPSInfoEntry(models.Model):
     case_mgmt_status = models.CharField(max_length=1000, blank=True, null=True, choices=CASE_MGMT_STATUS_CHOICES, default=N_A)
     app_type = models.CharField(max_length=1000, blank=True, null=True, choices=APP_TYPE_CHOICES, default=N_A)
     app_status = models.CharField(max_length=1000, blank=True, null=True, choices=APP_STATUS_CHOICES, default=N_A)
+    point_of_origin = models.CharField(max_length=1000, blank=True, null=True, choices=POINT_OF_ORIGIN_CHOICES, default=N_A)
 
     class Meta:
         # maps model to the picmodels module
@@ -352,6 +379,12 @@ class ConsumerCPSInfoEntry(models.Model):
                 return True
         return False
 
+    def check_point_of_origin_choices(self,):
+        for point_of_origin_tuple in self.POINT_OF_ORIGIN_CHOICES:
+            if point_of_origin_tuple[1].lower() == self.point_of_origin.lower():
+                return True
+        return False
+
     def return_values_dict(self):
         valuesdict = {"apt_date": None,
                       "target_list": self.target_list,
@@ -360,6 +393,7 @@ class ConsumerCPSInfoEntry(models.Model):
                       "case_mgmt_status": self.case_mgmt_status,
                       "app_type": self.app_type,
                       "app_status": self.app_status,
+                      "point_of_origin": self.point_of_origin,
                       "cps_location": None,
                       "primary_dependent": None,
                       "secondary_dependents": None,

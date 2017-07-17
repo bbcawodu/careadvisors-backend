@@ -99,6 +99,9 @@ def add_cps_info_to_consumer_instance(consumer_instance, validated_cps_info_para
     cps_info_object.app_status = validated_cps_info_params["rqst_app_status"]
     if not cps_info_object.check_app_status_choices():
         post_errors.append("app_status: {!s} is not a valid choice".format(cps_info_object.app_status))
+    cps_info_object.point_of_origin = validated_cps_info_params["rqst_point_of_origin"]
+    if not cps_info_object.check_point_of_origin_choices():
+        post_errors.append("point_of_origin: {!s} is not a valid choice".format(cps_info_object.point_of_origin))
 
     if not post_errors:
         primary_dependent_object = validated_cps_info_params["primary_dependent_object"]
@@ -362,6 +365,13 @@ def modify_consumer_cps_info(consumer_instance, validated_cps_info_params, rqst_
             rqst_errors.append("app_status: {!s} is not a valid choice".format(cps_info_instance.app_status))
     if not cps_info_instance.app_status:
         rqst_errors.append("app_status is required for a cps info entry. CPS info can not be added to consumer instance.")
+
+    if 'rqst_point_of_origin' in validated_cps_info_params:
+        cps_info_instance.point_of_origin = validated_cps_info_params['rqst_point_of_origin']
+        if not cps_info_instance.check_point_of_origin_choices():
+            rqst_errors.append("point_of_origin: {!s} is not a valid choice".format(cps_info_instance.point_of_origin))
+    if not cps_info_instance.point_of_origin:
+        rqst_errors.append("point_of_origin is required for a cps info entry. CPS info can not be added to consumer instance.")
 
     if not rqst_errors:
         if 'primary_dependent_object' in validated_cps_info_params:

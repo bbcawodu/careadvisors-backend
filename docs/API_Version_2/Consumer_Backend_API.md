@@ -44,6 +44,7 @@ Address Keys(Every field within address can be given as an empty string. Address
                                         "first_name": String (Required when "Consumer Database ID" is omitted),
                                         "last_name": String (Required when "Consumer Database ID" is omitted),
                                         "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted)
+                                        "force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
                                      },
                 "cps_location": String (Must be the name of a NavMetricsLocation instance with cps_location=True),
                 "apt_date": {
@@ -60,11 +61,13 @@ Address Keys(Every field within address can be given as an empty string. Address
                                                 "first_name": String (Required when "Consumer Database ID" is omitted),
                                                 "last_name": String (Required when "Consumer Database ID" is omitted),
                                                 "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted)
+                                                "force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
                                              },
                                              ...
                                         ],
-                "app_type": String (Must be one of these choices: "Medicaid", "SNAP", "Not Available"),
+                "app_type": String (Must be one of these choices: "Medicaid", "SNAP", "Medicaid/SNAP", "Redetermination", "Plan Selection", "Fax FCRC", "Education", "MMCO", "Not Available"),
                 "app_status": String (Must be one of these choices: "Submitted", "Pending", "Approved", "Denied", "Not Available"),
+                "point_of_origin": String (Must be one of these choices: "Walk-in", "Appointment", "Referral from call", "Referral from school letter", "Enrollment event", "Not Available"),
             }(Contains relevant CPS info),
 
 "Consumer Database ID": Integer,
@@ -98,10 +101,12 @@ In response, a JSON document will be displayed with the following format:
             - cps_info["primary_dependent"]["first_name"]
             - cps_info["primary_dependent"]["last_name"]
             - cps_info["primary_dependent"]["Consumer Database ID"]
+            - cps_info["primary_dependent"]["force_create_consumer"]
             - cps_info["secondary_dependents"]
             - cps_info["secondary_dependents"][index]["first_name"]
             - cps_info["secondary_dependents"][index]["last_name"]
             - cps_info["secondary_dependents"][index]["Consumer Database ID"]
+            - cps_info["secondary_dependents"][index]["force_create_consumer"]
             - "Consumer Database ID"
             
         - Keys that can be empty strings:
