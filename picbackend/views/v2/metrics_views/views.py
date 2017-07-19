@@ -130,7 +130,7 @@ def retrieve_metrics_data_by_request_params(search_params, validated_fields, rqs
     if 'id' in search_params:
         rqst_staff_id = search_params['id']
         if rqst_staff_id != 'all':
-            list_of_ids = search_params['id list']
+            list_of_ids = search_params['id_list']
         else:
             list_of_ids = None
 

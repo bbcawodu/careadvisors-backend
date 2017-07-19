@@ -2,8 +2,8 @@
     
 ### Google Calendar API OAuth2 Credentials Authorization Page for Navigators
 # NAVIGATORS MUST NOT CHANGE THE NAME OF THE PATIENT INNOVATION CENTER CONSUMER APPOINTMENT GOOGLE CALENDAR. IF THEY DO, THEY WILL NO LONGER BE SCHEDULED APPOINTMENTS
-- To retrieve and update Google Calendar API OAuth2 Credentials for a navigator and store it in the database, submit a GET request to http://picbackend.herokuapp.com/v2/calendar_auth/ with the following MANDATORY parameter: "navid".
-    - "navid" corresponds to navigator database id.
+- To retrieve and update Google Calendar API OAuth2 Credentials for a navigator and store it in the database, submit a GET request to http://picbackend.herokuapp.com/v2/calendar_auth/ with the following MANDATORY parameter: "nav_id".
+    - "nav_id" corresponds to navigator database id.
         - passing a database id that does not appear in the database will result in an error.
         
 - If there are no valid credentials for the given navigator id stored in the database, navigator will be redirected to a Google authorization page where they can authorize our application to view and modify their calendar.
@@ -64,19 +64,19 @@ In response, a JSON document will be displayed with the following format:
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
                                                             "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
                                                         },
                                                         {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
                                                             "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
                                                         },
                                                         {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
                                                             "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
                                                         },
                                                         ...
                                                         ],
@@ -86,40 +86,19 @@ In response, a JSON document will be displayed with the following format:
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
                                                             "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
                                                             },
                                                             {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
                                                             "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
                                                             },
                                                             {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
                                                             "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
-                                                            },
-                                                            ...
-                                                        ](Can Be Empty),
-                                                        [
-                                                            {
-                                                            "Navigator Name" : "Bradley Awodu",
-                                                            "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
-                                                            },
-                                                            {
-                                                            "Navigator Name" : "Bradley Awodu",
-                                                            "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
-                                                            },
-                                                            {
-                                                            "Navigator Name" : "Bradley Awodu",
-                                                            "Navigator Database ID" : 1,
-                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
                                                             },
                                                             ...
                                                         ](Can Be Empty),
@@ -128,19 +107,40 @@ In response, a JSON document will be displayed with the following format:
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
                                                             "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
                                                             },
                                                             {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
                                                             "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
                                                             },
                                                             {
                                                             "Navigator Name" : "Bradley Awodu",
                                                             "Navigator Database ID" : 1,
                                                             "Appointment Date and Time" : '2016-12-22T10:00:00',
-                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid=1",
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
+                                                            },
+                                                            ...
+                                                        ](Can Be Empty),
+                                                        [
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
+                                                            },
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
+                                                            },
+                                                            {
+                                                            "Navigator Name" : "Bradley Awodu",
+                                                            "Navigator Database ID" : 1,
+                                                            "Appointment Date and Time" : '2016-12-22T10:00:00',
+                                                            "Schedule Appointment Link" : "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id=1",
                                                             },
                                                             ...
                                                         ](Can Be Empty),
@@ -172,9 +172,9 @@ In response, a JSON document will be displayed with the following format:
 ### View Scheduled Consumer Appointments API (IN TEST)
 #### ALL DATES AND TIMES ARE UTC
 
-To retrieve scheduled consumer appointments for a given navigator, submit a GET request to: http://picbackend.herokuapp.com/v2/patient_assist_apt_mgr/ with the following MANDATORY parameter: "navid"
+To retrieve scheduled consumer appointments for a given navigator, submit a GET request to: http://picbackend.herokuapp.com/v2/patient_assist_apt_mgr/ with the following MANDATORY parameter: "nav_id"
 
-- "navid" must be a base 10 integer
+- "nav_id" must be a base 10 integer
 
 - The response will be a JSON document with the following format:
 ```

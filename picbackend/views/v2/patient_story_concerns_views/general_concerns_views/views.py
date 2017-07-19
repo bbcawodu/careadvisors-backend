@@ -60,7 +60,7 @@ class GeneralConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             if 'id' in search_params:
                 rqst_general_concerns_id = search_params['id']
                 if rqst_general_concerns_id != 'all':
-                    list_of_ids = search_params['id list']
+                    list_of_ids = search_params['id_list']
                 else:
                     list_of_ids = None
 

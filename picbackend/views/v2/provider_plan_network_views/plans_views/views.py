@@ -57,7 +57,7 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             if 'id' in search_params:
                 rqst_plan_id = search_params['id']
                 if rqst_plan_id != 'all':
-                    list_of_ids = search_params['id list']
+                    list_of_ids = search_params['id_list']
                 else:
                     list_of_ids = None
 
@@ -74,8 +74,8 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 rqst_carrier_name = search_params['carrier name']
 
                 data_list = retrieve_plan_data_by_carrier_name(search_params, rqst_carrier_name, rqst_errors)
-            elif 'carrier id' in search_params:
-                list_of_carrier_ids = search_params['carrier id list']
+            elif 'carrier_id' in search_params:
+                list_of_carrier_ids = search_params['carrier_id_list']
 
                 data_list = retrieve_plan_data_by_carrier_id(search_params, list_of_carrier_ids, rqst_errors)
             elif 'accepted_location_id' in search_params:

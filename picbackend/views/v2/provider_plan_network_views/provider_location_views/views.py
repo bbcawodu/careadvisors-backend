@@ -64,7 +64,7 @@ class ProviderLocationsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             if 'id' in search_params:
                 rqst_provider_location_id = search_params['id']
                 if rqst_provider_location_id != 'all':
-                    list_of_ids = search_params['id list']
+                    list_of_ids = search_params['id_list']
                 else:
                     list_of_ids = None
 
