@@ -1,19 +1,40 @@
 import datetime
 import re
 import urllib
+from picmodels.models import HealthcarePlan
 
 
 def validate_get_rqst_parameter_id(get_rqst_params, validated_params, rqst_errors):
-    if 'id' in get_rqst_params:
-        validated_params['id'] = get_rqst_params['id']
-        if validated_params['id'] != "all":
-            list_of_ids = re.findall("\d+", validated_params['id'])
-            for indx, element in enumerate(list_of_ids):
-                list_of_ids[indx] = int(element)
-            validated_params['id list'] = list_of_ids
+    param_name = 'id'
 
-            if not validated_params['id list']:
-                rqst_errors.append('Invalid id, ids must be base 10 integers')
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        if validated_params[param_name] != "all":
+            validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
+    unvalidated_param_value = get_rqst_params[param_name]
+
+    if unvalidated_param_value != "all":
+        validated_param_value = int(unvalidated_param_value)
+    else:
+        validated_param_value = unvalidated_param_value
+
+    validated_params[param_name] = validated_param_value
+
+
+def validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
+    unvalidated_param_value = get_rqst_params[param_name]
+
+    validated_param_value_list = re.findall("\d+", unvalidated_param_value)
+    for indx, element in enumerate(validated_param_value_list):
+        validated_param_value_list[indx] = int(element)
+
+    validated_params["{}_{}".format(param_name, "list")] = validated_param_value_list
+    if not validated_param_value_list:
+        rqst_errors.append('Invalid {}, {}s must be base 10 integers'.format(param_name, param_name))
 
 
 def validate_get_rqst_parameter_fname(get_rqst_params, validated_params, rqst_errors):
@@ -67,29 +88,21 @@ def validate_get_rqst_parameter_location(get_rqst_params, validated_params, rqst
 
 
 def validate_get_rqst_parameter_locationid(get_rqst_params, validated_params, rqst_errors):
-    if 'location_id' in get_rqst_params:
-        validated_params['location_id'] = get_rqst_params['location_id']
+    param_name = 'location_id'
 
-        list_of_ids = re.findall("\d+", validated_params['location_id'])
-        for indx, element in enumerate(list_of_ids):
-            list_of_ids[indx] = int(element)
-        validated_params['location_id list'] = list_of_ids
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-        if not validated_params['location_id list']:
-            rqst_errors.append('Invalid location_id, ids must be base 10 integers')
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
-def validate_get_rqst_parameter_navid(get_rqst_params, validated_params, rqst_errors):
-    if 'navid' in get_rqst_params:
-        validated_params['navigator id'] = get_rqst_params['navid']
+def validate_get_rqst_parameter_nav_id(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'nav_id'
 
-        list_of_nav_ids = re.findall("\d+", validated_params['navigator id'])
-        for indx, element in enumerate(list_of_nav_ids):
-            list_of_nav_ids[indx] = int(element)
-        validated_params['navigator id list'] = list_of_nav_ids
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-        if not validated_params['navigator id list']:
-            rqst_errors.append('Invalid navigator id, navigator ids must be base 10 integers')
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_county(get_rqst_params, validated_params, rqst_errors):
@@ -102,12 +115,12 @@ def validate_get_rqst_parameter_county(get_rqst_params, validated_params, rqst_e
 
 
 def validate_get_rqst_parameter_zipcode(get_rqst_params, validated_params, rqst_errors):
-    if "zipcode" in get_rqst_params:
-        validated_params['zipcode'] = get_rqst_params['zipcode']
-        validated_params['zipcode list'] = re.findall(r"\d+", validated_params['zipcode'])
+    param_name = "zipcode"
 
-        if not validated_params['zipcode list']:
-            rqst_errors.append('Invalid zipcode, zipcodes must be integers')
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_time(get_rqst_params, validated_params, rqst_errors):
@@ -146,14 +159,13 @@ def validate_get_rqst_parameter_is_cps_consumer(get_rqst_params, validated_param
             validated_params['is_cps_consumer'] = validated_params['is_cps_consumer'] in ('true')
 
 
-def validate_get_rqst_parameter_partnerid(get_rqst_params, validated_params, rqst_errors):
-    if 'partnerid' in get_rqst_params:
-        validated_params['partnerid'] = get_rqst_params['partnerid']
-        list_of_ids = re.findall("[@\w. '-_]+", validated_params['partnerid'])
-        validated_params['partnerid list'] = list_of_ids
+def validate_get_rqst_parameter_partner_id(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'partner_id'
 
-        if not validated_params['partnerid list']:
-            rqst_errors.append('Invalid partnerid parameter, partnerid parameters must be ascii strings.')
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_fields(get_rqst_params, validated_params, rqst_errors):
@@ -166,8 +178,10 @@ def validate_get_rqst_parameter_fields(get_rqst_params, validated_params, rqst_e
 
 
 def validate_get_rqst_parameter_page(get_rqst_params, validated_params, rqst_errors):
-    if 'page' in get_rqst_params:
-        validated_params['page number'] = int(get_rqst_params['page'])
+    param_name = 'page'
+
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_groupby(get_rqst_params, validated_params, rqst_errors):
@@ -227,16 +241,12 @@ def validate_get_rqst_parameter_has_sample_id_card(get_rqst_params, validated_pa
 
 
 def validate_get_rqst_parameter_carrier_id(get_rqst_params, validated_params, rqst_errors):
-    if 'carrier_id' in get_rqst_params:
-        validated_params['carrier id'] = get_rqst_params['carrier_id']
+    param_name = 'carrier_id'
 
-        list_of_carrier_ids = re.findall("\d+", validated_params['carrier id'])
-        for indx, element in enumerate(list_of_carrier_ids):
-            list_of_carrier_ids[indx] = int(element)
-        validated_params['carrier id list'] = list_of_carrier_ids
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-        if not validated_params['carrier id list']:
-            rqst_errors.append('Invalid carrier id, carrier ids must be base 10 integers')
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_carrier_state(get_rqst_params, validated_params, rqst_errors):
@@ -254,16 +264,12 @@ def validate_get_rqst_parameter_carrier_name(get_rqst_params, validated_params, 
 
 
 def validate_get_rqst_parameter_accepted_location_id(get_rqst_params, validated_params, rqst_errors):
-    if 'accepted_location_id' in get_rqst_params:
-        validated_params['accepted_location_id'] = get_rqst_params['accepted_location_id']
+    param_name = 'accepted_location_id'
 
-        list_of_accepted_location_ids = re.findall("\d+", validated_params['accepted_location_id'])
-        for indx, element in enumerate(list_of_accepted_location_ids):
-            list_of_accepted_location_ids[indx] = int(element)
-        validated_params['accepted_location_id_list'] = list_of_accepted_location_ids
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-        if not validated_params['accepted_location_id_list']:
-            rqst_errors.append('Invalid accepted_location id, accepted_location ids must be base 10 integers')
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_network_name(get_rqst_params, validated_params, rqst_errors):
@@ -272,16 +278,12 @@ def validate_get_rqst_parameter_network_name(get_rqst_params, validated_params, 
 
 
 def validate_get_rqst_parameter_network_id(get_rqst_params, validated_params, rqst_errors):
-    if 'network_id' in get_rqst_params:
-        validated_params['network_id'] = get_rqst_params['network_id']
+    param_name = 'network_id'
 
-        list_of_network_ids = re.findall("\d+", validated_params['network_id'])
-        for indx, element in enumerate(list_of_network_ids):
-            list_of_network_ids[indx] = int(element)
-        validated_params['network_id_list'] = list_of_network_ids
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-        if not validated_params['network_id_list']:
-            rqst_errors.append('Invalid network id, network ids must be base 10 integers')
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_premium_type(get_rqst_params, validated_params, rqst_errors):
@@ -327,29 +329,21 @@ def validate_get_rqst_parameter_gen_concern_name(get_rqst_params, validated_para
 
 
 def validate_get_rqst_parameter_gen_concern_id(get_rqst_params, validated_params, rqst_errors):
-    if 'gen_concern_id' in get_rqst_params:
-        validated_params['gen_concern_id'] = get_rqst_params['gen_concern_id']
+    param_name = 'gen_concern_id'
 
-        list_of_gen_concern_ids = re.findall("\d+", validated_params['gen_concern_id'])
-        for indx, element in enumerate(list_of_gen_concern_ids):
-            list_of_gen_concern_ids[indx] = int(element)
-        validated_params['gen_concern_id_list'] = list_of_gen_concern_ids
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-        if not validated_params['gen_concern_id_list']:
-            rqst_errors.append('Invalid gen_concern id, gen_concern ids must be base 10 integers')
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_gen_concern_id_subset(get_rqst_params, validated_params, rqst_errors):
-    if 'gen_concern_id_subset' in get_rqst_params:
-        validated_params['gen_concern_id_subset'] = get_rqst_params['gen_concern_id_subset']
+    param_name = 'gen_concern_id_subset'
 
-        list_of_gen_concern_ids = re.findall("\d+", validated_params['gen_concern_id_subset'])
-        for indx, element in enumerate(list_of_gen_concern_ids):
-            list_of_gen_concern_ids[indx] = int(element)
-        validated_params['gen_concern_id_subset_list'] = list_of_gen_concern_ids
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-        if not validated_params['gen_concern_id_subset_list']:
-            rqst_errors.append('Invalid gen_concern id, gen_concern ids must be base 10 integers')
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_hospital_name(get_rqst_params, validated_params, rqst_errors):
@@ -358,16 +352,12 @@ def validate_get_rqst_parameter_hospital_name(get_rqst_params, validated_params,
 
 
 def validate_get_rqst_parameter_family_size(get_rqst_params, validated_params, rqst_errors):
-    if 'family_size' in get_rqst_params:
-        validated_params['family_size'] = get_rqst_params['family_size']
+    param_name = 'family_size'
 
-        list_of_family_sizes = re.findall("\d+", validated_params['family_size'])
-        for indx, element in enumerate(list_of_family_sizes):
-            list_of_family_sizes[indx] = int(element)
-        validated_params['family_size_list'] = list_of_family_sizes
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-        if not validated_params['family_size_list']:
-            rqst_errors.append('Invalid family_size, family_sizes must be base 10 integers')
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 class HTTPParameterValidatorBase:
@@ -386,7 +376,7 @@ GET_PARAMETER_VALIDATION_FUNCTIONS = {
     "lname": validate_get_rqst_parameter_lname,
     "email": validate_get_rqst_parameter_email,
     "name": validate_get_rqst_parameter_name,
-    "navid": validate_get_rqst_parameter_navid,
+    "nav_id": validate_get_rqst_parameter_nav_id,
 
     "mpn": validate_get_rqst_parameter_mpn,
     "region": validate_get_rqst_parameter_region,
@@ -402,7 +392,7 @@ GET_PARAMETER_VALIDATION_FUNCTIONS = {
     "enddate": validate_get_rqst_parameter_enddate,
     "is_cps_consumer": validate_get_rqst_parameter_is_cps_consumer,
 
-    "partnerid": validate_get_rqst_parameter_partnerid,
+    "partner_id": validate_get_rqst_parameter_partner_id,
     "intent": validate_get_rqst_parameter_intent,
 
     "state": validate_get_rqst_parameter_state,

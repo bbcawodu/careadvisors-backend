@@ -98,7 +98,7 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             elif 'id' in search_params:
                 rqst_staff_id = search_params['id']
                 if rqst_staff_id != 'all':
-                    list_of_ids = search_params['id list']
+                    list_of_ids = search_params['id_list']
                 else:
                     list_of_ids = None
 

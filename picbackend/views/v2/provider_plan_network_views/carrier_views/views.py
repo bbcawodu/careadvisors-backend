@@ -79,7 +79,7 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             if 'id' in search_params:
                 rqst_carrier_id = search_params['id']
                 if rqst_carrier_id != 'all':
-                    list_of_ids = search_params['id list']
+                    list_of_ids = search_params['id_list']
                 else:
                     list_of_ids = None
 

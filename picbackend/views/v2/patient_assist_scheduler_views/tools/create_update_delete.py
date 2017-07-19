@@ -543,7 +543,7 @@ def create_navigator_apt_entry(nav_info, appointment_timestamp):
     next_available_apt_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"]),
                                 "Navigator Database ID": nav_info["Database ID"],
                                 "Appointment Date and Time": appointment_timestamp.isoformat()[:-6],
-                                "Schedule Appointment Link": "http://picbackend.herokuapp.com/v1/scheduleappointment/?navid={!s}".format(str(nav_info["Database ID"])),
+                                "Schedule Appointment Link": "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id={!s}".format(str(nav_info["Database ID"])),
                                 }
 
     return next_available_apt_entry

@@ -199,7 +199,7 @@ In response, a JSON document will be displayed with the following format:
             - passing "all" as the value will return all consumer enteties
             
     - "Secondary" parameters - Any number of these parameters can be added to a request.
-        - "navid" corresponds to staff member class database id.
+        - "nav_id" corresponds to staff member class database id.
             - Can be multiple values separated by commas.
         - "is_cps_consumer" corresponds to whether consumer is a Chicago Public Schools consumer.
             - must be of type boolean (true or false)
@@ -309,7 +309,7 @@ In response, a JSON document will be displayed with the following format:
     - "region" corresponds to consumer region.
     - "id" corresponds to consumer class database id.
         - passing "all" as the value will return all consumer enteties
-    - "navid" corresponds to staff member class database id. (Can be combined with any of the above parameters)
+    - "nav_id" corresponds to staff member class database id. (Can be combined with any of the above parameters)
     - "page" corresponds to the current page of consumer instances to be displayed with full fields. 
         - if this parameter is missing, the first 20 consumer instances will be displayed with full fields.
         

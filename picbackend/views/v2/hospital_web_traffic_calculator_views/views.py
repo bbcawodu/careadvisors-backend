@@ -55,7 +55,7 @@ class HospitalWebTrafficCalculatorDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
             if 'id' in search_params:
                 rqst_hospital_web_traffic_calculator_data_id = search_params['id']
                 if rqst_hospital_web_traffic_calculator_data_id != 'all':
-                    list_of_ids = search_params['id list']
+                    list_of_ids = search_params['id_list']
                 else:
                     list_of_ids = []
                 data_list = retrieve_hospital_web_traffic_calculator_data_by_id(db_objects,

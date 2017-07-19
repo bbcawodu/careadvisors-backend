@@ -1,6 +1,6 @@
 def filter_metrics_db_instances_by_secondary_params(search_params, metrics_instances):
-    if 'zipcode list' in search_params:
-        list_of_zipcodes = search_params['zipcode list']
+    if 'zipcode_list' in search_params:
+        list_of_zipcodes = search_params['zipcode_list']
         metrics_instances = metrics_instances.filter(location__address__zipcode__in=list_of_zipcodes)
     if 'look up date' in search_params:
         look_up_date = search_params['look up date']
@@ -14,8 +14,8 @@ def filter_metrics_db_instances_by_secondary_params(search_params, metrics_insta
     if 'location' in search_params:
         rqst_location = search_params['location']
         metrics_instances = metrics_instances.filter(location__name__iexact=rqst_location)
-    if 'location_id list' in search_params:
-        list_of_location_ids = search_params['location_id list']
+    if 'location_id_list' in search_params:
+        list_of_location_ids = search_params['location_id_list']
         metrics_instances = metrics_instances.filter(location__id__in=list_of_location_ids)
 
     return metrics_instances
