@@ -1,12 +1,12 @@
 ## Pokitdok Backend API
 
 ### Pokitdok Trading Partner Retrieval API.
-- To retrieve parsed trading partner data from pokitdok, submit a GET request to http://picbackend.herokuapp.com/v2/health_insurance_trading_partners/ with the following optional parameter: "partnerid"
-    - "partnerid" corresponds to the partner id provided by pokitdok for a given trading partner.
+- To retrieve parsed trading partner data from pokitdok, submit a GET request to http://picbackend.herokuapp.com/v2/health_insurance_trading_partners/ with the following optional parameter: "partner_id"
+    - "partner_id" corresponds to the partner id provided by pokitdok for a given trading partner.
         - If this parameter is provided, results will contain valid search parameters for eligibility checks.
     
     
-- The response for requests WITHOUT partnerid provided will be a JSON document with the following format:
+- The response for requests WITHOUT partner_id provided will be a JSON document with the following format:
     ```
     {
         "Status": {
@@ -44,7 +44,7 @@
     ```
     
     
-- The response for requests WITH partnerid provided will be a JSON document with the following format:
+- The response for requests WITH partner_id provided will be a JSON document with the following format:
     ```
     {
         "Status": {
@@ -89,7 +89,7 @@ The body of the request should be a JSON document using the following template:
 }
 ```
 
-- The consumer parameters ("Trading Partner ID" is mandatory) need to match patterns according to the trading partner you are requesting. Use /v1/tradingpartners?partnerid="Trading Partner ID" to retrieve valid paramater set:
+- The consumer parameters ("Trading Partner ID" is mandatory) need to match patterns according to the trading partner you are requesting. Use /v1/tradingpartners?partner_id="Trading Partner ID" to retrieve valid paramater set:
 
 
     

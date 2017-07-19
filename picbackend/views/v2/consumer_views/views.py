@@ -83,7 +83,7 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     put_logic_function = consumer_management_put_logic
 
     accepted_get_parameters = [
-        "navid",
+        "nav_id",
         "is_cps_consumer",
         "fname",
         "lname",
@@ -111,7 +111,7 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
 
     accepted_get_parameters = [
-        "navid",
+        "nav_id",
         "is_cps_consumer",
         "fname",
         "lname",
@@ -125,8 +125,8 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 def get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors):
     # Filter consumer objects based on GET parameters
     def filter_db_objects_by_secondary_params(db_objects):
-        if 'navigator id list' in search_params:
-            list_of_nav_ids = search_params['navigator id list']
+        if 'nav_id_list' in search_params:
+            list_of_nav_ids = search_params['nav_id_list']
             db_objects = db_objects.filter(navigator__in=list_of_nav_ids)
         if 'is_cps_consumer' in search_params:
             is_cps_consumer = search_params['is_cps_consumer']
@@ -159,14 +159,14 @@ def get_and_add_consumer_data_to_response(consumers, request, search_params, res
         elif 'id' in search_params:
             rqst_consumer_id = search_params['id']
             if rqst_consumer_id != 'all':
-                list_of_ids = search_params['id list']
+                list_of_ids = search_params['id_list']
             else:
                 list_of_ids = None
 
             data_list = retrieve_consumer_data_by_id(db_objects, rqst_consumer_id, list_of_ids, rqst_errors)
 
             def paginate_results():
-                rqst_page_no = search_params['page number'] if 'page number' in search_params else None
+                rqst_page_no = search_params['page'] if 'page' in search_params else None
                 base_url = request.build_absolute_uri(None)
 
                 extra_urls = paginate_result_list_by_changing_excess_data_to_ids(data_list, CONSUMERS_PER_PAGE, rqst_page_no, base_url)

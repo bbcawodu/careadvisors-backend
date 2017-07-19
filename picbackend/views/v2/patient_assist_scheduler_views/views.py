@@ -53,17 +53,17 @@ class NavGoogleCalendarAccessRequestView(View):
         """
 
         response_raw_data, rqst_errors = init_v2_response_data()
-        search_params = validate_get_request_parameters(request.GET, ["navid"], rqst_errors)
+        search_params = validate_get_request_parameters(request.GET, ["nav_id"], rqst_errors)
 
-        if 'navigator id' in search_params:
-            nav_id = search_params["navigator id"]
+        if 'nav_id' in search_params:
+            nav_id = search_params["nav_id"]
             try:
                 picstaff_object = PICStaff.objects.get(id=nav_id)
                 storage = DjangoORMStorage(CredentialsModel, 'id', nav_id, 'credential')
                 credential = storage.get()
                 if credential is None or credential.invalid == True:
                     google_token = xsrfutil.generate_token(settings.SECRET_KEY, picstaff_object.id)
-                    params_dict = {"navid": nav_id,
+                    params_dict = {"nav_id": nav_id,
                                    "token": google_token.decode('ascii')}
                     params_json = json.dumps(params_dict).encode('ascii')
                     params_base64_encoded = base64.urlsafe_b64encode(params_json)
@@ -99,14 +99,14 @@ class GoogleCalendarAuthReturnView(View):
 
         state_string = request.GET['state']
         state_dict = json.loads(base64.urlsafe_b64decode(state_string).decode('ascii'))
-        if not xsrfutil.validate_token(settings.SECRET_KEY, bytes(state_dict['token'], 'utf-8'), state_dict["navid"]):
+        if not xsrfutil.validate_token(settings.SECRET_KEY, bytes(state_dict['token'], 'utf-8'), state_dict["nav_id"]):
             return HttpResponseBadRequest()
-        # if not xsrfutil.validate_token(SECRET_KEY, bytes(request.GET['state'], 'utf-8'), search_params["navigator id"]):
+        # if not xsrfutil.validate_token(SECRET_KEY, bytes(request.GET['state'], 'utf-8'), search_params["nav_id"]):
         #     return HttpResponseBadRequest()
         credential = FLOW.step2_exchange(request.REQUEST)
-        storage = DjangoORMStorage(CredentialsModel, 'id', PICStaff.objects.get(id=state_dict["navid"]), 'credential')
+        storage = DjangoORMStorage(CredentialsModel, 'id', PICStaff.objects.get(id=state_dict["nav_id"]), 'credential')
         storage.put(credential)
-        return HttpResponseRedirect("/v2/calendar_auth/?navid={!s}".format(state_dict["navid"]))
+        return HttpResponseRedirect("/v2/calendar_auth/?nav_id={!s}".format(state_dict["nav_id"]))
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -122,8 +122,8 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
     def nav_scheduled_appointments_logic(self, request, search_params, response_raw_data, rqst_errors):
         response_raw_data["Data"] = {"Scheduled Appointments": None}
 
-        if 'navigator id' in search_params and not rqst_errors:
-            nav_id = search_params["navigator id"]
+        if 'nav_id' in search_params and not rqst_errors:
+            nav_id = search_params["nav_id"]
 
             try:
                 picstaff_object = PICStaff.objects.get(id=nav_id)
@@ -182,6 +182,6 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
     delete_logic_function = delete_nav_scheduled_appointment_logic
 
     accepted_get_parameters = [
-        "navid"
+        "nav_id"
     ]
     get_logic_function = nav_scheduled_appointments_logic
