@@ -89,7 +89,7 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
                 data_list = retrieve_carrier_data_by_name(carriers[0], rqst_name, rqst_errors)
             elif 'state' in search_params:
-                list_of_states = search_params['state list']
+                list_of_states = search_params['state_list']
 
                 data_list = retrieve_carrier_data_by_state(carriers[0], list_of_states, rqst_errors)
             else:
