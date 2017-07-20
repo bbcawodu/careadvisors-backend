@@ -185,11 +185,11 @@ In response, a JSON document will be displayed with the following format:
         - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter
     
     - "Primary" parameters - One and exactly one of these parameters are required in every request.
-        - "fname" corresponds to consumer first name.
+        - "first_name" corresponds to consumer first name.
             - Can be multiple values separated by commas.
-        - "lname" corresponds to consumer last name.
+        - "last_name" corresponds to consumer last name.
             - Can be multiple values separated by commas.
-            - "fname" and "lname" can be given simultaneously as parameters. If so, only one value each is permitted.
+            - "first_name" and "last_name" can be given simultaneously as parameters. If so, only one value each is permitted.
         - "email" corresponds to consumer email.
             - Can be multiple values separated by commas.
         - "region" corresponds to consumer region.
@@ -302,9 +302,9 @@ In response, a JSON document will be displayed with the following format:
     - A maximum of 20 consumer records with full fields will be returned due to size constraints
         - The rest are consumer database IDs
         - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter
-    - "fname" corresponds to consumer first name.
-    - "lname" corresponds to consumer last name.
-        - "fname" and "lname" can be given simultaneously as parameters. If so, only one value each is permitted.
+    - "first_name" corresponds to consumer first name.
+    - "last_name" corresponds to consumer last name.
+        - "first_name" and "last_name" can be given simultaneously as parameters. If so, only one value each is permitted.
     - "email" corresponds to consumer email.
     - "region" corresponds to consumer region.
     - "id" corresponds to consumer class database id.

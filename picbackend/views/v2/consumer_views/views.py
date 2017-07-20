@@ -85,8 +85,8 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     accepted_get_parameters = [
         "nav_id",
         "is_cps_consumer",
-        "fname",
-        "lname",
+        "first_name",
+        "last_name",
         "email",
         "id",
         "page"
@@ -113,8 +113,8 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     accepted_get_parameters = [
         "nav_id",
         "is_cps_consumer",
-        "fname",
-        "lname",
+        "first_name",
+        "last_name",
         "email",
         "id",
         "page"
@@ -139,21 +139,21 @@ def get_and_add_consumer_data_to_response(consumers, request, search_params, res
     def retrieve_data_by_primary_params_and_add_to_response(db_objects):
         data_list = []
 
-        if 'first name' in search_params and 'last name' in search_params:
-            rqst_first_name = search_params['first name']
-            rqst_last_name = search_params['last name']
+        if 'first_name' in search_params and 'last_name' in search_params:
+            rqst_first_name = search_params['first_name']
+            rqst_last_name = search_params['last_name']
 
             data_list = retrieve_consumer_data_by_f_and_l_name(db_objects, rqst_first_name, rqst_last_name, rqst_errors)
         elif 'email' in search_params:
-            list_of_emails = search_params['email list']
+            list_of_emails = search_params['email_list']
 
             data_list = retrieve_consumer_data_by_email(db_objects, list_of_emails, rqst_errors)
-        elif 'first name' in search_params:
-            list_of_first_names = search_params['first name list']
+        elif 'first_name' in search_params:
+            list_of_first_names = search_params['first_name_list']
 
             data_list = retrieve_consumer_data_by_first_name(db_objects, list_of_first_names, rqst_errors)
-        elif 'last name' in search_params:
-            list_of_last_names = search_params['last name list']
+        elif 'last_name' in search_params:
+            list_of_last_names = search_params['last_name_list']
 
             data_list = retrieve_consumer_data_by_last_name(db_objects, list_of_last_names, rqst_errors)
         elif 'id' in search_params:

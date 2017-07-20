@@ -66,33 +66,33 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         def retrieve_data_by_primary_params_and_add_to_response():
             data_list = []
 
-            if 'first name' in search_params and 'last name' in search_params:
-                rqst_first_name = search_params['first name']
-                rqst_last_name = search_params['last name']
+            if 'first_name' in search_params and 'last_name' in search_params:
+                rqst_first_name = search_params['first_name']
+                rqst_last_name = search_params['last_name']
 
                 data_list = retrieve_staff_data_by_f_and_l_name(rqst_first_name, rqst_last_name, rqst_errors)
             elif 'email' in search_params:
-                list_of_emails = search_params['email list']
+                list_of_emails = search_params['email_list']
 
                 data_list = retrieve_staff_data_by_email(list_of_emails, rqst_errors)
             elif 'mpn' in search_params:
-                list_of_mpns = search_params['mpn list']
+                list_of_mpns = search_params['mpn_list']
 
                 data_list = retrieve_staff_data_by_mpn(list_of_mpns, rqst_errors)
-            elif 'first name' in search_params:
-                list_of_first_names = search_params['first name list']
+            elif 'first_name' in search_params:
+                list_of_first_names = search_params['first_name_list']
 
                 data_list = retrieve_staff_data_by_first_name(list_of_first_names, rqst_errors)
-            elif 'last name' in search_params:
-                list_of_last_names = search_params['last name list']
+            elif 'last_name' in search_params:
+                list_of_last_names = search_params['last_name_list']
 
                 data_list = retrieve_staff_data_by_last_name(list_of_last_names, rqst_errors)
             elif 'county' in search_params:
-                list_of_counties = search_params['county list']
+                list_of_counties = search_params['county_list']
 
                 data_list = retrieve_staff_data_by_county(list_of_counties, rqst_errors)
             elif 'region' in search_params:
-                list_of_regions = search_params['region list']
+                list_of_regions = search_params['region_list']
 
                 data_list = retrieve_staff_data_by_region(list_of_regions, rqst_errors)
             elif 'id' in search_params:
@@ -115,8 +115,8 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
     accepted_get_parameters = [
         "id",
-        "fname",
-        "lname",
+        "first_name",
+        "last_name",
         "email",
         "mpn",
         "county",
