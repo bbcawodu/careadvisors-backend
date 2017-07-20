@@ -222,12 +222,12 @@ def validate_get_rqst_parameter_carrier_id(get_rqst_params, validated_params, rq
 
 
 def validate_get_rqst_parameter_carrier_state(get_rqst_params, validated_params, rqst_errors):
-    if "carrier_state" in get_rqst_params:
-        validated_params['carrier state'] = get_rqst_params['carrier_state']
-        validated_params['carrier state list'] = re.findall(r"[\w. '-]+", validated_params['carrier state'])
+    param_name = "carrier_state"
 
-        if not validated_params['carrier state list']:
-            rqst_errors.append('Invalid carrier state, carrier states must be ascii strings.')
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_carrier_name(get_rqst_params, validated_params, rqst_errors):

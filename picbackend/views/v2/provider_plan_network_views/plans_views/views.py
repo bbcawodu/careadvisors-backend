@@ -66,8 +66,8 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 rqst_name = search_params['name']
 
                 data_list = retrieve_plan_data_by_name(search_params, rqst_name, rqst_errors)
-            elif 'carrier state' in search_params:
-                list_of_carrier_states = search_params['carrier state list']
+            elif 'carrier_state' in search_params:
+                list_of_carrier_states = search_params['carrier_state_list']
 
                 data_list = retrieve_plan_data_by_carrier_state(search_params, list_of_carrier_states, rqst_errors)
             elif 'carrier name' in search_params:
