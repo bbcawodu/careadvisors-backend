@@ -277,10 +277,10 @@ In response, a JSON document will be displayed with the following format:
     - Parameters are divided into 2 categories: "primary" and "secondary"
     
     - "Primary" parameters - One and exactly one of these parameters are required in every request.
-        - "fname" corresponds to staff member first name.
+        - "first_name" corresponds to staff member first name.
             - Must be a String
             - Can be multiple values separated by commas.
-        - "lname" corresponds to staff member last name.
+        - "last_name" corresponds to staff member last name.
             - Must be a String
             - Can be multiple values separated by commas.
         - "email" corresponds to staff member email.
@@ -293,8 +293,8 @@ In response, a JSON document will be displayed with the following format:
             - Must be an integer
             - Can be multiple values separated by commas.
             - passing "all" as the value will return all staff members.
-        - SPECIAL CASE: Only "fname" and "lname" can be given simultaneously as parameters.
-            - When "fname" and "lname" are given at the same time, only one value of each permitted.
+        - SPECIAL CASE: Only "first_name" and "last_name" can be given simultaneously as parameters.
+            - When "first_name" and "last_name" are given at the same time, only one value of each permitted.
     
     - "Secondary" parameters - Any number of these parameters can be added to a request.
         - "startdate" - Start date of metrics to be retrieved

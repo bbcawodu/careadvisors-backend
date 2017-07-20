@@ -14,72 +14,49 @@ def validate_get_rqst_parameter_id(get_rqst_params, validated_params, rqst_error
             validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
-def validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
-    unvalidated_param_value = get_rqst_params[param_name]
+def validate_get_rqst_parameter_first_name(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'first_name'
 
-    if unvalidated_param_value != "all":
-        validated_param_value = int(unvalidated_param_value)
-    else:
-        validated_param_value = unvalidated_param_value
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-    validated_params[param_name] = validated_param_value
+        validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
-def validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
-    unvalidated_param_value = get_rqst_params[param_name]
+def validate_get_rqst_parameter_last_name(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'last_name'
 
-    validated_param_value_list = re.findall("\d+", unvalidated_param_value)
-    for indx, element in enumerate(validated_param_value_list):
-        validated_param_value_list[indx] = int(element)
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-    validated_params["{}_{}".format(param_name, "list")] = validated_param_value_list
-    if not validated_param_value_list:
-        rqst_errors.append('Invalid {}, {}s must be base 10 integers'.format(param_name, param_name))
-
-
-def validate_get_rqst_parameter_fname(get_rqst_params, validated_params, rqst_errors):
-    if 'fname' in get_rqst_params:
-        validated_params['first name'] = get_rqst_params['fname']
-        validated_params['first name list'] = re.findall(r"[\w. '-]+", validated_params['first name'])
-
-        if not validated_params['first name list']:
-            rqst_errors.append('Invalid first name, first names must be ascii strings.')
-
-
-def validate_get_rqst_parameter_lname(get_rqst_params, validated_params, rqst_errors):
-    if 'lname' in get_rqst_params:
-        validated_params['last name'] = get_rqst_params['lname']
-        validated_params['last name list'] = re.findall(r"[\w. '-]+", validated_params['last name'])
-
-        if not validated_params['last name list']:
-            rqst_errors.append('Invalid last name, last names must be ascii strings.')
+        validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_email(get_rqst_params, validated_params, rqst_errors):
-    if 'email' in get_rqst_params:
-        validated_params['email'] = get_rqst_params['email']
-        validated_params['email list'] = re.findall(r"[@\w. '-]+", validated_params['email'])
+    param_name = 'email'
 
-        if not validated_params['email list']:
-            rqst_errors.append('Invalid email parameter.')
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_mpn(get_rqst_params, validated_params, rqst_errors):
-    if 'mpn' in get_rqst_params:
-        validated_params['mpn'] = get_rqst_params['mpn']
-        validated_params['mpn list'] = re.findall(r"[@\w. '-]+", validated_params['mpn'])
+    param_name = 'mpn'
 
-        if not validated_params['mpn list']:
-            rqst_errors.append('Invalid mpn parameter.')
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_region(get_rqst_params, validated_params, rqst_errors):
-    if 'region' in get_rqst_params:
-        validated_params['region'] = get_rqst_params['region']
-        validated_params['region list'] = re.findall(r"[@\w. '-]+", validated_params['region'])
+    param_name = 'region'
 
-        if not validated_params['region list']:
-            rqst_errors.append('Invalid region, regions must be ascii strings.')
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_location(get_rqst_params, validated_params, rqst_errors):
@@ -106,12 +83,12 @@ def validate_get_rqst_parameter_nav_id(get_rqst_params, validated_params, rqst_e
 
 
 def validate_get_rqst_parameter_county(get_rqst_params, validated_params, rqst_errors):
-    if "county" in get_rqst_params:
-        validated_params['county'] = get_rqst_params['county']
-        validated_params['county list'] = re.findall(r"[\w. '-]+", validated_params['county'])
+    param_name = 'county'
 
-        if not validated_params['county list']:
-            rqst_errors.append('Invalid county parameter, county parameters must be ascii strings.')
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_zipcode(get_rqst_params, validated_params, rqst_errors):
@@ -190,12 +167,12 @@ def validate_get_rqst_parameter_groupby(get_rqst_params, validated_params, rqst_
 
 
 def validate_get_rqst_parameter_nav_location_tags(get_rqst_params, validated_params, rqst_errors):
-    if 'nav_location_tags' in get_rqst_params:
-        validated_params['nav_location_tags'] = get_rqst_params['nav_location_tags']
-        validated_params['nav_location_tags list'] = re.findall(r"[@\w. '-]+", validated_params['nav_location_tags'])
+    param_name = 'nav_location_tags'
 
-        if not validated_params['nav_location_tags list']:
-            rqst_errors.append('Invalid nav_location_tags parameter, nav_location_tags parameters must be ascii strings.')
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_is_cps_location(get_rqst_params, validated_params, rqst_errors):
@@ -218,17 +195,12 @@ def validate_get_rqst_parameter_intent(get_rqst_params, validated_params, rqst_e
 
 
 def validate_get_rqst_parameter_state(get_rqst_params, validated_params, rqst_errors):
-    if "state" in get_rqst_params:
-        validated_params['state'] = get_rqst_params['state']
-        validated_params['state list'] = re.findall(r"[\w. '-]+", validated_params['state'])
+    param_name = "state"
 
-        number_of_commas = len(re.findall(r",", validated_params['state']))
-        number_of_parameters_there_should_be = number_of_commas + 1
-        if number_of_parameters_there_should_be != len(validated_params['state list']):
-            rqst_errors.append('List of states is formatted wrong. Values must be ascii strings separated by commas')
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-        if not validated_params['state list']:
-            rqst_errors.append('Invalid state, states must be ascii strings.')
+        validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_has_sample_id_card(get_rqst_params, validated_params, rqst_errors):
@@ -360,6 +332,55 @@ def validate_get_rqst_parameter_family_size(get_rqst_params, validated_params, r
         validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
+def validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
+    unvalidated_param_value = get_rqst_params[param_name]
+
+    validated_param_value = unvalidated_param_value
+
+    validated_params[param_name] = validated_param_value
+
+
+def validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
+    unvalidated_param_value = get_rqst_params[param_name]
+
+    validated_param_value_list = re.findall("\d+", unvalidated_param_value)
+    for indx, element in enumerate(validated_param_value_list):
+        validated_param_value_list[indx] = int(element)
+    validated_params["{}_{}".format(param_name, "list")] = validated_param_value_list
+
+    if not validated_param_value_list:
+        rqst_errors.append('Invalid {}, {}s must be base 10 integers'.format(param_name, param_name))
+
+    number_of_commas = len(re.findall(r",", unvalidated_param_value))
+    number_of_parameters_there_should_be = number_of_commas + 1
+    if number_of_parameters_there_should_be != len(validated_param_value_list):
+        rqst_errors.append(
+            'List of {}s is formatted wrong. Values must be base 10 integers separated by commas'.format(param_name))
+
+
+def validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
+    unvalidated_param_value = get_rqst_params[param_name]
+
+    validated_param_value = unvalidated_param_value
+
+    validated_params[param_name] = validated_param_value
+
+
+def validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
+    unvalidated_param_value = get_rqst_params[param_name]
+
+    validated_param_value_list = re.findall(r"[@\w. '-]+", unvalidated_param_value)
+    validated_params["{}_{}".format(param_name, "list")] = validated_param_value_list
+
+    if not validated_param_value_list:
+        rqst_errors.append('Invalid {}, {}s must be ascii encoded strings.'.format(param_name, param_name))
+
+    number_of_commas = len(re.findall(r",", unvalidated_param_value))
+    number_of_parameters_there_should_be = number_of_commas + 1
+    if number_of_parameters_there_should_be != len(validated_param_value_list):
+        rqst_errors.append('List of {}s is formatted wrong. Values must be ascii strings separated by commas'.format(param_name))
+
+
 class HTTPParameterValidatorBase:
     parameter_name = None
 
@@ -372,8 +393,8 @@ class HTTPParameterValidatorBase:
 
 GET_PARAMETER_VALIDATION_FUNCTIONS = {
     "id": validate_get_rqst_parameter_id,
-    "fname": validate_get_rqst_parameter_fname,
-    "lname": validate_get_rqst_parameter_lname,
+    "first_name": validate_get_rqst_parameter_first_name,
+    "last_name": validate_get_rqst_parameter_last_name,
     "email": validate_get_rqst_parameter_email,
     "name": validate_get_rqst_parameter_name,
     "nav_id": validate_get_rqst_parameter_nav_id,
