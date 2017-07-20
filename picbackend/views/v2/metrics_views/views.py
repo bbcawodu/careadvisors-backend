@@ -62,8 +62,8 @@ class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
     accepted_get_parameters = [
         "id",
-        "fname",
-        "lname",
+        "first_name",
+        "last_name",
         "email",
         "mpn",
         "zipcode",
@@ -135,25 +135,25 @@ def retrieve_metrics_data_by_request_params(search_params, validated_fields, rqs
             list_of_ids = None
 
         data_list, missing_primary_parameters = retrieve_metrics_data_by_staff_id(rqst_staff_id, list_of_ids, search_params, rqst_errors, fields=validated_fields)
-    elif 'first name' in search_params and 'last name' in search_params:
-        list_of_first_names = search_params['first name list']
-        list_of_last_names = search_params['last name list']
+    elif 'first_name' in search_params and 'last_name' in search_params:
+        list_of_first_names = search_params['first_name_list']
+        list_of_last_names = search_params['last_name_list']
 
         data_list, missing_primary_parameters = retrieve_metrics_data_by_staff_f_and_l_name(list_of_first_names, list_of_last_names, search_params, rqst_errors, fields=validated_fields)
-    elif 'first name' in search_params:
-        list_of_first_names = search_params['first name list']
+    elif 'first_name' in search_params:
+        list_of_first_names = search_params['first_name_list']
 
         data_list, missing_primary_parameters = retrieve_metrics_data_by_staff_first_name(list_of_first_names, search_params, rqst_errors, fields=validated_fields)
-    elif 'last name' in search_params:
-        list_of_last_names = search_params['last name list']
+    elif 'last_name' in search_params:
+        list_of_last_names = search_params['last_name_list']
 
         data_list, missing_primary_parameters = retrieve_metrics_data_by_staff_last_name(list_of_last_names, search_params, rqst_errors, fields=validated_fields)
     elif 'email' in search_params:
-        list_of_emails = search_params['email list']
+        list_of_emails = search_params['email_list']
 
         data_list, missing_primary_parameters = retrieve_metrics_data_by_staff_email(list_of_emails, search_params, rqst_errors, fields=validated_fields)
     elif 'mpn' in search_params:
-        list_of_mpns = search_params['mpn list']
+        list_of_mpns = search_params['mpn_list']
 
         data_list, missing_primary_parameters = retrieve_metrics_data_by_staff_mpn(list_of_mpns, search_params, rqst_errors, fields=validated_fields)
     else:
