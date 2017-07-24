@@ -297,11 +297,11 @@ In response, a JSON document will be displayed with the following format:
             - When "first_name" and "last_name" are given at the same time, only one value of each permitted.
     
     - "Secondary" parameters - Any number of these parameters can be added to a request.
-        - "startdate" - Start date of metrics to be retrieved
+        - "start_date" - Start date of metrics to be retrieved
             - Must be given in "YYYY-MM-DD" format
-        - "enddate" - End date of metrics to be retrieved
+        - "end_date" - End date of metrics to be retrieved
             - Must be given in "YYYY-MM-DD" format
-        - "time" - amount of days to look up in the past
+        - "time_delta_in_days" - amount of days to look up in the past
             - Must be an integer
         - "zipcode" - Zipcode of the location for metrics to be retrieved.
             - Must be a 5 digit integer
