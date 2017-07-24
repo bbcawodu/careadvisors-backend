@@ -22,7 +22,11 @@ def retrieve_metrics_data_by_staff_id(rqst_staff_id, list_of_ids, search_params,
 
         if not response_list:
             rqst_errors.append("No metrics entries found in database for given staff id(s).")
-            missing_parameter_list = list_of_ids
+
+            if rqst_staff_id == 'all':
+                missing_parameter_list = ['all']
+            else:
+                missing_parameter_list = list_of_ids
         else:
             if list_of_ids:
                 for db_id in list_of_ids:

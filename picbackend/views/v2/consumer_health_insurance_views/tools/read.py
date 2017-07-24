@@ -24,8 +24,8 @@ def fetch_and_parse_pokit_elig_data(post_data, post_errors):
     if not post_errors:
         eligibility_request_data = {
             "member": {},
-            "provider":{"npi": "1962941096",
-                        "organization_name": "Care Advisors Inc."},
+            "provider":{"npi": "1649703620",
+                        "organization_name": "PATIENT INNOVATION CENTER NFP"},
             "trading_partner_id": rqst_consumer_trading_partner
         }
         if rqst_consumer_f_name:

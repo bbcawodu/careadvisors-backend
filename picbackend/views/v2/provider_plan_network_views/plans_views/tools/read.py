@@ -40,7 +40,7 @@ def filter_db_objects_by_secondary_params(search_params, db_objects):
         include_detailed_report_fields = False
     if 'premium_type' in search_params:
         matching_db_objects = None
-        for rqst_premium_type in search_params['premium_type list']:
+        for rqst_premium_type in search_params['premium_type_list']:
             if matching_db_objects:
                 matching_db_objects = matching_db_objects | db_objects.filter(premium_type__iexact=rqst_premium_type)
             else:

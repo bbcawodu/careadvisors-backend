@@ -1,6 +1,7 @@
 import datetime
 import re
 import urllib
+import json
 from picmodels.models import HealthcarePlan
 
 
@@ -60,8 +61,10 @@ def validate_get_rqst_parameter_region(get_rqst_params, validated_params, rqst_e
 
 
 def validate_get_rqst_parameter_location(get_rqst_params, validated_params, rqst_errors):
-    if 'location' in get_rqst_params:
-        validated_params['location'] = urllib.parse.unquote(get_rqst_params['location'])
+    param_name = 'location'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_locationid(get_rqst_params, validated_params, rqst_errors):
@@ -100,40 +103,32 @@ def validate_get_rqst_parameter_zipcode(get_rqst_params, validated_params, rqst_
         validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
-def validate_get_rqst_parameter_time(get_rqst_params, validated_params, rqst_errors):
-    if "time" in get_rqst_params:
-        try:
-            validated_params['look up date'] = datetime.date.today() - datetime.timedelta(days=int(get_rqst_params['time']))
-            validated_params['time'] = get_rqst_params['time']
-        except ValueError:
-            rqst_errors.append('time parameter must be a valid integer.')
+def validate_get_rqst_parameter_time_delta_in_days(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'time_delta_in_days'
+
+    if param_name in get_rqst_params:
+        validate_time_delta_in_days_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
-def validate_get_rqst_parameter_startdate(get_rqst_params, validated_params, rqst_errors):
-    if "startdate" in get_rqst_params:
-        try:
-            datetime.datetime.strptime(get_rqst_params["startdate"], '%Y-%m-%d')
-            validated_params['start date'] = get_rqst_params["startdate"]
-        except ValueError:
-            rqst_errors.append('startdate parameter must be a valid date.')
+def validate_get_rqst_parameter_start_date(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'start_date'
+
+    if param_name in get_rqst_params:
+        validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
-def validate_get_rqst_parameter_enddate(get_rqst_params, validated_params, rqst_errors):
-    if "enddate" in get_rqst_params:
-        try:
-            datetime.datetime.strptime(get_rqst_params["enddate"], '%Y-%m-%d')
-            validated_params['end date'] = get_rqst_params["enddate"]
-        except ValueError:
-            rqst_errors.append('enddate parameter must be a valid integer.')
+def validate_get_rqst_parameter_end_date(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'end_date'
+
+    if param_name in get_rqst_params:
+        validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_is_cps_consumer(get_rqst_params, validated_params, rqst_errors):
-    if 'is_cps_consumer' in get_rqst_params:
-        validated_params['is_cps_consumer'] = get_rqst_params['is_cps_consumer'].lower()
-        if validated_params['is_cps_consumer'] not in ('true', 'false'):
-            rqst_errors.append("Value for is_cps_consumer is not type boolean")
-        else:
-            validated_params['is_cps_consumer'] = validated_params['is_cps_consumer'] in ('true')
+    param_name = 'is_cps_consumer'
+
+    if param_name in get_rqst_params:
+        validate_bool_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_partner_id(get_rqst_params, validated_params, rqst_errors):
@@ -146,10 +141,12 @@ def validate_get_rqst_parameter_partner_id(get_rqst_params, validated_params, rq
 
 
 def validate_get_rqst_parameter_fields(get_rqst_params, validated_params, rqst_errors):
-    if 'fields' in get_rqst_params:
-        validated_params['fields'] = urllib.parse.unquote(get_rqst_params['fields'])
-        validated_params['fields list'] = re.findall(r"[@\w. '-]+", validated_params['fields'])
+    param_name = 'fields'
 
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validated_params['fields list'] = re.findall(r"[@\w. '-]+", validated_params['fields'])
         if not validated_params['fields list']:
             rqst_errors.append('Invalid fields parameter, field parameters must be ascii strings.')
 
@@ -161,9 +158,11 @@ def validate_get_rqst_parameter_page(get_rqst_params, validated_params, rqst_err
         validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
-def validate_get_rqst_parameter_groupby(get_rqst_params, validated_params, rqst_errors):
-    if "groupby" in get_rqst_params:
-        validated_params['group by'] = get_rqst_params['groupby']
+def validate_get_rqst_parameter_group_by(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'group_by'
+
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_nav_location_tags(get_rqst_params, validated_params, rqst_errors):
@@ -176,22 +175,24 @@ def validate_get_rqst_parameter_nav_location_tags(get_rqst_params, validated_par
 
 
 def validate_get_rqst_parameter_is_cps_location(get_rqst_params, validated_params, rqst_errors):
-    if 'is_cps_location' in get_rqst_params:
-        validated_params['is_cps_location'] = get_rqst_params['is_cps_location'].lower()
-        if validated_params['is_cps_location'] not in ('true', 'false'):
-            rqst_errors.append("Value for is_cps_location is not type boolean")
-        else:
-            validated_params['is_cps_location'] = validated_params['is_cps_location'] in ('true')
+    param_name = 'is_cps_location'
+
+    if param_name in get_rqst_params:
+        validate_bool_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_name(get_rqst_params, validated_params, rqst_errors):
-    if 'name' in get_rqst_params:
-        validated_params['name'] = urllib.parse.unquote(get_rqst_params['name'])
+    param_name = 'name'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_intent(get_rqst_params, validated_params, rqst_errors):
-    if 'intent' in get_rqst_params:
-        validated_params['intent'] = urllib.parse.unquote(get_rqst_params['intent'])
+    param_name = 'intent'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_state(get_rqst_params, validated_params, rqst_errors):
@@ -204,12 +205,10 @@ def validate_get_rqst_parameter_state(get_rqst_params, validated_params, rqst_er
 
 
 def validate_get_rqst_parameter_has_sample_id_card(get_rqst_params, validated_params, rqst_errors):
-    if 'has_sample_id_card' in get_rqst_params:
-        validated_params['has_sample_id_card'] = get_rqst_params['has_sample_id_card'].lower()
-        if validated_params['has_sample_id_card'] not in ('true', 'false'):
-            rqst_errors.append("Value for has_sample_id_card is not type boolean")
-        else:
-            validated_params['has_sample_id_card'] = validated_params['has_sample_id_card'] in ('true')
+    param_name = 'has_sample_id_card'
+
+    if param_name in get_rqst_params:
+        validate_bool_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_carrier_id(get_rqst_params, validated_params, rqst_errors):
@@ -231,8 +230,10 @@ def validate_get_rqst_parameter_carrier_state(get_rqst_params, validated_params,
 
 
 def validate_get_rqst_parameter_carrier_name(get_rqst_params, validated_params, rqst_errors):
-    if 'carrier_name' in get_rqst_params:
-        validated_params['carrier name'] = urllib.parse.unquote(get_rqst_params['carrier_name'])
+    param_name = 'carrier_name'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_accepted_location_id(get_rqst_params, validated_params, rqst_errors):
@@ -245,8 +246,10 @@ def validate_get_rqst_parameter_accepted_location_id(get_rqst_params, validated_
 
 
 def validate_get_rqst_parameter_network_name(get_rqst_params, validated_params, rqst_errors):
-    if 'network_name' in get_rqst_params:
-        validated_params['network_name'] = urllib.parse.unquote(get_rqst_params['network_name'])
+    param_name = 'network_name'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_network_id(get_rqst_params, validated_params, rqst_errors):
@@ -259,45 +262,45 @@ def validate_get_rqst_parameter_network_id(get_rqst_params, validated_params, rq
 
 
 def validate_get_rqst_parameter_premium_type(get_rqst_params, validated_params, rqst_errors):
-    if 'premium_type' in get_rqst_params:
-        validated_params['premium_type'] = get_rqst_params['premium_type']
-        validated_params['premium_type list'] = re.findall(r"[@\w. '-]+", validated_params['premium_type'])
+    param_name = 'premium_type'
 
-        if not validated_params['premium_type list']:
-            rqst_errors.append('Invalid premium_type.')
-        else:
-            for premium_type in validated_params['premium_type list']:
-                dummy_plan_object = HealthcarePlan(premium_type=premium_type)
-                if not dummy_plan_object.check_premium_choices():
-                    rqst_errors.append('The following is an invalid premium_type : {}'.format(premium_type))
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        for premium_type in validated_params['premium_type_list']:
+            dummy_plan_object = HealthcarePlan(premium_type=premium_type)
+            if not dummy_plan_object.check_premium_choices():
+                rqst_errors.append('The following is an invalid premium_type : {}'.format(premium_type))
 
 
 def validate_get_rqst_parameter_include_summary_report(get_rqst_params, validated_params, rqst_errors):
-    if 'include_summary_report' in get_rqst_params:
-        validated_params['include_summary_report'] = get_rqst_params['include_summary_report'].lower()
-        if validated_params['include_summary_report'] not in ('true', 'false'):
-            rqst_errors.append("Value for include_summary_report is not type boolean")
-        else:
-            validated_params['include_summary_report'] = validated_params['include_summary_report'] in ('true')
+    param_name = 'include_summary_report'
+
+    if param_name in get_rqst_params:
+        validate_bool_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_include_detailed_report(get_rqst_params, validated_params, rqst_errors):
-    if 'include_detailed_report' in get_rqst_params:
-        validated_params['include_detailed_report'] = get_rqst_params['include_detailed_report'].lower()
-        if validated_params['include_detailed_report'] not in ('true', 'false'):
-            rqst_errors.append("Value for include_detailed_report is not type boolean")
-        else:
-            validated_params['include_detailed_report'] = validated_params['include_detailed_report'] in ('true')
+    param_name = 'include_detailed_report'
+
+    if param_name in get_rqst_params:
+        validate_bool_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_question(get_rqst_params, validated_params, rqst_errors):
-    if 'question' in get_rqst_params:
-        validated_params['question'] = urllib.parse.unquote(get_rqst_params['question'])
+    param_name = 'question'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_gen_concern_name(get_rqst_params, validated_params, rqst_errors):
-    if 'gen_concern_name' in get_rqst_params:
-        validated_params['gen_concern_name'] = urllib.parse.unquote(get_rqst_params['gen_concern_name'])
+    param_name = 'gen_concern_name'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_gen_concern_id(get_rqst_params, validated_params, rqst_errors):
@@ -319,8 +322,10 @@ def validate_get_rqst_parameter_gen_concern_id_subset(get_rqst_params, validated
 
 
 def validate_get_rqst_parameter_hospital_name(get_rqst_params, validated_params, rqst_errors):
-    if 'hospital_name' in get_rqst_params:
-        validated_params['hospital_name'] = urllib.parse.unquote(get_rqst_params['hospital_name'])
+    param_name = 'hospital_name'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
 def validate_get_rqst_parameter_family_size(get_rqst_params, validated_params, rqst_errors):
@@ -381,14 +386,122 @@ def validate_string_list_get_rqst_param(get_rqst_params, validated_params, param
         rqst_errors.append('List of {}s is formatted wrong. Values must be ascii strings separated by commas'.format(param_name))
 
 
-class HTTPParameterValidatorBase:
-    parameter_name = None
+def validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
+    unvalidated_param_value = get_rqst_params[param_name]
 
-    def validate_get_rqst_parameter(self, get_rqst_params, validated_params, rqst_errors):
-        if self.parameter_name:
-            pass
-        else:
-            raise NotImplementedError("self.parameter_name must be set to a non null value in order to use this function.")
+    validated_param_value = urllib.parse.unquote(unvalidated_param_value)
+
+    validated_params[param_name] = validated_param_value
+
+
+def validate_url_encoded_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
+    unvalidated_param_value = get_rqst_params[param_name]
+    url_decoded_param_value = urllib.parse.unquote(unvalidated_param_value)
+
+    validated_param_value_list = re.findall(r"[@\w. '-]+", url_decoded_param_value)
+    validated_params["{}_{}".format(param_name, "list")] = validated_param_value_list
+
+    error_message = 'Comma separated list of {}s is formatted wrong. Values must be ascii strings that have all non-ascii characters url encoded.'.format(param_name)
+    if not validated_param_value_list:
+        rqst_errors.append(error_message)
+
+    number_of_commas = len(re.findall(r",", unvalidated_param_value))
+    number_of_parameters_there_should_be = number_of_commas + 1
+    if number_of_parameters_there_should_be != len(validated_param_value_list):
+        rqst_errors.append(error_message)
+
+
+def validate_bool_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
+    accepted_unvalidated_values = (
+        'true',
+        'false'
+    )
+
+    unvalidated_values_that_equal_true = (
+        'true'
+    )
+
+    unvalidated_param_value = get_rqst_params[param_name].lower()
+    if unvalidated_param_value not in accepted_unvalidated_values:
+        rqst_errors.append("Value for {} is not type boolean".format(param_name))
+
+    validated_param_value = unvalidated_param_value in unvalidated_values_that_equal_true
+    validated_params[param_name] = validated_param_value
+
+
+def validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
+    unvalidated_param_value = get_rqst_params[param_name]
+
+    try:
+        validated_param_value = datetime.datetime.strptime(unvalidated_param_value, '%Y-%m-%d')
+    except ValueError:
+        rqst_errors.append('{} parameter value must be a valid date formatted like: YYYY-MM-DD.'.format(param_name))
+        validated_param_value = None
+
+    validated_params[param_name] = validated_param_value
+
+
+def validate_time_delta_in_days_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
+    unvalidated_param_value = get_rqst_params[param_name]
+
+    try:
+        validated_param_value = int(unvalidated_param_value)
+    except ValueError:
+        rqst_errors.append('Invalid {} param value. Value must be a base 10 integer.'.format(param_name))
+        validated_param_value = None
+    else:
+        validated_param_value = datetime.timedelta(days=validated_param_value)
+
+    validated_params[param_name] = validated_param_value
+
+
+class HTTPParamValidatorBase:
+    param_name = None
+    param_types = None
+    accepted_param_types = [
+        'int',
+        'int_list'
+        'str',
+        'url_encoded_str'
+    ]
+    is_list_of_params = None
+
+    @classmethod
+    def check_that_instance_attributes_are_init(cls):
+        if cls.param_name is None:
+            raise NotImplementedError("cls.param_name must be set to a non null value in order to use this function.")
+        if cls.param_types is None:
+            raise NotImplementedError("cls.param_types must be set to a non null value in order to use this function.")
+        elif not isinstance(cls.param_types, list):
+            raise NotImplementedError("cls.param_types must be set to a list whose values are in: {} in order to use this function.".format(json.dumps(cls.accepted_param_types)))
+        if cls.is_list_of_params is None:
+            raise NotImplementedError(
+                "cls.is_list_of_params must be set to a non null value in order to use this function.")
+
+    @classmethod
+    def validate_get_rqst_parameter(cls, get_rqst_params, validated_params, rqst_errors):
+        cls.check_that_instance_attributes_are_init()
+
+        for param_type in cls.param_types:
+            if param_type == 'int':
+                if cls.param_name in get_rqst_params:
+                    validate_int_get_rqst_param(get_rqst_params, validated_params, cls.param_name, rqst_errors)
+
+                    validated_param_value = validated_params[cls.param_name]
+                    if cls.is_list_of_params and validated_param_value != "all":
+                        validate_int_list_get_rqst_param(get_rqst_params, validated_params, cls.param_name, rqst_errors)
+            elif param_type == 'int_list':
+                if cls.param_name in get_rqst_params:
+                    unvalidated_param_value = get_rqst_params[cls.param_name]
+                    if unvalidated_param_value != "all":
+                        validate_int_list_get_rqst_param(get_rqst_params, validated_params, cls.param_name, rqst_errors)
+            elif param_type == 'str':
+                if cls.param_name in get_rqst_params:
+                    validate_string_get_rqst_param(get_rqst_params, validated_params, cls.param_name, rqst_errors)
+            elif param_type == 'url_encoded_str':
+                pass
+            else:
+                raise NotImplementedError("param_type: {} must be in this set of accepted values {}.".format(param_type, json.dumps(cls.accepted_param_types)))
 
 
 GET_PARAMETER_VALIDATION_FUNCTIONS = {
@@ -408,9 +521,9 @@ GET_PARAMETER_VALIDATION_FUNCTIONS = {
 
     "county": validate_get_rqst_parameter_county,
     "zipcode": validate_get_rqst_parameter_zipcode,
-    "time": validate_get_rqst_parameter_time,
-    "startdate": validate_get_rqst_parameter_startdate,
-    "enddate": validate_get_rqst_parameter_enddate,
+    "time_delta_in_days": validate_get_rqst_parameter_time_delta_in_days,
+    "start_date": validate_get_rqst_parameter_start_date,
+    "end_date": validate_get_rqst_parameter_end_date,
     "is_cps_consumer": validate_get_rqst_parameter_is_cps_consumer,
 
     "partner_id": validate_get_rqst_parameter_partner_id,
@@ -440,5 +553,5 @@ GET_PARAMETER_VALIDATION_FUNCTIONS = {
 
     'fields': validate_get_rqst_parameter_fields,
     "page": validate_get_rqst_parameter_page,
-    "groupby": validate_get_rqst_parameter_groupby,
+    "group_by": validate_get_rqst_parameter_group_by,
 }

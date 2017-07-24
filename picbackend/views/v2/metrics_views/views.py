@@ -67,9 +67,9 @@ class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         "email",
         "mpn",
         "zipcode",
-        "time",
-        "startdate",
-        "enddate",
+        "time_delta_in_days",
+        "start_date",
+        "end_date",
         "location",
         "location_id",
         "fields"
@@ -132,7 +132,7 @@ def retrieve_metrics_data_by_request_params(search_params, validated_fields, rqs
         if rqst_staff_id != 'all':
             list_of_ids = search_params['id_list']
         else:
-            list_of_ids = None
+            list_of_ids = []
 
         data_list, missing_primary_parameters = retrieve_metrics_data_by_staff_id(rqst_staff_id, list_of_ids, search_params, rqst_errors, fields=validated_fields)
     elif 'first_name' in search_params and 'last_name' in search_params:
