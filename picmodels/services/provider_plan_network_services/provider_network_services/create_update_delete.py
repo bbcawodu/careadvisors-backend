@@ -24,10 +24,11 @@ def check_for_provider_network_objs_with_given_name(provider_network_name, post_
         found_provider_network_obj = True
 
         provider_network_ids = []
+        len_of_provider_network_qset = len(provider_network_objs)
         for provider_network_obj in provider_network_objs:
             provider_network_ids.append(provider_network_obj.id)
 
-        if provider_network_objs.count() > 1:
+        if len_of_provider_network_qset > 1:
             post_errors.append(
                 "Multiple provider networks with name: {} already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
                     provider_network_name, json.dumps(provider_network_ids)))
