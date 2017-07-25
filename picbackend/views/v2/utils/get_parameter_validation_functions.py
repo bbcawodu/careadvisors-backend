@@ -340,7 +340,10 @@ def validate_get_rqst_parameter_family_size(get_rqst_params, validated_params, r
 def validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
     unvalidated_param_value = get_rqst_params[param_name]
 
-    validated_param_value = unvalidated_param_value
+    try:
+        validated_param_value = int(unvalidated_param_value)
+    except ValueError:
+        validated_param_value = unvalidated_param_value
 
     validated_params[param_name] = validated_param_value
 

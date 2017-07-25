@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.core.validators import MaxValueValidator
 import uuid
 import os
+import urllib
 
 
 def get_sample_id_card_file_path(instance, filename):
@@ -135,6 +136,7 @@ class HealthcareCarrier(models.Model):
 
     def return_values_dict(self):
         valuesdict = {"name": self.name,
+                      "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
                       "state": None,
                       "plans": None,
                       "sample_id_card": None,
@@ -249,6 +251,7 @@ class HealthcarePlan(models.Model):
 
     def return_values_dict(self, include_summary_report=False, include_detailed_report=False):
         valuesdict = {"name": self.name,
+                      "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
                       "premium_type": self.premium_type,
                       "metal_level": self.metal_level,
                       "county": self.county,
@@ -368,6 +371,7 @@ class ProviderNetwork(models.Model):
 
     def return_values_dict(self):
         valuesdict = {"name": self.name,
+                      "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
                       "provider_locations": None,
                       "Database ID": self.id}
 
@@ -393,6 +397,7 @@ class ProviderLocation(models.Model):
 
     def return_values_dict(self):
         valuesdict = {"name": self.name,
+                      "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
                       "provider_network info": None,
                       "accepted_plans": None,
                       "Database ID": self.id}
