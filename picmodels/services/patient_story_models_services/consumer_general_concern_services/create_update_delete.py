@@ -21,10 +21,11 @@ def check_for_general_concern_objs_with_given_name(general_concern_name, post_er
         found_general_concern_obj = True
 
         general_concern_ids = []
+        len_of_general_concerns_qset = len(general_concern_objs)
         for general_concern_obj in general_concern_objs:
             general_concern_ids.append(general_concern_obj.id)
 
-        if general_concern_objs.count() > 1:
+        if len_of_general_concerns_qset > 1:
             post_errors.append(
                 "Multiple general concerns with name: {} already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
                     general_concern_name, json.dumps(general_concern_ids)))

@@ -21,10 +21,11 @@ def check_for_specific_concern_objs_with_given_question(specific_concern_questio
         found_specific_concern_obj = True
 
         specific_concern_ids = []
+        len_of_specific_concerns_qset = len(specific_concern_objs)
         for specific_concern_obj in specific_concern_objs:
             specific_concern_ids.append(specific_concern_obj.id)
 
-        if specific_concern_objs.count() > 1:
+        if len_of_specific_concerns_qset > 1:
             post_errors.append(
                 "Multiple specific concerns with question: {} already exist in db. (Hint - Delete all but one and modify the remaining) id's: {}".format(
                     specific_concern_question, json.dumps(specific_concern_ids)))

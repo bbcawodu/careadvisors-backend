@@ -19,7 +19,7 @@ class ConsumerGeneralConcern(Model):
                       "Database ID": self.id}
 
         related_specific_concerns_qset = self.related_specific_concerns.all()
-        if related_specific_concerns_qset.count():
+        if len(related_specific_concerns_qset):
             specific_concerns_list = []
             for specific_concern_object in related_specific_concerns_qset:
                 specific_concern_dict = {
@@ -53,7 +53,7 @@ class ConsumerSpecificConcern(Model):
                       "Database ID": self.id}
 
         related_gen_concerns_qset = self.related_general_concerns.all()
-        if related_gen_concerns_qset.count():
+        if len(related_gen_concerns_qset):
             general_concerns_list = []
             for gen_concern_object in related_gen_concerns_qset:
                 gen_concern_dict = {

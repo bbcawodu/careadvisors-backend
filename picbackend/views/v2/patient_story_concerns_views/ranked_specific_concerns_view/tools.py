@@ -15,7 +15,7 @@ def retrieve_related_spec_concern_objs_from_list_of_gen_concern_names(rqst_data,
 
     rqst_ranked_general_concern_names = clean_list_value_from_dict_object(rqst_data, "root", "ranked_general_concerns",
                                                                           rqst_errors)
-    if len(rqst_errors) == 0:
+    if not rqst_errors:
         no_of_ranked_gen_concerns = len(rqst_ranked_general_concern_names)
 
         if no_of_ranked_gen_concerns <= MAX_NO_OF_GEN_CONCERNS_GIVEN:

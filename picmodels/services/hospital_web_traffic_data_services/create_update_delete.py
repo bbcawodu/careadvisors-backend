@@ -22,10 +22,11 @@ def check_for_web_traffic_calculator_data_objs_with_given_name(hospital_name, po
         found_hospital_web_traffic_calculator_data_obj = True
 
         hospital_web_traffic_calculator_data_ids = []
+        len_of_web_traffic_data_qset = len(hospital_web_traffic_calculator_data_objs)
         for hospital_web_traffic_calculator_data_obj in hospital_web_traffic_calculator_data_objs:
             hospital_web_traffic_calculator_data_ids.append(hospital_web_traffic_calculator_data_obj.id)
 
-        if hospital_web_traffic_calculator_data_objs.count() > 1:
+        if len_of_web_traffic_data_qset > 1:
             post_errors.append(
                 "Multiple instances of hospital web traffic calculator data with name: {} already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
                     hospital_name, json.dumps(hospital_web_traffic_calculator_data_ids)))
