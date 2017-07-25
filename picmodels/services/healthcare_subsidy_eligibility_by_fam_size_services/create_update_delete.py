@@ -23,10 +23,11 @@ def check_for_healthcare_subsidy_eligibility_data_objs_with_given_family_size(fa
         found_healthcare_subsidy_eligibility_data_obj = True
 
         healthcare_subsidy_eligibility_data_ids = []
+        len_of_eligibility_data_qset = len(healthcare_subsidy_eligibility_data_objs)
         for healthcare_subsidy_eligibility_data_obj in healthcare_subsidy_eligibility_data_objs:
             healthcare_subsidy_eligibility_data_ids.append(healthcare_subsidy_eligibility_data_obj.id)
 
-        if healthcare_subsidy_eligibility_data_objs.count() > 1:
+        if len_of_eligibility_data_qset > 1:
             post_errors.append(
                 "Multiple instances of healthcare subsidy eligibility data with family size: {} already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
                     family_size, json.dumps(healthcare_subsidy_eligibility_data_ids)))

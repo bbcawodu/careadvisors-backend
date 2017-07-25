@@ -24,10 +24,11 @@ def check_for_healthcare_carrier_objs_with_given_name_and_state(carrier_name, ca
         found_healthcare_carrier_obj = True
 
         carrier_ids = []
+        len_of_carrier_qset = len(healthcare_carrier_objs)
         for carrier_obj in healthcare_carrier_objs:
             carrier_ids.append(carrier_obj.id)
 
-        if healthcare_carrier_objs.count() > 1:
+        if len_of_carrier_qset > 1:
             post_errors.append(
                 "Multiple healthcare carriers with name: {} and state: {} already exist in db. (Hint - Delete one and modify the remaining) id's: {}".format(
                     carrier_name, carrier_state, json.dumps(carrier_ids)))

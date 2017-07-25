@@ -41,10 +41,11 @@ def check_for_provider_location_objs_with_given_name_and_network(provider_locati
         found_provider_location_obj = True
 
         provider_location_ids = []
+        len_of_provider_location_qset = len(provider_location_objs)
         for provider_location_obj in provider_location_objs:
             provider_location_ids.append(provider_location_obj.id)
 
-        if provider_location_objs.count() > 1:
+        if len_of_provider_location_qset > 1:
             post_errors.append(
                 "Multiple provider locations with name: {} and provider network id: {} already exist in db. (Hint - Delete all but one and modify the remaining) id's: {}".format(
                     provider_location_name, provider_network_obj.id, json.dumps(provider_location_ids)))

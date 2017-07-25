@@ -95,14 +95,14 @@ class PICStaff(models.Model):
                     break
 
         base_locations = self.base_locations.all()
-        if base_locations.count():
+        if len(base_locations):
             base_location_values = []
             for base_location in base_locations:
                 base_location_values.append(base_location.return_values_dict())
             valuesdict["Base Locations"] = base_location_values
 
         credentials_queryset = self.credentialsmodel_set.all()
-        if credentials_queryset.count():
+        if len(credentials_queryset):
             for credentials_instance in credentials_queryset:
                 if credentials_instance.credential.invalid:
                     credentials_instance.delete()
@@ -412,7 +412,7 @@ class ConsumerCPSInfoEntry(models.Model):
             valuesdict["primary_dependent"] = primary_dependent_entry
 
         secondary_dependent_queryset = self.secondary_dependents.all()
-        if secondary_dependent_queryset.count():
+        if len(secondary_dependent_queryset):
             secondary_dependent_list = []
             for secondary_dependent in secondary_dependent_queryset:
                 dependent_entry = {"first_name": secondary_dependent.first_name,
