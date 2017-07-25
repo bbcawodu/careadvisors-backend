@@ -232,34 +232,33 @@ class PICConsumerBase(models.Model):
         if self.cps_info:
             valuesdict['cps_info'] = self.cps_info.return_values_dict()
 
-        if hasattr(self, "primary_guardian"):
-            if self.primary_guardian:
-                cps_info_qset = self.primary_guardian.all()
-                if len(cps_info_qset):
-                    primary_guardian_info = []
+        if self.primary_guardian:
+            cps_info_qset = self.primary_guardian.all()
+            if len(cps_info_qset):
+                primary_guardian_info = []
 
-                    for cps_info_instance in cps_info_qset:
-                        primary_guardian_qset = cps_info_instance.picconsumer_set.all()
+                for cps_info_instance in cps_info_qset:
+                    primary_guardian_qset = cps_info_instance.picconsumer_set.all()
 
-                        for primary_guardian_instance in primary_guardian_qset:
-                            primary_guardian_info.append(primary_guardian_instance.id)
+                    for primary_guardian_instance in primary_guardian_qset:
+                        primary_guardian_info.append(primary_guardian_instance.id)
 
-                    if primary_guardian_info:
-                        valuesdict["primary_guardians"] = primary_guardian_info
-        if hasattr(self, "secondary_guardians"):
-            if self.secondary_guardians:
-                cps_info_qset = self.secondary_guardians.all()
-                if len(cps_info_qset):
-                    secondary_guardians_info = []
+                if primary_guardian_info:
+                    valuesdict["primary_guardians"] = primary_guardian_info
 
-                    for cps_info_instance in cps_info_qset:
-                        secondary_guardians_qset = cps_info_instance.picconsumer_set.all()
+        if self.secondary_guardians:
+            cps_info_qset = self.secondary_guardians.all()
+            if len(cps_info_qset):
+                secondary_guardians_info = []
 
-                        for secondary_guardian_instance in secondary_guardians_qset:
-                            secondary_guardians_info.append(secondary_guardian_instance.id)
+                for cps_info_instance in cps_info_qset:
+                    secondary_guardians_qset = cps_info_instance.picconsumer_set.all()
 
-                    if secondary_guardians_info:
-                        valuesdict["secondary_guardians"] = secondary_guardians_info
+                    for secondary_guardian_instance in secondary_guardians_qset:
+                        secondary_guardians_info.append(secondary_guardian_instance.id)
+
+                if secondary_guardians_info:
+                    valuesdict["secondary_guardians"] = secondary_guardians_info
 
         return valuesdict
 
