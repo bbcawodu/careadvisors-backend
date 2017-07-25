@@ -242,7 +242,7 @@ class PICConsumerBase(models.Model):
                         primary_guardian_qset = cps_info_instance.picconsumer_set.all()
 
                         for primary_guardian_instance in primary_guardian_qset:
-                            primary_guardian_info.append(primary_guardian_instance.return_values_dict())
+                            primary_guardian_info.append(primary_guardian_instance.id)
 
                     if primary_guardian_info:
                         valuesdict["primary_guardians"] = primary_guardian_info
@@ -256,7 +256,7 @@ class PICConsumerBase(models.Model):
                         secondary_guardians_qset = cps_info_instance.picconsumer_set.all()
 
                         for secondary_guardian_instance in secondary_guardians_qset:
-                            secondary_guardians_info.append(secondary_guardian_instance.return_values_dict())
+                            secondary_guardians_info.append(secondary_guardian_instance.id)
 
                     if secondary_guardians_info:
                         valuesdict["secondary_guardians"] = secondary_guardians_info
