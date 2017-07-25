@@ -41,3 +41,8 @@ TODO: Write credits
 ## License
 
 TODO: Write license
+
+
+## CODING NOTES
+- Use len instead of .count in methods that iterate over that same queryset since the results will be cached and it is preferable to use len in that case since this avoids hitting the the database again, and also the possibly of retrieving a different number of results'
+
