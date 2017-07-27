@@ -11,7 +11,7 @@ def validate_get_rqst_parameter_id(get_rqst_params, validated_params, rqst_error
     if param_name in get_rqst_params:
         validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
-        if validated_params[param_name] != "all":
+        if get_rqst_params[param_name] != "all":
             validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
