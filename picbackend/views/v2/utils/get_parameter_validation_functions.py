@@ -337,6 +337,22 @@ def validate_get_rqst_parameter_family_size(get_rqst_params, validated_params, r
         validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
+def validate_get_rqst_parameter_phone_number(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'phone_number'
+
+    if param_name in get_rqst_params:
+        validate_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_string_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_get_rqst_parameter_company_name(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'company_name'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
 def validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
     unvalidated_param_value = get_rqst_params[param_name]
 
@@ -557,4 +573,6 @@ GET_PARAMETER_VALIDATION_FUNCTIONS = {
     'fields': validate_get_rqst_parameter_fields,
     "page": validate_get_rqst_parameter_page,
     "group_by": validate_get_rqst_parameter_group_by,
+    "phone_number": validate_get_rqst_parameter_phone_number,
+    "company_name": validate_get_rqst_parameter_company_name,
 }

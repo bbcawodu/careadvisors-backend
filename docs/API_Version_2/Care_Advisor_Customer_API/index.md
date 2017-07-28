@@ -1,4 +1,4 @@
-## Care Advisor Customer Backend API
+## Care Advisor Customer Backend API (IN DEVELOPMENT - NOT LIVE)
 
 
 ## care_advisor_customer Table Entity Relationship Diagram
@@ -6,7 +6,7 @@
 ![care_advisor_customer Table Entity Relationship Diagram](care_advisor_customer_table_erd.jpg)
 
 
-### Care Advisor Customer: Create, Update, and Delete Methods Endpoint
+### Care Advisor Customer: Create, Update, and Delete Methods Endpoint (IN DEVELOPMENT - NOT LIVE)
 To create, update, or delete rows in the care_advisor_customer table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/care_advisor_customer/
 
 - The header of the request should include: 
@@ -19,10 +19,10 @@ The body of the request should be JSON formatted text using the following templa
 {
 "first_name": String,
 "last_name": String,
-"email": String,
+"email": String (Must be in the following format: username@domanname.domain),
 "company_name": String,
-"phone_number": String,
-"db_id": Integer,
+"phone_number": String (Must be in the following format: DDDDDDDDDD where D=base 10 digit),
+"id": Integer,
 "db_action": String,
 }
 "
@@ -36,17 +36,17 @@ In response, JSON formatted text with the following format will be returned:
             "Version": 2.0,
             "Errors": Array
             "Data": {
-                        "db_id": Integer or "deleted"
+                        "id": Integer or "deleted"
                     },
            }
 }
 ```
 
-- Adding a row to the care_advisor_customer table.
-    - To add a row to the care_advisor_customer table, the value for the "db_action" key in the root object must equal "add_row".
+- Creating a row in the care_advisor_customer table.
+    - To create a row in the care_advisor_customer table, the value for the "db_action" key in the root object must equal "create_row".
     - Request root object information
         - Keys that MUST be omitted:
-            - "db_id"
+            - "id"
         - Keys that CAN be omitted:
             - None
         - Keys that can be empty strings:
@@ -78,7 +78,7 @@ In response, JSON formatted text with the following format will be returned:
     - To delete a row in the care_advisor_customer table, the value for the "db_action" key in the root object must equal "delete_row".
     - Request root object information
         - Keys that MUST be omitted:
-            - all except "db_id"
+            - all except "id" and "db_action"
         - Keys that CAN be omitted:
             - None
         - Keys that can be empty strings:
@@ -96,7 +96,7 @@ In response, JSON formatted text with the following format will be returned:
         - Each object in the array is a string corresponding to an error in parsing the request BODY.
     - No changes are made to the database.
     
-### Care Advisor Customer: Read Method Endpoint
+### Care Advisor Customer: Read Method Endpoint (IN DEVELOPMENT - NOT LIVE)
 - To read/query rows in the care_advisor_customer table of the database, make a GET request to http://picbackend.herokuapp.com/v2/care_advisor_customer/
     - Results returned in the response body will be filtered by the parameters given in the query string of the request url.
     - The parameters given in the query string can be divided into 2 categories: "primary" and "secondary"
@@ -112,8 +112,7 @@ In response, JSON formatted text with the following format will be returned:
             - Must be a string
             - Can be multiple values separated by commas.
         - "company_name" corresponds to the company_name column of the care_advisor_customer table.
-            - Must be a string
-            - Can be multiple values separated by commas.
+            - Must be an ascii string that has all non-ascii characters url encoded
         - "phone_number" corresponds to the column of the care_advisor_customer table.
             - Must be a string
             - Can be multiple values separated by commas.
@@ -137,7 +136,7 @@ In response, JSON formatted text with the following format will be returned:
                 "email": String,
                 "company_name": String,
                 "phone_number": String,
-                "db_id": Integer,
+                "id": Integer,
             },
             ...,
             ...,

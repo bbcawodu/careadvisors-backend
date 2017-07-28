@@ -137,4 +137,7 @@ urlpatterns = [
     # urls for Healthcare Subsidy Eligibility Data By Family Size views
     url(r"^v2/subsidy_data_by_family_size/$", views.HealthcareSubsidyEligibilityDataMgrView.as_view()),
 
+    # urls for Care Advisor customer views
+    url(r"^v2/care_advisor_customer/$", views.CareAdvisorCustomerMgmtView.as_view()),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
