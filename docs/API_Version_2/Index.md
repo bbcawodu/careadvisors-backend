@@ -64,6 +64,6 @@ This file is documentation for the backend API library for Patient Innovation Ce
 [Healthcare Subsidy Eligibility Data By Family Size API README](Healthcare_Subsidy_Eligibility_Data_By_Family_Size_API.md)
 
 
-## Care Advisor Customer Backend API (IN DEVELOPMENT - NOT LIVE)
+## Care Advisor Customer Backend API
 
 [Care Advisor Customer Backend API README](Care_Advisor_Customer_API/index.md)

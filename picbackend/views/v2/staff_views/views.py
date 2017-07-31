@@ -1,9 +1,3 @@
-"""
-Defines views that handle Patient Innovation Center Staff based requests
-API Version 2
-"""
-
-
 from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -41,64 +35,64 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     def dispatch(self, request, *args, **kwargs):
         return super(StaffManagementView, self).dispatch(request, *args, **kwargs)
 
-    def staff_management_put_logic(self, post_data, response_raw_data, post_errors):
-        rqst_action = clean_string_value_from_dict_object(post_data, "root", "Database Action", post_errors)
+    def staff_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
+        rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
 
-        if not post_errors:
+        if not rqst_errors:
             staff_instance = None
 
             if rqst_action == "Staff Addition":
-                staff_instance = validate_rqst_params_and_add_instance(post_data, post_errors)
+                staff_instance = validate_rqst_params_and_add_instance(rqst_body, rqst_errors)
             elif rqst_action == "Staff Modification":
-                staff_instance = validate_rqst_params_and_modify_instance(post_data, post_errors)
+                staff_instance = validate_rqst_params_and_modify_instance(rqst_body, rqst_errors)
             elif rqst_action == "Staff Deletion":
-                validate_rqst_params_and_delete_instance(post_data, post_errors)
+                validate_rqst_params_and_delete_instance(rqst_body, rqst_errors)
 
-                if not post_errors:
+                if not rqst_errors:
                     response_raw_data['Data']["Database ID"] = "Deleted"
             else:
-                post_errors.append("No valid 'Database Action' provided.")
+                rqst_errors.append("No valid 'Database Action' provided.")
 
             if staff_instance:
                 response_raw_data['Data'] = {"Database ID": staff_instance.id}
 
-    def staff_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
+    def staff_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         def retrieve_data_by_primary_params_and_add_to_response():
             data_list = []
 
-            if 'first_name' in search_params and 'last_name' in search_params:
-                rqst_first_name = search_params['first_name']
-                rqst_last_name = search_params['last_name']
+            if 'first_name' in validated_GET_rqst_params and 'last_name' in validated_GET_rqst_params:
+                rqst_first_name = validated_GET_rqst_params['first_name']
+                rqst_last_name = validated_GET_rqst_params['last_name']
 
                 data_list = retrieve_staff_data_by_f_and_l_name(rqst_first_name, rqst_last_name, rqst_errors)
-            elif 'email' in search_params:
-                list_of_emails = search_params['email_list']
+            elif 'email' in validated_GET_rqst_params:
+                list_of_emails = validated_GET_rqst_params['email_list']
 
                 data_list = retrieve_staff_data_by_email(list_of_emails, rqst_errors)
-            elif 'mpn' in search_params:
-                list_of_mpns = search_params['mpn_list']
+            elif 'mpn' in validated_GET_rqst_params:
+                list_of_mpns = validated_GET_rqst_params['mpn_list']
 
                 data_list = retrieve_staff_data_by_mpn(list_of_mpns, rqst_errors)
-            elif 'first_name' in search_params:
-                list_of_first_names = search_params['first_name_list']
+            elif 'first_name' in validated_GET_rqst_params:
+                list_of_first_names = validated_GET_rqst_params['first_name_list']
 
                 data_list = retrieve_staff_data_by_first_name(list_of_first_names, rqst_errors)
-            elif 'last_name' in search_params:
-                list_of_last_names = search_params['last_name_list']
+            elif 'last_name' in validated_GET_rqst_params:
+                list_of_last_names = validated_GET_rqst_params['last_name_list']
 
                 data_list = retrieve_staff_data_by_last_name(list_of_last_names, rqst_errors)
-            elif 'county' in search_params:
-                list_of_counties = search_params['county_list']
+            elif 'county' in validated_GET_rqst_params:
+                list_of_counties = validated_GET_rqst_params['county_list']
 
                 data_list = retrieve_staff_data_by_county(list_of_counties, rqst_errors)
-            elif 'region' in search_params:
-                list_of_regions = search_params['region_list']
+            elif 'region' in validated_GET_rqst_params:
+                list_of_regions = validated_GET_rqst_params['region_list']
 
                 data_list = retrieve_staff_data_by_region(list_of_regions, rqst_errors)
-            elif 'id' in search_params:
-                rqst_staff_id = search_params['id']
+            elif 'id' in validated_GET_rqst_params:
+                rqst_staff_id = validated_GET_rqst_params['id']
                 if rqst_staff_id != 'all':
-                    list_of_ids = search_params['id_list']
+                    list_of_ids = validated_GET_rqst_params['id_list']
                 else:
                     list_of_ids = None
 
@@ -111,9 +105,9 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
         retrieve_data_by_primary_params_and_add_to_response()
 
-    put_logic_function = staff_management_put_logic
+    parse_PUT_request_and_add_response = staff_management_put_logic
 
-    accepted_get_parameters = [
+    accepted_GET_request_parameters = [
         "id",
         "first_name",
         "last_name",
@@ -122,7 +116,7 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         "county",
         "region",
     ]
-    get_logic_function = staff_management_get_logic
+    parse_GET_request_and_add_response = staff_management_get_logic
 
 
 def upload_staff_pic(request):

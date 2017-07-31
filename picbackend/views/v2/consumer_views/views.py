@@ -1,9 +1,3 @@
-"""
-Defines views that handle Patient Innovation Center consumer based requests
-API Version 2
-"""
-
-
 from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -36,14 +30,14 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     def dispatch(self, request, *args, **kwargs):
         return super(ConsumerManagementView, self).dispatch(request, *args, **kwargs)
 
-    def consumer_management_put_logic(self, post_data, response_raw_data, post_errors):
+    def consumer_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         # Retrieve database action from post data
-        rqst_action = clean_string_value_from_dict_object(post_data, "root", "Database Action", post_errors)
+        rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
 
         # If there are no parsing errors, process POST data based on database action
-        if not post_errors:
+        if not rqst_errors:
             if rqst_action == "Consumer Addition":
-                matching_consumer_instances, consumer_instance, backup_consumer_obj = validate_rqst_params_and_add_instance(post_data, post_errors)
+                matching_consumer_instances, consumer_instance, backup_consumer_obj = validate_rqst_params_and_add_instance(rqst_body, rqst_errors)
 
                 if matching_consumer_instances:
                     consumer_match_data = []
@@ -56,33 +50,33 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                     if backup_consumer_obj:
                         response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
             elif rqst_action == "Consumer Modification":
-                consumer_instance, backup_consumer_obj = validate_rqst_params_and_modify_instance(post_data, post_errors)
+                consumer_instance, backup_consumer_obj = validate_rqst_params_and_modify_instance(rqst_body, rqst_errors)
 
-                if not post_errors:
+                if not rqst_errors:
                     if consumer_instance:
                         response_raw_data['Data']["Database ID"] = consumer_instance.id
                     if backup_consumer_obj:
                         response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
             elif rqst_action == "Consumer Deletion":
-                backup_consumer_obj = validate_rqst_params_and_delete_instance(post_data, post_errors)
+                backup_consumer_obj = validate_rqst_params_and_delete_instance(rqst_body, rqst_errors)
 
-                if not post_errors:
+                if not rqst_errors:
                     response_raw_data['Data']["Database ID"] = "Deleted"
 
                     if backup_consumer_obj:
                         response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
             else:
-                post_errors.append("No valid 'Database Action' provided.")
+                rqst_errors.append("No valid 'Database Action' provided.")
 
-    def consumer_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
+    def consumer_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         # Retrieve all Patient Innovation Center consumer objects
         consumers = PICConsumer.objects.all()
 
-        get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
+        get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst_params, response_raw_data, rqst_errors)
 
-    put_logic_function = consumer_management_put_logic
+    parse_PUT_request_and_add_response = consumer_management_put_logic
 
-    accepted_get_parameters = [
+    accepted_GET_request_parameters = [
         "nav_id",
         "is_cps_consumer",
         "first_name",
@@ -91,7 +85,7 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         "id",
         "page"
     ]
-    get_logic_function = consumer_management_get_logic
+    parse_GET_request_and_add_response = consumer_management_get_logic
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -104,13 +98,13 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     def dispatch(self, request, *args, **kwargs):
         return super(ConsumerBackupManagementView, self).dispatch(request, *args, **kwargs)
 
-    def consumer_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
+    def consumer_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         # Retrieve all Patient Innovation Center consumer objects
         consumers = PICConsumerBackup.objects.all()
 
-        get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors)
+        get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst_params, response_raw_data, rqst_errors)
 
-    accepted_get_parameters = [
+    accepted_GET_request_parameters = [
         "nav_id",
         "is_cps_consumer",
         "first_name",
@@ -119,17 +113,17 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         "id",
         "page"
     ]
-    get_logic_function = consumer_management_get_logic
+    parse_GET_request_and_add_response = consumer_management_get_logic
 
 
-def get_and_add_consumer_data_to_response(consumers, request, search_params, response_raw_data, rqst_errors):
+def get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
     # Filter consumer objects based on GET parameters
     def filter_db_objects_by_secondary_params(db_objects):
-        if 'nav_id_list' in search_params:
-            list_of_nav_ids = search_params['nav_id_list']
+        if 'nav_id_list' in validated_GET_rqst_params:
+            list_of_nav_ids = validated_GET_rqst_params['nav_id_list']
             db_objects = db_objects.filter(navigator__in=list_of_nav_ids)
-        if 'is_cps_consumer' in search_params:
-            is_cps_consumer = search_params['is_cps_consumer']
+        if 'is_cps_consumer' in validated_GET_rqst_params:
+            is_cps_consumer = validated_GET_rqst_params['is_cps_consumer']
             db_objects = db_objects.filter(cps_consumer=is_cps_consumer)
 
         return db_objects
@@ -139,34 +133,34 @@ def get_and_add_consumer_data_to_response(consumers, request, search_params, res
     def retrieve_data_by_primary_params_and_add_to_response(db_objects):
         data_list = []
 
-        if 'first_name' in search_params and 'last_name' in search_params:
-            rqst_first_name = search_params['first_name']
-            rqst_last_name = search_params['last_name']
+        if 'first_name' in validated_GET_rqst_params and 'last_name' in validated_GET_rqst_params:
+            rqst_first_name = validated_GET_rqst_params['first_name']
+            rqst_last_name = validated_GET_rqst_params['last_name']
 
             data_list = retrieve_consumer_data_by_f_and_l_name(db_objects, rqst_first_name, rqst_last_name, rqst_errors)
-        elif 'email' in search_params:
-            list_of_emails = search_params['email_list']
+        elif 'email' in validated_GET_rqst_params:
+            list_of_emails = validated_GET_rqst_params['email_list']
 
             data_list = retrieve_consumer_data_by_email(db_objects, list_of_emails, rqst_errors)
-        elif 'first_name' in search_params:
-            list_of_first_names = search_params['first_name_list']
+        elif 'first_name' in validated_GET_rqst_params:
+            list_of_first_names = validated_GET_rqst_params['first_name_list']
 
             data_list = retrieve_consumer_data_by_first_name(db_objects, list_of_first_names, rqst_errors)
-        elif 'last_name' in search_params:
-            list_of_last_names = search_params['last_name_list']
+        elif 'last_name' in validated_GET_rqst_params:
+            list_of_last_names = validated_GET_rqst_params['last_name_list']
 
             data_list = retrieve_consumer_data_by_last_name(db_objects, list_of_last_names, rqst_errors)
-        elif 'id' in search_params:
-            rqst_consumer_id = search_params['id']
+        elif 'id' in validated_GET_rqst_params:
+            rqst_consumer_id = validated_GET_rqst_params['id']
             if rqst_consumer_id != 'all':
-                list_of_ids = search_params['id_list']
+                list_of_ids = validated_GET_rqst_params['id_list']
             else:
                 list_of_ids = None
 
             data_list = retrieve_consumer_data_by_id(db_objects, rqst_consumer_id, list_of_ids, rqst_errors)
 
             def paginate_results():
-                rqst_page_no = search_params['page'] if 'page' in search_params else None
+                rqst_page_no = validated_GET_rqst_params['page'] if 'page' in validated_GET_rqst_params else None
                 base_url = request.build_absolute_uri(None)
 
                 extra_urls = paginate_result_list_by_changing_excess_data_to_ids(data_list, CONSUMERS_PER_PAGE, rqst_page_no, base_url)
