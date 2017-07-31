@@ -4,16 +4,18 @@ Defines utility functions and classes for staff views
 
 from picmodels.models import CareAdvisorCustomer
 from picmodels.services import filter_db_queryset_by_id
-from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_f_and_l_name
-from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_first_name
-from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_last_name
-from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_email
+from picmodels.services.care_advisor_customer_model_services import filter_qset_by_first_name_and_last_name
+from picmodels.services.care_advisor_customer_model_services import filter_qset_by_email
+from picmodels.services.care_advisor_customer_model_services import filter_qset_by_first_name
+from picmodels.services.care_advisor_customer_model_services import filter_qset_by_last_name
+from picmodels.services.care_advisor_customer_model_services import filter_qset_by_company_name
+from picmodels.services.care_advisor_customer_model_services import filter_qset_by_phone_number
 
 
 def retrieve_table_data_by_id(rqst_id, list_of_ids, rqst_errors):
-    care_advisor_customer_qset = filter_db_queryset_by_id(CareAdvisorCustomer.objects.all(), rqst_id, list_of_ids)
+    filtered_qset = filter_db_queryset_by_id(CareAdvisorCustomer.objects.all(), rqst_id, list_of_ids)
 
-    table_data_list = create_response_list_from_db_objects(care_advisor_customer_qset)
+    table_data_list = create_table_data_list_from_qset(filtered_qset)
 
     def check_response_data_for_requested_data():
         if not table_data_list:
@@ -30,23 +32,7 @@ def retrieve_table_data_by_id(rqst_id, list_of_ids, rqst_errors):
     return table_data_list
 
 
-def retrieve_staff_data_by_f_and_l_name(rqst_first_name, rqst_last_name, rqst_errors):
-    staff_qset = filter_staff_objs_by_f_and_l_name(CareAdvisorCustomer.objects.all(), rqst_first_name, rqst_last_name)
-
-    response_list = create_response_list_from_db_objects(staff_qset)
-
-    def check_response_data_for_requested_data():
-        if not response_list:
-            rqst_errors.append("No staff instances in db for given first and last name")
-
-    check_response_data_for_requested_data()
-
-    response_list = [response_list]
-
-    return response_list
-
-
-def create_response_list_from_db_objects(db_objects):
+def create_table_data_list_from_qset(db_objects):
     return_list = []
 
     for db_instance in db_objects:
@@ -55,70 +41,123 @@ def create_response_list_from_db_objects(db_objects):
     return return_list
 
 
-def retrieve_staff_data_by_email(list_of_emails, rqst_errors):
-    response_list = []
+def retrieve_table_data_by_first_name_and_last_name(rqst_first_name, rqst_last_name, rqst_errors):
+    filtered_qset = filter_qset_by_first_name_and_last_name(CareAdvisorCustomer.objects.all(), rqst_first_name, rqst_last_name)
+
+    table_data_list = create_table_data_list_from_qset(filtered_qset)
+
+    def check_response_data_for_requested_data():
+        if not table_data_list:
+            rqst_errors.append("No rows in care_advisor_customer table were found for given first and last name")
+
+    check_response_data_for_requested_data()
+
+    table_data_list = [table_data_list]
+
+    return table_data_list
+
+
+def retrieve_table_data_by_email(list_of_emails, rqst_errors):
+    table_data_list = []
 
     for email in list_of_emails:
-        filtered_staff_qset = filter_staff_objs_by_email(CareAdvisorCustomer.objects.all(), email)
+        filtered_qset = filter_qset_by_email(CareAdvisorCustomer.objects.all(), email)
 
-        response_list_component = create_response_list_from_db_objects(filtered_staff_qset)
+        table_data_list_component = create_table_data_list_from_qset(filtered_qset)
 
         def check_response_component_for_requested_data():
-            if not response_list_component:
-                rqst_errors.append('Staff instance with email: {} not found in database'.format(email))
+            if not table_data_list_component:
+                rqst_errors.append('No rows in care_advisor_customer table were found for email: {}'.format(email))
 
         check_response_component_for_requested_data()
 
         def add_response_component_to_response_data():
-            if response_list_component:
-                response_list.append(response_list_component)
+            if table_data_list_component:
+                table_data_list.append(table_data_list_component)
 
         add_response_component_to_response_data()
 
-    return response_list
+    return table_data_list
 
 
-def retrieve_staff_data_by_first_name(list_of_first_names, rqst_errors):
-    response_list = []
+def retrieve_table_data_by_first_name(list_of_first_names, rqst_errors):
+    table_data_list = []
 
     for first_name in list_of_first_names:
-        filtered_staff_qset = filter_staff_objs_by_first_name(CareAdvisorCustomer.objects.all(), first_name)
+        filtered_qset = filter_qset_by_first_name(CareAdvisorCustomer.objects.all(), first_name)
 
-        response_list_component = create_response_list_from_db_objects(filtered_staff_qset)
+        table_data_list_component = create_table_data_list_from_qset(filtered_qset)
 
         def check_response_component_for_requested_data():
-            if not response_list_component:
-                rqst_errors.append('Staff instance with first name: {} not found in database'.format(first_name))
+            if not table_data_list_component:
+                rqst_errors.append('No rows in care_advisor_customer table were found first name: {}'.format(first_name))
 
         check_response_component_for_requested_data()
 
         def add_response_component_to_response_data():
-            if response_list_component:
-                response_list.append(response_list_component)
+            if table_data_list_component:
+                table_data_list.append(table_data_list_component)
 
         add_response_component_to_response_data()
 
-    return response_list
+    return table_data_list
 
 
-def retrieve_staff_data_by_last_name(list_of_last_names, rqst_errors):
-    response_list = []
+def retrieve_table_data_by_last_name(list_of_last_names, rqst_errors):
+    table_data_list = []
 
     for last_name in list_of_last_names:
-        filtered_staff_qset = filter_staff_objs_by_last_name(CareAdvisorCustomer.objects.all(), last_name)
+        filtered_qset = filter_qset_by_last_name(CareAdvisorCustomer.objects.all(), last_name)
 
-        response_list_component = create_response_list_from_db_objects(filtered_staff_qset)
+        table_data_list_component = create_table_data_list_from_qset(filtered_qset)
 
         def check_response_component_for_requested_data():
-            if not response_list_component:
-                rqst_errors.append('Staff instance with last name: {} not found in database'.format(last_name))
+            if not table_data_list_component:
+                rqst_errors.append('No rows in care_advisor_customer table were found last name: {}'.format(last_name))
 
         check_response_component_for_requested_data()
 
         def add_response_component_to_response_data():
-            if response_list_component:
-                response_list.append(response_list_component)
+            if table_data_list_component:
+                table_data_list.append(table_data_list_component)
 
         add_response_component_to_response_data()
 
-    return response_list
+    return table_data_list
+
+
+def retrieve_table_data_by_company_name(company_name, rqst_errors):
+    filtered_qset = filter_qset_by_company_name(CareAdvisorCustomer.objects.all(), company_name)
+
+    table_data_list = create_table_data_list_from_qset(filtered_qset)
+
+    def check_response_component_for_requested_data():
+        if not table_data_list:
+            rqst_errors.append('No rows in care_advisor_customer table were found company name: {}'.format(company_name))
+
+    check_response_component_for_requested_data()
+
+    return table_data_list
+
+
+def retrieve_table_data_by_phone_number(list_of_phone_numbers, rqst_errors):
+    table_data_list = []
+
+    for phone_number in list_of_phone_numbers:
+        filtered_qset = filter_qset_by_phone_number(CareAdvisorCustomer.objects.all(), phone_number)
+
+        table_data_list_component = create_table_data_list_from_qset(filtered_qset)
+
+        def check_response_component_for_requested_data():
+            if not table_data_list_component:
+                rqst_errors.append('No rows in care_advisor_customer table were found phone number: {}'.format(phone_number))
+
+        check_response_component_for_requested_data()
+
+        def add_response_component_to_response_data():
+            if table_data_list_component:
+                table_data_list.append(table_data_list_component)
+
+        add_response_component_to_response_data()
+
+    return table_data_list

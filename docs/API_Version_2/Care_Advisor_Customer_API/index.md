@@ -114,7 +114,8 @@ In response, JSON formatted text with the following format will be returned:
         - "company_name" corresponds to the company_name column of the care_advisor_customer table.
             - Must be an ascii string that has all non-ascii characters url encoded
         - "phone_number" corresponds to the column of the care_advisor_customer table.
-            - Must be a string
+            - Must be an integer
+            - Must be in the following format: DDDDDDDDDD where D=base 10 digit
             - Can be multiple values separated by commas.
         - "id" corresponds to the id column of the care_advisor_customer table.
             - Must be an integer
@@ -150,17 +151,18 @@ In response, JSON formatted text with the following format will be returned:
     }
     ```
 
-- NOTES: Results will be grouped by the "Primary" parameter that is given with the request.
-    -Eg: If "first_name" is the "Primary" parameter the results will be grouped like the following
-        
-        ```
-        "Data": [
-            [Results for first_name parameter 2],
-            [Results for first_name parameter 1],
-            [Results for first_name parameter 3],
-            ...,
-        ] (Order is arbitrary)
-        ```
+- NOTES
+    - If the 'primary' parameter given in the query string is not 'id', results will be grouped by the 'primary' parameter that is given with the request.
+        -Eg: If "first_name" is the "primary" parameter the results will be grouped like the following
+            
+            ```
+            "Data": [
+                [Results for first_name parameter 2],
+                [Results for first_name parameter 1],
+                [Results for first_name parameter 3],
+                ...,
+            ] (Order is arbitrary)
+            ```
   
 - If there ARE NO errors parsing the request body and rows in the care_advisor_customer table of the database ARE found:
     - The value for the "Errors" key in the response root object will an empty array
