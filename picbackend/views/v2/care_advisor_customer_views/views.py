@@ -14,10 +14,12 @@ from picmodels.services.care_advisor_customer_model_services import add_instance
 from picmodels.services.care_advisor_customer_model_services import modify_instance_using_validated_params
 from picmodels.services.care_advisor_customer_model_services import delete_instance_using_validated_params
 from .tools import retrieve_table_data_by_id
-from .tools import retrieve_staff_data_by_f_and_l_name
-from .tools import retrieve_staff_data_by_email
-from .tools import retrieve_staff_data_by_first_name
-from .tools import retrieve_staff_data_by_last_name
+from .tools import retrieve_table_data_by_first_name_and_last_name
+from .tools import retrieve_table_data_by_email
+from .tools import retrieve_table_data_by_first_name
+from .tools import retrieve_table_data_by_last_name
+from .tools import retrieve_table_data_by_company_name
+from .tools import retrieve_table_data_by_phone_number
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -49,24 +51,7 @@ class CareAdvisorCustomerMgmtView(JSONPUTRspMixin, JSONGETRspMixin, View):
         def retrieve_data_by_primary_params_and_add_to_response():
             data_list = []
 
-            if 'first_name' in validated_params and 'last_name' in validated_params:
-                rqst_first_name = validated_params['first_name']
-                rqst_last_name = validated_params['last_name']
-
-                data_list = retrieve_staff_data_by_f_and_l_name(rqst_first_name, rqst_last_name, rqst_errors)
-            elif 'email' in validated_params:
-                list_of_emails = validated_params['email_list']
-
-                data_list = retrieve_staff_data_by_email(list_of_emails, rqst_errors)
-            elif 'first_name' in validated_params:
-                list_of_first_names = validated_params['first_name_list']
-
-                data_list = retrieve_staff_data_by_first_name(list_of_first_names, rqst_errors)
-            elif 'last_name' in validated_params:
-                list_of_last_names = validated_params['last_name_list']
-
-                data_list = retrieve_staff_data_by_last_name(list_of_last_names, rqst_errors)
-            elif 'id' in validated_params:
+            if 'id' in validated_params:
                 rqst_staff_id = validated_params['id']
                 if rqst_staff_id != 'all':
                     list_of_ids = validated_params['id_list']
@@ -74,6 +59,31 @@ class CareAdvisorCustomerMgmtView(JSONPUTRspMixin, JSONGETRspMixin, View):
                     list_of_ids = None
 
                 data_list = retrieve_table_data_by_id(rqst_staff_id, list_of_ids, rqst_errors)
+            elif 'first_name' in validated_params and 'last_name' in validated_params:
+                rqst_first_name = validated_params['first_name']
+                rqst_last_name = validated_params['last_name']
+
+                data_list = retrieve_table_data_by_first_name_and_last_name(rqst_first_name, rqst_last_name, rqst_errors)
+            elif 'first_name' in validated_params:
+                list_of_first_names = validated_params['first_name_list']
+
+                data_list = retrieve_table_data_by_first_name(list_of_first_names, rqst_errors)
+            elif 'last_name' in validated_params:
+                list_of_last_names = validated_params['last_name_list']
+
+                data_list = retrieve_table_data_by_last_name(list_of_last_names, rqst_errors)
+            elif 'email' in validated_params:
+                list_of_emails = validated_params['email_list']
+
+                data_list = retrieve_table_data_by_email(list_of_emails, rqst_errors)
+            elif 'company_name' in validated_params:
+                company_name = validated_params['company_name']
+
+                data_list = retrieve_table_data_by_company_name(company_name, rqst_errors)
+            elif 'phone_number' in validated_params:
+                list_of_phone_numbers = validated_params['phone_number_list']
+
+                data_list = retrieve_table_data_by_phone_number(list_of_phone_numbers, rqst_errors)
             else:
                 rqst_errors.append('No Valid Parameters')
 

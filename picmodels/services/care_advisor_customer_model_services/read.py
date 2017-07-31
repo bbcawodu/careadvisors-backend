@@ -1,34 +1,34 @@
-def filter_staff_objs_by_f_and_l_name(staff_objs, rqst_first_name, rqst_last_name):
-    staff_objs = staff_objs.filter(first_name__iexact=rqst_first_name, last_name__iexact=rqst_last_name)
+def filter_qset_by_first_name_and_last_name(qset, rqst_first_name, rqst_last_name):
+    qset = qset.filter(first_name__iexact=rqst_first_name, last_name__iexact=rqst_last_name)
 
-    return staff_objs
-
-
-def filter_staff_objs_by_first_name(staff_objs, rqst_first_name):
-    staff_objs = staff_objs.filter(first_name__iexact=rqst_first_name)
-
-    return staff_objs
+    return qset
 
 
-def filter_staff_objs_by_last_name(staff_objs, rqst_last_name):
-    staff_objs = staff_objs.filter(last_name__iexact=rqst_last_name)
+def filter_qset_by_first_name(qset, rqst_first_name):
+    qset = qset.filter(first_name__iexact=rqst_first_name)
 
-    return staff_objs
-
-
-def filter_staff_objs_by_email(staff_objs, rqst_email):
-    staff_objs = staff_objs.filter(email__iexact=rqst_email)
-
-    return staff_objs
+    return qset
 
 
-def filter_staff_objs_by_county(staff_objs, rqst_county):
-    staff_objs = staff_objs.filter(county__iexact=rqst_county)
+def filter_qset_by_last_name(qset, rqst_last_name):
+    qset = qset.filter(last_name__iexact=rqst_last_name)
 
-    return staff_objs
+    return qset
 
 
-def filter_staff_objs_by_mpn(staff_objs, rqst_mpn):
-    staff_objs = staff_objs.filter(mpn__iexact=rqst_mpn)
+def filter_qset_by_company_name(qset, rqst_company_name):
+    qset = qset.filter(company_name__iexact=rqst_company_name)
 
-    return staff_objs
+    return qset
+
+
+def filter_qset_by_email(qset, rqst_email):
+    qset = qset.filter(email__iexact=rqst_email)
+
+    return qset
+
+
+def filter_qset_by_phone_number(qset, rqst_phone_number):
+    qset = qset.filter(phone_number__iexact=rqst_phone_number)
+
+    return qset
