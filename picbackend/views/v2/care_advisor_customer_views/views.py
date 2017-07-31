@@ -1,9 +1,3 @@
-"""
-Defines views that handle Patient Innovation Center Staff based requests
-API Version 2
-"""
-
-
 from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -47,41 +41,41 @@ class CareAdvisorCustomerMgmtView(JSONPUTRspMixin, JSONGETRspMixin, View):
             if care_advisor_customer_instance:
                 response_raw_data['Data']["id"] = care_advisor_customer_instance.id
 
-    def care_advisor_customer_mgmt_get_logic(self, request, validated_params, response_raw_data, rqst_errors):
+    def care_advisor_customer_mgmt_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         def retrieve_data_by_primary_params_and_add_to_response():
             data_list = []
 
-            if 'id' in validated_params:
-                rqst_staff_id = validated_params['id']
+            if 'id' in validated_GET_rqst_params:
+                rqst_staff_id = validated_GET_rqst_params['id']
                 if rqst_staff_id != 'all':
-                    list_of_ids = validated_params['id_list']
+                    list_of_ids = validated_GET_rqst_params['id_list']
                 else:
                     list_of_ids = None
 
                 data_list = retrieve_table_data_by_id(rqst_staff_id, list_of_ids, rqst_errors)
-            elif 'first_name' in validated_params and 'last_name' in validated_params:
-                rqst_first_name = validated_params['first_name']
-                rqst_last_name = validated_params['last_name']
+            elif 'first_name' in validated_GET_rqst_params and 'last_name' in validated_GET_rqst_params:
+                rqst_first_name = validated_GET_rqst_params['first_name']
+                rqst_last_name = validated_GET_rqst_params['last_name']
 
                 data_list = retrieve_table_data_by_first_name_and_last_name(rqst_first_name, rqst_last_name, rqst_errors)
-            elif 'first_name' in validated_params:
-                list_of_first_names = validated_params['first_name_list']
+            elif 'first_name' in validated_GET_rqst_params:
+                list_of_first_names = validated_GET_rqst_params['first_name_list']
 
                 data_list = retrieve_table_data_by_first_name(list_of_first_names, rqst_errors)
-            elif 'last_name' in validated_params:
-                list_of_last_names = validated_params['last_name_list']
+            elif 'last_name' in validated_GET_rqst_params:
+                list_of_last_names = validated_GET_rqst_params['last_name_list']
 
                 data_list = retrieve_table_data_by_last_name(list_of_last_names, rqst_errors)
-            elif 'email' in validated_params:
-                list_of_emails = validated_params['email_list']
+            elif 'email' in validated_GET_rqst_params:
+                list_of_emails = validated_GET_rqst_params['email_list']
 
                 data_list = retrieve_table_data_by_email(list_of_emails, rqst_errors)
-            elif 'company_name' in validated_params:
-                company_name = validated_params['company_name']
+            elif 'company_name' in validated_GET_rqst_params:
+                company_name = validated_GET_rqst_params['company_name']
 
                 data_list = retrieve_table_data_by_company_name(company_name, rqst_errors)
-            elif 'phone_number' in validated_params:
-                list_of_phone_numbers = validated_params['phone_number_list']
+            elif 'phone_number' in validated_GET_rqst_params:
+                list_of_phone_numbers = validated_GET_rqst_params['phone_number_list']
 
                 data_list = retrieve_table_data_by_phone_number(list_of_phone_numbers, rqst_errors)
             else:
@@ -91,9 +85,9 @@ class CareAdvisorCustomerMgmtView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
         retrieve_data_by_primary_params_and_add_to_response()
 
-    put_logic_function = care_advisor_customer_mgmt_put_logic
+    parse_PUT_request_and_add_response = care_advisor_customer_mgmt_put_logic
 
-    accepted_get_parameters = [
+    accepted_GET_request_parameters = [
         "id",
         "first_name",
         "last_name",
@@ -101,4 +95,4 @@ class CareAdvisorCustomerMgmtView(JSONPUTRspMixin, JSONGETRspMixin, View):
         "company_name",
         "phone_number",
     ]
-    get_logic_function = care_advisor_customer_mgmt_get_logic
+    parse_GET_request_and_add_response = care_advisor_customer_mgmt_get_logic

@@ -27,34 +27,34 @@ class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     def dispatch(self, request, *args, **kwargs):
         return super(NavHubLocationManagementView, self).dispatch(request, *args, **kwargs)
 
-    def nav_hub_location_management_put_logic(self, post_data, response_raw_data, post_errors):
-        rqst_action = clean_string_value_from_dict_object(post_data, "root", "Database Action", post_errors)
+    def nav_hub_location_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
+        rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
 
-        if not post_errors:
+        if not rqst_errors:
             if rqst_action == "Location Addition":
-                location_instance = validate_rqst_params_and_add_instance(post_data, post_errors)
+                location_instance = validate_rqst_params_and_add_instance(rqst_body, rqst_errors)
 
                 if location_instance:
                     response_raw_data['Data'] = {"Database ID": location_instance.id}
             elif rqst_action == "Location Modification":
-                location_instance = validate_rqst_params_and_modify_instance(post_data, post_errors)
+                location_instance = validate_rqst_params_and_modify_instance(rqst_body, rqst_errors)
 
                 if location_instance:
                     response_raw_data['Data'] = {"Database ID": location_instance.id}
             elif rqst_action == "Location Deletion":
-                validate_rqst_params_and_delete_instance(post_data, post_errors)
+                validate_rqst_params_and_delete_instance(rqst_body, rqst_errors)
 
-                if not post_errors:
+                if not rqst_errors:
                     response_raw_data['Data']["Database ID"] = "Deleted"
             else:
-                post_errors.append("No valid 'Database Action' provided.")
+                rqst_errors.append("No valid 'Database Action' provided.")
 
-    def nav_hub_location_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
+    def nav_hub_location_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         nav_hub_location_qset = NavMetricsLocation.objects.all()
 
         def filter_db_objects_by_secondary_params(db_objects):
-            if 'is_cps_location' in search_params:
-                is_cps_location = search_params['is_cps_location']
+            if 'is_cps_location' in validated_GET_rqst_params:
+                is_cps_location = validated_GET_rqst_params['is_cps_location']
                 db_objects = db_objects.filter(cps_location=is_cps_location)
 
             return db_objects
@@ -62,10 +62,10 @@ class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         nav_hub_location_qset = filter_db_objects_by_secondary_params(nav_hub_location_qset)
 
         def retrieve_data_by_primary_params_and_add_to_response(db_object_qset):
-            if 'id' in search_params:
-                rqst_nav_hub_location_id = search_params['id']
+            if 'id' in validated_GET_rqst_params:
+                rqst_nav_hub_location_id = validated_GET_rqst_params['id']
                 if rqst_nav_hub_location_id != 'all':
-                    list_of_ids = search_params['id_list']
+                    list_of_ids = validated_GET_rqst_params['id_list']
                 else:
                     list_of_ids = None
             else:
@@ -79,10 +79,10 @@ class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
         retrieve_data_by_primary_params_and_add_to_response(nav_hub_location_qset)
 
-    put_logic_function = nav_hub_location_management_put_logic
+    parse_PUT_request_and_add_response = nav_hub_location_management_put_logic
 
-    accepted_get_parameters = [
+    accepted_GET_request_parameters = [
         "is_cps_location",
         "id"
     ]
-    get_logic_function = nav_hub_location_management_get_logic
+    parse_GET_request_and_add_response = nav_hub_location_management_get_logic

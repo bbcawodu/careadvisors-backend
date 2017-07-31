@@ -14,13 +14,13 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
     def dispatch(self, request, *args, **kwargs):
         return super(RankedSpecificConcernsView, self).dispatch(request, *args, **kwargs)
 
-    def ranked_specific_concerns_post_logic(self, post_data, response_raw_data, post_errors):
-        list_of_related_specific_concern_qsets, no_of_unique_rel_spec_concerns = retrieve_related_spec_concern_objs_from_list_of_gen_concern_names(post_data, post_errors)
+    def ranked_specific_concerns_post_logic(self, rqst_body, response_raw_data, rqst_errors):
+        list_of_related_specific_concern_qsets, no_of_unique_rel_spec_concerns = retrieve_related_spec_concern_objs_from_list_of_gen_concern_names(rqst_body, rqst_errors)
         if no_of_unique_rel_spec_concerns == 0:
-            post_errors.append(
+            rqst_errors.append(
                 "There are no related specific concern objects in the db for the given general concerns.")
 
-        if not post_errors:
+        if not rqst_errors:
             def determine_min_no_of_specific_concerns_to_fetch():
                 if no_of_unique_rel_spec_concerns < MIN_NO_OF_SPECIFIC_CONCERNS_TO_FETCH:
                     return no_of_unique_rel_spec_concerns
@@ -81,4 +81,4 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
 
             parse_ranked_specific_concern_objects_and_add_data_to_response()
 
-    post_logic_function = ranked_specific_concerns_post_logic
+    parse_POST_request_and_add_response = ranked_specific_concerns_post_logic

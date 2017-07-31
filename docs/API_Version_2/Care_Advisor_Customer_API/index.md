@@ -1,4 +1,4 @@
-## Care Advisor Customer Backend API (IN DEVELOPMENT - NOT LIVE)
+## Care Advisor Customer Backend API
 
 
 ## care_advisor_customer Table Entity Relationship Diagram
@@ -6,7 +6,7 @@
 ![care_advisor_customer Table Entity Relationship Diagram](care_advisor_customer_table_erd.jpg)
 
 
-### Care Advisor Customer: Create, Update, and Delete Methods Endpoint (IN DEVELOPMENT - NOT LIVE)
+### Care Advisor Customer: Create, Update, and Delete Methods Endpoint
 To create, update, or delete rows in the care_advisor_customer table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/care_advisor_customer/
 
 - The header of the request should include: 
@@ -96,7 +96,7 @@ In response, JSON formatted text with the following format will be returned:
         - Each object in the array is a string corresponding to an error in parsing the request BODY.
     - No changes are made to the database.
     
-### Care Advisor Customer: Read Method Endpoint (IN DEVELOPMENT - NOT LIVE)
+### Care Advisor Customer: Read Method Endpoint
 - To read/query rows in the care_advisor_customer table of the database, make a GET request to http://picbackend.herokuapp.com/v2/care_advisor_customer/
     - Results returned in the response body will be filtered by the parameters given in the query string of the request url.
     - The parameters given in the query string can be divided into 2 categories: "primary" and "secondary"

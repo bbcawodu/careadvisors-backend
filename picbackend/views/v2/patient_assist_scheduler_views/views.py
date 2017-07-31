@@ -119,11 +119,11 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
     def dispatch(self, request, *args, **kwargs):
         return super(PatientAssistAptMgtView, self).dispatch(request, *args, **kwargs)
 
-    def nav_scheduled_appointments_logic(self, request, search_params, response_raw_data, rqst_errors):
+    def nav_scheduled_appointments_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         response_raw_data["Data"] = {"Scheduled Appointments": None}
 
-        if 'nav_id' in search_params and not rqst_errors:
-            nav_id = search_params["nav_id"]
+        if 'nav_id' in validated_GET_rqst_params and not rqst_errors:
+            nav_id = validated_GET_rqst_params["nav_id"]
 
             try:
                 picstaff_object = PICStaff.objects.get(id=nav_id)
@@ -143,12 +143,12 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
 
         response_raw_data["Host"] = settings.HOSTURL
 
-    def available_nav_appointments_logic(self, post_data, response_raw_data, post_errors):
+    def available_nav_appointments_logic(self, rqst_body, response_raw_data, rqst_errors):
         response_raw_data["Data"] = {}
         response_raw_data["Data"]["Next Available Appointments"] = []
         response_raw_data["Data"]["Preferred Appointments"] = []
 
-        rqst_preferred_times = clean_list_value_from_dict_object(post_data, "root", "Preferred Times", post_errors, empty_list_allowed=True)
+        rqst_preferred_times = clean_list_value_from_dict_object(rqst_body, "root", "Preferred Times", rqst_errors, empty_list_allowed=True)
 
         valid_rqst_preferred_times_timestamps = []
         for preferred_time_iso_string in rqst_preferred_times:
@@ -159,29 +159,29 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
                     pass
 
         if valid_rqst_preferred_times_timestamps:
-            response_raw_data["Data"]["Preferred Appointments"] = get_preferred_nav_apts(rqst_preferred_times, valid_rqst_preferred_times_timestamps, post_errors)
+            response_raw_data["Data"]["Preferred Appointments"] = get_preferred_nav_apts(rqst_preferred_times, valid_rqst_preferred_times_timestamps, rqst_errors)
         else:
-            response_raw_data["Data"]["Next Available Appointments"] = get_next_available_nav_apts(post_errors)
+            response_raw_data["Data"]["Next Available Appointments"] = get_next_available_nav_apts(rqst_errors)
 
-    def add_nav_scheduled_appointment_logic(self, post_data, response_raw_data, post_errors):
+    def add_nav_scheduled_appointment_logic(self, rqst_body, response_raw_data, rqst_errors):
         response_raw_data["Data"] = {"Confirmed Appointment": None,
                                      "Consumer ID": None}
 
-        confirmed_appointment, consumer_dict = add_nav_apt_to_google_calendar(post_data, post_errors)
+        confirmed_appointment, consumer_dict = add_nav_apt_to_google_calendar(rqst_body, rqst_errors)
         response_raw_data["Data"]["Confirmed Appointment"] = confirmed_appointment
         if consumer_dict:
             response_raw_data["Data"]["Consumer ID"] = consumer_dict["Database ID"]
 
-    def delete_nav_scheduled_appointment_logic(self, post_data, response_raw_data, post_errors):
+    def delete_nav_scheduled_appointment_logic(self, rqst_body, response_raw_data, rqst_errors):
         response_raw_data["Data"] = {"Deleted Appointment": False}
 
-        response_raw_data["Data"]["Deleted Appointment"] = delete_nav_apt_from_google_calendar(post_data, post_errors)
+        response_raw_data["Data"]["Deleted Appointment"] = delete_nav_apt_from_google_calendar(rqst_body, rqst_errors)
 
-    put_logic_function = add_nav_scheduled_appointment_logic
-    post_logic_function = available_nav_appointments_logic
-    delete_logic_function = delete_nav_scheduled_appointment_logic
+    parse_PUT_request_and_add_response = add_nav_scheduled_appointment_logic
+    parse_POST_request_and_add_response = available_nav_appointments_logic
+    parse_DELETE_request_and_add_response = delete_nav_scheduled_appointment_logic
 
-    accepted_get_parameters = [
+    accepted_GET_request_parameters = [
         "nav_id"
     ]
-    get_logic_function = nav_scheduled_appointments_logic
+    parse_GET_request_and_add_response = nav_scheduled_appointments_logic
