@@ -65,22 +65,22 @@ def manage_cta_request(request):
 
 # Need to abstract common variables in get and post class methods into class attributes
 class ViewCTAView(JSONGETRspMixin, View):
-    def view_cta_get_logic(self, request, search_params, response_raw_data, rqst_errors):
+    def view_cta_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         def retrieve_data_by_primary_params_and_add_to_response():
             cta_return_list = []
-            if 'intent' in search_params:
+            if 'intent' in validated_GET_rqst_params:
                 try:
-                    if search_params['intent'] == 'all':
+                    if validated_GET_rqst_params['intent'] == 'all':
                         cta_objects = CallToAction.objects.all()
 
                         for cta_object in cta_objects:
                             cta_return_list.append(cta_object.return_values_dict())
                     else:
-                        cta_object = CallToAction.objects.get(intent__iexact=search_params['intent'])
+                        cta_object = CallToAction.objects.get(intent__iexact=validated_GET_rqst_params['intent'])
 
                         cta_return_list.append(cta_object.return_values_dict())
                 except CallToAction.DoesNotExist:
-                    rqst_errors.append("No Call to Action object found for intent keyword: {}".format(search_params["intent"]))
+                    rqst_errors.append("No Call to Action object found for intent keyword: {}".format(validated_GET_rqst_params["intent"]))
             else:
                 rqst_errors.append("'intent' must be in GET parameters")
 
@@ -88,5 +88,5 @@ class ViewCTAView(JSONGETRspMixin, View):
 
         retrieve_data_by_primary_params_and_add_to_response()
 
-    accepted_get_parameters = ["intent"]
-    get_logic_function = view_cta_get_logic
+    accepted_GET_request_parameters = ["intent"]
+    parse_GET_request_and_add_response = view_cta_get_logic

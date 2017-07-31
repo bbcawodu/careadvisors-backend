@@ -29,59 +29,59 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     def dispatch(self, request, *args, **kwargs):
         return super(PlansManagementView, self).dispatch(request, *args, **kwargs)
 
-    def plans_management_put_logic(self, post_data, response_raw_data, post_errors):
-        rqst_action = clean_string_value_from_dict_object(post_data, "root", "Database Action", post_errors)
+    def plans_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
+        rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
 
-        if not post_errors:
+        if not rqst_errors:
             healthcare_plan_instance = None
 
             if rqst_action == "Plan Addition":
-                healthcare_plan_instance = validate_rqst_params_and_add_instance(post_data, post_errors)
+                healthcare_plan_instance = validate_rqst_params_and_add_instance(rqst_body, rqst_errors)
             elif rqst_action == "Plan Modification":
-                healthcare_plan_instance = validate_rqst_params_and_modify_instance(post_data, post_errors)
+                healthcare_plan_instance = validate_rqst_params_and_modify_instance(rqst_body, rqst_errors)
             elif rqst_action == "Plan Deletion":
-                validate_rqst_params_and_delete_instance(post_data, post_errors)
+                validate_rqst_params_and_delete_instance(rqst_body, rqst_errors)
 
-                if not post_errors:
+                if not rqst_errors:
                     response_raw_data['Data']["Database ID"] = "Deleted"
             else:
-                post_errors.append("No valid 'Database Action' provided.")
+                rqst_errors.append("No valid 'Database Action' provided.")
 
             if healthcare_plan_instance:
                 response_raw_data['Data']["Database ID"] = healthcare_plan_instance.id
 
-    def plans_management_get_logic(self, request, search_params, response_raw_data, rqst_errors):
+    def plans_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         def retrieve_data_by_primary_params_and_add_to_response():
             data_list = None
 
-            if 'id' in search_params:
-                rqst_plan_id = search_params['id']
+            if 'id' in validated_GET_rqst_params:
+                rqst_plan_id = validated_GET_rqst_params['id']
                 if rqst_plan_id != 'all':
-                    list_of_ids = search_params['id_list']
+                    list_of_ids = validated_GET_rqst_params['id_list']
                 else:
                     list_of_ids = None
 
-                data_list = retrieve_plan_data_by_id(search_params, rqst_plan_id, list_of_ids, rqst_errors)
-            elif 'name' in search_params:
-                rqst_name = search_params['name']
+                data_list = retrieve_plan_data_by_id(validated_GET_rqst_params, rqst_plan_id, list_of_ids, rqst_errors)
+            elif 'name' in validated_GET_rqst_params:
+                rqst_name = validated_GET_rqst_params['name']
 
-                data_list = retrieve_plan_data_by_name(search_params, rqst_name, rqst_errors)
-            elif 'carrier_state' in search_params:
-                list_of_carrier_states = search_params['carrier_state_list']
+                data_list = retrieve_plan_data_by_name(validated_GET_rqst_params, rqst_name, rqst_errors)
+            elif 'carrier_state' in validated_GET_rqst_params:
+                list_of_carrier_states = validated_GET_rqst_params['carrier_state_list']
 
-                data_list = retrieve_plan_data_by_carrier_state(search_params, list_of_carrier_states, rqst_errors)
-            elif 'carrier_name' in search_params:
-                rqst_carrier_name = search_params['carrier_name']
+                data_list = retrieve_plan_data_by_carrier_state(validated_GET_rqst_params, list_of_carrier_states, rqst_errors)
+            elif 'carrier_name' in validated_GET_rqst_params:
+                rqst_carrier_name = validated_GET_rqst_params['carrier_name']
 
-                data_list = retrieve_plan_data_by_carrier_name(search_params, rqst_carrier_name, rqst_errors)
-            elif 'carrier_id' in search_params:
-                list_of_carrier_ids = search_params['carrier_id_list']
+                data_list = retrieve_plan_data_by_carrier_name(validated_GET_rqst_params, rqst_carrier_name, rqst_errors)
+            elif 'carrier_id' in validated_GET_rqst_params:
+                list_of_carrier_ids = validated_GET_rqst_params['carrier_id_list']
 
-                data_list = retrieve_plan_data_by_carrier_id(search_params, list_of_carrier_ids, rqst_errors)
-            elif 'accepted_location_id' in search_params:
-                list_of_accepted_location_ids = search_params['accepted_location_id_list']
+                data_list = retrieve_plan_data_by_carrier_id(validated_GET_rqst_params, list_of_carrier_ids, rqst_errors)
+            elif 'accepted_location_id' in validated_GET_rqst_params:
+                list_of_accepted_location_ids = validated_GET_rqst_params['accepted_location_id_list']
 
-                data_list = retrieve_plan_data_by_accepted_location_id(search_params, list_of_accepted_location_ids, rqst_errors)
+                data_list = retrieve_plan_data_by_accepted_location_id(validated_GET_rqst_params, list_of_accepted_location_ids, rqst_errors)
             else:
                 rqst_errors.append('No Valid Parameters')
 
@@ -89,9 +89,9 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
         retrieve_data_by_primary_params_and_add_to_response()
 
-    put_logic_function = plans_management_put_logic
+    parse_PUT_request_and_add_response = plans_management_put_logic
 
-    accepted_get_parameters = [
+    accepted_GET_request_parameters = [
         "id",
         "name",
         'carrier_state',
@@ -102,4 +102,4 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         "include_detailed_report",
         "premium_type"
     ]
-    get_logic_function = plans_management_get_logic
+    parse_GET_request_and_add_response = plans_management_get_logic

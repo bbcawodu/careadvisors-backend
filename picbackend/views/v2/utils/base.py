@@ -1,7 +1,3 @@
-"""
-This module defines utility functions that are used throughout the project
-"""
-
 import sys
 import json
 from django.http import HttpResponse
@@ -9,29 +5,23 @@ from .get_parameter_validation_functions import GET_PARAMETER_VALIDATION_FUNCTIO
 
 
 class JSONGETRspMixin(object):
-    get_logic_function = None
-    accepted_get_parameters = None
+    parse_GET_request_and_add_response = None
+    accepted_GET_request_parameters = None
 
     def get(self, request, *args, **kwargs):
-        """
-        Defines view that handles Patient Innovation Center GET requests that return json objects in the body
-        :param request: django request instance object
-        :rtype: HttpResponse
-        """
-
-        if self.get_logic_function is None:
-            raise NotImplementedError("Need to set class attribute, 'get_logic_function'.")
-        elif self.accepted_get_parameters is None:
+        if self.parse_GET_request_and_add_response is None:
+            raise NotImplementedError("Need to set class attribute, 'parse_GET_request_and_add_response'.")
+        elif self.accepted_GET_request_parameters is None:
             raise NotImplementedError("Need to set class attribute, 'accepted_parameters'. If no parameters are needed, set class attribute to an empty list.")
         else:
             # Initialize dictionary for response data, initialize list for parsing errors
             response_raw_data, rqst_errors = init_v2_response_data()
 
             # Build dictionary that contains valid Patient Innovation Center GET parameters
-            search_params = validate_get_request_parameters(request.GET, self.accepted_get_parameters, rqst_errors)
+            validated_GET_rqst_params = validate_get_request_parameters(request.GET, self.accepted_GET_request_parameters, rqst_errors)
 
             if not rqst_errors:
-                self.get_logic_function(request, search_params, response_raw_data, rqst_errors)
+                self.parse_GET_request_and_add_response(request, validated_GET_rqst_params, response_raw_data, rqst_errors)
 
             parse_and_log_errors(response_raw_data, rqst_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
@@ -39,59 +29,47 @@ class JSONGETRspMixin(object):
 
 
 class JSONPOSTRspMixin(object):
-    post_logic_function = None
+    parse_POST_request_and_add_response = None
 
     def post(self, request, *args, **kwargs):
-        """
-        Defines view that handles Patient Innovation Center POST requests that accept and return json objects in the body
-        :param request: django request instance object
-        :rtype: HttpResponse
-        """
-
-        if self.post_logic_function:
+        if self.parse_POST_request_and_add_response:
             # Initialize dictionary for response data, initialize list for parsing errors
-            response_raw_data, post_errors = init_v2_response_data()
+            response_raw_data, rqst_errors = init_v2_response_data()
 
-            post_json = request.body.decode('utf-8')
-            post_data = json.loads(post_json)
+            json_encoded_rqst_body = request.body.decode('utf-8')
+            rqst_body = json.loads(json_encoded_rqst_body)
 
-            self.post_logic_function(post_data, response_raw_data, post_errors)
+            self.parse_POST_request_and_add_response(rqst_body, response_raw_data, rqst_errors)
 
-            parse_and_log_errors(response_raw_data, post_errors)
+            parse_and_log_errors(response_raw_data, rqst_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
             return response
         else:
-            raise NotImplementedError("Need to set class attribute, 'post_logic_function'.")
+            raise NotImplementedError("Need to set class attribute, 'parse_POST_request_and_add_response'.")
 
 
 class JSONPUTRspMixin(object):
-    put_logic_function = None
+    parse_PUT_request_and_add_response = None
 
     def put(self, request, *args, **kwargs):
-        """
-        Defines view that handles Patient Innovation Center PUT requests that accept and return json objects in the body
-        :param request: django request instance object
-        :rtype: HttpResponse
-        """
-
-        if self.put_logic_function:
+        if self.parse_PUT_request_and_add_response:
             # Initialize dictionary for response data, initialize list for parsing errors
-            response_raw_data, post_errors = init_v2_response_data()
+            response_raw_data, rqst_errors = init_v2_response_data()
 
-            post_json = request.body.decode('utf-8')
-            post_data = json.loads(post_json)
+            json_encoded_rqst_body = request.body.decode('utf-8')
+            rqst_body = json.loads(json_encoded_rqst_body)
 
-            self.put_logic_function(post_data, response_raw_data, post_errors)
+            self.parse_PUT_request_and_add_response(rqst_body, response_raw_data, rqst_errors)
 
-            parse_and_log_errors(response_raw_data, post_errors)
+            parse_and_log_errors(response_raw_data, rqst_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
             return response
         else:
-            raise NotImplementedError("Need to set class attribute, 'put_logic_function'.")
+            raise NotImplementedError("Need to set class attribute, 'parse_PUT_request_and_add_response'.")
 
 
 class JSONDELETERspMixin(object):
-    delete_logic_function = None
+    parse_DELETE_request_and_add_response = None
 
     def delete(self, request, *args, **kwargs):
         """
@@ -100,20 +78,20 @@ class JSONDELETERspMixin(object):
         :rtype: HttpResponse
         """
 
-        if self.delete_logic_function:
+        if self.parse_DELETE_request_and_add_response:
             # Initialize dictionary for response data, initialize list for parsing errors
-            response_raw_data, post_errors = init_v2_response_data()
+            response_raw_data, rqst_errors = init_v2_response_data()
 
-            post_json = request.body.decode('utf-8')
-            post_data = json.loads(post_json)
+            json_encoded_rqst_body = request.body.decode('utf-8')
+            rqst_body = json.loads(json_encoded_rqst_body)
 
-            self.delete_logic_function(post_data, response_raw_data, post_errors)
+            self.parse_DELETE_request_and_add_response(rqst_body, response_raw_data, rqst_errors)
 
-            parse_and_log_errors(response_raw_data, post_errors)
+            parse_and_log_errors(response_raw_data, rqst_errors)
             response = HttpResponse(json.dumps(response_raw_data), content_type="application/json")
             return response
         else:
-            raise NotImplementedError("Need to set class attribute, 'delete_logic_function'.")
+            raise NotImplementedError("Need to set class attribute, 'parse_DELETE_request_and_add_response'.")
 
 
 class JSONRspMixin(object):
