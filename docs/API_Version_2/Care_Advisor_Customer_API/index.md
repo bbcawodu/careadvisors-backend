@@ -17,8 +17,7 @@ The body of the request should be JSON formatted text using the following templa
 ```
 "
 {
-"first_name": String,
-"last_name": String,
+"full_name": String,
 "email": String (Must be in the following format: username@domanname.domain),
 "company_name": String,
 "phone_number": String (Must be in the following format: DDDDDDDDDD where D=base 10 digit),
@@ -62,8 +61,7 @@ In response, JSON formatted text with the following format will be returned:
         - Keys that MUST be omitted:
             - None
         - Keys that CAN be omitted:
-            - "first_name"
-            - "last_name"
+            - "full_name"
             - "email"
             - "company_name"
             - "phone_number"
@@ -102,12 +100,8 @@ In response, JSON formatted text with the following format will be returned:
     - The parameters given in the query string can be divided into 2 categories: "primary" and "secondary"
     
     - "primary" parameters - One and exactly one of these parameters are required in every request query string.
-        - "first_name" corresponds to the first_name column of the care_advisor_customer table.
-            - Must be a string
-            - Can be multiple values separated by commas.
-        - "last_name" corresponds to the last_name column of the care_advisor_customer table.
-            - Must be a string
-            - Can be multiple values separated by commas.
+        - "full_name" corresponds to the full_name column of the care_advisor_customer table.
+            - Must be an ascii string that has all non-ascii characters url encoded
         - "email" corresponds to the email column of the care_advisor_customer table.
             - Must be a string
             - Can be multiple values separated by commas.
@@ -121,8 +115,6 @@ In response, JSON formatted text with the following format will be returned:
             - Must be an integer
             - Can be multiple values separated by commas.
             - passing "all" as the value will return all staff members.
-        - SPECIAL CASE: Only "first_name" and "last_name" can be given simultaneously as parameters in the query string.
-            - When "first_name" and "last_name" are given at the same time, only one value of each permitted for each parameter.
             
     - "Secondary" parameters - Any number of these parameters can be added to a request query string.
         - None
@@ -132,8 +124,7 @@ In response, JSON formatted text with the following format will be returned:
     {
         "Data": [
             {
-                "first_name": String,
-                "last_name": String,
+                "full_name": String,
                 "email": String,
                 "company_name": String,
                 "phone_number": String,
@@ -153,13 +144,13 @@ In response, JSON formatted text with the following format will be returned:
 
 - NOTES
     - If the 'primary' parameter given in the query string is not 'id', results will be grouped by the 'primary' parameter that is given with the request.
-        -Eg: If "first_name" is the "primary" parameter the results will be grouped like the following
+        -Eg: If "full_name" is the "primary" parameter the results will be grouped like the following
             
             ```
             "Data": [
-                [Results for first_name parameter 2],
-                [Results for first_name parameter 1],
-                [Results for first_name parameter 3],
+                [Results for full_name parameter 2],
+                [Results for full_name parameter 1],
+                [Results for full_name parameter 3],
                 ...,
             ] (Order is arbitrary)
             ```
