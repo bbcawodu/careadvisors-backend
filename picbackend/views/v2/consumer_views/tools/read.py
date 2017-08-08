@@ -128,18 +128,24 @@ def retrieve_consumer_data_by_last_name(consumers, list_of_last_names, rqst_erro
 def paginate_result_list_by_changing_excess_data_to_ids(consumer_list, CONSUMERS_PER_PAGE, rqst_page_no, base_url):
     page_urls = []
 
-    len_of_consumer_list = len(consumer_list)
+    len_of_consumer_list = sum(len(possible_consumer_sublist) if isinstance(possible_consumer_sublist, list) else 1 for possible_consumer_sublist in consumer_list)
     if len_of_consumer_list > CONSUMERS_PER_PAGE:
         if rqst_page_no:
-            end_point_of_first_list_to_change = ((rqst_page_no - 1) * CONSUMERS_PER_PAGE)
-            start_point_of_second_list_to_change = (rqst_page_no * CONSUMERS_PER_PAGE)
+            end_point_of_first_list_to_change_to_ids = ((rqst_page_no - 1) * CONSUMERS_PER_PAGE)
+            start_point_of_second_list_to_change_to_ids = (rqst_page_no * CONSUMERS_PER_PAGE)
 
-            if len_of_consumer_list > end_point_of_first_list_to_change:
+            if len_of_consumer_list > end_point_of_first_list_to_change_to_ids:
                 for i, consumer in enumerate(consumer_list[:(CONSUMERS_PER_PAGE * (rqst_page_no - 1))]):
-                    consumer_list[i] = consumer["Database ID"]
-            if len_of_consumer_list > start_point_of_second_list_to_change:
+                    if isinstance(consumer, list):
+                        pass
+                    else:
+                        consumer_list[i] = consumer["Database ID"]
+            if len_of_consumer_list > start_point_of_second_list_to_change_to_ids:
                 for i, consumer in enumerate(consumer_list[(rqst_page_no * CONSUMERS_PER_PAGE):]):
-                    consumer_list[(rqst_page_no * CONSUMERS_PER_PAGE)+i] = consumer["Database ID"]
+                    if isinstance(consumer, list):
+                        pass
+                    else:
+                        consumer_list[(rqst_page_no * CONSUMERS_PER_PAGE)+i] = consumer["Database ID"]
         else:
             total_pages = math.ceil(len_of_consumer_list / CONSUMERS_PER_PAGE)
             for i in range(total_pages):

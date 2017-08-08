@@ -23,4 +23,4 @@ def filter_metrics_db_instances_by_secondary_params(search_params, metrics_insta
         list_of_location_ids = search_params['location_id_list']
         metrics_instances = metrics_instances.filter(location__id__in=list_of_location_ids)
 
-    return metrics_instances
+    return metrics_instances.order_by("submission_date")
