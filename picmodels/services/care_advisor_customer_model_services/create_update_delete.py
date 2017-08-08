@@ -5,8 +5,7 @@ from django.db import IntegrityError
 def add_instance_using_validated_params(validated_params, rqst_errors):
     rqst_email = validated_params['email']
     rqst_db_instance_values = {
-        'first_name': validated_params['first_name'],
-        'last_name': validated_params['last_name'],
+        'full_name': validated_params['full_name'],
         'company_name': validated_params['company_name'],
         'phone_number': validated_params['phone_number'],
     }
@@ -36,10 +35,8 @@ def modify_instance_using_validated_params(validated_params, rqst_errors):
             care_advisor_customer_instance.email = rqst_email
         else:
             rqst_email = care_advisor_customer_instance.email
-        if 'first_name' in validated_params:
-            care_advisor_customer_instance.first_name = validated_params['first_name']
-        if 'last_name' in validated_params:
-            care_advisor_customer_instance.last_name = validated_params['last_name']
+        if 'full_name' in validated_params:
+            care_advisor_customer_instance.full_name = validated_params['full_name']
         if 'company_name' in validated_params:
             care_advisor_customer_instance.company_name = validated_params['company_name']
         if 'phone_number' in validated_params:

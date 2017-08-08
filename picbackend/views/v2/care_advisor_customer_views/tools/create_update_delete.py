@@ -29,8 +29,7 @@ def validate_put_rqst_params(rqst_body, rqst_errors):
 
 
 def validate_params_for_create_row(rqst_body, validated_params, rqst_errors):
-    validated_params['first_name'] = clean_string_value_from_dict_object(rqst_body, "root", "first_name", rqst_errors)
-    validated_params['last_name'] = clean_string_value_from_dict_object(rqst_body, "root", "last_name", rqst_errors)
+    validated_params['full_name'] = clean_string_value_from_dict_object(rqst_body, "root", "full_name", rqst_errors)
 
     rqst_email = clean_string_value_from_dict_object(rqst_body, "root", "email", rqst_errors)
     if rqst_email is not None:
@@ -56,10 +55,8 @@ def validate_phone_number(phone_number, rqst_errors):
 
 def validate_params_for_update_row(rqst_body, validated_params, rqst_errors):
     validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
-    if 'first_name' in rqst_body:
-        validated_params['first_name'] = clean_string_value_from_dict_object(rqst_body, "root", "first_name", rqst_errors)
-    if 'last_name' in rqst_body:
-        validated_params['last_name'] = clean_string_value_from_dict_object(rqst_body, "root", "last_name", rqst_errors)
+    if 'full_name' in rqst_body:
+        validated_params['full_name'] = clean_string_value_from_dict_object(rqst_body, "root", "full_name", rqst_errors)
     if 'email' in rqst_body:
         rqst_email = clean_string_value_from_dict_object(rqst_body, "root", "email", rqst_errors)
         if rqst_email is not None:

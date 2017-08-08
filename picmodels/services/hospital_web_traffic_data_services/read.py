@@ -1,4 +1,4 @@
 def filter_hospital_web_traffic_calculator_data_instances_by_hospital_name(web_traffic_calculator_data_objs, rqst_hospital_name):
-    web_traffic_calculator_data_objs = web_traffic_calculator_data_objs.filter(hospital_name=rqst_hospital_name)
+    web_traffic_calculator_data_objs = web_traffic_calculator_data_objs.filter(hospital_name=rqst_hospital_name).order_by("hospital_name")
 
     return web_traffic_calculator_data_objs

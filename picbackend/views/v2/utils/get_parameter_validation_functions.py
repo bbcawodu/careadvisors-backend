@@ -353,6 +353,13 @@ def validate_get_rqst_parameter_company_name(get_rqst_params, validated_params, 
         validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
+def validate_get_rqst_parameter_full_name(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'full_name'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
 def validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors):
     unvalidated_param_value = get_rqst_params[param_name]
 
@@ -575,4 +582,5 @@ GET_PARAMETER_VALIDATION_FUNCTIONS = {
     "group_by": validate_get_rqst_parameter_group_by,
     "phone_number": validate_get_rqst_parameter_phone_number,
     "company_name": validate_get_rqst_parameter_company_name,
+    'full_name': validate_get_rqst_parameter_full_name
 }
