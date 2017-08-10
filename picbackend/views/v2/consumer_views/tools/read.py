@@ -4,6 +4,7 @@ Defines utility functions and classes for consumer views
 
 
 import math
+import sys
 from picmodels.services import filter_db_queryset_by_id
 from picmodels.services.staff_consumer_models_services.pic_consumer_services import filter_consumer_objs_by_f_and_l_name
 from picmodels.services.staff_consumer_models_services.pic_consumer_services import filter_consumer_objs_by_email
@@ -13,6 +14,9 @@ from picmodels.services.staff_consumer_models_services.pic_consumer_services imp
 
 def retrieve_consumer_data_by_id(consumers, rqst_consumer_id, list_of_ids, rqst_errors):
     consumers = filter_db_queryset_by_id(consumers, rqst_consumer_id, list_of_ids)
+
+    print('Finished db query.')
+    sys.stdout.flush()
 
     response_list = create_response_list_from_db_objects(consumers)
 
@@ -27,6 +31,9 @@ def retrieve_consumer_data_by_id(consumers, rqst_consumer_id, list_of_ids, rqst_
                         rqst_errors.append('Consumer instance with id: {} not found in database'.format(db_id))
 
     check_response_data_for_requested_data()
+
+    print('Parsed table data for missing entries.')
+    sys.stdout.flush()
 
     return response_list
 
