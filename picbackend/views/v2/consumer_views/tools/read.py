@@ -20,6 +20,9 @@ def retrieve_consumer_data_by_id(consumers, rqst_consumer_id, list_of_ids, rqst_
 
     response_list = create_response_list_from_db_objects(consumers)
 
+    print('Built response data list.')
+    sys.stdout.flush()
+
     def check_response_data_for_requested_data():
         if not response_list:
             rqst_errors.append("No consumer instances in db for given ids")
