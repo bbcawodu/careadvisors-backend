@@ -114,7 +114,7 @@ In response, JSON formatted text with the following format will be returned:
         - "id" corresponds to the id column of the care_advisor_customer table.
             - Must be an integer
             - Can be multiple values separated by commas.
-            - passing "all" as the value will return all staff members.
+            - passing "all" as the value will return all rows.
             
     - "Secondary" parameters - Any number of these parameters can be added to a request query string.
         - None
@@ -160,6 +160,6 @@ In response, JSON formatted text with the following format will be returned:
     - The value for the "Error Code" key in the response root object will be 0. 
 - If there ARE errors parsing the request body or rows in the care_advisor_customer table of the database ARE NOT found,
     - "Error Code" will be 1.
-    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the JSON Body doc.
-    - Array corresponding to the "Data" key will be empty.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" object.
+        -Each item in the array is a string corresponding to an error parsing the JSON Body doc.
+    - An empty array will be the value for the "Data" key.
