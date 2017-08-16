@@ -174,9 +174,7 @@ def create_consumer_instance_from_apt_rqst(rqst_nav_id, post_data, post_errors):
         rqst_consumer_info['force_create_consumer'] = True
         rqst_consumer_info['Navigator Database ID'] = rqst_nav_id
 
-        consumer_info_response, consumer_info_errors = init_v2_response_data()
-        consumer_info_response = validate_rqst_params_and_add_instance(consumer_info_response, rqst_consumer_info, post_errors)
-        consumer_instance = PICConsumer.objects.get(id=consumer_info_response['Data']["Database ID"])
+        matching_consumer_instances, consumer_instance, backup_consumer_obj = validate_rqst_params_and_add_instance(rqst_consumer_info, post_errors)
 
         consumer_info = consumer_instance.return_values_dict()
 

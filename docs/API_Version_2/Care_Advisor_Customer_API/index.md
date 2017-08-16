@@ -27,7 +27,7 @@ The body of the request should be JSON formatted text using the following templa
 "
 ```
 
-In response, JSON formatted text with the following format will be returned:
+In response, JSON formatted text with the following format will be returned in the response body:
 ```
 {
  "Status": {
@@ -97,7 +97,7 @@ In response, JSON formatted text with the following format will be returned:
 ### Care Advisor Customer: Read Method Endpoint
 - To read/query rows in the care_advisor_customer table of the database, make a GET request to http://picbackend.herokuapp.com/v2/care_advisor_customer/
     - Results returned in the response body will be filtered by the parameters given in the query string of the request url.
-    - The parameters given in the query string can be divided into 2 categories: "primary" and "secondary"
+    - The parameters given in the REQUIRED query string can be divided into 2 categories: "primary" and "secondary"
     
     - "primary" parameters - One and exactly one of these parameters are required in every request query string.
         - "full_name" corresponds to the full_name column of the care_advisor_customer table.
@@ -119,7 +119,7 @@ In response, JSON formatted text with the following format will be returned:
     - "Secondary" parameters - Any number of these parameters can be added to a request query string.
         - None
     
-- The response will be a JSON document with the following format:
+- The response body will be a JSON formatted text with the following format:
     ```
     {
         "Data": [

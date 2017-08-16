@@ -18,9 +18,6 @@ from ..utils import JSONGETRspMixin
 import sys
 
 
-CONSUMERS_PER_PAGE = 20
-
-
 # Need to abstract common variables in get and post class methods into class attributes
 class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
@@ -134,6 +131,14 @@ def get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst
     def retrieve_data_by_primary_params_and_add_to_response(db_objects):
         data_list = []
 
+        def paginate_results():
+            rqst_page_no = validated_GET_rqst_params['page'] if 'page' in validated_GET_rqst_params else None
+            base_url = request.build_absolute_uri(None)
+
+            extra_urls = paginate_result_list_by_changing_excess_data_to_ids(data_list, rqst_page_no, base_url)
+            if extra_urls:
+                response_raw_data['Page URLs'] = extra_urls
+
         if 'first_name' in validated_GET_rqst_params and 'last_name' in validated_GET_rqst_params:
             rqst_first_name = validated_GET_rqst_params['first_name']
             rqst_last_name = validated_GET_rqst_params['last_name']
@@ -159,24 +164,16 @@ def get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst
                 list_of_ids = None
 
             data_list = retrieve_consumer_data_by_id(db_objects, rqst_consumer_id, list_of_ids, rqst_errors)
-
-            print('Retrieved and parsed consumer table data.')
-            sys.stdout.flush()
-
-            def paginate_results():
-                rqst_page_no = validated_GET_rqst_params['page'] if 'page' in validated_GET_rqst_params else None
-                base_url = request.build_absolute_uri(None)
-
-                extra_urls = paginate_result_list_by_changing_excess_data_to_ids(data_list, CONSUMERS_PER_PAGE, rqst_page_no, base_url)
-                if extra_urls:
-                    response_raw_data['Page URLs'] = extra_urls
-
-            paginate_results()
-
-            print('Paginated Results.')
-            sys.stdout.flush()
         else:
             rqst_errors.append('No Valid Parameters')
+
+        print('Retrieved and parsed consumer table data.')
+        sys.stdout.flush()
+
+        paginate_results()
+
+        print('Paginated Results.')
+        sys.stdout.flush()
 
         response_raw_data['Data'] = data_list
 
