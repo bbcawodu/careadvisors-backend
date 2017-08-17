@@ -95,14 +95,14 @@ class PICStaff(models.Model):
                     break
 
         base_locations = self.base_locations.all()
-        if len(base_locations):
+        if base_locations:
             base_location_values = []
             for base_location in base_locations:
                 base_location_values.append(base_location.return_values_dict())
             valuesdict["Base Locations"] = base_location_values
 
         credentials_queryset = self.credentialsmodel_set.all()
-        if len(credentials_queryset):
+        if credentials_queryset:
             for credentials_instance in credentials_queryset:
                 if credentials_instance.credential.invalid:
                     credentials_instance.delete()
@@ -218,7 +218,7 @@ class PICConsumerBase(models.Model):
             navigator_note_objects = self.consumernote_set.all()
             navigator_note_list = []
 
-            if len(navigator_note_objects):
+            if navigator_note_objects:
                 for navigator_note in navigator_note_objects:
                     navigator_note_list.append(navigator_note.navigator_notes)
 
@@ -416,7 +416,7 @@ class ConsumerCPSInfoEntry(models.Model):
 
         if self.secondary_dependents:
             secondary_dependent_queryset = self.secondary_dependents.all()
-            if len(secondary_dependent_queryset):
+            if secondary_dependent_queryset:
                 secondary_dependent_list = []
                 for secondary_dependent in secondary_dependent_queryset:
                     dependent_entry = {"first_name": secondary_dependent.first_name,
