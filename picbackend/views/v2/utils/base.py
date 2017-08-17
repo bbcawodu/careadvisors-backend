@@ -345,7 +345,7 @@ def parse_and_log_errors(response_raw_data, errors_list):
     :param errors_list: (type: list) list of error messages
     :return: (type: dictionary) dictionary that can be used in PIC JSON responses with errors logged
     """
-    if len(errors_list) > 0:
+    if errors_list:
         if response_raw_data["Status"]["Error Code"] == 0:
             response_raw_data["Status"]["Error Code"] = 1
         response_raw_data["Status"]["Errors"] = errors_list

@@ -71,7 +71,7 @@ class MetricsSubmission(models.Model):
                       }
 
         plan_stats = self.planstat_set.all()
-        if len(plan_stats):
+        if plan_stats:
             plan_stats_list = []
             for plan_stat in plan_stats:
                 plan_stats_list.append(plan_stat.return_values_dict())

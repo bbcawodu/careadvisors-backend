@@ -110,7 +110,7 @@ def retrieve_plan_data_by_carrier_state(search_params, list_of_carrier_states, r
         response_list_component = []
 
         carrier_qset = filter_carrier_objs_by_state(HealthcareCarrier.objects.all(), carrier_state)
-        if len(carrier_qset):
+        if carrier_qset:
             plan_qset = None
             for carrier_instance in carrier_qset:
                 if plan_qset:

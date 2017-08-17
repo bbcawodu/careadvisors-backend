@@ -411,7 +411,7 @@ class ProviderLocation(models.Model):
             valuesdict['provider_network info'] = provider_network_info
 
         accepted_plans_queryset = self.accepted_plans.all()
-        if len(accepted_plans_queryset):
+        if accepted_plans_queryset:
             accepted_plans_ids = []
             for plan_object in accepted_plans_queryset:
                 accepted_plans_ids.append(plan_object.id)

@@ -72,7 +72,7 @@ def modify_web_traffic_calculator_data_obj(hospital_web_traffic_calculator_data_
     except HospitalWebTrafficData.DoesNotExist:
         post_errors.append("Hospital web traffic calculator data instance does not exist for database id: {}".format(hospital_web_traffic_calculator_data_id))
 
-    if len(post_errors) == 0:
+    if not post_errors:
         hospital_web_traffic_calculator_data_obj.save()
 
     return hospital_web_traffic_calculator_data_obj
