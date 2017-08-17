@@ -126,8 +126,6 @@ def get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst
 
         return db_objects
 
-    consumers = filter_db_objects_by_secondary_params(consumers)
-
     def retrieve_data_by_primary_params_and_add_to_response(db_objects):
         data_list = []
 
@@ -176,5 +174,7 @@ def get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst
         sys.stdout.flush()
 
         response_raw_data['Data'] = data_list
+
+    consumers = filter_db_objects_by_secondary_params(consumers)
 
     retrieve_data_by_primary_params_and_add_to_response(consumers)
