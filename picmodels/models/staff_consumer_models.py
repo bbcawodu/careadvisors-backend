@@ -211,14 +211,18 @@ class PICConsumerBase(models.Model):
                       # "secondary_guardians": None,
                       "Database ID": self.id}
 
-        if self.date_met_nav is not None:
+        if self.date_met_nav:
             valuesdict["date_met_nav"] = self.date_met_nav.isoformat()
 
-        navigator_note_objects = self.consumernote_set.all()
-        navigator_note_list = []
-        for navigator_note in navigator_note_objects:
-            navigator_note_list.append(navigator_note.navigator_notes)
-        valuesdict["Navigator Notes"] = navigator_note_list
+        if self.consumernote_set:
+            navigator_note_objects = self.consumernote_set.all()
+            navigator_note_list = []
+
+            if len(navigator_note_objects):
+                for navigator_note in navigator_note_objects:
+                    navigator_note_list.append(navigator_note.navigator_notes)
+
+            valuesdict["Navigator Notes"] = navigator_note_list
 
         if self.address:
             valuesdict["address"] = {}
@@ -226,7 +230,7 @@ class PICConsumerBase(models.Model):
             for key in address_values:
                 valuesdict["address"][key] = address_values[key]
 
-        if self.navigator is not None:
+        if self.navigator:
             valuesdict['Navigator'] = "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name)
 
         if self.cps_info:
@@ -398,26 +402,27 @@ class ConsumerCPSInfoEntry(models.Model):
                       "secondary_dependents": None,
                       "Database ID": self.id}
 
-        if self.apt_date is not None:
+        if self.apt_date:
             valuesdict["apt_date"] = self.apt_date.isoformat()
 
-        if self.cps_location is not None:
+        if self.cps_location:
             valuesdict["cps_location"] = self.cps_location.name
 
-        if self.primary_dependent is not None:
+        if self.primary_dependent:
             primary_dependent_entry = {"first_name": self.primary_dependent.first_name,
                                        "last_name": self.primary_dependent.last_name,
                                        "Database ID": self.primary_dependent.id}
             valuesdict["primary_dependent"] = primary_dependent_entry
 
-        secondary_dependent_queryset = self.secondary_dependents.all()
-        if len(secondary_dependent_queryset):
-            secondary_dependent_list = []
-            for secondary_dependent in secondary_dependent_queryset:
-                dependent_entry = {"first_name": secondary_dependent.first_name,
-                                   "last_name": secondary_dependent.last_name,
-                                   "Database ID": secondary_dependent.id}
-                secondary_dependent_list.append(dependent_entry)
-            valuesdict["secondary_dependents"] = secondary_dependent_list
+        if self.secondary_dependents:
+            secondary_dependent_queryset = self.secondary_dependents.all()
+            if len(secondary_dependent_queryset):
+                secondary_dependent_list = []
+                for secondary_dependent in secondary_dependent_queryset:
+                    dependent_entry = {"first_name": secondary_dependent.first_name,
+                                       "last_name": secondary_dependent.last_name,
+                                       "Database ID": secondary_dependent.id}
+                    secondary_dependent_list.append(dependent_entry)
+                valuesdict["secondary_dependents"] = secondary_dependent_list
 
         return valuesdict
