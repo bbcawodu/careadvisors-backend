@@ -238,7 +238,7 @@ class PICConsumerBase(models.Model):
 
         # if self.primary_guardian:
         #     cps_info_qset = self.primary_guardian.all()
-        #     if len(cps_info_qset):
+        #     if cps_info_qset:
         #         primary_guardian_info = []
         #
         #         for cps_info_instance in cps_info_qset:
@@ -252,7 +252,7 @@ class PICConsumerBase(models.Model):
         #
         # if self.secondary_guardians:
         #     cps_info_qset = self.secondary_guardians.all()
-        #     if len(cps_info_qset):
+        #     if cps_info_qset:
         #         secondary_guardians_info = []
         #
         #         for cps_info_instance in cps_info_qset:

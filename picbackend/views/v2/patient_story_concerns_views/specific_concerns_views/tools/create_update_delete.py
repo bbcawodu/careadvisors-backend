@@ -43,7 +43,7 @@ def get_specific_concern_mgmt_put_params(rqst_provider_location_info, post_error
     rqst_related_general_concerns_names = list(set(rqst_related_general_concerns_names))
     related_general_concerns_objects = []
     related_general_concerns_errors = []
-    if rqst_related_general_concerns_names and len(post_errors) == 0:
+    if rqst_related_general_concerns_names and not post_errors:
         for related_general_concerns_name in rqst_related_general_concerns_names:
             try:
                 related_general_concerns_object = ConsumerGeneralConcern.objects.get(name__iexact=related_general_concerns_name)

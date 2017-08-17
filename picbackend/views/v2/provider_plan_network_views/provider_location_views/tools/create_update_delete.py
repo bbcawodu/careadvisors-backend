@@ -36,7 +36,7 @@ def get_provider_location_mgmt_put_params(rqst_provider_location_info, post_erro
     rqst_accepted_plans_ids = list(set(rqst_accepted_plans_ids))
     accepted_plans_objects = []
     plans_errors = []
-    if rqst_accepted_plans_ids and len(post_errors) == 0:
+    if rqst_accepted_plans_ids and not post_errors:
         for accepted_plan_id in rqst_accepted_plans_ids:
             try:
                 accepted_plan_object = HealthcarePlan.objects.get(id=accepted_plan_id)
