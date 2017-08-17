@@ -3,10 +3,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from ..utils import JSONPUTRspMixin
 from ..utils import JSONGETRspMixin
+from picmodels.models import CareAdvisorCustomer
 from .tools import validate_put_rqst_params
-from picmodels.services.care_advisor_customer_model_services import add_instance_using_validated_params
-from picmodels.services.care_advisor_customer_model_services import modify_instance_using_validated_params
-from picmodels.services.care_advisor_customer_model_services import delete_instance_using_validated_params
 from .tools import retrieve_table_data_by_id
 from .tools import retrieve_table_data_by_email
 from .tools import retrieve_table_data_by_full_name
@@ -28,11 +26,11 @@ class CareAdvisorCustomerMgmtView(JSONPUTRspMixin, JSONGETRspMixin, View):
             care_advisor_customer_instance = None
 
             if rqst_db_action == "create_row":
-                care_advisor_customer_instance = add_instance_using_validated_params(validated_params, rqst_errors)
+                care_advisor_customer_instance = CareAdvisorCustomer.add_instance_using_validated_params(validated_params, rqst_errors)
             elif rqst_db_action == "update_row":
-                care_advisor_customer_instance = modify_instance_using_validated_params(validated_params, rqst_errors)
+                care_advisor_customer_instance = CareAdvisorCustomer.modify_instance_using_validated_params(validated_params, rqst_errors)
             elif rqst_db_action == "delete_row":
-                delete_instance_using_validated_params(validated_params, rqst_errors)
+                CareAdvisorCustomer.delete_instance_using_validated_params(validated_params, rqst_errors)
                 if not rqst_errors:
                     response_raw_data['Data']["id"] = "deleted"
 
