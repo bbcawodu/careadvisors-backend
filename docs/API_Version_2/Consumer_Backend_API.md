@@ -180,9 +180,11 @@ In response, a JSON document will be displayed with the following format:
 - To retrieve consumer data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/consumers/ with the following parameters(at least one required)
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"
-    - A maximum of 20 consumer records with full fields will be returned due to size constraints
-        - The rest are consumer database IDs
-        - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter
+    - A maximum of 20 consumer record objects with all of the keys will be returned in order to limit the size of the response BODY.
+        - The rest of the record objects will only have one key: "Database ID"
+        - If the request does not include the "page" parameter:
+            - "Page URLs" will be a key in the root of the JSON response Body.
+                - The value of this key is an array of strings. Each string is a url for more full consumer records for the inital request.
     
     - "Primary" parameters - One and exactly one of these parameters are required in every request.
         - "first_name" corresponds to consumer first name.
@@ -270,10 +272,10 @@ In response, a JSON document will be displayed with the following format:
             ...,
             ...,
             ...,
-            up to 20 full record consumer entries,
-            2(Database IDs for the rest),
-            6,
-            9
+            up to 20 full record consumer record objects,
+            {"Database ID": 2}(Incomplete consumer record with "Database ID" as its only key),
+            {"Database ID": 6}(Incomplete consumer record with "Database ID" as its only key),
+            {"Database ID": 9}(Incomplete consumer record with "Database ID" as its only key)
         ],
         "Status": {
             "Version": 2.0,
@@ -281,7 +283,7 @@ In response, a JSON document will be displayed with the following format:
             "Warnings": Array,
             "Errors": Array
         },
-        "Page URLs": Array of strings (Will be missing if "page" parameter is given OR less than 20 consumers in results)
+        "Page URLs": Array of strings (Will be missing if "page" parameter is in request query string OR there are less than 20 consumer record objects in the array for the "Data" key.)
     }
     ```
 
@@ -299,19 +301,35 @@ In response, a JSON document will be displayed with the following format:
     
 ### Consumer Backup Data Retrieval API
 - To retrieve backup consumer data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/backup_consumers/ with the following parameters(at least one required)
-    - A maximum of 20 consumer records with full fields will be returned due to size constraints
-        - The rest are consumer database IDs
-        - Links to pages with the rest of the full records for your query will be given if you request without "page" parameter
-    - "first_name" corresponds to consumer first name.
-    - "last_name" corresponds to consumer last name.
-        - "first_name" and "last_name" can be given simultaneously as parameters. If so, only one value each is permitted.
-    - "email" corresponds to consumer email.
-    - "region" corresponds to consumer region.
-    - "id" corresponds to consumer class database id.
-        - passing "all" as the value will return all consumer enteties
-    - "nav_id" corresponds to staff member class database id. (Can be combined with any of the above parameters)
-    - "page" corresponds to the current page of consumer instances to be displayed with full fields. 
-        - if this parameter is missing, the first 20 consumer instances will be displayed with full fields.
+    - Results will be filtered by the given parameters.
+    - Parameters are divided into 2 categories: "primary" and "secondary"
+    - A maximum of 20 consumer record objects with all of the keys will be returned in order to limit the size of the response BODY.
+        - The rest of the record objects will only have one key: "Database ID"
+        - If the request does not include the "page" parameter:
+            - "Page URLs" will be a key in the root of the JSON response Body.
+                - The value of this key is an array of strings. Each string is a url for more full consumer records for the inital request.
+    
+    - "Primary" parameters - One and exactly one of these parameters are required in every request.
+        - "first_name" corresponds to consumer first name.
+            - Can be multiple values separated by commas.
+        - "last_name" corresponds to consumer last name.
+            - Can be multiple values separated by commas.
+            - "first_name" and "last_name" can be given simultaneously as parameters. If so, only one value each is permitted.
+        - "email" corresponds to consumer email.
+            - Can be multiple values separated by commas.
+        - "region" corresponds to consumer region.
+            - Can be multiple values separated by commas.
+        - "id" corresponds to consumer class database id.
+            - Can be multiple values separated by commas.
+            - passing "all" as the value will return all consumer enteties
+            
+    - "Secondary" parameters - Any number of these parameters can be added to a request.
+        - "nav_id" corresponds to staff member class database id.
+            - Can be multiple values separated by commas.
+        - "is_cps_consumer" corresponds to whether consumer is a Chicago Public Schools consumer.
+            - must be of type boolean (true or false)
+        - "page" corresponds to the current page of consumer instances to be displayed with full fields.
+            - if this parameter is missing, the first 20 consumer instances will be displayed with full fields.
         
 - The response will be a JSON document with the following format:
     ```
@@ -377,10 +395,10 @@ In response, a JSON document will be displayed with the following format:
             ...,
             ...,
             ...,
-            up to 20 full record consumer entries,
-            2(Database IDs for the rest),
-            6,
-            9
+            up to 20 full record consumer record objects,
+            {"Database ID": 2}(Incomplete consumer record with "Database ID" as its only key),
+            {"Database ID": 6}(Incomplete consumer record with "Database ID" as its only key),
+            {"Database ID": 9}(Incomplete consumer record with "Database ID" as its only key)
         ],
         "Status": {
             "Version": 2.0,
@@ -388,7 +406,7 @@ In response, a JSON document will be displayed with the following format:
             "Warnings": Array,
             "Errors": Array
         },
-        "Page URLs": Array of strings (Will be missing if "page" parameter is given OR less than 20 consumers in results)
+        "Page URLs": Array of strings (Will be missing if "page" parameter is in request query string OR there are less than 20 consumer record objects in the array for the "Data" key.)
     }
     ```
 
