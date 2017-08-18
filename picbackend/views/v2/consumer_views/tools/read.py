@@ -45,7 +45,7 @@ def retrieve_consumer_data_by_id(consumers, rqst_consumer_id, list_of_ids, rqst_
 def create_response_list_from_db_objects(db_objects):
     return_list = []
 
-    for db_instance in db_objects.iterator():
+    for db_instance in db_objects:
         return_list.append(db_instance.return_values_dict())
 
     return return_list
