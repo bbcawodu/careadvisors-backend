@@ -84,8 +84,9 @@ class PICStaff(models.Model):
         # consumers = PICConsumer.objects.filter(navigator=self.id)
         consumers = self.picconsumer_set.all()
         consumer_list = []
-        for consumer in consumers:
-            consumer_list.append(consumer.id)
+        if len(consumers):
+            for consumer in consumers:
+                consumer_list.append(consumer.id)
         valuesdict['Consumers'] = consumer_list
 
         if self.county:

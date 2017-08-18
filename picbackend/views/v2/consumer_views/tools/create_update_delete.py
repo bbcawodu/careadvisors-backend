@@ -91,7 +91,7 @@ def validate_add_instance_rqst_params(post_data, post_errors):
             if year < 1 or year > 9999:
                 post_errors.append("Year must be between 1 and 9999 inclusive")
 
-        if len(post_errors) == 0:
+        if not post_errors:
             rqst_date_met_nav = datetime.date(year, month, day)
 
     rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator Database ID", post_errors)
@@ -217,7 +217,7 @@ def validate_cps_info_params_for_add_instance_rqst(rqst_cps_info_params, rqst_co
             if year < 1 or year > 9999:
                 rqst_errors.append("Year must be between 1 and 9999 inclusive")
 
-        if len(rqst_errors) == 0:
+        if not rqst_errors:
             rqst_apt_date = datetime.date(year, month, day)
 
     rqst_target_list = clean_bool_value_from_dict_object(rqst_cps_info_params,
@@ -341,7 +341,7 @@ def check_consumer_db_entries_for_dependent_info(rqst_dependent_dict, rqst_error
                                                                 "last_name",
                                                                 rqst_errors)
 
-    if len(rqst_errors) == 0:
+    if not rqst_errors:
         consumer_entry_query = PICConsumer.objects.filter(first_name=rqst_dependent_f_name,
                                                           last_name=rqst_dependent_l_name)
         for consumer_entry in consumer_entry_query:
@@ -481,7 +481,7 @@ def validate_modify_instance_rqst_params(rqst_params, rqst_errors):
                 if year < 1 or year > 9999:
                     rqst_errors.append("Year must be between 1 and 9999 inclusive")
 
-            if len(rqst_errors) == 0:
+            if not rqst_errors:
                 rqst_date_met_nav = datetime.date(year, month, day)
 
         validated_params["rqst_date_met_nav"] = rqst_date_met_nav
@@ -582,7 +582,7 @@ def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, cons
         if rqst_secondary_dependents:
             for dependent_index, rqst_secondary_dependent_dict in enumerate(rqst_secondary_dependents):
                 secondary_dependent_object = None
-                if len(rqst_errors) == 0:
+                if not rqst_errors:
                     rqst_secondary_dependent_database_id = clean_int_value_from_dict_object(
                         rqst_secondary_dependent_dict,
                         "secondary_dependent",
@@ -654,7 +654,7 @@ def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, cons
                 if year < 1 or year > 9999:
                     rqst_errors.append("Year must be between 1 and 9999 inclusive")
 
-            if len(rqst_errors) == 0:
+            if not rqst_errors:
                 rqst_apt_date = datetime.date(year, month, day)
 
         validated_params["rqst_apt_date"] = rqst_apt_date

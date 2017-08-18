@@ -51,7 +51,7 @@ def create_or_update_metrics_obj_using_validated_params(validated_metrics_params
             metrics_instance.location = location_instance_for_metrics
             metrics_instance.zipcode = location_instance_for_metrics.address.zipcode
 
-            if len(rqst_errors) == 0:
+            if not rqst_errors:
                 metrics_instance.save()
 
                 metrics_instance_current_plan_stats = metrics_instance.planstat_set.all()

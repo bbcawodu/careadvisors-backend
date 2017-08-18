@@ -377,8 +377,10 @@ class ProviderNetwork(models.Model):
 
         # add related plans to values dict
         provider_locations = []
-        for provider_location in self.providerlocation_set.all():
-            provider_locations.append(provider_location.id)
+        provider_location_qset = self.providerlocation_set.all()
+        if len(provider_location_qset):
+            for provider_location in provider_location_qset:
+                provider_locations.append(provider_location.id)
 
         if provider_locations:
             valuesdict["provider_locations"] = provider_locations

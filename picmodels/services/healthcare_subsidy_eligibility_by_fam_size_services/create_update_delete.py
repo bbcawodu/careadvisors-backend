@@ -8,7 +8,7 @@ def add_healthcare_subsidy_eligibility_data_instance_using_validated_params(add_
     found_healthcare_subsidy_eligibility_data_objs = check_for_healthcare_subsidy_eligibility_data_objs_with_given_family_size(
         family_size, post_errors)
 
-    if not found_healthcare_subsidy_eligibility_data_objs and len(post_errors) == 0:
+    if not found_healthcare_subsidy_eligibility_data_objs and not post_errors:
         healthcare_subsidy_eligibility_data_obj = create_new_healthcare_subsidy_eligibility_data_obj(add_healthcare_subsidy_eligibility_data_params, post_errors)
 
     return healthcare_subsidy_eligibility_data_obj
@@ -49,7 +49,7 @@ def create_new_healthcare_subsidy_eligibility_data_obj(healthcare_subsidy_eligib
     healthcare_subsidy_eligibility_data_obj.tax_cred_for_marketplace_income_limit = healthcare_subsidy_eligibility_data_params['tax_cred_for_marketplace_income_limit']
     healthcare_subsidy_eligibility_data_obj.marketplace_without_subsidies_income_level = healthcare_subsidy_eligibility_data_params['marketplace_without_subsidies_income_level']
 
-    if len(post_errors) == 0:
+    if not post_errors:
         healthcare_subsidy_eligibility_data_obj.save()
 
     return healthcare_subsidy_eligibility_data_obj
@@ -61,7 +61,7 @@ def modify_healthcare_subsidy_eligibility_data_instance_using_validated_params(m
     found_healthcare_subsidy_eligibility_data_objs = check_for_healthcare_subsidy_eligibility_data_objs_with_given_family_size(
         family_size, post_errors, rqst_healthcare_subsidy_eligibility_data_id)
 
-    if not found_healthcare_subsidy_eligibility_data_objs and len(post_errors) == 0:
+    if not found_healthcare_subsidy_eligibility_data_objs and not post_errors:
         healthcare_subsidy_eligibility_data_obj = modify_healthcare_subsidy_eligibility_data_obj(modify_healthcare_subsidy_eligibility_data_params, rqst_healthcare_subsidy_eligibility_data_id, post_errors)
 
     return healthcare_subsidy_eligibility_data_obj
@@ -78,7 +78,7 @@ def modify_healthcare_subsidy_eligibility_data_obj(healthcare_subsidy_eligibilit
     except HealthcareSubsidyEligibilityByFamSize.DoesNotExist:
         post_errors.append("Healthcare subsidy eligibility data instance does not exist for database id: {}".format(healthcare_subsidy_eligibility_data_id))
 
-    if len(post_errors) == 0:
+    if not post_errors:
         healthcare_subsidy_eligibility_data_obj.save()
 
     return healthcare_subsidy_eligibility_data_obj

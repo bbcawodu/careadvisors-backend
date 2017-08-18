@@ -97,7 +97,7 @@ def get_plan_mgmt_put_params(rqst_plan_info, post_errors):
                     coinsurance_percentage = 0.0
                     copay = 0.0
 
-                if len(post_errors) == 0:
+                if not post_errors:
                     if coinsurance_percentage is not None or copay is not None:
                         healthcare_service_cost_instance = HealthcareServiceCostEntry(coinsurance=coinsurance_percentage,
                                                                                       copay=copay)
