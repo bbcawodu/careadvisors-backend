@@ -1,14 +1,15 @@
 from picmodels.models import ProviderLocation
 from picmodels.models import HealthcareCarrier
 from picmodels.models import HealthcarePlan
-from picmodels.services import filter_db_queryset_by_id
+from picmodels.services.provider_plan_network_services.healthcare_plan_services import prefetch_related_rows
+from picmodels.services.provider_plan_network_services.healthcare_plan_services import filter_plan_qset_by_id
 from picmodels.services.provider_plan_network_services.healthcare_plan_services import filter_plan_qset_by_name
 from picmodels.services.provider_plan_network_services.healthcare_plan_services import filter_plan_qset_by_carrier_name
 from picmodels.services.provider_plan_network_services.healthcare_carrier_services import filter_carrier_objs_by_state
 
 
 def retrieve_plan_data_by_id(search_params, rqst_plan_id, list_of_ids, rqst_errors):
-    plan_qset = filter_db_queryset_by_id(HealthcarePlan.objects.all(), rqst_plan_id, list_of_ids)
+    plan_qset = filter_plan_qset_by_id(HealthcarePlan.objects.all(), rqst_plan_id, list_of_ids)
     plan_qset, include_summary_report_fields, include_detailed_report_fields = filter_db_objects_by_secondary_params(search_params, plan_qset)
 
     response_list = create_response_list_from_db_objects(plan_qset, include_summary_report_fields, include_detailed_report_fields)
@@ -83,6 +84,7 @@ def retrieve_plan_data_by_carrier_id(search_params, list_of_carrier_ids, rqst_er
         try:
             carrier_instance = HealthcareCarrier.objects.get(id=carrier_id)
             plan_qset = carrier_instance.healthcareplan_set.all()
+            plan_qset = prefetch_related_rows(plan_qset)
             plan_qset, include_summary_report_fields, include_detailed_report_fields = filter_db_objects_by_secondary_params(search_params, plan_qset)
 
             response_list_component = create_response_list_from_db_objects(plan_qset, include_summary_report_fields, include_detailed_report_fields)
@@ -117,6 +119,7 @@ def retrieve_plan_data_by_carrier_state(search_params, list_of_carrier_states, r
                     plan_qset = plan_qset | carrier_instance.healthcareplan_set.all()
                 else:
                     plan_qset = carrier_instance.healthcareplan_set.all()
+            plan_qset = prefetch_related_rows(plan_qset)
 
             plan_qset, include_summary_report_fields, include_detailed_report_fields = filter_db_objects_by_secondary_params(
                 search_params, plan_qset)
@@ -167,6 +170,7 @@ def retrieve_plan_data_by_accepted_location_id(search_params, list_of_accepted_l
         try:
             provider_location_instance = ProviderLocation.objects.get(id=provider_location_id)
             plan_qset = provider_location_instance.accepted_plans.all()
+            plan_qset = prefetch_related_rows(plan_qset)
             plan_qset, include_summary_report_fields, include_detailed_report_fields = filter_db_objects_by_secondary_params(search_params, plan_qset)
 
             response_list_component = create_response_list_from_db_objects(plan_qset, include_summary_report_fields,

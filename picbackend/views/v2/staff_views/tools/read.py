@@ -3,7 +3,7 @@ Defines utility functions and classes for staff views
 """
 
 from picmodels.models import PICStaff
-from picmodels.services import filter_db_queryset_by_id
+from picmodels.services import filter_staff_qset_by_id
 from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_f_and_l_name
 from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_first_name
 from picmodels.services.staff_consumer_models_services.pic_staff_services import filter_staff_objs_by_last_name
@@ -189,7 +189,7 @@ def retrieve_staff_data_by_mpn(list_of_mpns, rqst_errors):
 
 
 def retrieve_staff_data_by_id(rqst_staff_id, list_of_ids, rqst_errors):
-    staff_qset = filter_db_queryset_by_id(PICStaff.objects.all(), rqst_staff_id, list_of_ids)
+    staff_qset = filter_staff_qset_by_id(PICStaff.objects.all(), rqst_staff_id, list_of_ids)
 
     response_list = create_response_list_from_db_objects(staff_qset)
 
