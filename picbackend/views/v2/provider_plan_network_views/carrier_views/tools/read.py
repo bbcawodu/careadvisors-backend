@@ -1,10 +1,10 @@
-from picmodels.services import filter_db_queryset_by_id
+from picmodels.services.provider_plan_network_services.healthcare_carrier_services import filter_carrier_qset_by_id
 from picmodels.services.provider_plan_network_services.healthcare_carrier_services import filter_carrier_objs_by_state
 from picmodels.services.provider_plan_network_services.healthcare_carrier_services import filter_carrier_objs_by_name
 
 
 def retrieve_carrier_data_by_id(carrier_qset, rqst_carrier_id, list_of_ids, rqst_errors):
-    carrier_qset = filter_db_queryset_by_id(carrier_qset, rqst_carrier_id, list_of_ids)
+    carrier_qset = filter_carrier_qset_by_id(carrier_qset, rqst_carrier_id, list_of_ids)
 
     response_list = create_response_list_from_db_objects(carrier_qset)
 

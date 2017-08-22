@@ -144,9 +144,11 @@ class HealthcareCarrier(models.Model):
 
         # add related plans to values dict
         member_plans = []
-        for plan_object in self.healthcareplan_set.all():
-            member_plans.append(plan_object.id)
-
+        if self.healthcareplan_set:
+            carrier_plan_qset = self.healthcareplan_set.all()
+            if len(carrier_plan_qset):
+                for plan_object in carrier_plan_qset:
+                    member_plans.append(plan_object.id)
         if member_plans:
             valuesdict["plans"] = member_plans
 
@@ -258,47 +260,47 @@ class HealthcarePlan(models.Model):
                       "carrier_info": None,
                       "Database ID": self.id}
 
-        def add_report_fields_to_values_dict(summary_report_fields):
-            report_values_dict_entry = {}
-            for summary_report_field in summary_report_fields:
+        def add_report_fields_to_values_dict(report_fields):
+            def compose_cost_string_from_related_cost_row(healthcare_service_cost_entry_instance):
+                entry_string = ""
+
+                if healthcare_service_cost_entry_instance.coinsurance:
+                    entry_string = "{}% coinsurance".format(healthcare_service_cost_entry_instance.coinsurance)
+                if healthcare_service_cost_entry_instance.copay:
+                    if entry_string != "":
+                        entry_string += " and "
+                    entry_string += "${} copay".format(healthcare_service_cost_entry_instance.copay)
+                if entry_string == "" or entry_string == "0% coinsurance and $0 copay":
+                    entry_string = "No charge"
+                if healthcare_service_cost_entry_instance.cost_relation_to_deductible:
+                    entry_string += " {} deductible".format(
+                        healthcare_service_cost_entry_instance.cost_relation_to_deductible.lower())
+
+                return entry_string
+
+            report_fields_with_values = {}
+            for report_field in report_fields:
                 try:
-                    report_values_dict_entry[summary_report_field] = getattr(self, summary_report_field).all().order_by('-cost_relation_to_deductible')
+                    report_fields_with_values[report_field] = getattr(self, report_field).all().order_by('-cost_relation_to_deductible')
                 except AttributeError:
-                    report_values_dict_entry[summary_report_field] = getattr(self, summary_report_field)
+                    report_fields_with_values[report_field] = getattr(self, report_field)
 
-            instance_has_all_summary_report_fields = any(summary_report_value for summary_report_value in report_values_dict_entry.values())
-            if instance_has_all_summary_report_fields:
-                def compose_cost_entry_string_from_cost_instance_and_add_to_values_dict(healthcare_service_cost_entry_instance):
-                    entry_string = ""
-
-                    if healthcare_service_cost_entry_instance.coinsurance:
-                        entry_string = "{}% coinsurance".format(healthcare_service_cost_entry_instance.coinsurance)
-                    if healthcare_service_cost_entry_instance.copay:
-                        if entry_string != "":
-                            entry_string += " and "
-                        entry_string += "${} copay".format(healthcare_service_cost_entry_instance.copay)
-                    if entry_string == "" or entry_string == "0% coinsurance and $0 copay":
-                        entry_string = "No charge"
-                    if healthcare_service_cost_entry_instance.cost_relation_to_deductible:
-                        entry_string += " {} deductible".format(
-                            healthcare_service_cost_entry_instance.cost_relation_to_deductible.lower())
-
-                    return entry_string
-
+            instance_has_all_report_fields = any(report_field_value for report_field_value in report_fields_with_values.values())
+            if instance_has_all_report_fields:
                 # Convert all summary report fields to values that are json serializable and add to valuesdict
-                for key, plan_field_value in report_values_dict_entry.items():
+                for key, plan_field_value in report_fields_with_values.items():
                     if isinstance(plan_field_value, models.QuerySet):
                         values_dict_string = ""
                         for healthcare_service_cost_entry in plan_field_value:
                             if values_dict_string != "":
                                 values_dict_string += " and "
-                            values_dict_string += compose_cost_entry_string_from_cost_instance_and_add_to_values_dict(healthcare_service_cost_entry)
+                            values_dict_string += compose_cost_string_from_related_cost_row(healthcare_service_cost_entry)
                         if values_dict_string == "":
                             values_dict_string = None
 
-                        report_values_dict_entry[key] = values_dict_string
+                        report_fields_with_values[key] = values_dict_string
 
-                return report_values_dict_entry
+                return report_fields_with_values
             else:
                 return None
 
