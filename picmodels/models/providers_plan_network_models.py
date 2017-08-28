@@ -280,21 +280,29 @@ class HealthcarePlan(models.Model):
 
             report_fields_with_values = {}
             for report_field in report_fields:
-                try:
-                    report_fields_with_values[report_field] = getattr(self, report_field).all().order_by('-cost_relation_to_deductible')
-                except AttributeError:
-                    report_fields_with_values[report_field] = getattr(self, report_field)
+                # try:
+                #     report_fields_with_values[report_field] = getattr(self, report_field).all().order_by(
+                #         '-cost_relation_to_deductible')
+                # except AttributeError:
+                #     report_fields_with_values[report_field] = getattr(self, report_field)
 
-            instance_has_all_report_fields = any(report_field_value for report_field_value in report_fields_with_values.values())
+                report_value = getattr(self, report_field)
+                if isinstance(report_value, float):
+                    report_fields_with_values[report_field] = report_value
+                else:
+                    report_fields_with_values[report_field] = report_value.all().order_by('-cost_relation_to_deductible')
+
+            instance_has_all_report_fields = all(report_field_value for report_field_value in report_fields_with_values.values())
             if instance_has_all_report_fields:
                 # Convert all summary report fields to values that are json serializable and add to valuesdict
-                for key, plan_field_value in report_fields_with_values.items():
-                    if isinstance(plan_field_value, models.QuerySet):
+                for key, healthcare_service_cost_qset in report_fields_with_values.items():
+                    if isinstance(healthcare_service_cost_qset, models.QuerySet):
                         values_dict_string = ""
-                        for healthcare_service_cost_entry in plan_field_value:
-                            if values_dict_string != "":
-                                values_dict_string += " and "
-                            values_dict_string += compose_cost_string_from_related_cost_row(healthcare_service_cost_entry)
+                        if len(healthcare_service_cost_qset):
+                            for healthcare_service_cost_entry in healthcare_service_cost_qset:
+                                if values_dict_string != "":
+                                    values_dict_string += " and "
+                                values_dict_string += compose_cost_string_from_related_cost_row(healthcare_service_cost_entry)
                         if values_dict_string == "":
                             values_dict_string = None
 
