@@ -2,6 +2,11 @@ def prefetch_related_rows(db_queryset):
     db_queryset = db_queryset.prefetch_related('consumernote_set',
                                                'address',
                                                'navigator',
+                                               'primary_guardian',
+                                               'primary_guardian__picconsumer_set',
+                                               'secondary_guardians',
+                                               'secondary_guardians__picconsumer_set',
+                                               'cps_info',
                                                'cps_info__cps_location',
                                                'cps_info__primary_dependent',
                                                'cps_info__secondary_dependents')
