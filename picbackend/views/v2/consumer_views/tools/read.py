@@ -6,7 +6,7 @@ Defines utility functions and classes for consumer views
 import math
 import sys
 from ..constants import CONSUMERS_PER_PAGE
-from picmodels.services import filter_db_queryset_by_id
+from picmodels.services import filter_consumer_qset_by_id
 from picmodels.services.staff_consumer_models_services.pic_consumer_services import filter_consumer_objs_by_f_and_l_name
 from picmodels.services.staff_consumer_models_services.pic_consumer_services import filter_consumer_objs_by_email
 from picmodels.services.staff_consumer_models_services.pic_consumer_services import filter_consumer_objs_by_first_name
@@ -14,7 +14,7 @@ from picmodels.services.staff_consumer_models_services.pic_consumer_services imp
 
 
 def retrieve_consumer_data_by_id(consumers, rqst_consumer_id, list_of_ids, rqst_errors):
-    consumers = filter_db_queryset_by_id(consumers, rqst_consumer_id, list_of_ids)
+    consumers = filter_consumer_qset_by_id(consumers, rqst_consumer_id, list_of_ids)
 
     print('Finished db query.')
     sys.stdout.flush()
@@ -45,7 +45,7 @@ def retrieve_consumer_data_by_id(consumers, rqst_consumer_id, list_of_ids, rqst_
 def create_response_list_from_db_objects(db_objects):
     return_list = []
 
-    for db_instance in db_objects.iterator():
+    for db_instance in db_objects:
         return_list.append(db_instance.return_values_dict())
 
     return return_list
