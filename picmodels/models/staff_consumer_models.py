@@ -267,29 +267,29 @@ class PICConsumerBase(models.Model):
         if self.cps_info:
             valuesdict['cps_info'] = self.cps_info.return_values_dict()
 
-        if self.primary_guardian:
-            primary_guardian_info = []
-
-            primary_guardian_qset = self.get_primary_guardian_qset()
-            if primary_guardian_qset is not None:
-                if len(primary_guardian_qset):
-                    for primary_guardian_instance in primary_guardian_qset:
-                        primary_guardian_info.append(primary_guardian_instance.id)
-
-            if primary_guardian_info:
-                valuesdict["primary_guardians"] = primary_guardian_info
-
-        if self.secondary_guardians:
-            secondary_guardian_info = []
-
-            secondary_guardian_qset = self.get_secondary_guardian_qset()
-            if secondary_guardian_qset is not None:
-                if len(secondary_guardian_qset):
-                    for secondary_guardian_instance in secondary_guardian_qset:
-                        secondary_guardian_info.append(secondary_guardian_instance.id)
-
-            if secondary_guardian_info:
-                valuesdict["secondary_guardians"] = secondary_guardian_info
+        # if self.primary_guardian:
+        #     primary_guardian_info = []
+        #
+        #     primary_guardian_qset = self.get_primary_guardian_qset()
+        #     if primary_guardian_qset is not None:
+        #         if len(primary_guardian_qset):
+        #             for primary_guardian_instance in primary_guardian_qset:
+        #                 primary_guardian_info.append(primary_guardian_instance.id)
+        #
+        #     if primary_guardian_info:
+        #         valuesdict["primary_guardians"] = primary_guardian_info
+        #
+        # if self.secondary_guardians:
+        #     secondary_guardian_info = []
+        #
+        #     secondary_guardian_qset = self.get_secondary_guardian_qset()
+        #     if secondary_guardian_qset is not None:
+        #         if len(secondary_guardian_qset):
+        #             for secondary_guardian_instance in secondary_guardian_qset:
+        #                 secondary_guardian_info.append(secondary_guardian_instance.id)
+        #
+        #     if secondary_guardian_info:
+        #         valuesdict["secondary_guardians"] = secondary_guardian_info
 
         return valuesdict
 
