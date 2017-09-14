@@ -1,6 +1,8 @@
 import sys
 import json
 from django.http import HttpResponse
+from django.db import connection
+from django.conf import settings
 from .get_parameter_validation_functions import GET_PARAMETER_VALIDATION_FUNCTIONS
 
 
@@ -345,6 +347,12 @@ def parse_and_log_errors(response_raw_data, errors_list):
     :param errors_list: (type: list) list of error messages
     :return: (type: dictionary) dictionary that can be used in PIC JSON responses with errors logged
     """
+
+    if settings.DEBUG:
+        db_queries_made = connection.queries
+        print(json.dumps(db_queries_made))
+        sys.stdout.flush()
+
     if errors_list:
         if response_raw_data["Status"]["Error Code"] == 0:
             response_raw_data["Status"]["Error Code"] = 1
