@@ -4,6 +4,26 @@ from django.http import HttpResponse
 from django.db import connection
 from django.conf import settings
 from .get_parameter_validation_functions import GET_PARAMETER_VALIDATION_FUNCTIONS
+from django.core.exceptions import PermissionDenied
+
+
+def ajax_required_attr_method_wrapper(f):
+    """
+    AJAX request required decorator
+    use it in your views:
+
+    @ajax_required_attr_method_wrapper
+    def my_view(request):
+        ....
+
+    """
+    def wrap(self, request, *args, **kwargs):
+            if not request.is_ajax():
+                raise PermissionDenied()
+            return f(self, request, *args, **kwargs)
+    wrap.__doc__=f.__doc__
+    wrap.__name__=f.__name__
+    return wrap
 
 
 class JSONGETRspMixin(object):
@@ -94,6 +114,13 @@ class JSONDELETERspMixin(object):
             return response
         else:
             raise NotImplementedError("Need to set class attribute, 'parse_DELETE_request_and_add_response'.")
+
+
+if not settings.DEBUG:
+    JSONGETRspMixin.get = ajax_required_attr_method_wrapper(JSONGETRspMixin.get)
+    JSONPUTRspMixin.put = ajax_required_attr_method_wrapper(JSONPUTRspMixin.put)
+    JSONPOSTRspMixin.post = ajax_required_attr_method_wrapper(JSONPOSTRspMixin.post)
+    JSONDELETERspMixin.delete = ajax_required_attr_method_wrapper(JSONDELETERspMixin.delete)
 
 
 class JSONRspMixin(object):
