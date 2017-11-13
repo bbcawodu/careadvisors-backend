@@ -1,6 +1,4 @@
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from ..utils import JSONPUTRspMixin
 from ..utils import JSONGETRspMixin
 from picmodels.models import CareAdvisorCustomer
@@ -14,10 +12,6 @@ from .tools import retrieve_table_data_by_phone_number
 
 # Need to abstract common variables in get and post class methods into class attributes
 class CareAdvisorCustomerMgmtView(JSONPUTRspMixin, JSONGETRspMixin, View):
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(CareAdvisorCustomerMgmtView, self).dispatch(request, *args, **kwargs)
-
     def care_advisor_customer_mgmt_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         validated_params = validate_put_rqst_params(rqst_body, rqst_errors)
 

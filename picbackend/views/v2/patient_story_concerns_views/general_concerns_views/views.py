@@ -4,7 +4,6 @@ flow
 """
 
 from django.views.generic import View
-from django.utils.decorators import method_decorator
 from ...utils import clean_string_value_from_dict_object
 from picmodels.models import ConsumerGeneralConcern
 from .tools import validate_rqst_params_and_add_instance
@@ -12,7 +11,6 @@ from .tools import validate_rqst_params_and_modify_instance
 from .tools import validate_rqst_params_and_delete_instance
 from .tools import retrieve_general_concerns_by_id
 from .tools import retrieve_general_concerns_by_name
-from django.views.decorators.csrf import csrf_exempt
 from ...utils import JSONPUTRspMixin
 from ...utils import JSONGETRspMixin
 
@@ -22,10 +20,6 @@ class GeneralConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
     Defines views that handles healthcare carrier related requests
     """
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(GeneralConcernsManagementView, self).dispatch(request, *args, **kwargs)
 
     def general_concerns_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         # Retrieve database action from post data

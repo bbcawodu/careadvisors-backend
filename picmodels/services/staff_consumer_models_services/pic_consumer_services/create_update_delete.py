@@ -14,8 +14,8 @@ def add_instance_using_validated_params(add_consumer_params, post_errors):
     backup_consumer_obj = None
     matching_consumer_instances = None
 
-    found_consumers = PICConsumer.objects.filter(first_name=add_consumer_params['rqst_consumer_f_name'],
-                                                 last_name=add_consumer_params['rqst_consumer_l_name'])
+    found_consumers = PICConsumer.objects.filter(first_name__iexact=add_consumer_params['rqst_consumer_f_name'],
+                                                 last_name__iexact=add_consumer_params['rqst_consumer_l_name'])
     if found_consumers and not add_consumer_params['force_create_consumer']:
         query_params = {"first_name": add_consumer_params['rqst_consumer_f_name'],
                         "last_name": add_consumer_params['rqst_consumer_l_name'], }

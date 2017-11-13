@@ -1,6 +1,4 @@
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from picmodels.models import ProviderNetwork
 from ...utils import clean_string_value_from_dict_object
 from ...utils import JSONPUTRspMixin
@@ -12,16 +10,8 @@ from .tools import retrieve_provider_network_data_by_id
 from .tools import retrieve_provider_network_data_by_name
 
 
-#Need to abstract common variables in get and post class methods into class attributes
+# Need to abstract common variables in get and post class methods into class attributes
 class ProviderNetworksManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
-    """
-    Defines views that handles healthcare carrier related requests
-    """
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(ProviderNetworksManagementView, self).dispatch(request, *args, **kwargs)
-
     def provider_networks_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         # Retrieve database action from post data
         rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)

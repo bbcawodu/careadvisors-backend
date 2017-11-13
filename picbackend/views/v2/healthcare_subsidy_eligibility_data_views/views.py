@@ -1,5 +1,4 @@
 from django.views.generic import View
-from django.utils.decorators import method_decorator
 from ..utils import clean_string_value_from_dict_object
 from picmodels.models import HealthcareSubsidyEligibilityByFamSize
 from .tools import validate_rqst_params_and_add_instance
@@ -7,17 +6,12 @@ from .tools import validate_rqst_params_and_modify_instance
 from .tools import validate_rqst_params_and_delete_instance
 from .tools import retrieve_healthcare_subsidy_eligibility_data_by_id
 from .tools import retrieve_healthcare_subsidy_eligibility_data_by_family_size
-from django.views.decorators.csrf import csrf_exempt
 from ..utils import JSONPUTRspMixin
 from ..utils import JSONGETRspMixin
 
 
-#Need to abstract common variables in get and post class methods into class attributes
+# Need to abstract common variables in get and post class methods into class attributes
 class HealthcareSubsidyEligibilityDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, View):
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(HealthcareSubsidyEligibilityDataMgrView, self).dispatch(request, *args, **kwargs)
-
     def healthcare_subsidy_eligibility_data_mgr_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         # Retrieve database action from post data
         rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)

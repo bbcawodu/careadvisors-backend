@@ -5,8 +5,6 @@ API Version 2
 
 
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from picmodels.models import NavMetricsLocation
 from ..utils import JSONPUTRspMixin
 from ..utils import JSONGETRspMixin
@@ -22,10 +20,6 @@ class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
     Defines views that handles Patient Innovation Center navigator hub location instance related requests
     """
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(NavHubLocationManagementView, self).dispatch(request, *args, **kwargs)
 
     def nav_hub_location_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)

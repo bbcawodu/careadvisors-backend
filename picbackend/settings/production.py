@@ -4,3 +4,6 @@ from picbackend.settings.base import *
 DEBUG = True
 
 HOSTURL = "https://picbackend.herokuapp.com"
+
+if DEBUG:
+    CORS_ORIGIN_WHITELIST += ('localhost:8080',)
