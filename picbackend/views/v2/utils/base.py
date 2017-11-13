@@ -1,6 +1,9 @@
 import sys
 import json
 from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 from django.conf import settings
 from .get_parameter_validation_functions import GET_PARAMETER_VALIDATION_FUNCTIONS
@@ -30,6 +33,10 @@ class JSONGETRspMixin(object):
     parse_GET_request_and_add_response = None
     accepted_GET_request_parameters = None
 
+    # @method_decorator(ensure_csrf_cookie)
+    # def dispatch(self, request, *args, **kwargs):
+    #     return super(JSONGETRspMixin, self).dispatch(request, *args, **kwargs)
+
     def get(self, request, *args, **kwargs):
         if self.parse_GET_request_and_add_response is None:
             raise NotImplementedError("Need to set class attribute, 'parse_GET_request_and_add_response'.")
@@ -53,6 +60,10 @@ class JSONGETRspMixin(object):
 class JSONPOSTRspMixin(object):
     parse_POST_request_and_add_response = None
 
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(JSONPOSTRspMixin, self).dispatch(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         if self.parse_POST_request_and_add_response:
             # Initialize dictionary for response data, initialize list for parsing errors
@@ -73,6 +84,10 @@ class JSONPOSTRspMixin(object):
 class JSONPUTRspMixin(object):
     parse_PUT_request_and_add_response = None
 
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(JSONPUTRspMixin, self).dispatch(request, *args, **kwargs)
+
     def put(self, request, *args, **kwargs):
         if self.parse_PUT_request_and_add_response:
             # Initialize dictionary for response data, initialize list for parsing errors
@@ -92,6 +107,10 @@ class JSONPUTRspMixin(object):
 
 class JSONDELETERspMixin(object):
     parse_DELETE_request_and_add_response = None
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(JSONDELETERspMixin, self).dispatch(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
         """

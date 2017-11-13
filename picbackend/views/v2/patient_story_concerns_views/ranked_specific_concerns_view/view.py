@@ -1,7 +1,6 @@
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from ...utils import JSONPOSTRspMixin
+from ...utils import JSONGETRspMixin
 from copy import deepcopy
 from .tools import retrieve_related_spec_concern_objs_from_list_of_gen_concern_names
 from .tools import calculate_number_of_specific_concerns_to_fill
@@ -9,10 +8,9 @@ from .constants import MIN_NO_OF_SPECIFIC_CONCERNS_TO_FETCH
 
 
 # Need to abstract common variables in get and post class methods into class attributes
-class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(RankedSpecificConcernsView, self).dispatch(request, *args, **kwargs)
+class RankedSpecificConcernsView(JSONGETRspMixin, JSONPOSTRspMixin, View):
+    def ranked_specific_concerns_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
+        pass
 
     def ranked_specific_concerns_post_logic(self, rqst_body, response_raw_data, rqst_errors):
         list_of_related_specific_concern_qsets, no_of_unique_rel_spec_concerns = retrieve_related_spec_concern_objs_from_list_of_gen_concern_names(rqst_body, rqst_errors)
@@ -82,3 +80,8 @@ class RankedSpecificConcernsView(JSONPOSTRspMixin, View):
             parse_ranked_specific_concern_objects_and_add_data_to_response()
 
     parse_POST_request_and_add_response = ranked_specific_concerns_post_logic
+
+    accepted_GET_request_parameters = [
+
+    ]
+    parse_GET_request_and_add_response = ranked_specific_concerns_get_logic

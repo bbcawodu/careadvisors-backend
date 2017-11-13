@@ -3,8 +3,6 @@ This module defines views that handle hospital/provider locations for provider n
 """
 
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from ...utils import clean_string_value_from_dict_object
 from picmodels.models import ConsumerSpecificConcern
 from .tools import validate_rqst_params_and_add_instance
@@ -26,10 +24,6 @@ class SpecificConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
     Defines views that handles healthcare carrier related requests
     """
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(SpecificConcernsManagementView, self).dispatch(request, *args, **kwargs)
 
     def specific_concerns_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         # Retrieve database action from post data

@@ -1,18 +1,11 @@
-
 import pokitdok
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from .tools import fetch_and_parse_pokit_elig_data
 from ..utils import JSONPOSTRspMixin
 from ..utils import JSONGETRspMixin
 
 
-class ConsumerHealthInsuranceBenefitsView(JSONPOSTRspMixin, View):
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(ConsumerHealthInsuranceBenefitsView, self).dispatch(request, *args, **kwargs)
-
+class ConsumerHealthInsuranceBenefitsView(JSONPOSTRspMixin, JSONGETRspMixin, View):
     def insurance_benefits_logic(self, rqst_body, response_raw_data, rqst_errors):
         # Fetch eligibility data from Pokitdok
         raw_elig_data, parsed_elig_data = fetch_and_parse_pokit_elig_data(rqst_body, rqst_errors)
@@ -20,7 +13,15 @@ class ConsumerHealthInsuranceBenefitsView(JSONPOSTRspMixin, View):
         response_raw_data['raw_eligibility_data'] = raw_elig_data
         response_raw_data['Data'] = parsed_elig_data
 
+    def consumer_health_insurance_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
+        pass
+
     parse_POST_request_and_add_response = insurance_benefits_logic
+
+    accepted_GET_request_parameters = [
+
+    ]
+    parse_GET_request_and_add_response = consumer_health_insurance_get_logic
 
 
 class TradingPartnerView(JSONGETRspMixin, View):

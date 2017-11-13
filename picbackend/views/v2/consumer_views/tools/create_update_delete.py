@@ -342,8 +342,8 @@ def check_consumer_db_entries_for_dependent_info(rqst_dependent_dict, rqst_error
                                                                 rqst_errors)
 
     if not rqst_errors:
-        consumer_entry_query = PICConsumer.objects.filter(first_name=rqst_dependent_f_name,
-                                                          last_name=rqst_dependent_l_name)
+        consumer_entry_query = PICConsumer.objects.filter(first_name__iexact=rqst_dependent_f_name,
+                                                          last_name__iexact=rqst_dependent_l_name)
         for consumer_entry in consumer_entry_query:
             found_consumer_entries.append(consumer_entry.id)
 

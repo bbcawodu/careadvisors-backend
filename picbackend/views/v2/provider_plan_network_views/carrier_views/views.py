@@ -1,6 +1,4 @@
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
@@ -20,12 +18,8 @@ from .tools import retrieve_carrier_data_by_name
 from .tools import retrieve_carrier_data_by_state
 
 
-#Need to abstract common variables in get and post class methods into class attributes
+# Need to abstract common variables in get and post class methods into class attributes
 class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(CarriersManagementView, self).dispatch(request, *args, **kwargs)
-
     def carriers_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         # Retrieve database action from post data
         rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)

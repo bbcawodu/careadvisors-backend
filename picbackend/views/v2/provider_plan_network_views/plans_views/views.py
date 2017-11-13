@@ -3,8 +3,6 @@ This module defines views that handle accepted plans for provider networks contr
 """
 
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from ...utils import clean_string_value_from_dict_object
 from ...utils import JSONPUTRspMixin
 from ...utils import JSONGETRspMixin
@@ -19,16 +17,8 @@ from .tools import retrieve_plan_data_by_carrier_name
 from .tools import retrieve_plan_data_by_accepted_location_id
 
 
-#Need to abstract common variables in get and post class methods into class attributes
+# Need to abstract common variables in get and post class methods into class attributes
 class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
-    """
-    Defines views that handles healthcare carrier related requests
-    """
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(PlansManagementView, self).dispatch(request, *args, **kwargs)
-
     def plans_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
 

@@ -11,8 +11,6 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponseBadRequest
 from django.conf import settings
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from oauth2client.contrib.django_util.storage import DjangoORMStorage
 from oauth2client.contrib import xsrfutil
 from oauth2client.client import flow_from_clientsecrets
@@ -114,10 +112,6 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
     """
     Defines views that manage scheduled consumer appointments for the Patient Assist Plugin
     """
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(PatientAssistAptMgtView, self).dispatch(request, *args, **kwargs)
 
     def nav_scheduled_appointments_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         response_raw_data["Data"] = {"Scheduled Appointments": None}

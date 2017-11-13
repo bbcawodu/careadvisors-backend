@@ -63,6 +63,15 @@ MIDDLEWARE_CLASSES = (
 
 CORS_ORIGIN_ALLOW_ALL = True
 
+CORS_ORIGIN_WHITELIST = (
+    "google.com",
+    "pic-reporting-system.herokuapp.com",
+    "navigatornetwork.org",
+    "patient-assist-backend.herokuapp.com",
+    "dashboard-console-demo.herokuapp.com",
+    "dashboard-console-demo.care-advisors.com",
+)
+
 ROOT_URLCONF = 'picbackend.urls'
 
 # sets template directory to root/templates

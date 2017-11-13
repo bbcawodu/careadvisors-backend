@@ -1,6 +1,4 @@
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from picmodels.models import PICConsumer
 from picmodels.models import PICConsumerBackup
 from ..utils import clean_string_value_from_dict_object
@@ -24,10 +22,6 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     Defines views that handles Patient Innovation Center consumer instance related requests
     """
 
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(ConsumerManagementView, self).dispatch(request, *args, **kwargs)
-
     def consumer_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         # Retrieve database action from post data
         rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
@@ -41,7 +35,7 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                     consumer_match_data = []
                     for consumer in matching_consumer_instances:
                         consumer_match_data.append(consumer.return_values_dict())
-                    response_raw_data['Data']['Possible Consumer Matches'] = consumer_match_data
+                    response_raw_data['Status']['Possible Consumer Matches'] = consumer_match_data
                 else:
                     if consumer_instance:
                         response_raw_data['Data']["Database ID"] = consumer_instance.id
@@ -91,10 +85,6 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
     Defines views that handles Patient Innovation Center consumer backup instance related requests
     """
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(ConsumerBackupManagementView, self).dispatch(request, *args, **kwargs)
 
     def consumer_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         # Retrieve all Patient Innovation Center consumer objects

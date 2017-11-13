@@ -1,6 +1,4 @@
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
@@ -30,10 +28,6 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
     Defines views that handles Patient Innovation Center consumer instance related requests
     """
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(StaffManagementView, self).dispatch(request, *args, **kwargs)
 
     def staff_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)

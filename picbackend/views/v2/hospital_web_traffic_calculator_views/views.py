@@ -1,5 +1,4 @@
 from django.views.generic import View
-from django.utils.decorators import method_decorator
 from ..utils import clean_string_value_from_dict_object
 from picmodels.models import HospitalWebTrafficData
 from .tools import validate_rqst_params_and_add_instance
@@ -7,7 +6,6 @@ from .tools import validate_rqst_params_and_modify_instance
 from .tools import validate_rqst_params_and_delete_instance
 from .tools import retrieve_hospital_web_traffic_calculator_data_by_id
 from .tools import retrieve_web_traffic_calculator_data_by_hospital_name
-from django.views.decorators.csrf import csrf_exempt
 from ..utils import JSONPUTRspMixin
 from ..utils import JSONGETRspMixin
 
@@ -17,10 +15,6 @@ class HospitalWebTrafficCalculatorDataMgrView(JSONPUTRspMixin, JSONGETRspMixin, 
     """
     Defines views that handles healthcare carrier related requests
     """
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(HospitalWebTrafficCalculatorDataMgrView, self).dispatch(request, *args, **kwargs)
 
     def hospital_web_traffic_calculator_data_mgr_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         # Retrieve database action from post data

@@ -1,6 +1,4 @@
 from django.views.generic import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from ..utils import clean_string_value_from_dict_object
 from .tools import validate_rqst_params_then_add_or_update_metrics_instance
 from .tools import validate_rqst_params_and_delete_instance
@@ -14,15 +12,11 @@ from ..utils import JSONPUTRspMixin
 from ..utils import JSONGETRspMixin
 
 
-#Need to abstract common variables in get and post class methods into class attributes
+# Need to abstract common variables in get and post class methods into class attributes
 class ConsumerMetricsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
     Defines views that handles Patient Innovation Center metrics instance related requests
     """
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(ConsumerMetricsManagementView, self).dispatch(request, *args, **kwargs)
 
     def metrics_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
         rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors, no_key_allowed=True)
