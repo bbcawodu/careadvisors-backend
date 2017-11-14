@@ -386,7 +386,7 @@ def modify_consumer_cps_info(consumer_instance, validated_cps_info_params, rqst_
             if 'secondary_dependents_list' in validated_cps_info_params:
                 secondary_dependents_list = validated_cps_info_params['secondary_dependents_list']
 
-                if cps_info_instance.secondary_dependents:
+                if not cps_info_instance._state.adding and cps_info_instance.secondary_dependents:
                     cps_info_instance.secondary_dependents.clear()
                 if secondary_dependents_list:
                     for secondary_dependent_instance in secondary_dependents_list:
