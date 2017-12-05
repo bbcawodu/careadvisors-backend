@@ -71,6 +71,7 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     accepted_GET_request_parameters = [
         "nav_id",
         "is_cps_consumer",
+        "has_hospital_info",
         "first_name",
         "last_name",
         "email",
@@ -95,6 +96,7 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     accepted_GET_request_parameters = [
         "nav_id",
         "is_cps_consumer",
+        "has_hospital_info",
         "first_name",
         "last_name",
         "email",
@@ -113,6 +115,9 @@ def get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst
         if 'is_cps_consumer' in validated_GET_rqst_params:
             is_cps_consumer = validated_GET_rqst_params['is_cps_consumer']
             db_objects = db_objects.filter(cps_consumer=is_cps_consumer)
+        if 'has_hospital_info' in validated_GET_rqst_params:
+            has_hospital_info = validated_GET_rqst_params['has_hospital_info']
+            db_objects = db_objects.filter(consumer_hospital_info__isnull=not has_hospital_info)
 
         return db_objects
 
