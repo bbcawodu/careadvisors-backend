@@ -263,10 +263,10 @@ def clean_float_value_from_dict_object(dict_object, dict_name, dict_key, post_er
             post_errors.append("{!r} key not found in {!r} object".format(dict_key, dict_name))
     elif dict_object[dict_key] is None and not none_allowed:
         post_errors.append("Value for {!r} in {!r} object is Null".format(dict_key, dict_name))
-    elif not isinstance(dict_object[dict_key], float):
+    elif not isinstance(dict_object[dict_key], float) and not isinstance(dict_object[dict_key], int):
         post_errors.append("Value for {!r} in {!r} object is not an float".format(dict_key, dict_name))
     else:
-        return dict_object[dict_key]
+        return float(dict_object[dict_key])
 
 
 def clean_dict_value_from_dict_object(dict_object, dict_name, dict_key, post_errors, none_allowed=False, no_key_allowed=False):

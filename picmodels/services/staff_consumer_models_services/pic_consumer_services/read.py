@@ -9,7 +9,8 @@ def prefetch_related_rows(db_queryset):
                                                'cps_info',
                                                'cps_info__cps_location',
                                                'cps_info__primary_dependent',
-                                               'cps_info__secondary_dependents')
+                                               'cps_info__secondary_dependents',
+                                               "consumer_hospital_info")
 
     return db_queryset
 

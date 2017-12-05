@@ -5,6 +5,7 @@ from picmodels.models import ConsumerNote
 from picmodels.models import Address
 from picmodels.models import Country
 from picmodels.models import ConsumerCPSInfoEntry
+from picmodels.models import ConsumerHospitalInfo
 from picmodels.models import NavMetricsLocation
 from django.db import IntegrityError
 
@@ -66,10 +67,54 @@ def create_consumer_obj(consumer_params, post_errors):
     if consumer_params['rqst_cps_consumer']:
         add_cps_info_to_consumer_instance(consumer_instance, consumer_params['validated_cps_info_dict'], post_errors)
 
+    if consumer_params['validated_hospital_info_dict']:
+        add_hospital_info_to_consumer_instance(consumer_instance, consumer_params['validated_hospital_info_dict'], post_errors)
+
     if not post_errors and consumer_params['rqst_create_backup']:
         backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
 
     return consumer_instance, backup_consumer_obj
+
+
+def add_hospital_info_to_consumer_instance(consumer_instance, validated_hospital_info_params, post_errors):
+    consumer_hospital_info_row = ConsumerHospitalInfo()
+
+    if 'treatment_site' in validated_hospital_info_params:
+        consumer_hospital_info_row.treatment_site = validated_hospital_info_params['treatment_site']
+    if 'account_number' in validated_hospital_info_params:
+        consumer_hospital_info_row.account_number = validated_hospital_info_params['account_number']
+    if 'mrn' in validated_hospital_info_params:
+        consumer_hospital_info_row.mrn = validated_hospital_info_params['mrn']
+    if 'date_of_birth' in validated_hospital_info_params:
+        consumer_hospital_info_row.date_of_birth = validated_hospital_info_params['date_of_birth']
+    if 'ssn' in validated_hospital_info_params:
+        consumer_hospital_info_row.ssn = validated_hospital_info_params['ssn']
+    if 'state' in validated_hospital_info_params:
+        consumer_hospital_info_row.state = validated_hospital_info_params['state']
+    if 'p_class' in validated_hospital_info_params:
+        consumer_hospital_info_row.p_class = validated_hospital_info_params['p_class']
+    if 'admit_date' in validated_hospital_info_params:
+        consumer_hospital_info_row.admit_date = validated_hospital_info_params['admit_date']
+    if 'discharge_date' in validated_hospital_info_params:
+        consumer_hospital_info_row.discharge_date = validated_hospital_info_params['discharge_date']
+    if 'medical_charges' in validated_hospital_info_params:
+        consumer_hospital_info_row.medical_charges = validated_hospital_info_params['medical_charges']
+    if 'referred_date' in validated_hospital_info_params:
+        consumer_hospital_info_row.referred_date = validated_hospital_info_params['referred_date']
+    if 'no_date' in validated_hospital_info_params:
+        consumer_hospital_info_row.no_date = validated_hospital_info_params['no_date']
+    if 'type' in validated_hospital_info_params:
+        consumer_hospital_info_row.type = validated_hospital_info_params['type']
+    if 'no_reason' in validated_hospital_info_params:
+        consumer_hospital_info_row.no_reason = validated_hospital_info_params['no_reason']
+
+    if not post_errors:
+        consumer_hospital_info_row.save()
+        consumer_instance.consumer_hospital_info = consumer_hospital_info_row
+
+        consumer_instance.save()
+    else:
+        consumer_instance.delete()
 
 
 def add_cps_info_to_consumer_instance(consumer_instance, validated_cps_info_params, post_errors):

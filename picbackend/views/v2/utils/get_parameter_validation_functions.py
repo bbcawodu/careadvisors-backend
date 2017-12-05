@@ -131,6 +131,13 @@ def validate_get_rqst_parameter_is_cps_consumer(get_rqst_params, validated_param
         validate_bool_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
+def validate_get_rqst_parameter_has_hospital_info(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'has_hospital_info'
+
+    if param_name in get_rqst_params:
+        validate_bool_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
 def validate_get_rqst_parameter_partner_id(get_rqst_params, validated_params, rqst_errors):
     param_name = 'partner_id'
 
@@ -551,6 +558,7 @@ GET_PARAMETER_VALIDATION_FUNCTIONS = {
     "start_date": validate_get_rqst_parameter_start_date,
     "end_date": validate_get_rqst_parameter_end_date,
     "is_cps_consumer": validate_get_rqst_parameter_is_cps_consumer,
+    "has_hospital_info": validate_get_rqst_parameter_has_hospital_info,
 
     "partner_id": validate_get_rqst_parameter_partner_id,
     "intent": validate_get_rqst_parameter_intent,

@@ -6,6 +6,7 @@ import datetime
 import json
 from ...utils import clean_string_value_from_dict_object
 from ...utils import clean_int_value_from_dict_object
+from ...utils import clean_float_value_from_dict_object
 from ...utils import clean_list_value_from_dict_object
 from ...utils import clean_dict_value_from_dict_object
 from ...utils import clean_bool_value_from_dict_object
@@ -129,28 +130,132 @@ def validate_add_instance_rqst_params(post_data, post_errors):
                                                            post_errors,
                                                            no_key_allowed=True)
 
-    return {"rqst_consumer_email": rqst_consumer_email,
-            "rqst_consumer_f_name": rqst_consumer_f_name,
-            "rqst_consumer_m_name": rqst_consumer_m_name,
-            "rqst_consumer_l_name": rqst_consumer_l_name,
-            "rqst_consumer_plan": rqst_consumer_plan,
-            "rqst_consumer_met_nav_at": rqst_consumer_met_nav_at,
-            "rqst_consumer_household_size": rqst_consumer_household_size,
-            "rqst_consumer_phone": rqst_consumer_phone,
-            "rqst_consumer_pref_lang": rqst_consumer_pref_lang,
-            "rqst_navigator_notes": rqst_navigator_notes,
-            "rqst_nav_id": rqst_nav_id,
-            "nav_instance": nav_instance,
-            "rqst_address_line_1": rqst_address_line_1,
-            "rqst_address_line_2": rqst_address_line_2,
-            "rqst_city": rqst_city,
-            "rqst_state": rqst_state,
-            "rqst_zipcode": rqst_zipcode,
-            "rqst_date_met_nav": rqst_date_met_nav,
-            "rqst_cps_consumer": rqst_cps_consumer,
-            "rqst_cps_info_dict": rqst_cps_info_dict,
-            "validated_cps_info_dict": validated_cps_info_dict,
-            "rqst_create_backup": rqst_create_backup}
+    rqst_hospital_info_dict = clean_dict_value_from_dict_object(post_data,
+                                                                "root",
+                                                                "consumer_hospital_info",
+                                                                post_errors,
+                                                                no_key_allowed=True,
+                                                                none_allowed=True)
+    validated_hospital_info_dict = None
+    if rqst_hospital_info_dict:
+        validated_hospital_info_dict = validate_hospital_info_params(rqst_hospital_info_dict, post_errors)
+
+    return {
+        "rqst_consumer_email": rqst_consumer_email,
+        "rqst_consumer_f_name": rqst_consumer_f_name,
+        "rqst_consumer_m_name": rqst_consumer_m_name,
+        "rqst_consumer_l_name": rqst_consumer_l_name,
+        "rqst_consumer_plan": rqst_consumer_plan,
+        "rqst_consumer_met_nav_at": rqst_consumer_met_nav_at,
+        "rqst_consumer_household_size": rqst_consumer_household_size,
+        "rqst_consumer_phone": rqst_consumer_phone,
+        "rqst_consumer_pref_lang": rqst_consumer_pref_lang,
+        "rqst_navigator_notes": rqst_navigator_notes,
+        "rqst_nav_id": rqst_nav_id,
+        "nav_instance": nav_instance,
+        "rqst_address_line_1": rqst_address_line_1,
+        "rqst_address_line_2": rqst_address_line_2,
+        "rqst_city": rqst_city,
+        "rqst_state": rqst_state,
+        "rqst_zipcode": rqst_zipcode,
+        "rqst_date_met_nav": rqst_date_met_nav,
+        "rqst_cps_consumer": rqst_cps_consumer,
+        "rqst_cps_info_dict": rqst_cps_info_dict,
+        "validated_cps_info_dict": validated_cps_info_dict,
+        "validated_hospital_info_dict": validated_hospital_info_dict,
+        "rqst_create_backup": rqst_create_backup
+    }
+
+
+def validate_hospital_info_params(rqst_hospital_info_dict, rqst_errors):
+    validated_hospital_info_params = {}
+
+    if "treatment_site" in rqst_hospital_info_dict:
+        treatment_site = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "treatment_site", rqst_errors)
+        validated_hospital_info_params['treatment_site'] = treatment_site
+
+    if "account_number" in rqst_hospital_info_dict:
+        account_number = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "account_number", rqst_errors)
+        validated_hospital_info_params['account_number'] = account_number
+
+    if "mrn" in rqst_hospital_info_dict:
+        mrn = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "mrn", rqst_errors)
+        validated_hospital_info_params['mrn'] = mrn
+
+    if "date_of_birth" in rqst_hospital_info_dict:
+        date_of_birth = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "date_of_birth", rqst_errors)
+
+        validated_date_of_birth = validate_string_date_input(date_of_birth, "date_of_birth", rqst_errors)
+        if validated_date_of_birth:
+            validated_hospital_info_params['date_of_birth'] = validated_date_of_birth
+
+    if "ssn" in rqst_hospital_info_dict:
+        ssn = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "ssn", rqst_errors)
+
+        if len(ssn) > 10:
+            rqst_errors.append('ssn must be less than 10 digits')
+        else:
+            validated_hospital_info_params['ssn'] = ssn
+
+    if "state" in rqst_hospital_info_dict:
+        state = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "state", rqst_errors)
+        validated_hospital_info_params['state'] = state
+
+    if "p_class" in rqst_hospital_info_dict:
+        p_class = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "p_class", rqst_errors)
+        validated_hospital_info_params['p_class'] = p_class
+
+    if "admit_date" in rqst_hospital_info_dict:
+        admit_date = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "admit_date", rqst_errors)
+
+        validated_admit_date = validate_string_date_input(admit_date, "admit_date", rqst_errors)
+        if validated_admit_date:
+            validated_hospital_info_params['admit_date'] = validated_admit_date
+
+    if "discharge_date" in rqst_hospital_info_dict:
+        discharge_date = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "discharge_date", rqst_errors)
+
+        validated_discharge_date = validate_string_date_input(discharge_date, "discharge_date", rqst_errors)
+        if validated_discharge_date:
+            validated_hospital_info_params['discharge_date'] = validated_discharge_date
+
+    if "medical_charges" in rqst_hospital_info_dict:
+        medical_charges = clean_float_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "medical_charges", rqst_errors)
+        validated_hospital_info_params['medical_charges'] = medical_charges
+
+    if "referred_date" in rqst_hospital_info_dict:
+        referred_date = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "referred_date", rqst_errors)
+
+        validated_referred_date = validate_string_date_input(referred_date, "referred_date", rqst_errors)
+        if validated_referred_date:
+            validated_hospital_info_params['referred_date'] = validated_referred_date
+
+    if "no_date" in rqst_hospital_info_dict:
+        no_date = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "no_date", rqst_errors)
+
+        validated_no_date = validate_string_date_input(no_date, "no_date", rqst_errors)
+        if validated_no_date:
+            validated_hospital_info_params['no_date'] = validated_no_date
+
+    if "type" in rqst_hospital_info_dict:
+        type = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "type", rqst_errors)
+        validated_hospital_info_params['type'] = type
+
+    if "no_reason" in rqst_hospital_info_dict:
+        no_reason = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "no_reason", rqst_errors)
+        validated_hospital_info_params['no_reason'] = no_reason
+
+    return validated_hospital_info_params
+
+
+def validate_string_date_input(string_date, param_name, rqst_errors):
+    try:
+        validated_date = datetime.datetime.strptime(string_date, '%m/%d/%Y')
+    except ValueError:
+        rqst_errors.append('{} parameter value must be a valid date formatted like: MM/DD/YYYY.'.format(param_name))
+        validated_date = None
+
+    return validated_date
 
 
 def validate_cps_info_params_for_add_instance_rqst(rqst_cps_info_params, rqst_consumer_met_nav_at, consumer_household_size, nav_instance, rqst_errors):

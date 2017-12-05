@@ -177,7 +177,7 @@ class PICConsumerBase(models.Model):
     navigator = models.ForeignKey(PICStaff, on_delete=models.SET_NULL, blank=True, null=True)
     # navigators = models.ManyToManyField(PICStaff, blank=True)
 
-    address = models.ForeignKey(Address, blank=True, null=True)
+    address = models.ForeignKey(Address, on_delete=models.SET_NULL, blank=True, null=True)
     household_size = models.IntegerField()
     plan = models.CharField(max_length=1000, blank=True, null=True)
     met_nav_at = models.CharField(max_length=1000)
@@ -185,6 +185,7 @@ class PICConsumerBase(models.Model):
 
     cps_consumer = models.BooleanField(default=False)
     cps_info = models.ForeignKey('ConsumerCPSInfoEntry', on_delete=models.SET_NULL, blank=True, null=True)
+    consumer_hospital_info = models.ForeignKey('ConsumerHospitalInfo', on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         # maps model to the picmodels module
@@ -240,6 +241,8 @@ class PICConsumerBase(models.Model):
                       "cps_info": None,
                       "primary_guardians": None,
                       "secondary_guardians": None,
+                      "consumer_hospital_info": None,
+
                       "Database ID": self.id}
 
         if self.date_met_nav:
@@ -266,6 +269,9 @@ class PICConsumerBase(models.Model):
 
         if self.cps_info:
             valuesdict['cps_info'] = self.cps_info.return_values_dict()
+
+        if self.consumer_hospital_info:
+            valuesdict['consumer_hospital_info'] = self.consumer_hospital_info.return_values_dict()
 
         # if self.primary_guardian:
         #     primary_guardian_info = []
@@ -451,5 +457,53 @@ class ConsumerCPSInfoEntry(models.Model):
                                        "Database ID": secondary_dependent.id}
                     secondary_dependent_list.append(dependent_entry)
                 valuesdict["secondary_dependents"] = secondary_dependent_list
+
+        return valuesdict
+
+
+class ConsumerHospitalInfo(models.Model):
+    """
+    Need to validate ALL field/column data before creating PICConsumerBase entries/rows and by extention,
+    ConsumerHospitalInfo entries/rows
+    """
+
+    treatment_site = models.CharField(max_length=1000, blank=True, null=True)
+    account_number = models.CharField(max_length=1000, blank=True, null=True)
+    mrn = models.CharField(max_length=1000, blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    ssn = models.CharField(max_length=10, blank=True, null=True)
+    state = models.CharField(max_length=5, blank=True, null=True)
+    p_class = models.CharField(max_length=100, blank=True, null=True)
+    admit_date = models.DateField(blank=True, null=True)
+    discharge_date = models.DateField(blank=True, null=True)
+    medical_charges = models.FloatField(blank=True, null=True)
+    referred_date = models.DateField(blank=True, null=True)
+    no_date = models.DateField(blank=True, null=True)
+    type = models.CharField(max_length=1000, blank=True, null=True)
+    no_reason = models.CharField(max_length=1000, blank=True, null=True)
+
+    class Meta:
+        # maps model to the picmodels module
+        app_label = 'picmodels'
+
+    def return_values_dict(self):
+        valuesdict = {
+            "treatment_site": self.treatment_site,
+            "account_number": self.account_number,
+            "mrn": self.mrn,
+            "date_of_birth": self.date_of_birth.isoformat() if self.date_of_birth else None,
+            "ssn": self.ssn,
+            "state": self.state,
+            "p_class": self.p_class,
+            "admit_date": self.admit_date.isoformat() if self.admit_date else None,
+            "discharge_date": self.discharge_date.isoformat() if self.discharge_date else None,
+            "medical_charges": self.medical_charges,
+            "referred_date": self.referred_date.isoformat() if self.referred_date else None,
+            "no_date": self.no_date.isoformat() if self.no_date else None,
+            "type": self.type,
+            "no_reason": self.no_reason,
+
+            "id": self.id
+        }
 
         return valuesdict
