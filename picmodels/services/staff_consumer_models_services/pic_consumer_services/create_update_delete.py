@@ -107,6 +107,10 @@ def add_hospital_info_to_consumer_instance(consumer_instance, validated_hospital
         consumer_hospital_info_row.type = validated_hospital_info_params['type']
     if 'no_reason' in validated_hospital_info_params:
         consumer_hospital_info_row.no_reason = validated_hospital_info_params['no_reason']
+    if 'case_status' in validated_hospital_info_params:
+        consumer_hospital_info_row.case_status = validated_hospital_info_params["case_status"]
+        if not consumer_hospital_info_row.check_case_status_choices():
+            post_errors.append("case_status: {!s} is not a valid choice".format(consumer_hospital_info_row.case_status))
 
     if not post_errors:
         consumer_hospital_info_row.save()
