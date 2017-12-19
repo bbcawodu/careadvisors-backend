@@ -160,6 +160,8 @@ class PICConsumerBaseQuerySet(models.QuerySet):
         for obj in self:
             if obj.cps_info:
                 obj.cps_info.delete()
+            if obj.consumer_hospital_info:
+                obj.consumer_hospital_info.delete()
         super(PICConsumerBaseQuerySet, self).delete(*args, **kwargs)
 
 
