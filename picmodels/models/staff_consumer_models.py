@@ -467,6 +467,13 @@ class ConsumerHospitalInfo(models.Model):
     ConsumerHospitalInfo entries/rows
     """
 
+    N_A = "Not Available"
+    OPEN = "Open"
+    CLOSED = "Closed"
+    CASE_STATUS_CHOICES = ((OPEN, "Open"),
+                           (CLOSED, "Closed"),
+                           (N_A, "Not Available"))
+
     treatment_site = models.CharField(max_length=1000, blank=True, null=True)
     account_number = models.CharField(max_length=1000, blank=True, null=True)
     mrn = models.CharField(max_length=1000, blank=True, null=True)
@@ -482,9 +489,17 @@ class ConsumerHospitalInfo(models.Model):
     type = models.CharField(max_length=1000, blank=True, null=True)
     no_reason = models.CharField(max_length=1000, blank=True, null=True)
 
+    case_status = models.CharField(max_length=1000, blank=True, null=True, choices=CASE_STATUS_CHOICES, default=N_A)
+
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
+
+    def check_case_status_choices(self,):
+        for case_status_tuple in self.CASE_STATUS_CHOICES:
+            if case_status_tuple[1].lower() == self.case_status.lower():
+                return True
+        return False
 
     def return_values_dict(self):
         valuesdict = {
@@ -502,6 +517,7 @@ class ConsumerHospitalInfo(models.Model):
             "no_date": self.no_date.isoformat() if self.no_date else None,
             "type": self.type,
             "no_reason": self.no_reason,
+            "case_status": self.case_status,
 
             "id": self.id
         }

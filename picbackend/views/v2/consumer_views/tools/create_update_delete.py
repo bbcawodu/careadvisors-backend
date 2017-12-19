@@ -245,6 +245,10 @@ def validate_hospital_info_params(rqst_hospital_info_dict, rqst_errors):
         no_reason = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "no_reason", rqst_errors)
         validated_hospital_info_params['no_reason'] = no_reason
 
+    if "case_status" in rqst_hospital_info_dict:
+        case_status = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "case_status", rqst_errors)
+        validated_hospital_info_params['case_status'] = case_status
+
     return validated_hospital_info_params
 
 
