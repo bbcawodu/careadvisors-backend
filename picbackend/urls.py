@@ -140,4 +140,7 @@ urlpatterns = [
     # urls for Care Advisor customer views
     url(r"^v2/care_advisor_customer/$", views.CareAdvisorCustomerMgmtView.as_view()),
 
+    # dashboard urls
+    url(r"^v2/dashboard/$", views.DashboardView.as_view()),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

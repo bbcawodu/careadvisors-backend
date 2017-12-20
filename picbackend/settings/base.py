@@ -183,3 +183,8 @@ DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 DEFAULT_STAFF_PIC_URL = 'staff_pics/None/default_staff_image.jpg'
 DEFAULT_CTA_PIC_URL = 'call_to_actions/None/default_cta_image.jpg'
 DEFAULT_CARRIER_SAMPLE_ID_CARD_URL = 'carrier_sample_id_cards/None/default_sample_id_card_image.jpg'
+
+
+# Chartio Settings
+CHARTIO_ORG_SECRET = os.environ['CHARTIO_ORG_SECRET']
+CHARTIO_BASE_URL = os.environ['CHARTIO_BASE_URL']
