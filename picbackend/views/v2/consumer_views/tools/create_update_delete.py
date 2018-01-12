@@ -4,20 +4,24 @@ Defines utility functions and classes for consumer views
 
 import datetime
 import json
-from ...utils import clean_string_value_from_dict_object
-from ...utils import clean_int_value_from_dict_object
-from ...utils import clean_float_value_from_dict_object
-from ...utils import clean_list_value_from_dict_object
-from ...utils import clean_dict_value_from_dict_object
-from ...utils import clean_bool_value_from_dict_object
-from picmodels.models import PICStaff
-from picmodels.models import PICConsumer
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import add_instance_using_validated_params
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import modify_instance_using_validated_params
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import delete_instance_using_validated_params
-from django.db import IntegrityError
-from django.core.validators import validate_email
+
 from django import forms
+from django.core.validators import validate_email
+from django.db import IntegrityError
+
+from picbackend.views.utils import clean_bool_value_from_dict_object
+from picbackend.views.utils import clean_dict_value_from_dict_object
+from picbackend.views.utils import clean_float_value_from_dict_object
+from picbackend.views.utils import clean_int_value_from_dict_object
+from picbackend.views.utils import clean_list_value_from_dict_object
+from picbackend.views.utils import clean_string_value_from_dict_object
+from picmodels.models import PICConsumer
+from picmodels.models import PICStaff
+from picmodels.services.staff_consumer_models_services.pic_consumer_services import add_instance_using_validated_params
+from picmodels.services.staff_consumer_models_services.pic_consumer_services import \
+    delete_instance_using_validated_params
+from picmodels.services.staff_consumer_models_services.pic_consumer_services import \
+    modify_instance_using_validated_params
 
 
 def validate_rqst_params_and_add_instance(rqst_consumer_info, rqst_errors):

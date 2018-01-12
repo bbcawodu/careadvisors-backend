@@ -9,7 +9,7 @@ from picmodels.models import Address
 class NavMetricsLocation(models.Model):
     """Model to store addresses for accounts"""
     name = models.CharField(max_length=200, unique=True)
-    address = models.ForeignKey(Address, blank=True, null=True)
+    address = models.ForeignKey(Address, blank=True, null=True, on_delete=models.SET_NULL)
 
     cps_location = models.BooleanField(default=False)
 

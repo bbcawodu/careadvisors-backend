@@ -3,28 +3,28 @@ Defines utility functions and classes for views that use the the Google API
 - Need to update exception catching for google API email calls to make them more specific
 """
 
-import httplib2
 import datetime
-import pytz
+
 import dateutil.parser
+import httplib2
+import mandrill
+import pytz
+from bdateutil import isbday
 from dateutil.tz import tzutc
+from django import forms
+from django.core.validators import validate_email
 from googleapiclient.discovery import build
 from googleapiclient.http import BatchHttpRequest
-from ...utils import clean_int_value_from_dict_object
-from ...utils import clean_string_value_from_dict_object
-from ...utils import clean_dict_value_from_dict_object
-from ...utils import init_v2_response_data
-from ...consumer_views import validate_rqst_params_and_add_instance
-from picmodels.models import PICStaff
-from picmodels.models import PICConsumer
-from picmodels.models import CredentialsModel
-from random import shuffle
-from pandas.tseries.offsets import BDay
 from pandas import bdate_range
-from bdateutil import isbday
-from django.core.validators import validate_email
-from django import forms
-import mandrill
+from pandas.tseries.offsets import BDay
+from random import shuffle
+
+from picbackend.views.utils import clean_dict_value_from_dict_object
+from picbackend.views.utils import clean_int_value_from_dict_object
+from picbackend.views.utils import clean_string_value_from_dict_object
+from picmodels.models import CredentialsModel
+from picmodels.models import PICStaff
+from ...consumer_views import validate_rqst_params_and_add_instance
 
 START_OF_BUSINESS_TIMESTAMP = datetime.time(hour=15, minute=0, second=0, microsecond=0)
 END_OF_BUSINESS_TIMESTAMP = datetime.time(hour=23, minute=0, second=0, microsecond=0)
@@ -133,20 +133,22 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
         post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(rqst_apt_datetime)))
 
     consumer_info = create_consumer_instance_from_apt_rqst(rqst_nav_id, post_data, post_errors)
-    try:
-        picstaff_object = PICStaff.objects.get(id=rqst_nav_id)
-        credentials_object = CredentialsModel.objects.get(id=picstaff_object)
-        nav_info = picstaff_object.return_values_dict()
-        if credentials_object.credential.invalid:
-            credentials_object.delete()
-            post_errors.append('Google Credentials database entry is invalid for the navigator with id: {!s}'.format(str(rqst_nav_id)))
-        else:
-            scheduled_appointment = send_add_apt_rqst_to_google_and_email_consumer(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors)
 
-    except PICStaff.DoesNotExist:
-        post_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(rqst_nav_id)))
-    except CredentialsModel.DoesNotExist:
-        post_errors.append('Google Credentials database entry does not exist for the navigator with id: {!s}'.format(str(rqst_nav_id)))
+    if not post_errors:
+        try:
+            picstaff_object = PICStaff.objects.get(id=rqst_nav_id)
+            credentials_object = CredentialsModel.objects.get(id=picstaff_object)
+            nav_info = picstaff_object.return_values_dict()
+            if credentials_object.credential.invalid:
+                credentials_object.delete()
+                post_errors.append('Google Credentials database entry is invalid for the navigator with id: {!s}'.format(str(rqst_nav_id)))
+            else:
+                scheduled_appointment = send_add_apt_rqst_to_google_and_email_consumer(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors)
+
+        except PICStaff.DoesNotExist:
+            post_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(rqst_nav_id)))
+        except CredentialsModel.DoesNotExist:
+            post_errors.append('Google Credentials database entry does not exist for the navigator with id: {!s}'.format(str(rqst_nav_id)))
 
     return scheduled_appointment, consumer_info
 
@@ -176,7 +178,8 @@ def create_consumer_instance_from_apt_rqst(rqst_nav_id, post_data, post_errors):
 
         matching_consumer_instances, consumer_instance, backup_consumer_obj = validate_rqst_params_and_add_instance(rqst_consumer_info, post_errors)
 
-        consumer_info = consumer_instance.return_values_dict()
+        if not post_errors:
+            consumer_info = consumer_instance.return_values_dict()
 
     return consumer_info
 

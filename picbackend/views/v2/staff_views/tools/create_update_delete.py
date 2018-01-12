@@ -2,15 +2,16 @@
 Defines utility functions and classes for staff views
 """
 
-from ...utils import clean_string_value_from_dict_object
-from ...utils import clean_int_value_from_dict_object
-from ...utils import clean_list_value_from_dict_object
-from picmodels.models import NavMetricsLocation
-from django.core.validators import validate_email
 from django import forms
+from django.core.validators import validate_email
+
+from picbackend.views.utils import clean_int_value_from_dict_object
+from picbackend.views.utils import clean_list_value_from_dict_object
+from picbackend.views.utils import clean_string_value_from_dict_object
+from picmodels.models import NavMetricsLocation
 from picmodels.services.staff_consumer_models_services.pic_staff_services import add_instance_using_validated_params
-from picmodels.services.staff_consumer_models_services.pic_staff_services import modify_instance_using_validated_params
 from picmodels.services.staff_consumer_models_services.pic_staff_services import delete_instance_using_validated_params
+from picmodels.services.staff_consumer_models_services.pic_staff_services import modify_instance_using_validated_params
 
 
 def validate_rqst_params_and_add_instance(post_data, post_errors):
@@ -41,10 +42,10 @@ def get_staff_mgmt_put_params(put_data, rqst_errors):
     rqst_base_locations = clean_list_value_from_dict_object(put_data, "root", "Base Locations", rqst_errors,
                                                             empty_list_allowed=True)
 
-    rqst_base_locations = list(set(rqst_base_locations))
     base_location_objects = []
     location_errors = []
     if rqst_base_locations:
+        rqst_base_locations = list(set(rqst_base_locations))
         for base_location_name in rqst_base_locations:
             try:
                 base_location_object = NavMetricsLocation.objects.get(name=base_location_name)

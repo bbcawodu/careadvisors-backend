@@ -1,15 +1,16 @@
 from django.views.generic import View
-from ..utils import clean_string_value_from_dict_object
-from .tools import validate_rqst_params_then_add_or_update_metrics_instance
-from .tools import validate_rqst_params_and_delete_instance
-from .tools import retrieve_metrics_data_by_staff_id
+
+from picbackend.views.utils import JSONGETRspMixin
+from picbackend.views.utils import JSONPUTRspMixin
+from picbackend.views.utils import clean_string_value_from_dict_object
+from .tools import retrieve_metrics_data_by_staff_email
 from .tools import retrieve_metrics_data_by_staff_f_and_l_name
 from .tools import retrieve_metrics_data_by_staff_first_name
+from .tools import retrieve_metrics_data_by_staff_id
 from .tools import retrieve_metrics_data_by_staff_last_name
-from .tools import retrieve_metrics_data_by_staff_email
 from .tools import retrieve_metrics_data_by_staff_mpn
-from ..utils import JSONPUTRspMixin
-from ..utils import JSONGETRspMixin
+from .tools import validate_rqst_params_and_delete_instance
+from .tools import validate_rqst_params_then_add_or_update_metrics_instance
 
 
 # Need to abstract common variables in get and post class methods into class attributes

@@ -55,38 +55,6 @@ urlpatterns = [
     # urls used to validate our application with Google. DO NOT REMOVE or API calls might be rejected
     url(r'^google2a62fdb4823a96c9.html$', TemplateView.as_view(template_name="google2a62fdb4823a96c9.html"), name='google2a62fdb4823a96c9'),
 
-    ###################
-    #API Version 1 URLS
-    ###################
-    # urls for staff views
-    url(r"^editstaff/$", views.handle_staff_edit_request),
-    url(r"^v1/staff/$", views.handle_staff_api_request),
-
-    # urls for consumer views
-    url(r"^editconsumer/$", views.handle_consumer_edit_request),
-    url(r"^v1/consumers/$", views.handle_consumer_api_request),
-
-    # urls for consumer metrics views
-    url(r"^submitmetrics/$", views.handle_metrics_submission_request),
-    url(r"^v1/metrics/$", views.handle_metrics_api_request),
-
-    # urls for location views
-    url(r"^addlocation/$", views.handle_location_add_request),
-    url(r"^managelocations/$", views.handle_manage_locations_request),
-    url(r"^edithublocation/$", views.handle_hub_location_edit_api_request),
-    url(r"^v1/navlocations/$", views.handle_nav_location_api_request),
-
-    # urls for pokitdok views
-    url(r"^v1/eligibility/$", views.handle_eligibility_request),
-    url(r"^v1/tradingpartners/$", views.handle_trading_partner_request),
-
-    # urls for patient assist scheduler views
-    url(r"^v1/calendar_auth/$", views.handle_calendar_auth_request),
-    url(r'^oauth2callback', views.auth_return),
-    url(r"^v1/viewscheduledappointments/$", views.handle_view_sched_apt_request),
-    url(r"^v1/getnavappointments/$", views.handle_nav_appointments_api_request),
-    url(r"^v1/add_consumer_appointment_with_nav/$", views.handle_add_consumer_apt_with_nav_request),
-    url(r"^v1/delete_consumer_appointment_with_nav/$", views.handle_delete_consumer_apt_with_nav_request),
 
     ###################
     #API Version 2 URLS
@@ -142,5 +110,17 @@ urlpatterns = [
 
     # dashboard urls
     url(r"^v2/dashboard/$", views.DashboardView.as_view()),
+
+
+    ###################
+    #CPS API V1 URLS
+    ###################
+
+    # urls for staff views
+    url(r"^cps/v1/staff/$", views.cps.CPSStaffManagementView.as_view()),
+    url(r"^cps/v1/staff_pic/$", views.cps.upload_cps_staff_pic),
+
+    # urls for cps metrics views
+    url(r"^cps/v1/metrics/$", views.cps.CPSMetricsManagementView.as_view()),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

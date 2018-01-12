@@ -127,7 +127,7 @@ class PatientAssistSchedulerAPITests(TestCase, BaseV2RqstTests):
         self.assertNotEqual(len(response_data["Data"]), 0)
 
     def test_view_navigators_scheduled_appointments(self):
-        self.base_url += "?navid=1"
+        self.base_url += "?nav_id=1"
         response = self.client_object.get(self.base_url)
         response_json = response.content.decode('utf-8')
         response_data = json.loads(response_json)

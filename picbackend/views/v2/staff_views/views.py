@@ -1,26 +1,27 @@
-from django.views.generic import View
+from django.conf import settings
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
-from django.conf import settings
-from picmodels.models import PICStaff
+from django.views.generic import View
+
+from picbackend.views.utils import JSONGETRspMixin
+from picbackend.views.utils import JSONPUTRspMixin
+from picbackend.views.utils import clean_string_value_from_dict_object
+from picbackend.views.utils import init_v2_response_data
+from picbackend.views.utils import validate_get_request_parameters
 from picmodels.forms import StaffImageUploadForm
-from ..utils import validate_get_request_parameters
-from ..utils import init_v2_response_data
-from ..utils import clean_string_value_from_dict_object
-from ..utils import JSONPUTRspMixin
-from ..utils import JSONGETRspMixin
-from .tools import validate_rqst_params_and_add_instance
-from .tools import validate_rqst_params_and_modify_instance
-from .tools import validate_rqst_params_and_delete_instance
-from .tools import retrieve_staff_data_by_f_and_l_name
-from .tools import retrieve_staff_data_by_email
-from .tools import retrieve_staff_data_by_first_name
-from .tools import retrieve_staff_data_by_last_name
-from .tools import retrieve_staff_data_by_id
-from .tools import retrieve_staff_data_by_mpn
+from picmodels.models import PICStaff
 from .tools import retrieve_staff_data_by_county
+from .tools import retrieve_staff_data_by_email
+from .tools import retrieve_staff_data_by_f_and_l_name
+from .tools import retrieve_staff_data_by_first_name
+from .tools import retrieve_staff_data_by_id
+from .tools import retrieve_staff_data_by_last_name
+from .tools import retrieve_staff_data_by_mpn
 from .tools import retrieve_staff_data_by_region
+from .tools import validate_rqst_params_and_add_instance
+from .tools import validate_rqst_params_and_delete_instance
+from .tools import validate_rqst_params_and_modify_instance
 
 
 # Need to abstract common variables in get and post class methods into class attributes

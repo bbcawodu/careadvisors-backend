@@ -1,19 +1,21 @@
+import sys
+
 from django.views.generic import View
+
+from picbackend.views.utils import JSONGETRspMixin
+from picbackend.views.utils import JSONPUTRspMixin
+from picbackend.views.utils import clean_string_value_from_dict_object
 from picmodels.models import PICConsumer
 from picmodels.models import PICConsumerBackup
-from ..utils import clean_string_value_from_dict_object
-from .tools import validate_rqst_params_and_add_instance
-from .tools import validate_rqst_params_and_modify_instance
-from .tools import validate_rqst_params_and_delete_instance
-from .tools import retrieve_consumer_data_by_f_and_l_name
-from .tools import retrieve_consumer_data_by_email
-from .tools import retrieve_consumer_data_by_first_name
-from .tools import retrieve_consumer_data_by_last_name
-from .tools import retrieve_consumer_data_by_id
 from .tools import paginate_result_list_by_changing_excess_data_to_ids
-from ..utils import JSONPUTRspMixin
-from ..utils import JSONGETRspMixin
-import sys
+from .tools import retrieve_consumer_data_by_email
+from .tools import retrieve_consumer_data_by_f_and_l_name
+from .tools import retrieve_consumer_data_by_first_name
+from .tools import retrieve_consumer_data_by_id
+from .tools import retrieve_consumer_data_by_last_name
+from .tools import validate_rqst_params_and_add_instance
+from .tools import validate_rqst_params_and_delete_instance
+from .tools import validate_rqst_params_and_modify_instance
 
 
 # Need to abstract common variables in get and post class methods into class attributes
