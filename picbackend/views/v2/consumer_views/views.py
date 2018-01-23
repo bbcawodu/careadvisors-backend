@@ -4,18 +4,15 @@ from django.views.generic import View
 
 from picbackend.views.utils import JSONGETRspMixin
 from picbackend.views.utils import JSONPUTRspMixin
-from picbackend.views.utils import clean_string_value_from_dict_object
 from picmodels.models import PICConsumer
 from picmodels.models import PICConsumerBackup
+from .tools import validate_put_rqst_params
 from .tools import paginate_result_list_by_changing_excess_data_to_ids
 from .tools import retrieve_consumer_data_by_email
 from .tools import retrieve_consumer_data_by_f_and_l_name
 from .tools import retrieve_consumer_data_by_first_name
 from .tools import retrieve_consumer_data_by_id
 from .tools import retrieve_consumer_data_by_last_name
-from .tools import validate_rqst_params_and_add_instance
-from .tools import validate_rqst_params_and_delete_instance
-from .tools import validate_rqst_params_and_modify_instance
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -25,13 +22,15 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
 
     def consumer_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
-        # Retrieve database action from post data
-        rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
+        validated_put_rqst_params = validate_put_rqst_params(rqst_body, rqst_errors)
+        rqst_action = validated_put_rqst_params['rqst_action']
 
-        # If there are no parsing errors, process POST data based on database action
         if not rqst_errors:
-            if rqst_action == "Consumer Addition":
-                matching_consumer_instances, consumer_instance, backup_consumer_obj = validate_rqst_params_and_add_instance(rqst_body, rqst_errors)
+            if rqst_action == "create":
+                matching_consumer_instances, consumer_instance, backup_consumer_obj = PICConsumer.create_row_w_validated_params(
+                    validated_put_rqst_params,
+                    rqst_errors
+                )
 
                 if matching_consumer_instances:
                     consumer_match_data = []
@@ -40,19 +39,26 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                     response_raw_data['Status']['Possible Consumer Matches'] = consumer_match_data
                 else:
                     if consumer_instance:
-                        response_raw_data['Data']["Database ID"] = consumer_instance.id
+                        response_raw_data['Data']["consumer_row"] = consumer_instance.return_values_dict()
                     if backup_consumer_obj:
                         response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
-            elif rqst_action == "Consumer Modification":
-                consumer_instance, backup_consumer_obj = validate_rqst_params_and_modify_instance(rqst_body, rqst_errors)
+            elif rqst_action == "update":
+                consumer_instance, backup_consumer_obj = PICConsumer.update_row_w_validated_params(
+                    validated_put_rqst_params,
+                    rqst_errors
+                )
 
                 if not rqst_errors:
                     if consumer_instance:
-                        response_raw_data['Data']["Database ID"] = consumer_instance.id
+                        response_raw_data['Data']["consumer_row"] = consumer_instance.return_values_dict()
                     if backup_consumer_obj:
                         response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
-            elif rqst_action == "Consumer Deletion":
-                backup_consumer_obj = validate_rqst_params_and_delete_instance(rqst_body, rqst_errors)
+            elif rqst_action == "delete":
+                backup_consumer_obj = PICConsumer.delete_row_w_validated_params(
+                    validated_put_rqst_params['rqst_consumer_id'],
+                    validated_put_rqst_params['rqst_create_backup'],
+                    rqst_errors
+                )
 
                 if not rqst_errors:
                     response_raw_data['Data']["Database ID"] = "Deleted"
@@ -60,7 +66,7 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                     if backup_consumer_obj:
                         response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
             else:
-                rqst_errors.append("No valid 'Database Action' provided.")
+                rqst_errors.append("No valid 'db_action' provided.")
 
     def consumer_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         # Retrieve all Patient Innovation Center consumer objects
@@ -116,7 +122,7 @@ def get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst
             db_objects = db_objects.filter(navigator__in=list_of_nav_ids)
         if 'is_cps_consumer' in validated_GET_rqst_params:
             is_cps_consumer = validated_GET_rqst_params['is_cps_consumer']
-            db_objects = db_objects.filter(cps_consumer=is_cps_consumer)
+            db_objects = db_objects.filter(cps_info__isnull=not is_cps_consumer)
         if 'has_hospital_info' in validated_GET_rqst_params:
             has_hospital_info = validated_GET_rqst_params['has_hospital_info']
             db_objects = db_objects.filter(consumer_hospital_info__isnull=not has_hospital_info)

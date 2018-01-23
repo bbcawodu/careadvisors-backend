@@ -3,7 +3,7 @@ This file defines the data models for the picproject app
 """
 
 from django.db import models
-from picmodels.models import NavMetricsLocation
+from picmodels.models.care_advisors import NavMetricsLocation
 from picmodels.models.chicago_public_schools.cps_staff_consumer_models import CPSStaff
 
 from .services.read import retrieve_metrics_data_by_id

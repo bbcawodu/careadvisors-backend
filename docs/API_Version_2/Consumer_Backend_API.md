@@ -34,16 +34,39 @@ Address Keys(Every field within address can be given as an empty string. Address
 "State": String,
 "Zipcode": String,
 
-"date_met_nav":{"Day": Integer,
-                "Month": Integer,
-                "Year": Integer},
-                                
-"cps_consumer": Boolean (Whether or not this consumer is a CPS consumer),
+"date_met_nav":{
+    "Day": Integer,
+    "Month": Integer,
+    "Year": Integer
+},
+
+"create_case_management_rows": [
+    {
+        "management_step": Integer,
+        "management_notes": String,
+    },
+    ...
+],
+"update_case_management_rows": [
+    {
+        "management_step": Integer,
+        "management_notes": String,
+        "id": Integer
+    },
+    ...
+],
+"delete_case_management_rows": [
+    Integer,
+    Integer,
+    Integer
+    ...
+],
+                
 "cps_info": {
                 "primary_dependent": {
                                         "first_name": String (Required when "Consumer Database ID" is omitted),
                                         "last_name": String (Required when "Consumer Database ID" is omitted),
-                                        "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted)
+                                        "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted),
                                         "force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
                                      },
                 "cps_location": String (Must be the name of a NavMetricsLocation instance with cps_location=True),
@@ -60,7 +83,7 @@ Address Keys(Every field within address can be given as an empty string. Address
                                              {
                                                 "first_name": String (Required when "Consumer Database ID" is omitted),
                                                 "last_name": String (Required when "Consumer Database ID" is omitted),
-                                                "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted)
+                                                "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted),
                                                 "force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
                                              },
                                              ...
@@ -70,8 +93,8 @@ Address Keys(Every field within address can be given as an empty string. Address
                 "point_of_origin": String (Must be one of these choices: "Walk-in", "Appointment", "Referral from call", "Referral from school letter", "Enrollment event", "Not Available"),
             }(Contains relevant CPS info),
 
-"Consumer Database ID": Integer,
-"Database Action": String,
+"id": Integer,
+"db_action": String,
 "create_backup": Boolean (Whether or not to create a backup instance of this consumer),
 "force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
 }
@@ -90,14 +113,13 @@ In response, a JSON document will be displayed with the following format:
 }
 ```
 
-- Adding a consumer database entry.
-    - To add a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Addition".
+- Create a consumer database entry.
+    - To create a consumer database entry, the value for "db_action" in the JSON Body must equal "create".
     
         - Keys that can be omitted:
             - "create_backup"
             - "force_create_consumer"
-            - "cps_consumer"(Must be present and True if "cps_info" is present.)
-            - "cps_info" (Must be present if "cps_consumer" is True.)
+            - "cps_info"
             - cps_info["primary_dependent"]["first_name"]
             - cps_info["primary_dependent"]["last_name"]
             - cps_info["primary_dependent"]["Consumer Database ID"]
@@ -107,7 +129,8 @@ In response, a JSON document will be displayed with the following format:
             - cps_info["secondary_dependents"][index]["last_name"]
             - cps_info["secondary_dependents"][index]["Consumer Database ID"]
             - cps_info["secondary_dependents"][index]["force_create_consumer"]
-            - "Consumer Database ID"
+            - "id"
+            - "create_case_management_rows"
             
         - Keys that can be empty strings:
             - "Middle Name"
@@ -127,17 +150,22 @@ In response, a JSON document will be displayed with the following format:
         
         - Keys that can be Null
             - "date_met_nav"
-        
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the created entry
+            
+        - Keys that WILL NOT be read
+            - "update_case_management_rows"
+            - "delete_case_management_rows"
+
+    - If there are no errors in the JSON Body document:        
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "consumer_row", the value for which is an object with the fields of the created entry
     
-- Modifying a consumer database entry.
-    - To modify a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Modification".
+- Update a consumer database entry.
+    - To update a consumer database entry, the value for "db_action" in the JSON Body must equal "update".
     - All key value pairs in the JSON Body document correspond to updated fields for specified "Consumer Database ID"
     - Note: at least one key other than "Consumer Database ID" and "Database Action" must be present
     
         - Keys that can be omitted:
-            - all except "Consumer Database ID" and "Database Action"
+            - all except "id" and "db_action"
         
         - Keys that can be empty strings:
             - "Middle Name"
@@ -159,16 +187,18 @@ In response, a JSON document will be displayed with the following format:
             - "date_met_nav"
             - "cps_info"
         
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the updated entry
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "consumer_row", the value for which is an object with the fields of the created entry
 
-- Deleting a consumer database entry.
-    - To delete a consumer database entry, the value for "Database Action" in the JSON Body must equal "Consumer Deletion".
+- Delete a consumer database entry.
+    - To delete a consumer database entry, the value for "db_action" in the JSON Body must equal "delete".
     
         - Keys that can be omitted:
-            - all except "Consumer Database ID" and "Database Action"
+            - all except "id" and "db_action"
         
-    - The response JSON document will have a "Deleted" as the value for the "Data" key.
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a "Deleted" as the value for the "Data" key.
     
 - If there are errors in the JSON Body document:
     - "Error Code" will be 1.
@@ -242,7 +272,6 @@ In response, a JSON document will be displayed with the following format:
                             "Country": String,
                            },
                            
-                "cps_consumer": Boolean,
                 "cps_info": {
                                 "primary_dependent": {
                                                         "first_name": String,
@@ -365,7 +394,6 @@ In response, a JSON document will be displayed with the following format:
                             "Country": String,
                            },
                            
-                "cps_consumer": Boolean,
                 "cps_info": {
                                 "primary_dependent": {
                                                         "first_name": String,

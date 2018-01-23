@@ -1,157 +1,9 @@
-"""
-This file defines the data models for the picproject app
-"""
-
 from django.db import models
-from picmodels.models import NavMetricsLocation, Address
-from django.contrib import admin
-from oauth2client.contrib.django_util.models import CredentialsField
-from django.dispatch import receiver
-from django.conf import settings
-import uuid
-import os
-
-
-def get_staff_pic_file_path(instance, filename):
-    ext = filename.split('.')[-1]
-    filename = "%s.%s" % (uuid.uuid4(), ext)
-    return os.path.join('staff_pics', filename)
-
-
-class PICStaff(models.Model):
-    # fields for PICStaff model
-    REGIONS = {"1": ["cook",
-                     "collar",
-                     "lake",
-                     "mchenry",
-                     "kane",
-                     "kendall",
-                     "dupage",
-                     "will"],
-               "2": ["stephenson",
-                     "winnebago",
-                     "ogle",
-                     "lee",
-                     "bureau",
-                     "lasalle",
-                     "peoria",
-                     "livingston",
-                     "iroquois",
-                     "champaign"],
-               "3": ["pike",
-                     "scott",
-                     "morgan",
-                     "calhoun",
-                     "greene",
-                     "macoupin",
-                     "jersey",
-                     "montgomery",
-                     "fayette",
-                     "bond",
-                     "marion",
-                     "madison",
-                     "clinton",
-                     "st. clair",
-                     "washington",
-                     "monroe",
-                     "randolph",
-                     "perry",
-                     "jackson"]}
-    first_name = models.CharField(max_length=1000)
-    last_name = models.CharField(default="", max_length=1000)
-    email = models.EmailField(unique=True)
-    type = models.CharField(max_length=1000)
-    county = models.CharField(blank=True, null=True, max_length=1000, default="")
-    region = models.CharField(blank=True, null=True, max_length=1000, default="")
-    mpn = models.CharField(blank=True, max_length=1000, default="")
-    staff_pic = models.ImageField(upload_to=get_staff_pic_file_path, blank=True, null=True)
-    base_locations = models.ManyToManyField(NavMetricsLocation, blank=True)
-
-    def return_values_dict(self):
-        valuesdict = {"First Name": self.first_name,
-                      "Last Name": self.last_name,
-                      "MPN": self.mpn,
-                      "Email": self.email,
-                      "Authorized Credentials": False,
-                      "Type": self.type,
-                      "Database ID": self.id,
-                      "County": self.county,
-                      "Region": None,
-                      "Picture": None,
-                      "Base Locations": [],
-                      "Consumers": []}
-
-        # consumers = PICConsumer.objects.filter(navigator=self.id)
-        consumers = self.picconsumer_set.all()
-        consumer_list = []
-        if len(consumers):
-            for consumer in consumers:
-                consumer_list.append(consumer.id)
-        valuesdict['Consumers'] = consumer_list
-
-        if self.county:
-            for region in self.REGIONS:
-                if self.county.lower() in self.REGIONS[region]:
-                    valuesdict["Region"] = region
-                    break
-
-        base_locations = self.base_locations.all()
-        if len(base_locations):
-            base_location_values = []
-            for base_location in base_locations:
-                base_location_values.append(base_location.return_values_dict())
-            valuesdict["Base Locations"] = base_location_values
-
-        credentials_queryset = self.credentialsmodel_set.all()
-        if len(credentials_queryset):
-            for credentials_instance in credentials_queryset:
-                if credentials_instance.credential.invalid:
-                    credentials_instance.delete()
-                else:
-                    valuesdict["Authorized Credentials"] = True
-
-        if self.staff_pic:
-            valuesdict["Picture"] = self.staff_pic.url
-        else:
-            valuesdict["Picture"] = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_STAFF_PIC_URL)
-
-        return valuesdict
-
-    def save(self, *args, **kwargs):
-        if self.county or self.county != "":
-            for region in self.REGIONS:
-                if self.county.lower() in self.REGIONS[region]:
-                    self.region = region
-                    break
-
-        super(PICStaff, self).save(*args, **kwargs)
-
-    class Meta:
-        unique_together = ("email",)
-        # maps model to the picmodels module
-        app_label = 'picmodels'
-
-
-@receiver(models.signals.post_delete, sender=PICStaff)
-def remove_file_from_s3(sender, instance, using, **kwargs):
-    if instance.staff_pic:
-        default_pic_url = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_STAFF_PIC_URL)
-        if instance.staff_pic.url != default_pic_url:
-            instance.staff_pic.delete(save=False)
-
-
-# Maybe add some sort of authorization to our API? OAuth? OAuth2? Some shit?
-class CredentialsModel(models.Model):
-    id = models.ForeignKey(PICStaff, primary_key=True)
-    credential = CredentialsField()
-
-    class Meta:
-        # maps model to the picmodels module
-        app_label = 'picmodels'
-
-
-class CredentialsAdmin(admin.ModelAdmin):
-    pass
+from picmodels.models.care_advisors.staff_models import PICStaff
+from picmodels.models.care_advisors import NavMetricsLocation, Address
+from .services.create_update_delete import create_row_w_validated_params
+from .services.create_update_delete import update_row_w_validated_params
+from .services.create_update_delete import delete_row_w_validated_params
 
 
 class PICConsumerBaseQuerySet(models.QuerySet):
@@ -185,7 +37,6 @@ class PICConsumerBase(models.Model):
     met_nav_at = models.CharField(max_length=1000)
     date_met_nav = models.DateField(blank=True, null=True)
 
-    cps_consumer = models.BooleanField(default=False)
     cps_info = models.ForeignKey('ConsumerCPSInfoEntry', on_delete=models.SET_NULL, blank=True, null=True)
     consumer_hospital_info = models.ForeignKey('ConsumerHospitalInfo', on_delete=models.SET_NULL, blank=True, null=True)
 
@@ -239,11 +90,12 @@ class PICConsumerBase(models.Model):
                       "Navigator": None,
                       "Navigator Notes": None,
                       "date_met_nav": None,
-                      "cps_consumer": self.cps_consumer,
                       "cps_info": None,
                       "primary_guardians": None,
                       "secondary_guardians": None,
                       "consumer_hospital_info": None,
+
+                      "case_management_rows": None,
 
                       "Database ID": self.id}
 
@@ -259,6 +111,16 @@ class PICConsumerBase(models.Model):
                     navigator_note_list.append(navigator_note.navigator_notes)
 
             valuesdict["Navigator Notes"] = navigator_note_list
+
+        if self.casemanagementstatus_set:
+            case_objects = self.casemanagementstatus_set.all().order_by("-date_modified")
+            case_list = []
+
+            if len(case_objects):
+                for case_note in case_objects:
+                    case_list.append(case_note.return_values_dict())
+
+            valuesdict["case_management_rows"] = case_list
 
         if self.address:
             valuesdict["address"] = {}
@@ -311,6 +173,11 @@ class PICConsumer(PICConsumerBase):
 
     class Meta(PICConsumerBase.Meta):
         unique_together = ()
+
+
+PICConsumer.create_row_w_validated_params = classmethod(create_row_w_validated_params)
+PICConsumer.update_row_w_validated_params = classmethod(update_row_w_validated_params)
+PICConsumer.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
 
 
 class PICConsumerBackup(PICConsumerBase):
@@ -520,6 +387,38 @@ class ConsumerHospitalInfo(models.Model):
             "type": self.type,
             "no_reason": self.no_reason,
             "case_status": self.case_status,
+
+            "id": self.id
+        }
+
+        return valuesdict
+
+
+class CaseManagementStatus(models.Model):
+    """
+    Need to validate ALL field/column data before creating PICConsumerBase entries/rows and by extention,
+    CaseManagementStatus entries/rows
+    """
+
+    contact = models.ForeignKey('PICConsumer', on_delete=models.CASCADE, blank=True, null=True)
+    contact_backup = models.ForeignKey('PICConsumerBackup', on_delete=models.CASCADE, blank=True, null=True)
+
+    date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
+    date_modified = models.DateTimeField(auto_now=True)
+
+    management_step = models.IntegerField()
+    management_notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        # maps model to the picmodels module
+        app_label = 'picmodels'
+
+    def return_values_dict(self):
+        valuesdict = {
+            "management_step": self.management_step,
+            "management_notes": self.management_notes,
+            "date_created": self.date_created.isoformat() if self.date_created else None,
+            "date_modified": self.date_modified.isoformat() if self.date_modified else None,
 
             "id": self.id
         }

@@ -1,83 +1,239 @@
 import json
-from picmodels.models import PICConsumer
-from picmodels.models import PICConsumerBackup
-from picmodels.models import ConsumerNote
-from picmodels.models import Address
-from picmodels.models import Country
-from picmodels.models import ConsumerCPSInfoEntry
-from picmodels.models import ConsumerHospitalInfo
-from picmodels.models import NavMetricsLocation
+import picmodels
 from django.db import IntegrityError
 
 
-def add_instance_using_validated_params(add_consumer_params, post_errors):
+def create_row_w_validated_params(cls, rqst_params, rqst_errors):
     consumer_instance = None
     backup_consumer_obj = None
     matching_consumer_instances = None
 
-    found_consumers = PICConsumer.objects.filter(first_name__iexact=add_consumer_params['rqst_consumer_f_name'],
-                                                 last_name__iexact=add_consumer_params['rqst_consumer_l_name'])
-    if found_consumers and not add_consumer_params['force_create_consumer']:
-        query_params = {"first_name": add_consumer_params['rqst_consumer_f_name'],
-                        "last_name": add_consumer_params['rqst_consumer_l_name'], }
-        post_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(
+    force_create_consumer = None
+    if 'force_create_consumer' in rqst_params:
+        force_create_consumer = rqst_params['force_create_consumer']
+
+    found_consumers = cls.objects.filter(
+        first_name__iexact=rqst_params['rqst_consumer_f_name'],
+        last_name__iexact=rqst_params['rqst_consumer_l_name']
+    )
+
+    if found_consumers and not force_create_consumer:
+        query_params = {
+            "first_name": rqst_params['rqst_consumer_f_name'],
+            "last_name": rqst_params['rqst_consumer_l_name']
+        }
+        rqst_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(
             json.dumps(query_params)))
         matching_consumer_instances = found_consumers.all()
     else:
-        consumer_instance, backup_consumer_obj = create_consumer_obj(add_consumer_params, post_errors)
+        address_instance = None
+        if rqst_params['rqst_address_line_1'] != '' and rqst_params['rqst_city'] != '' and \
+                        rqst_params['rqst_state'] != '' and rqst_params['rqst_zipcode'] != '':
+            address_instance, address_instance_created = picmodels.models.Address.objects.get_or_create(
+                address_line_1=rqst_params['rqst_address_line_1'],
+                address_line_2=rqst_params['rqst_address_line_2'],
+                city=rqst_params['rqst_city'],
+                state_province=rqst_params['rqst_state'],
+                zipcode=rqst_params['rqst_zipcode'],
+                country=picmodels.models.Country.objects.all()[0])
+
+        backup_consumer_obj = None
+
+        nav_instance = rqst_params['nav_instance']
+        consumer_instance = cls(
+            first_name=rqst_params['rqst_consumer_f_name'],
+            middle_name=rqst_params['rqst_consumer_m_name'],
+            last_name=rqst_params['rqst_consumer_l_name'],
+            email=rqst_params['rqst_consumer_email'],
+            phone=rqst_params['rqst_consumer_phone'],
+            plan=rqst_params['rqst_consumer_plan'],
+            preferred_language=rqst_params['rqst_consumer_pref_lang'],
+            address=address_instance,
+            date_met_nav=rqst_params['rqst_date_met_nav'],
+            met_nav_at=rqst_params['rqst_consumer_met_nav_at'],
+            household_size=rqst_params['rqst_consumer_household_size'],
+        )
+        consumer_instance.navigator = nav_instance
+        consumer_instance.save()
+
+        for navigator_note in rqst_params['rqst_navigator_notes']:
+            consumer_note_object = picmodels.models.ConsumerNote(
+                consumer=consumer_instance,
+                navigator_notes=navigator_note
+            )
+            consumer_note_object.save()
+
+        if "validated_create_c_m_rows" in rqst_params:
+            management_step_rows = rqst_params["validated_create_c_m_rows"]
+            if management_step_rows:
+                for management_step_row in management_step_rows:
+                    if management_step_row._state.adding:
+                        management_step_row.contact = consumer_instance
+                        management_step_row.save()
+
+        if rqst_params['validated_cps_info_dict']:
+            add_cps_info_to_consumer_instance(consumer_instance, rqst_params['validated_cps_info_dict'], rqst_errors)
+
+        if rqst_params['validated_hospital_info_dict'] and consumer_instance:
+            add_hospital_info_to_consumer_instance(consumer_instance, rqst_params['validated_hospital_info_dict'], rqst_errors)
+
+        if not rqst_errors and rqst_params['rqst_create_backup'] and consumer_instance:
+            backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
 
     return matching_consumer_instances, consumer_instance, backup_consumer_obj
 
 
-def create_consumer_obj(consumer_params, post_errors):
-    address_instance = None
-    if consumer_params['rqst_address_line_1'] != '' and consumer_params['rqst_city'] != '' and \
-                    consumer_params['rqst_state'] != '' and consumer_params['rqst_zipcode'] != '':
-        address_instance, address_instance_created = Address.objects.get_or_create(
-            address_line_1=consumer_params['rqst_address_line_1'],
-            address_line_2=consumer_params['rqst_address_line_2'],
-            city=consumer_params['rqst_city'],
-            state_province=consumer_params['rqst_state'],
-            zipcode=consumer_params['rqst_zipcode'],
-            country=Country.objects.all()[0])
-
+def update_row_w_validated_params(cls, validated_params, rqst_errors):
+    consumer_instance = None
     backup_consumer_obj = None
 
-    nav_instance = consumer_params['nav_instance']
-    consumer_instance = PICConsumer(first_name=consumer_params['rqst_consumer_f_name'],
-                                    middle_name=consumer_params['rqst_consumer_m_name'],
-                                    last_name=consumer_params['rqst_consumer_l_name'],
-                                    email=consumer_params['rqst_consumer_email'],
-                                    phone=consumer_params['rqst_consumer_phone'],
-                                    plan=consumer_params['rqst_consumer_plan'],
-                                    preferred_language=consumer_params['rqst_consumer_pref_lang'],
-                                    address=address_instance,
-                                    date_met_nav=consumer_params['rqst_date_met_nav'],
-                                    met_nav_at=consumer_params['rqst_consumer_met_nav_at'],
-                                    household_size=consumer_params['rqst_consumer_household_size'],
-                                    )
-    consumer_instance.navigator = nav_instance
-    consumer_instance.save()
+    def modify_consumers_address():
+        address_instance = consumer_instance.address
+        if address_instance:
+            if 'rqst_address_line_1' in validated_params:
+                address_instance.address_line_1 = validated_params['rqst_address_line_1']
+            if 'rqst_address_line_2' in validated_params:
+                address_instance.address_line_2 = validated_params['rqst_address_line_2']
+            if 'rqst_city' in validated_params:
+                address_instance.city = validated_params['rqst_city']
+            if 'rqst_state' in validated_params:
+                address_instance.state_province = validated_params['rqst_state']
+            if 'rqst_zipcode' in validated_params:
+                address_instance.zipcode = validated_params['rqst_zipcode']
+        else:
+            there_are_any_address_fields_in_validated_params = 'rqst_address_line_1' in validated_params or \
+                                                               'rqst_city' in validated_params or \
+                                                               'rqst_state' in validated_params or \
+                                                               'rqst_zipcode' in validated_params or \
+                                                               'rqst_address_line_2' in validated_params
+            if there_are_any_address_fields_in_validated_params:
+                there_are_enough_fields_to_create_address_instance = 'rqst_address_line_1' in validated_params and \
+                                                                     'rqst_city' in validated_params and \
+                                                                     'rqst_state' in validated_params and \
+                                                                     'rqst_zipcode' in validated_params
+                if there_are_enough_fields_to_create_address_instance:
+                    if 'rqst_address_line_2' not in validated_params:
+                        validated_params['rqst_address_line_2'] = ''
+                    required_address_fields_are_not_empty_strings = validated_params['rqst_address_line_1'] != '' and \
+                                                                    validated_params['rqst_city'] != '' and \
+                                                                    validated_params['rqst_state'] != '' and \
+                                                                    validated_params['rqst_zipcode'] != ''
 
-    for navigator_note in consumer_params['rqst_navigator_notes']:
-        consumer_note_object = ConsumerNote(consumer=consumer_instance,
-                                            navigator_notes=navigator_note)
-        consumer_note_object.save()
+                    if required_address_fields_are_not_empty_strings:
+                        address_instance, address_instance_created = picmodels.models.Address.objects.get_or_create(
+                            address_line_1=validated_params['rqst_address_line_1'],
+                            address_line_2=validated_params['rqst_address_line_2'],
+                            city=validated_params['rqst_city'],
+                            state_province=validated_params['rqst_state'],
+                            zipcode=validated_params['rqst_zipcode'],
+                            country=picmodels.models.Country.objects.all()[0])
 
-    if consumer_params['rqst_cps_consumer']:
-        add_cps_info_to_consumer_instance(consumer_instance, consumer_params['validated_cps_info_dict'], post_errors)
+                        consumer_instance.address = address_instance
+                # else:
+                #     rqst_errors.append("There are not enough fields to create an address instance.")
 
-    if consumer_params['validated_hospital_info_dict']:
-        add_hospital_info_to_consumer_instance(consumer_instance, consumer_params['validated_hospital_info_dict'], post_errors)
+    try:
+        consumer_instance = cls.objects.get(id=validated_params['rqst_consumer_id'])
+    except cls.DoesNotExist:
+        rqst_errors.append('Consumer database entry does not exist for the id: {!s}'.format(
+            str(validated_params['rqst_consumer_id'])))
+    except cls.MultipleObjectsReturned:
+        rqst_errors.append(
+            'Multiple database entries exist for the id: {!s}'.format(str(validated_params['rqst_consumer_id'])))
+    except IntegrityError:
+        rqst_errors.append(
+            'Database entry already exists for the id: {!s}'.format(str(validated_params['rqst_consumer_id'])))
+    else:
+        modify_consumers_address()
+        if "rqst_consumer_f_name" in validated_params:
+            consumer_instance.first_name = validated_params['rqst_consumer_f_name']
+        if "rqst_consumer_m_name" in validated_params:
+            consumer_instance.middle_name = validated_params['rqst_consumer_m_name']
+        if "rqst_consumer_l_name" in validated_params:
+            consumer_instance.last_name = validated_params['rqst_consumer_l_name']
+        if "rqst_consumer_phone" in validated_params:
+            consumer_instance.phone = validated_params['rqst_consumer_phone']
+        if "rqst_consumer_plan" in validated_params:
+            consumer_instance.plan = validated_params['rqst_consumer_plan']
+        if "rqst_consumer_met_nav_at" in validated_params:
+            consumer_instance.met_nav_at = validated_params['rqst_consumer_met_nav_at']
+        if "rqst_consumer_household_size" in validated_params:
+            consumer_instance.household_size = validated_params['rqst_consumer_household_size']
+        if "rqst_consumer_pref_lang" in validated_params:
+            consumer_instance.preferred_language = validated_params['rqst_consumer_pref_lang']
+        if "rqst_consumer_email" in validated_params:
+            consumer_instance.email = validated_params['rqst_consumer_email']
+        if "rqst_date_met_nav" in validated_params:
+            consumer_instance.date_met_nav = validated_params['rqst_date_met_nav']
+        if "nav_instance" in validated_params:
+            consumer_instance.navigator = validated_params['nav_instance']
+        if "rqst_cps_info_dict" in validated_params:
+            if validated_params['rqst_cps_info_dict']:
+                modify_consumer_cps_info(consumer_instance, validated_params['validated_cps_info_dict'], rqst_errors)
+            else:
+                if consumer_instance.cps_info:
+                    consumer_instance.cps_info.delete()
 
-    if not post_errors and consumer_params['rqst_create_backup']:
-        backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
+        if not rqst_errors:
+            address_instance = consumer_instance.address
+            if address_instance:
+                address_instance.save()
+
+            consumer_instance.save()
+
+            if 'rqst_navigator_notes' in validated_params:
+                old_consumer_notes = picmodels.models.ConsumerNote.objects.filter(consumer=consumer_instance.id)
+                for old_consumer_note in old_consumer_notes:
+                    old_consumer_note.delete()
+
+                for navigator_note in validated_params['rqst_navigator_notes']:
+                    consumer_note_object = picmodels.models.ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
+                    consumer_note_object.save()
+
+            if "validated_create_c_m_rows" in validated_params:
+                management_step_rows = validated_params["validated_create_c_m_rows"]
+                if management_step_rows:
+                    for management_step_row in management_step_rows:
+                        if management_step_row._state.adding:
+                            management_step_row.contact = consumer_instance
+                            management_step_row.save()
+            if "validated_update_c_m_rows" in validated_params:
+                management_step_rows = validated_params["validated_update_c_m_rows"]
+                if management_step_rows:
+                    for management_step_row in management_step_rows:
+                        management_step_row.contact = consumer_instance
+                        management_step_row.save()
+            if "validated_delete_c_m_rows" in validated_params:
+                management_step_rows = validated_params["validated_delete_c_m_rows"]
+                if management_step_rows:
+                    for management_step_row in management_step_rows:
+                        management_step_row.delete()
+
+            if 'rqst_create_backup' in validated_params:
+                if validated_params['rqst_create_backup']:
+                    backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
 
     return consumer_instance, backup_consumer_obj
 
 
+def delete_row_w_validated_params(cls, rqst_consumer_id, rqst_create_backup, post_errors):
+    backup_consumer_obj = None
+
+    try:
+        consumer_instance = cls.objects.get(id=rqst_consumer_id)
+
+        if rqst_create_backup:
+            backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
+
+        consumer_instance.delete()
+    except cls.DoesNotExist:
+        post_errors.append('Consumer database entry does not exist for the id: {}'.format(rqst_consumer_id))
+
+    return backup_consumer_obj
+
+
 def add_hospital_info_to_consumer_instance(consumer_instance, validated_hospital_info_params, post_errors):
-    consumer_hospital_info_row = ConsumerHospitalInfo()
+    consumer_hospital_info_row = picmodels.models.ConsumerHospitalInfo()
 
     if 'treatment_site' in validated_hospital_info_params:
         consumer_hospital_info_row.treatment_site = validated_hospital_info_params['treatment_site']
@@ -122,16 +278,16 @@ def add_hospital_info_to_consumer_instance(consumer_instance, validated_hospital
 
 
 def add_cps_info_to_consumer_instance(consumer_instance, validated_cps_info_params, post_errors):
-    cps_info_object = ConsumerCPSInfoEntry()
+    cps_info_object = picmodels.models.ConsumerCPSInfoEntry()
 
     rqst_cps_location = validated_cps_info_params["rqst_cps_location"]
     try:
-        cps_location_object = NavMetricsLocation.objects.get(name=rqst_cps_location)
+        cps_location_object = picmodels.models.NavMetricsLocation.objects.get(name=rqst_cps_location)
         if not cps_location_object.cps_location:
             post_errors.append("{!s} is not a cps_location".format(rqst_cps_location))
         else:
             cps_info_object.cps_location = cps_location_object
-    except NavMetricsLocation.DoesNotExist:
+    except picmodels.models.NavMetricsLocation.DoesNotExist:
         post_errors.append("NavMetricsLocation object does not exist for name: {!s}".format(rqst_cps_location))
 
     cps_info_object.apt_date = validated_cps_info_params["rqst_apt_date"]
@@ -169,7 +325,6 @@ def add_cps_info_to_consumer_instance(consumer_instance, validated_cps_info_para
 
         cps_info_object.save()
         consumer_instance.cps_info = cps_info_object
-        consumer_instance.cps_consumer = True
 
         consumer_instance.save()
     else:
@@ -188,7 +343,7 @@ def create_backup_consumer_obj(consumer_instance):
         except AttributeError:
             pass
 
-    backup_consumer_obj = PICConsumerBackup()
+    backup_consumer_obj = picmodels.models.PICConsumerBackup()
     for orig_field in non_null_field_name_list:
         orig_field_value = getattr(consumer_instance, orig_field)
         if orig_field == "cps_info":
@@ -198,7 +353,7 @@ def create_backup_consumer_obj(consumer_instance):
     backup_consumer_obj.save()
 
     if "cps_info" in non_null_field_name_list:
-        cps_info_copy = ConsumerCPSInfoEntry()
+        cps_info_copy = picmodels.models.ConsumerCPSInfoEntry()
         cps_info_orig = getattr(consumer_instance, "cps_info")
         cps_info_orig_fields = cps_info_orig._meta.get_fields()
 
@@ -218,158 +373,29 @@ def create_backup_consumer_obj(consumer_instance):
         setattr(backup_consumer_obj, "cps_info", cps_info_copy)
         backup_consumer_obj.save()
 
-    orig_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
+    orig_consumer_notes = picmodels.models.ConsumerNote.objects.filter(consumer=consumer_instance.id)
     for consumer_note in orig_consumer_notes:
-        consumer_note_copy_object = ConsumerNote(consumer_backup=backup_consumer_obj,
+        consumer_note_copy_object = picmodels.models.ConsumerNote(consumer_backup=backup_consumer_obj,
                                                  navigator_notes=consumer_note.navigator_notes)
         consumer_note_copy_object.save()
 
     return backup_consumer_obj
 
 
-def modify_instance_using_validated_params(modify_consumer_params, post_errors):
-    consumer_instance, backup_consumer_obj = modify_consumer_obj(modify_consumer_params, post_errors)
-
-    return consumer_instance, backup_consumer_obj
-
-
-def modify_consumer_obj(validated_params, rqst_errors):
-    consumer_instance = None
-    backup_consumer_obj = None
-
-    def modify_consumers_address():
-        address_instance = consumer_instance.address
-        if address_instance:
-            if 'rqst_address_line_1' in validated_params:
-                address_instance.address_line_1 = validated_params['rqst_address_line_1']
-            if 'rqst_address_line_2' in validated_params:
-                address_instance.address_line_2 = validated_params['rqst_address_line_2']
-            if 'rqst_city' in validated_params:
-                address_instance.city = validated_params['rqst_city']
-            if 'rqst_state' in validated_params:
-                address_instance.state_province = validated_params['rqst_state']
-            if 'rqst_zipcode' in validated_params:
-                address_instance.zipcode = validated_params['rqst_zipcode']
-        else:
-            there_are_any_address_fields_in_validated_params = 'rqst_address_line_1' in validated_params or \
-                                                               'rqst_city' in validated_params or \
-                                                               'rqst_state' in validated_params or \
-                                                               'rqst_zipcode' in validated_params or \
-                                                               'rqst_address_line_2' in validated_params
-            if there_are_any_address_fields_in_validated_params:
-                there_are_enough_fields_to_create_address_instance = 'rqst_address_line_1' in validated_params and \
-                                                                     'rqst_city' in validated_params and \
-                                                                     'rqst_state' in validated_params and \
-                                                                     'rqst_zipcode' in validated_params
-                if there_are_enough_fields_to_create_address_instance:
-                    if 'rqst_address_line_2' not in validated_params:
-                        validated_params['rqst_address_line_2'] = ''
-                    required_address_fields_are_not_empty_strings = validated_params['rqst_address_line_1'] != '' and \
-                                                                    validated_params['rqst_city'] != '' and \
-                                                                    validated_params['rqst_state'] != '' and \
-                                                                    validated_params['rqst_zipcode'] != ''
-
-                    if required_address_fields_are_not_empty_strings:
-                        address_instance, address_instance_created = Address.objects.get_or_create(
-                            address_line_1=validated_params['rqst_address_line_1'],
-                            address_line_2=validated_params['rqst_address_line_2'],
-                            city=validated_params['rqst_city'],
-                            state_province=validated_params['rqst_state'],
-                            zipcode=validated_params['rqst_zipcode'],
-                            country=Country.objects.all()[0])
-
-                        consumer_instance.address = address_instance
-                # else:
-                #     rqst_errors.append("There are not enough fields to create an address instance.")
-
-    try:
-        consumer_instance = PICConsumer.objects.get(id=validated_params['rqst_consumer_id'])
-    except PICConsumer.DoesNotExist:
-        rqst_errors.append('Consumer database entry does not exist for the id: {!s}'.format(
-            str(validated_params['rqst_consumer_id'])))
-    except PICConsumer.MultipleObjectsReturned:
-        rqst_errors.append(
-            'Multiple database entries exist for the id: {!s}'.format(str(validated_params['rqst_consumer_id'])))
-    except IntegrityError:
-        rqst_errors.append(
-            'Database entry already exists for the id: {!s}'.format(str(validated_params['rqst_consumer_id'])))
-    else:
-        modify_consumers_address()
-        if "rqst_consumer_f_name" in validated_params:
-            consumer_instance.first_name = validated_params['rqst_consumer_f_name']
-        if "rqst_consumer_m_name" in validated_params:
-            consumer_instance.middle_name = validated_params['rqst_consumer_m_name']
-        if "rqst_consumer_l_name" in validated_params:
-            consumer_instance.last_name = validated_params['rqst_consumer_l_name']
-        if "rqst_consumer_phone" in validated_params:
-            consumer_instance.phone = validated_params['rqst_consumer_phone']
-        if "rqst_consumer_plan" in validated_params:
-            consumer_instance.plan = validated_params['rqst_consumer_plan']
-        if "rqst_consumer_met_nav_at" in validated_params:
-            consumer_instance.met_nav_at = validated_params['rqst_consumer_met_nav_at']
-        if "rqst_consumer_household_size" in validated_params:
-            consumer_instance.household_size = validated_params['rqst_consumer_household_size']
-        if "rqst_consumer_pref_lang" in validated_params:
-            consumer_instance.preferred_language = validated_params['rqst_consumer_pref_lang']
-        if "rqst_consumer_email" in validated_params:
-            consumer_instance.email = validated_params['rqst_consumer_email']
-        if "rqst_date_met_nav" in validated_params:
-            consumer_instance.date_met_nav = validated_params['rqst_date_met_nav']
-        if "nav_instance" in validated_params:
-            consumer_instance.navigator = validated_params['nav_instance']
-        if 'rqst_cps_consumer' in validated_params:
-            if validated_params['rqst_cps_consumer'] is not None:
-                consumer_instance.cps_consumer = validated_params['rqst_cps_consumer']
-        if "rqst_cps_info_dict" in validated_params:
-            if validated_params['rqst_cps_info_dict']:
-                modify_consumer_cps_info(consumer_instance, validated_params['validated_cps_info_dict'], rqst_errors)
-            else:
-                if consumer_instance.cps_info:
-                    consumer_instance.cps_info.delete()
-
-                consumer_instance.cps_consumer = False
-
-        if not rqst_errors:
-            address_instance = consumer_instance.address
-            if address_instance:
-                address_instance.save()
-
-            if not consumer_instance.cps_consumer:
-                if consumer_instance.cps_info:
-                    consumer_instance.cps_info.delete()
-
-            consumer_instance.save()
-
-            if 'rqst_navigator_notes' in validated_params:
-                old_consumer_notes = ConsumerNote.objects.filter(consumer=consumer_instance.id)
-                for old_consumer_note in old_consumer_notes:
-                    old_consumer_note.delete()
-
-                for navigator_note in validated_params['rqst_navigator_notes']:
-                    consumer_note_object = ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
-                    consumer_note_object.save()
-
-            if 'rqst_create_backup' in validated_params:
-                if validated_params['rqst_create_backup']:
-                    backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
-
-    return consumer_instance, backup_consumer_obj
-
-
 def modify_consumer_cps_info(consumer_instance, validated_cps_info_params, rqst_errors):
     cps_info_instance = consumer_instance.cps_info
     if cps_info_instance is None:
-        cps_info_instance = ConsumerCPSInfoEntry()
+        cps_info_instance = picmodels.models.ConsumerCPSInfoEntry()
 
     if "rqst_cps_location" in validated_cps_info_params:
         rqst_cps_location = validated_cps_info_params["rqst_cps_location"]
         try:
-            cps_location_object = NavMetricsLocation.objects.get(name=rqst_cps_location)
+            cps_location_object = picmodels.models.NavMetricsLocation.objects.get(name=rqst_cps_location)
             if not cps_location_object.cps_location:
                 rqst_errors.append("{!s} is not a cps_location".format(rqst_cps_location))
             else:
                 cps_info_instance.cps_location = cps_location_object
-        except NavMetricsLocation.DoesNotExist:
+        except picmodels.models.NavMetricsLocation.DoesNotExist:
             rqst_errors.append("NavMetricsLocation object does not exist for name: {!s}".format(rqst_cps_location))
     if not cps_info_instance.cps_location:
         rqst_errors.append("cps_location is required for a cps info entry. CPS info can not be added to consumer instance.")
@@ -448,21 +474,4 @@ def modify_consumer_cps_info(consumer_instance, validated_cps_info_params, rqst_
 
             cps_info_instance.save()
             consumer_instance.cps_info = cps_info_instance
-            consumer_instance.cps_consumer = True
             consumer_instance.save()
-
-
-def delete_instance_using_validated_params(rqst_consumer_id, rqst_create_backup, post_errors):
-    backup_consumer_obj = None
-
-    try:
-        consumer_instance = PICConsumer.objects.get(id=rqst_consumer_id)
-
-        if rqst_create_backup:
-            backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
-
-        consumer_instance.delete()
-    except PICConsumer.DoesNotExist:
-        post_errors.append('Consumer database entry does not exist for the id: {}'.format(rqst_consumer_id))
-
-    return backup_consumer_obj

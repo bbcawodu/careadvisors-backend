@@ -3,7 +3,7 @@ This file defines the data models for the picproject app
 """
 
 from django.db import models
-from picmodels.models import Address
+from picmodels.models.care_advisors import Address
 
 
 class NavMetricsLocation(models.Model):

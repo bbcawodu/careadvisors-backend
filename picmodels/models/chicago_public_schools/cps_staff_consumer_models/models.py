@@ -1,5 +1,5 @@
 from django.db import models
-from picmodels.models import NavMetricsLocation
+from picmodels.models.care_advisors import NavMetricsLocation
 from oauth2client.contrib.django_util.models import CredentialsField
 from django.dispatch import receiver
 from django.conf import settings

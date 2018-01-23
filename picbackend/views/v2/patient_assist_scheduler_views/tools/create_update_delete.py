@@ -24,7 +24,7 @@ from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
 from picmodels.models import CredentialsModel
 from picmodels.models import PICStaff
-from ...consumer_views import validate_rqst_params_and_add_instance
+from picmodels.models import PICConsumer
 
 START_OF_BUSINESS_TIMESTAMP = datetime.time(hour=15, minute=0, second=0, microsecond=0)
 END_OF_BUSINESS_TIMESTAMP = datetime.time(hour=23, minute=0, second=0, microsecond=0)
@@ -176,7 +176,8 @@ def create_consumer_instance_from_apt_rqst(rqst_nav_id, post_data, post_errors):
         rqst_consumer_info['force_create_consumer'] = True
         rqst_consumer_info['Navigator Database ID'] = rqst_nav_id
 
-        matching_consumer_instances, consumer_instance, backup_consumer_obj = validate_rqst_params_and_add_instance(rqst_consumer_info, post_errors)
+        matching_consumer_instances, consumer_instance, backup_consumer_obj = PICConsumer.create_row_w_validated_params(
+            rqst_consumer_info, post_errors)
 
         if not post_errors:
             consumer_info = consumer_instance.return_values_dict()

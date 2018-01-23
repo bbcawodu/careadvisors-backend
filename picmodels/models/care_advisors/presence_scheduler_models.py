@@ -4,7 +4,7 @@ This file defines the data models for the picproject app
 
 from django.db import models
 from django.contrib.auth.models import User
-from picmodels.models import PICConsumer, PICStaff
+from picmodels.models.care_advisors import PICConsumer, PICStaff
 
 
 class PICUser(models.Model):

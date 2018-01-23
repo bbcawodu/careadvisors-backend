@@ -12,9 +12,9 @@ from picbackend.views.utils import clean_dict_value_from_dict_object
 from picbackend.views.utils import clean_bool_value_from_dict_object
 from picmodels.models import PICStaff
 from picmodels.models import PICConsumer
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import add_instance_using_validated_params
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import modify_instance_using_validated_params
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import delete_instance_using_validated_params
+from picmodels.services.staff_consumer_models_services.pic_consumer_services import create_row_w_validated_params
+from picmodels.services.staff_consumer_models_services.pic_consumer_services import update_row_w_validated_params
+from picmodels.services.staff_consumer_models_services.pic_consumer_services import delete_row_w_validated_params
 from django.db import IntegrityError
 from django.core.validators import validate_email
 from django import forms
@@ -34,7 +34,7 @@ def validate_rqst_params_and_add_instance(rqst_consumer_info, rqst_errors):
     consumer_instance = None
     backup_consumer_obj = None
     if not rqst_errors:
-        matching_consumer_instances, consumer_instance, backup_consumer_obj = add_instance_using_validated_params(add_consumer_params, rqst_errors)
+        matching_consumer_instances, consumer_instance, backup_consumer_obj = create_row_w_validated_params(add_consumer_params, rqst_errors)
 
     return matching_consumer_instances, consumer_instance, backup_consumer_obj
 
@@ -465,7 +465,7 @@ def validate_rqst_params_and_modify_instance(rqst_params, post_errors):
     consumer_instance = None
     backup_consumer_obj = None
     if not post_errors:
-        consumer_instance, backup_consumer_obj = modify_instance_using_validated_params(validated_params, post_errors)
+        consumer_instance, backup_consumer_obj = update_row_w_validated_params(validated_params, post_errors)
 
     return consumer_instance, backup_consumer_obj
 
@@ -840,6 +840,6 @@ def validate_rqst_params_and_delete_instance(post_data, post_errors):
 
     backup_consumer_obj = None
     if not post_errors:
-        backup_consumer_obj = delete_instance_using_validated_params(rqst_consumer_id, rqst_create_backup, post_errors)
+        backup_consumer_obj = delete_row_w_validated_params(rqst_consumer_id, rqst_create_backup, post_errors)
 
     return backup_consumer_obj
