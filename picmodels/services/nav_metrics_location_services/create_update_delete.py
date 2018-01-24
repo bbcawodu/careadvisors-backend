@@ -1,17 +1,31 @@
 from django.db import IntegrityError
-import json
 from picmodels.models import Address
 from picmodels.models import NavMetricsLocation
-from picmodels.models import Country
+
+
+def get_or_create_address_row(validated_rqst_params):
+    default_row_field_values = {
+        "address_line_1": validated_rqst_params['rqst_address_line_1'],
+        "address_line_2": validated_rqst_params['rqst_address_line_2'],
+        "city": validated_rqst_params['rqst_city'],
+        "state_province": validated_rqst_params['rqst_state']
+    }
+
+    address_instance, address_instance_created = Address.objects.get_or_create(
+        defaults=default_row_field_values,
+        address_line_1__iexact=validated_rqst_params['rqst_address_line_1'],
+        address_line_2__iexact=validated_rqst_params['rqst_address_line_2'],
+        city__iexact=validated_rqst_params['rqst_city'],
+        state_province__iexact=validated_rqst_params['rqst_state'],
+        zipcode=validated_rqst_params['rqst_zipcode'],
+        country=validated_rqst_params['country_row']
+    )
+
+    return address_instance, address_instance_created
 
 
 def add_instance_using_validated_params(validated_rqst_params, post_errors):
-    address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=validated_rqst_params['rqst_address_line_1'],
-                                                                               address_line_2=validated_rqst_params['rqst_address_line_2'],
-                                                                               city=validated_rqst_params['rqst_city'],
-                                                                               state_province=validated_rqst_params['rqst_state'],
-                                                                               zipcode=validated_rqst_params['rqst_zipcode'],
-                                                                               country=Country.objects.get(name=validated_rqst_params['rqst_country']))
+    address_instance, address_instance_created = get_or_create_address_row(validated_rqst_params)
 
     try:
         location_instance = NavMetricsLocation(name=validated_rqst_params['rqst_location_name'],
@@ -27,12 +41,8 @@ def add_instance_using_validated_params(validated_rqst_params, post_errors):
 
 
 def modify_instance_using_validated_params(rqst_location_id, validated_rqst_params, post_errors):
-    address_instance, address_instance_created = Address.objects.get_or_create(address_line_1=validated_rqst_params['rqst_address_line_1'],
-                                                                               address_line_2=validated_rqst_params['rqst_address_line_2'],
-                                                                               city=validated_rqst_params['rqst_city'],
-                                                                               state_province=validated_rqst_params['rqst_state'],
-                                                                               zipcode=validated_rqst_params['rqst_zipcode'],
-                                                                               country=Country.objects.get(name=validated_rqst_params['rqst_country']))
+    address_instance, address_instance_created = get_or_create_address_row(validated_rqst_params)
+
     try:
         location_instance = NavMetricsLocation.objects.get(id=rqst_location_id)
     except NavMetricsLocation.DoesNotExist:

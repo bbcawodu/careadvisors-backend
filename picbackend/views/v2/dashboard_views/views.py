@@ -1,8 +1,10 @@
-from django.conf import settings
 import datetime
+
 import jwt
+from django.conf import settings
 from django.views.generic import View
-from ..utils import JSONGETRspMixin
+
+from picbackend.views.utils import JSONGETRspMixin
 
 
 # Need to abstract common variables in get and post class methods into class attributes

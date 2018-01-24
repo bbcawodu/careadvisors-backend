@@ -1,6 +1,7 @@
-from ...utils import clean_list_value_from_dict_object
-from picmodels.models import ConsumerGeneralConcern
 from math import ceil
+
+from picbackend.views.utils import clean_list_value_from_dict_object
+from picmodels.models import ConsumerGeneralConcern
 from .constants import MAX_NO_OF_GEN_CONCERNS_GIVEN
 
 

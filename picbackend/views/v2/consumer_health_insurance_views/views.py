@@ -1,8 +1,9 @@
 import pokitdok
 from django.views.generic import View
+
+from picbackend.views.utils import JSONGETRspMixin
+from picbackend.views.utils import JSONPOSTRspMixin
 from .tools import fetch_and_parse_pokit_elig_data
-from ..utils import JSONPOSTRspMixin
-from ..utils import JSONGETRspMixin
 
 
 class ConsumerHealthInsuranceBenefitsView(JSONPOSTRspMixin, JSONGETRspMixin, View):

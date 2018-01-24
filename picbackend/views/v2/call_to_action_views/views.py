@@ -1,12 +1,13 @@
 from django.http import HttpResponse
+from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.views.generic import View
-from django.http import HttpResponseForbidden
-from ..utils import JSONGETRspMixin
-from picmodels.models import CallToAction
+
+from picbackend.views.utils import JSONGETRspMixin
+from picbackend.views.utils import init_v2_response_data
+from picbackend.views.utils import validate_get_request_parameters
 from picmodels.forms import CTAManagementForm
-from ..utils import validate_get_request_parameters
-from ..utils import init_v2_response_data
+from picmodels.models import CallToAction
 
 
 def manage_cta_request(request):

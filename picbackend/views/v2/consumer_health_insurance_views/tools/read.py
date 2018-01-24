@@ -3,8 +3,9 @@ Defines utility functions and classes for pokitdok views
 - Need to obtain valid NPI
 """
 
-from ...utils import clean_string_value_from_dict_object
 import pokitdok
+
+from picbackend.views.utils import clean_string_value_from_dict_object
 
 
 def fetch_and_parse_pokit_elig_data(post_data, post_errors):

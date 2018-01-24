@@ -1,10 +1,11 @@
-from django.views.generic import View
-from ...utils import JSONPOSTRspMixin
-from ...utils import JSONGETRspMixin
 from copy import deepcopy
-from .tools import retrieve_related_spec_concern_objs_from_list_of_gen_concern_names
-from .tools import calculate_number_of_specific_concerns_to_fill
+from django.views.generic import View
+
+from picbackend.views.utils import JSONGETRspMixin
+from picbackend.views.utils import JSONPOSTRspMixin
 from .constants import MIN_NO_OF_SPECIFIC_CONCERNS_TO_FETCH
+from .tools import calculate_number_of_specific_concerns_to_fill
+from .tools import retrieve_related_spec_concern_objs_from_list_of_gen_concern_names
 
 
 # Need to abstract common variables in get and post class methods into class attributes

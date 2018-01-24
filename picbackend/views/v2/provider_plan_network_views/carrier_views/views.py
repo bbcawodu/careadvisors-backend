@@ -1,21 +1,22 @@
-from django.views.generic import View
+from django.conf import settings
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
-from django.conf import settings
-from picmodels.models import HealthcareCarrier
+from django.views.generic import View
+
+from picbackend.views.utils import JSONGETRspMixin
+from picbackend.views.utils import JSONPUTRspMixin
+from picbackend.views.utils import clean_string_value_from_dict_object
+from picbackend.views.utils import init_v2_response_data
+from picbackend.views.utils import validate_get_request_parameters
 from picmodels.forms import CarrierSampleIDCardUploadForm
-from ...utils import clean_string_value_from_dict_object
-from ...utils import validate_get_request_parameters
-from ...utils import init_v2_response_data
-from ...utils import JSONPUTRspMixin
-from ...utils import JSONGETRspMixin
-from .tools import validate_rqst_params_and_add_instance
-from .tools import validate_rqst_params_and_modify_instance
-from .tools import validate_rqst_params_and_delete_instance
+from picmodels.models import HealthcareCarrier
 from .tools import retrieve_carrier_data_by_id
 from .tools import retrieve_carrier_data_by_name
 from .tools import retrieve_carrier_data_by_state
+from .tools import validate_rqst_params_and_add_instance
+from .tools import validate_rqst_params_and_delete_instance
+from .tools import validate_rqst_params_and_modify_instance
 
 
 # Need to abstract common variables in get and post class methods into class attributes

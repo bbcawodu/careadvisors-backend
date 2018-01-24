@@ -3,10 +3,11 @@ Defines utility functions and classes for staff views
 """
 
 import re
-from ...utils import clean_string_value_from_dict_object
-from ...utils import clean_int_value_from_dict_object
-from django.core.validators import validate_email
 from django import forms
+from django.core.validators import validate_email
+
+from picbackend.views.utils import clean_int_value_from_dict_object
+from picbackend.views.utils import clean_string_value_from_dict_object
 
 
 def validate_put_rqst_params(rqst_body, rqst_errors):

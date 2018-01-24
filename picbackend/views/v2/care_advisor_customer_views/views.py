@@ -1,13 +1,14 @@
 from django.views.generic import View
-from ..utils import JSONPUTRspMixin
-from ..utils import JSONGETRspMixin
+
+from picbackend.views.utils import JSONGETRspMixin
+from picbackend.views.utils import JSONPUTRspMixin
 from picmodels.models import CareAdvisorCustomer
-from .tools import validate_put_rqst_params
-from .tools import retrieve_table_data_by_id
+from .tools import retrieve_table_data_by_company_name
 from .tools import retrieve_table_data_by_email
 from .tools import retrieve_table_data_by_full_name
-from .tools import retrieve_table_data_by_company_name
+from .tools import retrieve_table_data_by_id
 from .tools import retrieve_table_data_by_phone_number
+from .tools import validate_put_rqst_params
 
 
 # Need to abstract common variables in get and post class methods into class attributes

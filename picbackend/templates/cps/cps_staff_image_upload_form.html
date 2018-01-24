@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+<head>
+    <link href="{% static 'css/cps_staff_image_upload_form.css' %}" rel='stylesheet' type='text/css'>
+</head>
+{#{% if form.errors %}#}
+{#    {% for field in form %}#}
+{#        {% for error in field.errors %}#}
+{#            <div class="alert alert-danger">#}
+{#                <strong>{{ error|escape }}</strong>#}
+{#            </div>#}
+{#        {% endfor %}#}
+{#    {% endfor %}#}
+{#    {% for error in form.non_field_errors %}#}
+{#        <div class="alert alert-danger">#}
+{#            <strong>{{ error|escape }}</strong>#}
+{#        </div>#}
+{#    {% endfor %}#}
+{#{% endif %}#}
+
+<body>
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<form action="/cps/v1/staff_pic/" method="post" enctype='multipart/form-data'>
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit" />
+    <input type="submit" value="Delete current image." name="delete_current_image_field_value"/>
+</form>
+</body>
+</html>

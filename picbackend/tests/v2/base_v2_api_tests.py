@@ -4,12 +4,14 @@ Defines base classes that tests for version 2 inherit from
 
 
 from django.test import Client
+from django.conf import settings
 import json
 
 
 class BaseV2RqstTests(object):
     base_url = "/v2/"
     client_object = Client()
+    settings.DEBUG = True
 
     def test_base_rqst(self):
         response = self.client_object.get(self.base_url)
@@ -31,7 +33,7 @@ class BaseV2RqstTests(object):
 
 
 class BaseV2APITests(BaseV2RqstTests):
-    def test_fetch_all_objects_request(self):
+    def test_base_fetch_all_objects_request(self):
         response = self.client_object.get(self.base_url)
         response_data_json = response.content.decode('utf-8')
         response_data = json.loads(response_data_json)
@@ -44,6 +46,7 @@ class BaseV2APITests(BaseV2RqstTests):
 
 class BaseConsumerStaffMetricsTests(BaseV2APITests):
 
-    def test_fetch_all_objects_request(self):
-        self.base_url += "id=all"
-        super(BaseConsumerStaffMetricsTests, self)
+    def test_base_fetch_all_objects_request(self):
+        self.base_url += "?id=all"
+
+        super(BaseConsumerStaffMetricsTests, self).test_base_fetch_all_objects_request()
