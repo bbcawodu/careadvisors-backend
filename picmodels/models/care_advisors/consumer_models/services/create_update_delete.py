@@ -3,81 +3,82 @@ import picmodels
 from django.db import IntegrityError
 
 
-def create_row_w_validated_params(cls, rqst_params, rqst_errors):
+def create_row_w_validated_params(cls, validated_params, rqst_errors):
     consumer_instance = None
     backup_consumer_obj = None
     matching_consumer_instances = None
 
     force_create_consumer = None
-    if 'force_create_consumer' in rqst_params:
-        force_create_consumer = rqst_params['force_create_consumer']
+    if 'force_create_consumer' in validated_params:
+        force_create_consumer = validated_params['force_create_consumer']
 
     found_consumers = cls.objects.filter(
-        first_name__iexact=rqst_params['rqst_consumer_f_name'],
-        last_name__iexact=rqst_params['rqst_consumer_l_name']
+        first_name__iexact=validated_params['rqst_consumer_f_name'],
+        last_name__iexact=validated_params['rqst_consumer_l_name']
     )
 
     if found_consumers and not force_create_consumer:
         query_params = {
-            "first_name": rqst_params['rqst_consumer_f_name'],
-            "last_name": rqst_params['rqst_consumer_l_name']
+            "first_name": validated_params['rqst_consumer_f_name'],
+            "last_name": validated_params['rqst_consumer_l_name']
         }
         rqst_errors.append('Consumer database entry(s) already exists for the parameters: {!s}'.format(
             json.dumps(query_params)))
         matching_consumer_instances = found_consumers.all()
     else:
         address_instance = None
-        if rqst_params['rqst_address_line_1'] != '' and rqst_params['rqst_city'] != '' and \
-                        rqst_params['rqst_state'] != '' and rqst_params['rqst_zipcode'] != '':
+        if validated_params['rqst_address_line_1'] != '' and validated_params['rqst_city'] != '' and \
+                        validated_params['rqst_state'] != '' and validated_params['rqst_zipcode'] != '':
             address_instance, address_instance_created = picmodels.models.Address.objects.get_or_create(
-                address_line_1=rqst_params['rqst_address_line_1'],
-                address_line_2=rqst_params['rqst_address_line_2'],
-                city=rqst_params['rqst_city'],
-                state_province=rqst_params['rqst_state'],
-                zipcode=rqst_params['rqst_zipcode'],
+                address_line_1=validated_params['rqst_address_line_1'],
+                address_line_2=validated_params['rqst_address_line_2'],
+                city=validated_params['rqst_city'],
+                state_province=validated_params['rqst_state'],
+                zipcode=validated_params['rqst_zipcode'],
                 country=picmodels.models.Country.objects.all()[0])
 
         backup_consumer_obj = None
 
-        nav_instance = rqst_params['nav_instance']
+        nav_instance = validated_params['nav_instance']
         consumer_instance = cls(
-            first_name=rqst_params['rqst_consumer_f_name'],
-            middle_name=rqst_params['rqst_consumer_m_name'],
-            last_name=rqst_params['rqst_consumer_l_name'],
-            email=rqst_params['rqst_consumer_email'],
-            phone=rqst_params['rqst_consumer_phone'],
-            plan=rqst_params['rqst_consumer_plan'],
-            preferred_language=rqst_params['rqst_consumer_pref_lang'],
+            first_name=validated_params['rqst_consumer_f_name'],
+            middle_name=validated_params['rqst_consumer_m_name'],
+            last_name=validated_params['rqst_consumer_l_name'],
+            email=validated_params['rqst_consumer_email'],
+            phone=validated_params['rqst_consumer_phone'],
+            plan=validated_params['rqst_consumer_plan'],
+            preferred_language=validated_params['rqst_consumer_pref_lang'],
             address=address_instance,
-            date_met_nav=rqst_params['rqst_date_met_nav'],
-            met_nav_at=rqst_params['rqst_consumer_met_nav_at'],
-            household_size=rqst_params['rqst_consumer_household_size'],
+            date_met_nav=validated_params['rqst_date_met_nav'],
+            met_nav_at=validated_params['rqst_consumer_met_nav_at'],
+            household_size=validated_params['rqst_consumer_household_size'],
         )
         consumer_instance.navigator = nav_instance
         consumer_instance.save()
 
-        for navigator_note in rqst_params['rqst_navigator_notes']:
+        for navigator_note in validated_params['rqst_navigator_notes']:
             consumer_note_object = picmodels.models.ConsumerNote(
                 consumer=consumer_instance,
                 navigator_notes=navigator_note
             )
             consumer_note_object.save()
 
-        if "validated_create_c_m_rows" in rqst_params:
-            management_step_rows = rqst_params["validated_create_c_m_rows"]
-            if management_step_rows:
-                for management_step_row in management_step_rows:
-                    if management_step_row._state.adding:
-                        management_step_row.contact = consumer_instance
-                        management_step_row.save()
+        if "validated_create_c_m_params" in validated_params:
+            validated_create_c_m_params = validated_params['validated_create_c_m_params']
 
-        if rqst_params['validated_cps_info_dict']:
-            add_cps_info_to_consumer_instance(consumer_instance, rqst_params['validated_cps_info_dict'], rqst_errors)
+            picmodels.models.CaseManagementStatus.create_c_m_rows_w_validated_params(
+                consumer_instance,
+                validated_create_c_m_params,
+                rqst_errors
+            )
 
-        if rqst_params['validated_hospital_info_dict'] and consumer_instance:
-            add_hospital_info_to_consumer_instance(consumer_instance, rqst_params['validated_hospital_info_dict'], rqst_errors)
+        if validated_params['validated_cps_info_dict']:
+            add_cps_info_to_consumer_instance(consumer_instance, validated_params['validated_cps_info_dict'], rqst_errors)
 
-        if not rqst_errors and rqst_params['rqst_create_backup'] and consumer_instance:
+        if validated_params['validated_hospital_info_dict'] and consumer_instance:
+            add_hospital_info_to_consumer_instance(consumer_instance, validated_params['validated_hospital_info_dict'], rqst_errors)
+
+        if not rqst_errors and validated_params['rqst_create_backup'] and consumer_instance:
             backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
 
     return matching_consumer_instances, consumer_instance, backup_consumer_obj
@@ -190,24 +191,29 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
                     consumer_note_object = picmodels.models.ConsumerNote(consumer=consumer_instance, navigator_notes=navigator_note)
                     consumer_note_object.save()
 
-            if "validated_create_c_m_rows" in validated_params:
-                management_step_rows = validated_params["validated_create_c_m_rows"]
-                if management_step_rows:
-                    for management_step_row in management_step_rows:
-                        if management_step_row._state.adding:
-                            management_step_row.contact = consumer_instance
-                            management_step_row.save()
-            if "validated_update_c_m_rows" in validated_params:
-                management_step_rows = validated_params["validated_update_c_m_rows"]
-                if management_step_rows:
-                    for management_step_row in management_step_rows:
-                        management_step_row.contact = consumer_instance
-                        management_step_row.save()
-            if "validated_delete_c_m_rows" in validated_params:
-                management_step_rows = validated_params["validated_delete_c_m_rows"]
-                if management_step_rows:
-                    for management_step_row in management_step_rows:
-                        management_step_row.delete()
+            if "validated_create_c_m_params" in validated_params:
+                validated_create_c_m_params = validated_params['validated_create_c_m_params']
+
+                picmodels.models.CaseManagementStatus.create_c_m_rows_w_validated_params(
+                    consumer_instance,
+                    validated_create_c_m_params,
+                    rqst_errors
+                )
+            if "validated_update_c_m_params" in validated_params:
+                validated_update_c_m_params = validated_params['validated_update_c_m_params']
+
+                picmodels.models.CaseManagementStatus.update_c_m_rows_w_validated_params(
+                    consumer_instance,
+                    validated_update_c_m_params,
+                    rqst_errors
+                )
+            if "validated_delete_c_m_params" in validated_params:
+                validated_delete_c_m_params = validated_params['validated_delete_c_m_params']
+
+                picmodels.models.CaseManagementStatus.delete_c_m_rows_w_validated_params(
+                    validated_delete_c_m_params,
+                    rqst_errors
+                )
 
             if 'rqst_create_backup' in validated_params:
                 if validated_params['rqst_create_backup']:
@@ -230,6 +236,71 @@ def delete_row_w_validated_params(cls, rqst_consumer_id, rqst_create_backup, pos
         post_errors.append('Consumer database entry does not exist for the id: {}'.format(rqst_consumer_id))
 
     return backup_consumer_obj
+
+
+def create_c_m_rows_w_validated_params(cls, consumer_instance, validated_create_c_m_params, rqst_errors):
+    if validated_create_c_m_params:
+        for c_m_param_index, c_m_params in enumerate(validated_create_c_m_params):
+            try:
+                c_m_status_row = cls(
+                    management_step=c_m_params['rqst_management_step'],
+                    management_notes=c_m_params['rqst_management_notes'],
+                )
+
+                c_m_status_row.contact = consumer_instance
+                c_m_status_row.save()
+            except IntegrityError:
+                rqst_errors.append(
+                    "Error at create_case_management_rows[{!s}] creating case management step row for params: {!s}".format(
+                        c_m_param_index, json.dumps(c_m_params)))
+
+
+def update_c_m_rows_w_validated_params(cls, consumer_instance, validated_update_c_m_params, rqst_errors):
+    if validated_update_c_m_params:
+        for c_m_param_index, c_m_params in enumerate(validated_update_c_m_params):
+            rqst_management_status_id = c_m_params['rqst_management_status_id']
+
+            try:
+                c_m_status_row = cls.objects.get(id=rqst_management_status_id)
+
+                c_m_status_row.management_step = c_m_params['rqst_management_step']
+                c_m_status_row.management_notes = c_m_params['rqst_management_notes']
+
+                c_m_status_row.contact = consumer_instance
+                c_m_status_row.save()
+            except cls.DoesNotExist:
+                rqst_errors.append('Case Management Status Row does not exist for the id: {!s}'.format(
+                    str(rqst_management_status_id)))
+            except cls.MultipleObjectsReturned:
+                rqst_errors.append(
+                    'Multiple Case Management Status Rows exist for the id: {!s}'.format(
+                        str(rqst_management_status_id)))
+            except IntegrityError:
+                rqst_errors.append(
+                    "Error at create_case_management_rows[{!s}] creating case management step row for params: {!s}".format(
+                        c_m_param_index, json.dumps(c_m_params)))
+
+
+def delete_c_m_rows_w_validated_params(cls, validated_delete_c_m_params, rqst_errors):
+    if validated_delete_c_m_params:
+        for c_m_param_index, c_m_params in enumerate(validated_delete_c_m_params):
+            rqst_management_status_id = c_m_params['rqst_management_status_id']
+
+            try:
+                c_m_status_row = cls.objects.get(id=rqst_management_status_id)
+
+                c_m_status_row.delete()
+            except cls.DoesNotExist:
+                rqst_errors.append('Case Management Status Row does not exist for the id: {!s}'.format(
+                    str(rqst_management_status_id)))
+            except cls.MultipleObjectsReturned:
+                rqst_errors.append(
+                    'Multiple Case Management Status Rows exist for the id: {!s}'.format(
+                        str(rqst_management_status_id)))
+            except IntegrityError:
+                rqst_errors.append(
+                    "Error at create_case_management_rows[{!s}] creating case management step row for params: {!s}".format(
+                        c_m_param_index, json.dumps(c_m_params)))
 
 
 def add_hospital_info_to_consumer_instance(consumer_instance, validated_hospital_info_params, post_errors):

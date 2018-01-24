@@ -6,11 +6,11 @@ Defines utility functions and classes for consumer views
 import math
 import sys
 from ..constants import CONSUMERS_PER_PAGE
-from picmodels.services import filter_consumer_qset_by_id
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import filter_consumer_objs_by_f_and_l_name
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import filter_consumer_objs_by_email
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import filter_consumer_objs_by_first_name
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import filter_consumer_objs_by_last_name
+from picmodels.models.care_advisors.consumer_models.services.read import filter_consumer_qset_by_id
+from picmodels.models.care_advisors.consumer_models.services.read import filter_consumer_objs_by_f_and_l_name
+from picmodels.models.care_advisors.consumer_models.services.read import filter_consumer_objs_by_email
+from picmodels.models.care_advisors.consumer_models.services.read import filter_consumer_objs_by_first_name
+from picmodels.models.care_advisors.consumer_models.services.read import filter_consumer_objs_by_last_name
 
 
 def retrieve_consumer_data_by_id(consumers, rqst_consumer_id, list_of_ids, rqst_errors):

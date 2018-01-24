@@ -163,7 +163,26 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
     validated_params["rqst_create_backup"] = rqst_create_backup
 
     if "create_case_management_rows" in rqst_body:
-        create_c_m_status_rows(rqst_body, validated_params, rqst_errors)
+        rqst_case_management_row_data = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "create_case_management_rows",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_create_c_m_params = []
+        if rqst_case_management_row_data:
+            for rqst_case_row_index, rqst_case_management_dict in enumerate(rqst_case_management_row_data):
+                validated_c_m_row_params = validate_create_c_m_status_data(
+                    rqst_case_management_dict,
+                    rqst_case_row_index,
+                    validated_params,
+                    rqst_errors
+                )
+                validated_create_c_m_params.append(validated_c_m_row_params)
+
+        validated_params['validated_create_c_m_params'] = validated_create_c_m_params
 
 
 def validate_update_row_params(rqst_body, validated_params, rqst_errors):
@@ -306,164 +325,180 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
                                                                                    "create_backup",
                                                                                    rqst_errors,
                                                                                    no_key_allowed=True)
+
     if "create_case_management_rows" in rqst_body:
-        create_c_m_status_rows(rqst_body, validated_params, rqst_errors)
+        rqst_case_management_row_data = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "create_case_management_rows",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_create_c_m_params = []
+        if rqst_case_management_row_data:
+            for rqst_case_row_index, rqst_case_management_dict in enumerate(rqst_case_management_row_data):
+                validated_c_m_row_params = validate_create_c_m_status_data(
+                    rqst_case_management_dict,
+                    rqst_case_row_index,
+                    validated_params,
+                    rqst_errors
+                )
+                validated_create_c_m_params.append(validated_c_m_row_params)
+
+        validated_params['validated_create_c_m_params'] = validated_create_c_m_params
     elif "update_case_management_rows" in rqst_body:
-        update_c_m_status_rows(rqst_body, validated_params, rqst_errors)
+        rqst_case_management_row_data = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "update_case_management_rows",
+            rqst_errors
+        )
+
+        validated_update_c_m_params = []
+        if rqst_case_management_row_data:
+            for rqst_case_row_index, rqst_case_management_dict in enumerate(rqst_case_management_row_data):
+                validated_c_m_row_params = validate_update_c_m_status_data(
+                    rqst_case_management_dict,
+                    rqst_case_row_index,
+                    rqst_errors
+                )
+                validated_update_c_m_params.append(validated_c_m_row_params)
+
+        validated_params['validated_update_c_m_params'] = validated_update_c_m_params
     elif "delete_case_management_rows" in rqst_body:
-        delete_c_m_status_rows(rqst_body, validated_params, rqst_errors)
+        rqst_case_management_row_data = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "delete_case_management_rows",
+            rqst_errors
+        )
+
+        validated_delete_c_m_params = []
+        if rqst_case_management_row_data:
+            for rqst_c_m_id in rqst_case_management_row_data:
+                validated_c_m_row_params = validate_delete_c_m_status_data(
+                    rqst_c_m_id,
+                    rqst_errors
+                )
+                validated_delete_c_m_params.append(validated_c_m_row_params)
+
+        validated_params['validated_delete_c_m_params'] = validated_delete_c_m_params
 
     if len(validated_params) < 3 or "rqst_consumer_id" not in validated_params:
         rqst_errors.append("No parameters to modify are given.")
 
 
-def create_c_m_status_rows(rqst_body, validated_params, rqst_errors):
-    rqst_case_management_row_data = clean_list_value_from_dict_object(rqst_body,
-                                                                      "root",
-                                                                      "create_case_management_rows",
-                                                                      rqst_errors,
-                                                                      empty_list_allowed=True)
-    validated_params["rqst_create_c_m_rows"] = rqst_case_management_row_data
+def validate_create_c_m_status_data(rqst_case_management_dict, rqst_case_row_index, validated_params, rqst_errors):
+    validated_c_m_row_params = {
 
-    validated_case_management_rows = []
-    if rqst_case_management_row_data:
-        for rqst_case_row_index, rqst_case_management_dict in enumerate(rqst_case_management_row_data):
-            validated_case_status_row = None
+    }
+    rqst_management_step = clean_int_value_from_dict_object(rqst_case_management_dict,
+                                                            "create_case_management_rows[{!s}]".format(rqst_case_row_index),
+                                                            "management_step",
+                                                            rqst_errors
+                                                            )
+    if rqst_management_step:
+        if rqst_management_step > 9:
+            rqst_errors.append(
+                "management_step for create_case_management_rows[{!s}] must be < 9".format(
+                    rqst_case_row_index))
+    validated_c_m_row_params['rqst_management_step'] = rqst_management_step
 
-            rqst_management_step = clean_int_value_from_dict_object(rqst_case_management_dict,
-                                                                    "create_case_management_rows[{!s}]".format(rqst_case_row_index),
-                                                                    "management_step",
-                                                                    rqst_errors
-                                                                    )
-            if rqst_management_step:
-                if rqst_management_step > 9:
-                    rqst_errors.append(
-                        "management_step for create_case_management_rows[{!s}] must be < 9".format(
-                            rqst_case_row_index))
+    rqst_management_notes = clean_string_value_from_dict_object(rqst_case_management_dict,
+                                                                "create_case_management_rows[{!s}]".format(
+                                                                    rqst_case_row_index),
+                                                                "management_notes",
+                                                                rqst_errors,
+                                                                empty_string_allowed=True
+                                                                )
+    validated_c_m_row_params['rqst_management_notes'] = rqst_management_notes
 
-            rqst_management_notes = clean_string_value_from_dict_object(rqst_case_management_dict,
-                                                                        "create_case_management_rows[{!s}]".format(rqst_case_row_index),
-                                                                        "management_notes",
-                                                                        rqst_errors,
-                                                                        empty_string_allowed=True
-                                                                        )
+    if "rqst_consumer_id" in validated_params and not rqst_errors:
+        matching_c_m_steps = CaseManagementStatus.objects.all().filter(
+            management_step=rqst_management_step,
+            contact=validated_params["rqst_consumer_id"]
+        ).values_list('id', flat=True)
 
-            if "rqst_consumer_id" in validated_params and not rqst_errors:
-                matching_c_m_steps = CaseManagementStatus.objects.all().filter(
-                    management_step=rqst_management_step,
-                    contact=validated_params["rqst_consumer_id"]
-                ).values_list('id', flat=True)
+        if len(matching_c_m_steps):
+            rqst_errors.append(
+                "case_management_rows with matching management_steps already exist for create_case_management_rows. matching ids: {!s}".format(
+                    matching_c_m_steps))
 
-                if len(matching_c_m_steps):
-                    rqst_errors.append(
-                        "case_management_rows with matching management_steps already exist for create_case_management_rows. matching ids: {!s}".format(
-                            matching_c_m_steps))
-
-            if not rqst_errors:
-                try:
-                    validated_case_status_row = CaseManagementStatus(
-                        management_step=rqst_management_step,
-                        management_notes=rqst_management_notes,
-                    )
-                except IntegrityError:
-                    rqst_errors.append(
-                        "Error at create_case_management_rows[{!s}] creating case management step row for params: {!s}".format(
-                            rqst_case_row_index, json.dumps(rqst_case_management_dict)))
-
-            validated_case_management_rows.append(validated_case_status_row)
-
-        validated_params["validated_create_c_m_rows"] = validated_case_management_rows
+    return validated_c_m_row_params
 
 
-def update_c_m_status_rows(rqst_body, validated_params, rqst_errors):
-    rqst_case_management_row_data = clean_list_value_from_dict_object(rqst_body,
-                                                                      "root",
-                                                                      "update_case_management_rows",
-                                                                      rqst_errors)
-    validated_params["rqst_update_c_m_rows"] = rqst_case_management_row_data
+def validate_update_c_m_status_data(rqst_case_management_dict, rqst_case_row_index, rqst_errors):
+    validated_c_m_row_params = {
 
-    validated_case_management_rows = []
-    if rqst_case_management_row_data:
-        for rqst_case_row_index, rqst_case_management_dict in enumerate(rqst_case_management_row_data):
-            updated_case_status_row = None
+    }
 
-            rqst_management_status_id = clean_int_value_from_dict_object(rqst_case_management_dict,
-                                                                         "create_case_management_rows[{!s}]".format(rqst_case_row_index),
-                                                                         "id",
-                                                                         rqst_errors
-                                                                         )
+    rqst_management_status_id = clean_int_value_from_dict_object(rqst_case_management_dict,
+                                                                 "create_case_management_rows[{!s}]".format(rqst_case_row_index),
+                                                                 "id",
+                                                                 rqst_errors
+                                                                 )
+    validated_c_m_row_params['rqst_management_status_id'] = rqst_management_status_id
+    if rqst_management_status_id:
+        try:
+            case_status_row = CaseManagementStatus.objects.get(id=rqst_management_status_id)
+        except CaseManagementStatus.DoesNotExist:
+            rqst_errors.append('Case Management Status Row does not exist for the id: {!s}'.format(
+                str(rqst_management_status_id)))
+        except CaseManagementStatus.MultipleObjectsReturned:
+            rqst_errors.append(
+                'Multiple Case Management Status Rows exist for the id: {!s}'.format(
+                    str(rqst_management_status_id)))
+        except IntegrityError:
+            rqst_errors.append(
+                'Case Management Status Row already exists for the id: {!s}'.format(
+                    str(rqst_management_status_id)))
 
-            if not rqst_errors:
-                try:
-                    updated_case_status_row = CaseManagementStatus.objects.get(id=rqst_management_status_id)
-                except CaseManagementStatus.DoesNotExist:
-                    rqst_errors.append('Case Management Status Row does not exist for the id: {!s}'.format(
-                        str(rqst_management_status_id)))
-                except CaseManagementStatus.MultipleObjectsReturned:
-                    rqst_errors.append(
-                        'Multiple Case Management Status Rows exist for the id: {!s}'.format(
-                            str(rqst_management_status_id)))
-                except IntegrityError:
-                    rqst_errors.append(
-                        'Case Management Status Row already exists for the id: {!s}'.format(
-                            str(rqst_management_status_id)))
+    rqst_management_step = clean_int_value_from_dict_object(rqst_case_management_dict,
+                                                            "create_case_management_rows[{!s}]".format(rqst_case_row_index),
+                                                            "management_step",
+                                                            rqst_errors
+                                                            )
+    if rqst_management_step:
+        if rqst_management_step > 9:
+            rqst_errors.append(
+                "management_step for create_case_management_rows[{!s}] must be < 9".format(
+                    rqst_case_row_index))
+    validated_c_m_row_params['rqst_management_step'] = rqst_management_step
 
-                rqst_management_step = clean_int_value_from_dict_object(rqst_case_management_dict,
-                                                                        "create_case_management_rows[{!s}]".format(rqst_case_row_index),
-                                                                        "management_step",
-                                                                        rqst_errors
-                                                                        )
-                if rqst_management_step:
-                    if rqst_management_step > 9:
-                        rqst_errors.append(
-                            "management_step for create_case_management_rows[{!s}] must be < 9".format(
-                                rqst_case_row_index))
+    rqst_management_notes = clean_string_value_from_dict_object(rqst_case_management_dict,
+                                                                "create_case_management_rows[{!s}]".format(
+                                                                    rqst_case_row_index),
+                                                                "management_notes",
+                                                                rqst_errors,
+                                                                empty_string_allowed=True
+                                                                )
+    validated_c_m_row_params['rqst_management_notes'] = rqst_management_notes
 
-                rqst_management_notes = clean_string_value_from_dict_object(rqst_case_management_dict,
-                                                                            "create_case_management_rows[{!s}]".format(rqst_case_row_index),
-                                                                            "management_notes",
-                                                                            rqst_errors,
-                                                                            empty_string_allowed=True
-                                                                            )
-                if not rqst_errors:
-                    updated_case_status_row.management_step = rqst_management_step
-                    updated_case_status_row.management_notes = rqst_management_notes
-
-            validated_case_management_rows.append(updated_case_status_row)
-
-        validated_params["validated_update_c_m_rows"] = validated_case_management_rows
+    return validated_c_m_row_params
 
 
-def delete_c_m_status_rows(rqst_body, validated_params, rqst_errors):
-    rqst_case_management_row_data = clean_list_value_from_dict_object(rqst_body,
-                                                                      "root",
-                                                                      "delete_case_management_rows",
-                                                                      rqst_errors)
-    validated_params["rqst_delete_c_m_rows"] = rqst_case_management_row_data
+def validate_delete_c_m_status_data(rqst_management_status_id, rqst_errors):
+    validated_c_m_row_params = {
+        'rqst_management_status_id': rqst_management_status_id
+    }
 
-    case_management_rows = []
-    if rqst_case_management_row_data:
-        for rqst_case_row_index, rqst_management_status_id in enumerate(rqst_case_management_row_data):
-            case_status_row = None
+    if rqst_management_status_id:
+        try:
+            case_status_row = CaseManagementStatus.objects.get(id=rqst_management_status_id)
+        except CaseManagementStatus.DoesNotExist:
+            rqst_errors.append('Case Management Status Row does not exist for the id: {!s}'.format(
+                str(rqst_management_status_id)))
+        except CaseManagementStatus.MultipleObjectsReturned:
+            rqst_errors.append(
+                'Multiple Case Management Status Rows exist for the id: {!s}'.format(
+                    str(rqst_management_status_id)))
+        except IntegrityError:
+            rqst_errors.append(
+                'Case Management Status Row already exists for the id: {!s}'.format(
+                    str(rqst_management_status_id)))
 
-            if not rqst_errors:
-                try:
-                    case_status_row = CaseManagementStatus.objects.get(id=rqst_management_status_id)
-                except CaseManagementStatus.DoesNotExist:
-                    rqst_errors.append('Case Management Status Row does not exist for the id: {!s}'.format(
-                        str(rqst_management_status_id)))
-                except CaseManagementStatus.MultipleObjectsReturned:
-                    rqst_errors.append(
-                        'Multiple Case Management Status Rows exist for the id: {!s}'.format(
-                            str(rqst_management_status_id)))
-                except IntegrityError:
-                    rqst_errors.append(
-                        'Case Management Status Row already exists for the id: {!s}'.format(
-                            str(rqst_management_status_id)))
-
-            case_management_rows.append(case_status_row)
-
-        validated_params["validated_delete_c_m_rows"] = case_management_rows
+    return validated_c_m_row_params
 
 
 def validate_hospital_info_params(rqst_hospital_info_dict, rqst_errors):

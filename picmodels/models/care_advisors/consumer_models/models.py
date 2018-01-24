@@ -4,6 +4,9 @@ from picmodels.models.care_advisors import NavMetricsLocation, Address
 from .services.create_update_delete import create_row_w_validated_params
 from .services.create_update_delete import update_row_w_validated_params
 from .services.create_update_delete import delete_row_w_validated_params
+from .services.create_update_delete import create_c_m_rows_w_validated_params
+from .services.create_update_delete import update_c_m_rows_w_validated_params
+from .services.create_update_delete import delete_c_m_rows_w_validated_params
 
 
 class PICConsumerBaseQuerySet(models.QuerySet):
@@ -424,3 +427,8 @@ class CaseManagementStatus(models.Model):
         }
 
         return valuesdict
+
+
+CaseManagementStatus.create_c_m_rows_w_validated_params = classmethod(create_c_m_rows_w_validated_params)
+CaseManagementStatus.update_c_m_rows_w_validated_params = classmethod(update_c_m_rows_w_validated_params)
+CaseManagementStatus.delete_c_m_rows_w_validated_params = classmethod(delete_c_m_rows_w_validated_params)
