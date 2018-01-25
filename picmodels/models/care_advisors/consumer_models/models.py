@@ -7,6 +7,11 @@ from .services.create_update_delete import delete_row_w_validated_params
 from .services.create_update_delete import create_c_m_rows_w_validated_params
 from .services.create_update_delete import update_c_m_rows_w_validated_params
 from .services.create_update_delete import delete_c_m_rows_w_validated_params
+from .services.read import retrieve_consumer_data_by_id
+from .services.read import retrieve_consumer_data_by_f_and_l_name
+from .services.read import retrieve_consumer_data_by_email
+from .services.read import retrieve_consumer_data_by_first_name
+from .services.read import retrieve_consumer_data_by_last_name
 
 
 class PICConsumerBaseQuerySet(models.QuerySet):
@@ -170,6 +175,13 @@ class PICConsumerBase(models.Model):
         if self.cps_info:
             self.cps_info.delete()
         super(PICConsumerBase, self).delete(*args, **kwargs)
+
+
+PICConsumerBase.retrieve_consumer_data_by_id = classmethod(retrieve_consumer_data_by_id)
+PICConsumerBase.retrieve_consumer_data_by_f_and_l_name = classmethod(retrieve_consumer_data_by_f_and_l_name)
+PICConsumerBase.retrieve_consumer_data_by_email = classmethod(retrieve_consumer_data_by_email)
+PICConsumerBase.retrieve_consumer_data_by_first_name = classmethod(retrieve_consumer_data_by_first_name)
+PICConsumerBase.retrieve_consumer_data_by_last_name = classmethod(retrieve_consumer_data_by_last_name)
 
 
 class PICConsumer(PICConsumerBase):
