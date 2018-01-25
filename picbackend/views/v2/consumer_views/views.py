@@ -8,11 +8,6 @@ from picmodels.models import PICConsumer
 from picmodels.models import PICConsumerBackup
 from .tools import validate_put_rqst_params
 from .tools import paginate_result_list_by_changing_excess_data_to_ids
-from .tools import retrieve_consumer_data_by_email
-from .tools import retrieve_consumer_data_by_f_and_l_name
-from .tools import retrieve_consumer_data_by_first_name
-from .tools import retrieve_consumer_data_by_id
-from .tools import retrieve_consumer_data_by_last_name
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -69,10 +64,13 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 rqst_errors.append("No valid 'db_action' provided.")
 
     def consumer_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
-        # Retrieve all Patient Innovation Center consumer objects
-        consumers = PICConsumer.objects.all()
-
-        get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst_params, response_raw_data, rqst_errors)
+        get_and_add_consumer_data_to_response(
+            request,
+            PICConsumer,
+            validated_GET_rqst_params,
+            response_raw_data,
+            rqst_errors
+        )
 
     parse_PUT_request_and_add_response = consumer_management_put_logic
 
@@ -96,10 +94,13 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
 
     def consumer_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
-        # Retrieve all Patient Innovation Center consumer objects
-        consumers = PICConsumerBackup.objects.all()
-
-        get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst_params, response_raw_data, rqst_errors)
+        get_and_add_consumer_data_to_response(
+            request,
+            PICConsumerBackup,
+            validated_GET_rqst_params,
+            response_raw_data,
+            rqst_errors
+        )
 
     accepted_GET_request_parameters = [
         "nav_id",
@@ -114,22 +115,8 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     parse_GET_request_and_add_response = consumer_management_get_logic
 
 
-def get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
-    # Filter consumer objects based on GET parameters
-    def filter_db_objects_by_secondary_params(db_objects):
-        if 'nav_id_list' in validated_GET_rqst_params:
-            list_of_nav_ids = validated_GET_rqst_params['nav_id_list']
-            db_objects = db_objects.filter(navigator__in=list_of_nav_ids)
-        if 'is_cps_consumer' in validated_GET_rqst_params:
-            is_cps_consumer = validated_GET_rqst_params['is_cps_consumer']
-            db_objects = db_objects.filter(cps_info__isnull=not is_cps_consumer)
-        if 'has_hospital_info' in validated_GET_rqst_params:
-            has_hospital_info = validated_GET_rqst_params['has_hospital_info']
-            db_objects = db_objects.filter(consumer_hospital_info__isnull=not has_hospital_info)
-
-        return db_objects
-
-    def retrieve_data_by_primary_params_and_add_to_response(db_objects):
+def get_and_add_consumer_data_to_response(request, db_model, validated_GET_rqst_params, response_raw_data, rqst_errors):
+    def retrieve_data_by_primary_params_and_add_to_response(db_model_class):
         data_list = []
 
         def paginate_results():
@@ -141,30 +128,15 @@ def get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst
                 response_raw_data['Page URLs'] = extra_urls
 
         if 'first_name' in validated_GET_rqst_params and 'last_name' in validated_GET_rqst_params:
-            rqst_first_name = validated_GET_rqst_params['first_name']
-            rqst_last_name = validated_GET_rqst_params['last_name']
-
-            data_list = retrieve_consumer_data_by_f_and_l_name(db_objects, rqst_first_name, rqst_last_name, rqst_errors)
+            data_list = db_model_class.retrieve_consumer_data_by_f_and_l_name(validated_GET_rqst_params, rqst_errors)
         elif 'email' in validated_GET_rqst_params:
-            list_of_emails = validated_GET_rqst_params['email_list']
-
-            data_list = retrieve_consumer_data_by_email(db_objects, list_of_emails, rqst_errors)
+            data_list = db_model_class.retrieve_consumer_data_by_email(validated_GET_rqst_params, rqst_errors)
         elif 'first_name' in validated_GET_rqst_params:
-            list_of_first_names = validated_GET_rqst_params['first_name_list']
-
-            data_list = retrieve_consumer_data_by_first_name(db_objects, list_of_first_names, rqst_errors)
+            data_list = db_model_class.retrieve_consumer_data_by_first_name(validated_GET_rqst_params, rqst_errors)
         elif 'last_name' in validated_GET_rqst_params:
-            list_of_last_names = validated_GET_rqst_params['last_name_list']
-
-            data_list = retrieve_consumer_data_by_last_name(db_objects, list_of_last_names, rqst_errors)
+            data_list = db_model_class.retrieve_consumer_data_by_last_name(validated_GET_rqst_params, rqst_errors)
         elif 'id' in validated_GET_rqst_params:
-            rqst_consumer_id = validated_GET_rqst_params['id']
-            if rqst_consumer_id != 'all':
-                list_of_ids = validated_GET_rqst_params['id_list']
-            else:
-                list_of_ids = None
-
-            data_list = retrieve_consumer_data_by_id(db_objects, rqst_consumer_id, list_of_ids, rqst_errors)
+            data_list = db_model_class.retrieve_consumer_data_by_id(validated_GET_rqst_params, rqst_errors)
         else:
             rqst_errors.append('No Valid Parameters')
 
@@ -178,6 +150,4 @@ def get_and_add_consumer_data_to_response(consumers, request, validated_GET_rqst
 
         response_raw_data['Data'] = data_list
 
-    consumers = filter_db_objects_by_secondary_params(consumers)
-
-    retrieve_data_by_primary_params_and_add_to_response(consumers)
+    retrieve_data_by_primary_params_and_add_to_response(db_model)
