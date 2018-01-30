@@ -2,9 +2,15 @@ import datetime
 
 
 def prefetch_related_rows(db_queryset):
-    db_queryset = db_queryset.prefetch_related('staff_member',
-                                               'planstat_set',
-                                               'location')
+    db_queryset = db_queryset.select_related(
+        'staff_member',
+        'location',
+        'location__address',
+    )
+
+    db_queryset = db_queryset.prefetch_related(
+        'planstat_set',
+    )
 
     return db_queryset
 

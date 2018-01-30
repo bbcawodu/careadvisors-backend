@@ -1,14 +1,18 @@
 def prefetch_related_rows(db_queryset):
-    db_queryset = db_queryset.prefetch_related('carrier',
-                                               "primary_care_physician_standard_cost",
-                                               "specialist_standard_cost",
-                                               "emergency_room_standard_cost",
-                                               "inpatient_facility_standard_cost",
-                                               "generic_drugs_standard_cost",
-                                               "preferred_brand_drugs_standard_cost",
-                                               "non_preferred_brand_drugs_standard_cost",
-                                               "specialty_drugs_standard_cost"
-                                               )
+    db_queryset = db_queryset.select_related(
+        'carrier',
+    )
+
+    db_queryset = db_queryset.prefetch_related(
+        "primary_care_physician_standard_cost",
+        "specialist_standard_cost",
+        "emergency_room_standard_cost",
+        "inpatient_facility_standard_cost",
+        "generic_drugs_standard_cost",
+        "preferred_brand_drugs_standard_cost",
+        "non_preferred_brand_drugs_standard_cost",
+        "specialty_drugs_standard_cost"
+    )
 
     return db_queryset
 
