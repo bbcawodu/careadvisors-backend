@@ -33,12 +33,14 @@ class Address(models.Model):
                            "city", "state_province", "country")
 
     def return_values_dict(self):
-        valuesdict = {"Address Line 1": self.address_line_1,
-                      "Address Line 2": self.address_line_2,
-                      "Zipcode": self.zipcode,
-                      "City": self.city,
-                      "State": self.state_province,
-                      "Country": self.country.name,
-                      "Database ID": self.id,
-                      }
+        valuesdict = {
+            "address_line_1": self.address_line_1,
+            "address_line_2": self.address_line_2,
+            "zipcode": self.zipcode,
+            "city": self.city,
+            "state_province": self.state_province,
+            "country": self.country.name,
+            "id": self.id,
+        }
+
         return valuesdict

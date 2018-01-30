@@ -48,6 +48,7 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
             phone=validated_params['rqst_consumer_phone'],
             plan=validated_params['rqst_consumer_plan'],
             preferred_language=validated_params['rqst_consumer_pref_lang'],
+            best_contact_time=validated_params['rqst_best_contact_time'],
             address=address_instance,
             date_met_nav=validated_params['rqst_date_met_nav'],
             met_nav_at=validated_params['rqst_consumer_met_nav_at'],
@@ -162,6 +163,8 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
             consumer_instance.household_size = validated_params['rqst_consumer_household_size']
         if "rqst_consumer_pref_lang" in validated_params:
             consumer_instance.preferred_language = validated_params['rqst_consumer_pref_lang']
+        if "rqst_best_contact_time" in validated_params:
+            consumer_instance.best_contact_time = validated_params['rqst_best_contact_time']
         if "rqst_consumer_email" in validated_params:
             consumer_instance.email = validated_params['rqst_consumer_email']
         if "rqst_date_met_nav" in validated_params:

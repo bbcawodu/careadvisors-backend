@@ -159,19 +159,22 @@ def filter_db_objects_by_secondary_params(db_objects, validated_GET_rqst_params)
 
 
 def prefetch_related_rows(db_queryset):
-    db_queryset = db_queryset.prefetch_related(
-        'consumernote_set',
+    db_queryset = db_queryset.select_related(
         'address',
         'navigator',
         # 'primary_guardian',
-        # 'primary_guardian__picconsumer_set',
-        # 'secondary_guardians',
-        # 'secondary_guardians__picconsumer_set',
         'cps_info',
         'cps_info__cps_location',
         'cps_info__primary_dependent',
-        'cps_info__secondary_dependents',
         "consumer_hospital_info",
+    )
+
+    db_queryset = db_queryset.prefetch_related(
+        'consumernote_set',
+        # 'primary_guardian__picconsumer_set',
+        # 'secondary_guardians',
+        # 'secondary_guardians__picconsumer_set',
+        'cps_info__secondary_dependents',
         "casemanagementstatus_set"
     )
 

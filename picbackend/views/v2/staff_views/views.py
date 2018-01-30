@@ -6,22 +6,12 @@ from django.views.generic import View
 
 from picbackend.views.utils import JSONGETRspMixin
 from picbackend.views.utils import JSONPUTRspMixin
-from picbackend.views.utils import clean_string_value_from_dict_object
 from picbackend.views.utils import init_v2_response_data
 from picbackend.views.utils import validate_get_request_parameters
 from picmodels.forms import StaffImageUploadForm
 from picmodels.models import PICStaff
-from .tools import retrieve_staff_data_by_county
-from .tools import retrieve_staff_data_by_email
-from .tools import retrieve_staff_data_by_f_and_l_name
-from .tools import retrieve_staff_data_by_first_name
-from .tools import retrieve_staff_data_by_id
-from .tools import retrieve_staff_data_by_last_name
-from .tools import retrieve_staff_data_by_mpn
-from .tools import retrieve_staff_data_by_region
-from .tools import validate_rqst_params_and_add_instance
-from .tools import validate_rqst_params_and_delete_instance
-from .tools import validate_rqst_params_and_modify_instance
+
+from .tools import validate_put_rqst_params
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -31,25 +21,26 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
 
     def staff_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
-        rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
+        validated_put_rqst_params = validate_put_rqst_params(rqst_body, rqst_errors)
+        rqst_action = validated_put_rqst_params['rqst_action']
 
         if not rqst_errors:
             staff_instance = None
 
-            if rqst_action == "Staff Addition":
-                staff_instance = validate_rqst_params_and_add_instance(rqst_body, rqst_errors)
-            elif rqst_action == "Staff Modification":
-                staff_instance = validate_rqst_params_and_modify_instance(rqst_body, rqst_errors)
-            elif rqst_action == "Staff Deletion":
-                validate_rqst_params_and_delete_instance(rqst_body, rqst_errors)
+            if rqst_action == "create":
+                staff_instance = PICStaff.create_row_w_validated_params(validated_put_rqst_params, rqst_errors)
+            elif rqst_action == "update":
+                staff_instance = PICStaff.update_row_w_validated_params(validated_put_rqst_params, rqst_errors)
+            elif rqst_action == "delete":
+                PICStaff.delete_row_w_validated_params(validated_put_rqst_params, rqst_errors)
 
                 if not rqst_errors:
-                    response_raw_data['Data']["Database ID"] = "Deleted"
+                    response_raw_data['Data']["row"] = "Deleted"
             else:
-                rqst_errors.append("No valid 'Database Action' provided.")
+                rqst_errors.append("No valid 'db_action' provided.")
 
             if staff_instance:
-                response_raw_data['Data'] = {"Database ID": staff_instance.id}
+                response_raw_data['Data'] = {"row": staff_instance.return_values_dict()}
 
     def staff_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         def retrieve_data_by_primary_params_and_add_to_response():
@@ -59,31 +50,31 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 rqst_first_name = validated_GET_rqst_params['first_name']
                 rqst_last_name = validated_GET_rqst_params['last_name']
 
-                data_list = retrieve_staff_data_by_f_and_l_name(rqst_first_name, rqst_last_name, rqst_errors)
+                data_list = PICStaff.retrieve_staff_data_by_f_and_l_name(rqst_first_name, rqst_last_name, rqst_errors)
             elif 'email' in validated_GET_rqst_params:
                 list_of_emails = validated_GET_rqst_params['email_list']
 
-                data_list = retrieve_staff_data_by_email(list_of_emails, rqst_errors)
+                data_list = PICStaff.retrieve_staff_data_by_email(list_of_emails, rqst_errors)
             elif 'mpn' in validated_GET_rqst_params:
                 list_of_mpns = validated_GET_rqst_params['mpn_list']
 
-                data_list = retrieve_staff_data_by_mpn(list_of_mpns, rqst_errors)
+                data_list = PICStaff.retrieve_staff_data_by_mpn(list_of_mpns, rqst_errors)
             elif 'first_name' in validated_GET_rqst_params:
                 list_of_first_names = validated_GET_rqst_params['first_name_list']
 
-                data_list = retrieve_staff_data_by_first_name(list_of_first_names, rqst_errors)
+                data_list = PICStaff.retrieve_staff_data_by_first_name(list_of_first_names, rqst_errors)
             elif 'last_name' in validated_GET_rqst_params:
                 list_of_last_names = validated_GET_rqst_params['last_name_list']
 
-                data_list = retrieve_staff_data_by_last_name(list_of_last_names, rqst_errors)
+                data_list = PICStaff.retrieve_staff_data_by_last_name(list_of_last_names, rqst_errors)
             elif 'county' in validated_GET_rqst_params:
                 list_of_counties = validated_GET_rqst_params['county_list']
 
-                data_list = retrieve_staff_data_by_county(list_of_counties, rqst_errors)
+                data_list = PICStaff.retrieve_staff_data_by_county(list_of_counties, rqst_errors)
             elif 'region' in validated_GET_rqst_params:
                 list_of_regions = validated_GET_rqst_params['region_list']
 
-                data_list = retrieve_staff_data_by_region(list_of_regions, rqst_errors)
+                data_list = PICStaff.retrieve_staff_data_by_region(list_of_regions, rqst_errors)
             elif 'id' in validated_GET_rqst_params:
                 rqst_staff_id = validated_GET_rqst_params['id']
                 if rqst_staff_id != 'all':
@@ -91,7 +82,7 @@ class StaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 else:
                     list_of_ids = None
 
-                data_list = retrieve_staff_data_by_id(rqst_staff_id, list_of_ids, rqst_errors)
+                data_list = PICStaff.retrieve_staff_data_by_id(rqst_staff_id, list_of_ids, rqst_errors)
             else:
                 rqst_errors.append('No Valid Parameters')
 
