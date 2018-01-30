@@ -84,28 +84,30 @@ class PICConsumerBase(models.Model):
         return secondary_guardian_qset
 
     def return_values_dict(self):
-        valuesdict = {"First Name": self.first_name,
-                      "Middle Name": self.middle_name,
-                      "Last Name": self.last_name,
-                      "Email": self.email,
-                      "Phone Number": self.phone,
-                      "Preferred Language": self.preferred_language,
-                      "address": None,
-                      "Household Size": self.household_size,
-                      "Plan": self.plan,
-                      "Met Navigator At": self.met_nav_at,
-                      "Best Contact Time": self.best_contact_time,
-                      "Navigator": None,
-                      "Navigator Notes": None,
-                      "date_met_nav": None,
-                      "cps_info": None,
-                      "primary_guardians": None,
-                      "secondary_guardians": None,
-                      "consumer_hospital_info": None,
+        valuesdict = {
+            "first_name": self.first_name,
+            "middle_name": self.middle_name,
+            "last_name": self.last_name,
+            "email": self.email,
+            "phone": self.phone,
+            "preferred_anguage": self.preferred_language,
+            "address": None,
+            "household size": self.household_size,
+            "plan": self.plan,
+            "met_nav_at": self.met_nav_at,
+            "best_contact_time": self.best_contact_time,
+            "navigator": None,
+            "consumer_notes": None,
+            "date_met_nav": None,
+            "cps_info": None,
+            "primary_guardians": None,
+            "secondary_guardians": None,
+            "consumer_hospital_info": None,
 
-                      "case_management_rows": None,
+            "case_management_rows": None,
 
-                      "Database ID": self.id}
+            "id": self.id
+        }
 
         if self.date_met_nav:
             valuesdict["date_met_nav"] = self.date_met_nav.isoformat()
@@ -118,10 +120,12 @@ class PICConsumerBase(models.Model):
                 for navigator_note in navigator_note_objects:
                     navigator_note_list.append(navigator_note.navigator_notes)
 
-            valuesdict["Navigator Notes"] = navigator_note_list
+            valuesdict["consumer_notes"] = navigator_note_list
 
         if self.casemanagementstatus_set:
+            # case_objects = self.casemanagementstatus_set.all()
             case_objects = self.casemanagementstatus_set.all().order_by("-date_modified")
+
             case_list = []
 
             if len(case_objects):
@@ -137,7 +141,7 @@ class PICConsumerBase(models.Model):
                 valuesdict["address"][key] = address_values[key]
 
         if self.navigator:
-            valuesdict['Navigator'] = "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name)
+            valuesdict['navigator'] = "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name)
 
         if self.cps_info:
             valuesdict['cps_info'] = self.cps_info.return_values_dict()

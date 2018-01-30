@@ -12,7 +12,7 @@ def paginate_result_list_by_changing_excess_data_to_ids(result_list, rqst_page_n
 
     def remove_all_keys_from_db_instance_info_dict_except_db_id(db_instance_info_dict):
         for key in list(db_instance_info_dict):
-            if key != "Database ID":
+            if key != "id":
                 db_instance_info_dict.pop(key, None)
 
     def change_first_part_of_result_list_to_ids():
