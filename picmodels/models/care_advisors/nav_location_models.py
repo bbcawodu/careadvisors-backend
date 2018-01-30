@@ -19,10 +19,11 @@ class NavMetricsLocation(models.Model):
         unique_together = ("address", "name")
 
     def return_values_dict(self):
-        valuesdict = {"Name": self.name,
-                      "Database ID": self.id,
-                      "CPS Location": self.cps_location,
-                      }
+        valuesdict = {
+            "Name": self.name,
+            "Database ID": self.id,
+            "CPS Location": self.cps_location,
+        }
 
         if self.address:
             address_values = self.address.return_values_dict()

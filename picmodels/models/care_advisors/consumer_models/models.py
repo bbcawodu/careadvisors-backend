@@ -123,8 +123,10 @@ class PICConsumerBase(models.Model):
             valuesdict["consumer_notes"] = navigator_note_list
 
         if self.casemanagementstatus_set:
-            # case_objects = self.casemanagementstatus_set.all()
-            case_objects = self.casemanagementstatus_set.all().order_by("-date_modified")
+            case_objects = self.casemanagementstatus_set.all()
+            # .order_by() adds significant overhead unless field to be ordered by has been indexed in some way
+            # case_objects = self.casemanagementstatus_set.all().order_by("-date_modified")
+            # case_objects = self.casemanagementstatus_set.all().order_by("management_step")
 
             case_list = []
 
