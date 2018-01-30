@@ -5,11 +5,11 @@ Defines utility functions and classes for consumer metrics views
 from picmodels.models import PICStaff
 from picmodels.services import filter_db_queryset_by_id
 from picmodels.services.metrics_submission_services import filter_metrics_db_instances_by_secondary_params
-from picmodels.services.staff_consumer_models_services import filter_staff_objs_by_f_and_l_name
-from picmodels.services.staff_consumer_models_services import filter_staff_objs_by_first_name
-from picmodels.services.staff_consumer_models_services import filter_staff_objs_by_last_name
-from picmodels.services.staff_consumer_models_services import filter_staff_objs_by_email
-from picmodels.services.staff_consumer_models_services import filter_staff_objs_by_mpn
+from picmodels.models.care_advisors.staff_models.services.read import filter_staff_objs_by_f_and_l_name
+from picmodels.models.care_advisors.staff_models.services.read import filter_staff_objs_by_first_name
+from picmodels.models.care_advisors.staff_models.services.read import filter_staff_objs_by_last_name
+from picmodels.models.care_advisors.staff_models.services.read import filter_staff_objs_by_email
+from picmodels.models.care_advisors.staff_models.services.read import filter_staff_objs_by_mpn
 
 
 def retrieve_metrics_data_by_staff_id(rqst_staff_id, list_of_ids, search_params, rqst_errors, fields=None):

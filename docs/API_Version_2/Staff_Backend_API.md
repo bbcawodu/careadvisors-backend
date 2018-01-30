@@ -1,7 +1,7 @@
 ## Staff Account Backend API
 
 ### Staff Data Submission API
-To modify or add members of the PICStaff class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/staff/. 
+To create, update, or delete rows in the PICStaff table in the database, make a PUT request to: http://picbackend.herokuapp.com/v2/staff/. 
 
 - The headers of the request should include: 
     - "Content-Type: "application/json""
@@ -15,10 +15,10 @@ The body of the request should be a JSON document using the following template:
 "Email": String,
 "User Type": String,
 "User County": String,
-"Base Location Names": [Strings (Can be None or empty string)], # If any locations are not found, an error will be added and the staff member will still be saved
-"MPN": String(Can be None or empty string),
-"Database ID": Integer(Required when "Database Action" == "Staff Modification" or "Staff Deletion"),
-"Database Action": String,
+"Base Location Names": [Strings (Can be Null or empty string)], # If any locations are not found, an error will be added and the staff member will still be saved
+"MPN": String(Can be Null or empty string),
+"id": Integer,
+"db_action": String,
 }
 ```
 
@@ -34,23 +34,58 @@ In response, a JSON document will be displayed with the following format:
 }
 ```
 
-- Adding a staff member database entry.
-    - To add a staff member database entry, the value for "Database Action" in the POST request must equal "Staff Addition".
-    - All other fields except "Database ID" must be filled.
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the created entry
+- Create a PICStaff database row.
+    - To create a row in the PICStaff table, the value for "db_action" in the JSON Body must equal "create".
     
-- Modifying a staff member database entry.
-    - To modify a staff member database entry, the value for "Database Action" in the POST request must equal "Staff Modification".
-    - All other fields must be filled.
-    - All key value pairs in the JSON Body document correspond to updated fields for specified "Database ID"
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the updated entry
+        - Keys that can be omitted:
+            - "id"
+            
+        - Keys that can be empty strings:
+            - "Base Location Names"[index]
+            - "MPN"
+        
+        - Keys that can be empty arrays
+            - "Base Location Names"
+        
+        - Keys that can be Null
+            - "Base Location Names"[index]
+            - "MPN"
 
-- Deleting a staff member database entry.
-    - To delete a staff member database entry, the value for "Database Action" in the POST request must equal "Staff Deletion".
-    - The only other field should be "Database ID".
-    - The response JSON document will have a "Deleted" as the value for the "Data" key.
+    - If there are no errors in the JSON Body document:        
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the created entry
+    
+- Update a PICStaff database row.
+    - To update a row in the PICStaff table, the value for "db_action" in the JSON Body must equal "update".
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "id"
+    - Note: at least one key other than "id" and "db_action" must be present
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+        - Keys that can be empty strings:
+            - "Base Location Names"[index]
+            - "MPN"
+         
+         - Keys that can be empty arrays
+            - "Base Location Names"
+        
+        - Keys that can be Null
+            - "Base Location Names"[index]
+            - "MPN"
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the created entry
+
+- Delete a PICStaff database row.
+    - To delete a row in the PICStaff table, the value for "db_action" in the JSON Body must equal "delete".
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+    - If there are no errors in the JSON Body document:
+        - It contains the key "row", the value for which is "Deleted".
     
 - If there are errors in the JSON Body document:
     - "Error Code" will be 1.

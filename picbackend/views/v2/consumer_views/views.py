@@ -34,7 +34,7 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                     response_raw_data['Status']['Possible Consumer Matches'] = consumer_match_data
                 else:
                     if consumer_instance:
-                        response_raw_data['Data']["consumer_row"] = consumer_instance.return_values_dict()
+                        response_raw_data['Data']["row"] = consumer_instance.return_values_dict()
                     if backup_consumer_obj:
                         response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
             elif rqst_action == "update":
@@ -45,7 +45,7 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
                 if not rqst_errors:
                     if consumer_instance:
-                        response_raw_data['Data']["consumer_row"] = consumer_instance.return_values_dict()
+                        response_raw_data['Data']["row"] = consumer_instance.return_values_dict()
                     if backup_consumer_obj:
                         response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
             elif rqst_action == "delete":
@@ -56,7 +56,7 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 )
 
                 if not rqst_errors:
-                    response_raw_data['Data']["Database ID"] = "Deleted"
+                    response_raw_data['Data']["row"] = "Deleted"
 
                     if backup_consumer_obj:
                         response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()

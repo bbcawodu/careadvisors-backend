@@ -1,7 +1,7 @@
 ## Consumer Account Backend API
 
 ### Consumer Data Submission API
-To modify or add members of the PICConsumer class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/consumers/.
+To create, update, or delete rows in the PICConsumer table in the database, make a PUT request to: http://picbackend.herokuapp.com/v2/consumers/.
 
 - The headers of the request should include: 
     - "Content-Type: "application/json""
@@ -10,29 +10,30 @@ The body of the request should be a JSON document using the following template:
 
 ```
 {
-"First Name": String,
-"Middle Name": String,
-"Last Name": String,
-"Email": String,
-"Phone Number": String,
-"Met Navigator At": String,
-"Household Size": Integer,
-"Navigator Notes": [
-                        "These are",
-                        "sample notes",
-                        "navigators write about consumers",
-                        ...
-                    ],
-"Plan": String,
-"Preferred Language": String,
-"Navigator Database ID": Integer,
+"first_name": String,
+"middle_name": String,
+"last_name": String,
+"email": String,
+"phone": String,
+"met_bav_at": String,
+"household_size": Integer,
+"consumer_notes": [
+    "These are",
+    "sample notes",
+    "navigators write about consumers",
+    ...
+],
+"plan": String,
+"preferred_language": String,
+"best_contact_time": String,
+"navigator_id": Integer,
 
 Address Keys(Every field within address can be given as an empty string. Address will only be recorded/updated iff a full address is given)
-"Address Line 1": String,
-"Address Line 2": String,
-"City": String,
-"State": String,
-"Zipcode": String,
+"address_line_1": String,
+"address_line_2": String,
+"city": String,
+"state_province": String,
+"zipcode": String,
 
 "date_met_nav":{
     "Day": Integer,
@@ -113,10 +114,11 @@ In response, a JSON document will be displayed with the following format:
 }
 ```
 
-- Create a consumer database entry.
-    - To create a consumer database entry, the value for "db_action" in the JSON Body must equal "create".
+- Create a PICConsumer database row.
+    - To create a row in the PICConsumer table, the value for "db_action" in the JSON Body must equal "create".
     
         - Keys that can be omitted:
+            - "best_contact_time"
             - "create_backup"
             - "force_create_consumer"
             - "cps_info"
@@ -133,19 +135,20 @@ In response, a JSON document will be displayed with the following format:
             - "create_case_management_rows"
             
         - Keys that can be empty strings:
-            - "Middle Name"
-            - "Email"
-            - "Phone Number"
-            - "Plan"
-            - "Preferred Language"
-            - "Address Line 1"
-            - "Address Line 2"
-            - "City"
-            - "State"
-            - "Zipcode"
+            - "middle_name"
+            - "best_contact_time"
+            - "email"
+            - "phone"
+            - "plan"
+            - "preferred_language"
+            - "address_line_1"
+            - "address_line_2"
+            - "city"
+            - "state_province"
+            - "zipcode"
         
         - Keys that can be empty arrays
-            - "Navigator Notes"
+            - "consumer_notes"
             - cps_info["secondary_dependents"]
         
         - Keys that can be Null
@@ -157,30 +160,31 @@ In response, a JSON document will be displayed with the following format:
 
     - If there are no errors in the JSON Body document:        
         - The response JSON document will have a dictionary object as the value for the "Data" key.
-            - It contains the key "consumer_row", the value for which is an object with the fields of the created entry
+            - It contains the key "row", the value for which is an object with the fields of the created row.
     
-- Update a consumer database entry.
-    - To update a consumer database entry, the value for "db_action" in the JSON Body must equal "update".
-    - All key value pairs in the JSON Body document correspond to updated fields for specified "Consumer Database ID"
-    - Note: at least one key other than "Consumer Database ID" and "Database Action" must be present
+- Update a PICConsumer database row.
+    - To update a row in the PICConsumer table, the value for "db_action" in the JSON Body must equal "update".
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "id"
+    - Note: at least one key other than "id" and "db_action" must be present
     
         - Keys that can be omitted:
             - all except "id" and "db_action"
         
         - Keys that can be empty strings:
-            - "Middle Name"
-            - "Email"
-            - "Phone Number"
-            - "Plan"
-            - "Preferred Language"
-            - "Address Line 1"
-            - "Address Line 2"
-            - "City"
-            - "State"
-            - "Zipcode"
+            - "middle_name"
+            - "best_contact_time"
+            - "email"
+            - "phone"
+            - "plan"
+            - "preferred_language"
+            - "address_line_1"
+            - "address_line_2"
+            - "city"
+            - "state_province"
+            - "zipcode"
          
          - Keys that can be empty arrays
-            - "Navigator Notes"
+            - "consumer_notes"
             - cps_info["secondary_dependents"]
         
         - Keys that can be Null
@@ -189,16 +193,17 @@ In response, a JSON document will be displayed with the following format:
         
     - If there are no errors in the JSON Body document:
         - The response JSON document will have a dictionary object as the value for the "Data" key.
-            - It contains the key "consumer_row", the value for which is an object with the fields of the created entry
+            - It contains the key "row", the value for which is an object with the fields of the updated row.
 
-- Delete a consumer database entry.
-    - To delete a consumer database entry, the value for "db_action" in the JSON Body must equal "delete".
+- Delete a PICConsumer database row.
+    - To delete a row in the PICConsumer table, the value for "db_action" in the JSON Body must equal "delete".
     
         - Keys that can be omitted:
             - all except "id" and "db_action"
         
     - If there are no errors in the JSON Body document:
-        - The response JSON document will have a "Deleted" as the value for the "Data" key.
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is "Deleted".
     
 - If there are errors in the JSON Body document:
     - "Error Code" will be 1.
@@ -243,33 +248,44 @@ In response, a JSON document will be displayed with the following format:
     {
         "Data": [
             {
-                "Email": String,
-                "Phone Number": String,
-                "Database ID": Integer,
-                "Preferred Language": String,
-                "First Name": String,
-                "Middle Name": String,
-                "Last Name": String,
+                "email": String,
+                "phone": String,
+                "id": Integer,
+                "preferred_language": String,
+                "first_name": String,
+                "middle_name": String,
+                "last_name": String,
                 "date_met_nav": String (Can be Null),
-                "Navigator": String,
-                "Navigator Notes": [
-                                        "These are",
-                                        "sample notes",
-                                        "navigators write about consumers",
-                                        ...
-                                    ],
-                "Met Navigator At": String,
-                "Household Size": Integer,
-                "Plan": String,
-                "Best Contact Time": String,
+                "navigator": String,
+                "consumer_notes": [
+                    "These are",
+                    "sample notes",
+                    "navigators write about consumers",
+                    ...
+                ],
+                "case_management_rows": [
+                    {
+                        "management_step": 2,
+                        "management_notes": "askjnksanfksaf"
+                    },
+                    {
+                        "management_step": 5,
+                        "management_notes": "askjnsagfksaf"
+                    },
+                    ...
+                ],
+                "met_nav_at": String,
+                "household_size": Integer,
+                "plan": String,
+                "best_contact_time": String,
                 "address": Will either be None or a dictionary of the following form:
                            {
-                            "Address Line 1": String,
-                            "Address Line 2": String,
-                            "City": String,
-                            "State": String,
-                            "Zipcode": String,
-                            "Country": String,
+                            "address_line_1": String,
+                            "address_ine_2": String,
+                            "city": String,
+                            "state_province": String,
+                            "zipcode": String,
+                            "country": String,
                            },
                            
                 "cps_info": {
@@ -365,33 +381,44 @@ In response, a JSON document will be displayed with the following format:
     {
         "Data": [
             {
-                "Email": String,
-                "Phone Number": String,
-                "Database ID": Integer,
-                "Preferred Language": String,
-                "First Name": String,
-                "Middle Name": String,
-                "Last Name": String,
+                "email": String,
+                "phone": String,
+                "id": Integer,
+                "preferred_language": String,
+                "first_name": String,
+                "middle_name": String,
+                "last_name": String,
                 "date_met_nav": String (Can be Null),
-                "Navigator": String,
-                "Navigator Notes": [
-                                        "These are",
-                                        "sample notes",
-                                        "navigators write about consumers",
-                                        ...
-                                    ],
-                "Met Navigator At": String,
-                "Household Size": Integer,
-                "Plan": String,
-                "Best Contact Time": String,
+                "navigator": String,
+                "consumer_notes": [
+                    "These are",
+                    "sample notes",
+                    "navigators write about consumers",
+                    ...
+                ],
+                "case_management_rows": [
+                    {
+                        "management_step": 2,
+                        "management_notes": "askjnksanfksaf"
+                    },
+                    {
+                        "management_step": 5,
+                        "management_notes": "askjnsagfksaf"
+                    },
+                    ...
+                ],
+                "met_nav_at": String,
+                "household_size": Integer,
+                "plan": String,
+                "best_contact_time": String,
                 "address": Will either be None or a dictionary of the following form:
                            {
-                            "Address Line 1": String,
-                            "Address Line 2": String,
-                            "City": String,
-                            "State": String,
-                            "Zipcode": String,
-                            "Country": String,
+                            "address_line_1": String,
+                            "address_ine_2": String,
+                            "city": String,
+                            "state_province": String,
+                            "zipcode": String,
+                            "country": String,
                            },
                            
                 "cps_info": {

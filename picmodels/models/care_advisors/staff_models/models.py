@@ -4,6 +4,21 @@ from django.contrib import admin
 from oauth2client.contrib.django_util.models import CredentialsField
 from django.dispatch import receiver
 from django.conf import settings
+
+from .services.create_update_delete import create_row_w_validated_params
+from .services.create_update_delete import update_row_w_validated_params
+from .services.create_update_delete import delete_row_w_validated_params
+
+from .services.read import retrieve_staff_data_by_id
+from .services.read import retrieve_staff_data_by_f_and_l_name
+from .services.read import retrieve_staff_data_by_first_name
+from .services.read import retrieve_staff_data_by_last_name
+from .services.read import retrieve_staff_data_by_email
+from .services.read import retrieve_staff_data_by_county
+from .services.read import retrieve_staff_data_by_region
+from .services.read import retrieve_staff_data_by_mpn
+
+
 import uuid
 import os
 
@@ -126,6 +141,20 @@ class PICStaff(models.Model):
         unique_together = ("email",)
         # maps model to the picmodels module
         app_label = 'picmodels'
+
+
+PICStaff.create_row_w_validated_params = classmethod(create_row_w_validated_params)
+PICStaff.update_row_w_validated_params = classmethod(update_row_w_validated_params)
+PICStaff.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
+
+PICStaff.retrieve_staff_data_by_id = classmethod(retrieve_staff_data_by_id)
+PICStaff.retrieve_staff_data_by_f_and_l_name = classmethod(retrieve_staff_data_by_f_and_l_name)
+PICStaff.retrieve_staff_data_by_first_name = classmethod(retrieve_staff_data_by_first_name)
+PICStaff.retrieve_staff_data_by_last_name = classmethod(retrieve_staff_data_by_last_name)
+PICStaff.retrieve_staff_data_by_email = classmethod(retrieve_staff_data_by_email)
+PICStaff.retrieve_staff_data_by_county = classmethod(retrieve_staff_data_by_county)
+PICStaff.retrieve_staff_data_by_region = classmethod(retrieve_staff_data_by_region)
+PICStaff.retrieve_staff_data_by_mpn = classmethod(retrieve_staff_data_by_mpn)
 
 
 @receiver(models.signals.post_delete, sender=PICStaff)

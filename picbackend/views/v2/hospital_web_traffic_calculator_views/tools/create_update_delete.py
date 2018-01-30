@@ -1,44 +1,33 @@
 from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
-from picmodels.services import add_web_traffic_calculator_data_instance_using_validated_params
-from picmodels.services import delete_web_traffic_calculator_data_instance_using_validated_params
-from picmodels.services import modify_web_traffic_calculator_data_instance_using_validated_params
 
 
-def validate_rqst_params_and_add_instance(rqst_hospital_web_traffic_calculator_data_info, post_errors):
-    add_hospital_web_traffic_calculator_data_params = validate_rqst_params(rqst_hospital_web_traffic_calculator_data_info, post_errors)
+def validate_put_rqst_params(rqst_body, rqst_errors):
+    validated_params = {
+        'rqst_action': clean_string_value_from_dict_object(rqst_body, "root", "db_action", rqst_errors)
+    }
 
-    web_traffic_data_obj = None
-    if not post_errors:
-        web_traffic_data_obj = add_web_traffic_calculator_data_instance_using_validated_params(
-            add_hospital_web_traffic_calculator_data_params, post_errors)
+    rqst_action = validated_params['rqst_action']
 
-    return web_traffic_data_obj
+    if rqst_action == 'create':
+        validate_create_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'update':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validate_update_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'delete':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
 
-
-def validate_rqst_params(rqst_hospital_web_traffic_calculator_data_info, post_errors):
-
-    return {
-        "hospital_name": clean_string_value_from_dict_object(rqst_hospital_web_traffic_calculator_data_info, "root", "hospital_name", post_errors),
-        "monthly_visits": clean_int_value_from_dict_object(rqst_hospital_web_traffic_calculator_data_info, "root", "monthly_visits", post_errors)
-            }
-
-
-def validate_rqst_params_and_modify_instance(rqst_hospital_web_traffic_calculator_data_info, post_errors):
-    modify_hospital_web_traffic_calculator_data_params = validate_rqst_params(rqst_hospital_web_traffic_calculator_data_info, post_errors)
-    rqst_hospital_web_traffic_calculator_data_id = clean_int_value_from_dict_object(rqst_hospital_web_traffic_calculator_data_info, "root", "Database ID", post_errors)
-
-    web_traffic_data_obj = None
-    if not post_errors:
-        web_traffic_data_obj = modify_web_traffic_calculator_data_instance_using_validated_params(
-            modify_hospital_web_traffic_calculator_data_params, rqst_hospital_web_traffic_calculator_data_id, post_errors)
-
-    return web_traffic_data_obj
+    return validated_params
 
 
-def validate_rqst_params_and_delete_instance(rqst_hospital_web_traffic_calculator_data_info, post_errors):
-    rqst_hospital_web_traffic_calculator_data_id = clean_int_value_from_dict_object(rqst_hospital_web_traffic_calculator_data_info, "root", "Database ID", post_errors)
+def validate_create_row_params(rqst_body, validated_params, rqst_errors):
+    validated_params["hospital_name"] = clean_string_value_from_dict_object(rqst_body, "root", "hospital_name", rqst_errors)
+    validated_params["monthly_visits"] = clean_int_value_from_dict_object(rqst_body, "root", "monthly_visits", rqst_errors)
 
-    if not post_errors:
-        delete_web_traffic_calculator_data_instance_using_validated_params(rqst_hospital_web_traffic_calculator_data_id,
-                                                                           post_errors)
+
+def validate_update_row_params(rqst_body, validated_params, rqst_errors):
+    if "hospital_name" in rqst_body:
+        validated_params["hospital_name"] = clean_string_value_from_dict_object(rqst_body, "root", "hospital_name", rqst_errors)
+
+    if "monthly_visits" in rqst_body:
+        validated_params["monthly_visits"] = clean_int_value_from_dict_object(rqst_body, "root", "monthly_visits", rqst_errors)
