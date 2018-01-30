@@ -135,12 +135,14 @@ class HealthcareCarrier(models.Model):
             return True
 
     def return_values_dict(self):
-        valuesdict = {"name": self.name,
-                      "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
-                      "state": None,
-                      "plans": None,
-                      "sample_id_card": None,
-                      "Database ID": self.id}
+        valuesdict = {
+            "name": self.name,
+            "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
+            "state": None,
+            "plans": None,
+            "sample_id_card": None,
+            "Database ID": self.id
+        }
 
         # add related plans to values dict
         member_plans = []
@@ -252,13 +254,15 @@ class HealthcarePlan(models.Model):
             return True
 
     def return_values_dict(self, include_summary_report=False, include_detailed_report=False):
-        valuesdict = {"name": self.name,
-                      "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
-                      "premium_type": self.premium_type,
-                      "metal_level": self.metal_level,
-                      "county": self.county,
-                      "carrier_info": None,
-                      "Database ID": self.id}
+        valuesdict = {
+            "name": self.name,
+            "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
+            "premium_type": self.premium_type,
+            "metal_level": self.metal_level,
+            "county": self.county,
+            "carrier_info": None,
+            "Database ID": self.id
+        }
 
         def add_report_fields_to_values_dict(report_fields):
             def compose_cost_string_from_related_cost_row(healthcare_service_cost_entry_instance):
@@ -281,6 +285,7 @@ class HealthcarePlan(models.Model):
             report_fields_with_values = {}
             for report_field in report_fields:
                 # try:
+                    ## .order_by() adds significant overhead unless field to be ordered by has been indexed in some way
                 #     report_fields_with_values[report_field] = getattr(self, report_field).all().order_by(
                 #         '-cost_relation_to_deductible')
                 # except AttributeError:
@@ -290,7 +295,9 @@ class HealthcarePlan(models.Model):
                 if isinstance(report_value, float):
                     report_fields_with_values[report_field] = report_value
                 else:
-                    report_fields_with_values[report_field] = report_value.all().order_by('-cost_relation_to_deductible')
+                    report_fields_with_values[report_field] = report_value.all()
+                    # .order_by() adds significant overhead unless field to be ordered by has been indexed in some way
+                    # report_fields_with_values[report_field] = report_value.all().order_by('-cost_relation_to_deductible')
 
             instance_has_all_report_fields = all(report_field_value for report_field_value in report_fields_with_values.values())
             if instance_has_all_report_fields:
@@ -326,9 +333,11 @@ class HealthcarePlan(models.Model):
 
         def add_carrier_info_to_values_dict():
             if self.carrier:
-                carrier_info = {"name": self.carrier.name,
-                                "state": self.carrier.state_province,
-                                "Database ID": self.carrier.id}
+                carrier_info = {
+                    "name": self.carrier.name,
+                    "state": self.carrier.state_province,
+                    "Database ID": self.carrier.id
+                }
                 valuesdict['carrier_info'] = carrier_info
         add_carrier_info_to_values_dict()
 

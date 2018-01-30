@@ -195,9 +195,12 @@ def create_response_list_from_db_objects(db_objects):
 
 
 def prefetch_related_rows(db_queryset):
-    db_queryset = db_queryset.prefetch_related('picconsumer_set',
-                                               'base_locations',
-                                               'credentialsmodel_set')
+    db_queryset = db_queryset.prefetch_related(
+        'picconsumer_set',
+        'base_locations',
+        'base_locations__address',
+        'credentialsmodel_set'
+    )
 
     return db_queryset
 

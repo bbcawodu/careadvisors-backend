@@ -79,18 +79,20 @@ class PICStaff(models.Model):
     base_locations = models.ManyToManyField(NavMetricsLocation, blank=True)
 
     def return_values_dict(self):
-        valuesdict = {"First Name": self.first_name,
-                      "Last Name": self.last_name,
-                      "MPN": self.mpn,
-                      "Email": self.email,
-                      "Authorized Credentials": False,
-                      "Type": self.type,
-                      "Database ID": self.id,
-                      "County": self.county,
-                      "Region": None,
-                      "Picture": None,
-                      "Base Locations": [],
-                      "Consumers": []}
+        valuesdict = {
+            "First Name": self.first_name,
+            "Last Name": self.last_name,
+            "MPN": self.mpn,
+            "Email": self.email,
+            "Authorized Credentials": False,
+            "Type": self.type,
+            "Database ID": self.id,
+            "County": self.county,
+            "Region": None,
+            "Picture": None,
+            "Base Locations": [],
+            "Consumers": []
+        }
 
         # consumers = PICConsumer.objects.filter(navigator=self.id)
         consumers = self.picconsumer_set.all()

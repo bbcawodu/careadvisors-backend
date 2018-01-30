@@ -165,6 +165,7 @@ def prefetch_related_rows(db_queryset):
         # 'primary_guardian',
         'cps_info',
         'cps_info__cps_location',
+        'cps_info__cps_location__address',
         'cps_info__primary_dependent',
         "consumer_hospital_info",
     )
