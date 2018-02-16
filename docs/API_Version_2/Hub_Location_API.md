@@ -2,7 +2,7 @@
 
 
 ### Navigator Hub Location Data Modification API
-To modify or add navigator hub locations in the database programatically, submit a PUT request to: http://picbackend.herokuapp.com/v2/navigator_hub_locations/.
+To create, update, or delete a row in the NavMetricsLocation table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/navigator_hub_locations/.
 
 - The headers of the request should include: 
     - "Content-Type: "application/json""
@@ -18,10 +18,10 @@ The body of the request should be a JSON document using the following template:
 "State": String,
 "Zipcode": String,
 "Country": String,
-"Database Action": String
+"cps_location": Boolean,
 
-"cps_location": Boolean (Key may be omitted)
-"Database ID": Integer(Required when "Database Action" == "Staff Modification" or "Staff Deletion"),
+"db_action": String,
+"id": Integer,
 }
 ```
 
@@ -37,29 +37,50 @@ In response, a JSON document will be displayed with the following format:
 }
 ```
 
-- Adding a navigator hub location database entry.
-    - To add a navigator hub location database entry, the value for "Database Action" in the JSON Body must equal "Location Addition".
-    - All other fields except "Database ID" must be filled.
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the created entry
+- Create a NavMetricsLocation database row.
+    - To create a row in the NavMetricsLocation table, the value for "db_action" in the JSON Body must equal "create".
     
-- Modifying a navigator hub location database entry.
-    - To modify a navigator hub location database entry, the value for "Database Action" in the JSON Body must equal "Location Modification".
-    - All other fields must be filled.
-    - All key value pairs in the JSON Body document correspond to updated fields for specified "Database ID"
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the updated entry
+        - Keys that can be omitted:
+            - "id"
+            
+        - Keys that can be empty strings:
+            - "address_line_2"
+        
+        - Keys that can be Null
+            - "address_line_2"
 
-- Deleting a navigator hub location database entry.
-    - To delete a navigator hub location database entry, the value for "Database Action" in the JSON Body must equal "Location Deletion".
-    - The only other field should be "Database ID".
-    - The response JSON document will have a "Deleted" as the value for the "Data" key.
+    - If there are no errors in the JSON Body document:        
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the created row.
     
-- If there are errors in the JSON Body document:
-    - "Error Code" will be 1.
-    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
-        -Each item in the array is a string corresponding to an error in the JSON Body doc.
-    - No changes are made to the database.
+- Update a NavMetricsLocation database row.
+    - To update a row in the NavMetricsLocation table, the value for "db_action" in the JSON Body must equal "update".
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "id"
+    - Note: at least one key other than "id" and "db_action" must be present
+    
+        - Keys that can be omitted:
+            - "Location Name"
+            - "cps_location"
+        
+        - Keys that can be empty strings:
+            - "address_line_2"
+        
+        - Keys that can be Null
+            - "address_line_2"
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the updated row.
+
+- Delete a NavMetricsLocation database row.
+    - To delete a row in the NavMetricsLocation table, the value for "db_action" in the JSON Body must equal "delete".
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is "Deleted".
     
     
 ### Navigator Location Data Retrieval API

@@ -2,7 +2,7 @@ from django.contrib import admin
 from picmodels.models import PICUser, Appointment, Location, PICConsumer, PICStaff, MetricsSubmission, PlanStat,\
     Country, NavMetricsLocation, Address, CredentialsModel, PICConsumerBackup, ConsumerCPSInfoEntry, CallToAction,\
     HealthcareCarrier, HealthcarePlan, HealthcareServiceCostEntry, HospitalWebTrafficData, ConsumerHospitalInfo,\
-    CaseManagementStatus
+    CaseManagementStatus, CareAdvisorCustomer
 
 # Register your models here.
 admin.site.register(PICUser)
@@ -25,3 +25,4 @@ admin.site.register(HealthcareServiceCostEntry)
 admin.site.register(HospitalWebTrafficData)
 admin.site.register(ConsumerHospitalInfo)
 admin.site.register(CaseManagementStatus)
+admin.site.register(CareAdvisorCustomer)

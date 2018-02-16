@@ -17,11 +17,11 @@ def validate_put_rqst_params(rqst_body, rqst_errors):
     validated_params['db_action'] = rqst_db_action
 
     if not rqst_errors:
-        if rqst_db_action == 'create_row':
+        if rqst_db_action == 'create':
             validate_params_for_create_row(rqst_body, validated_params, rqst_errors)
-        elif rqst_db_action == 'update_row':
+        elif rqst_db_action == 'update':
             validate_params_for_update_row(rqst_body, validated_params, rqst_errors)
-        elif rqst_db_action == 'delete_row':
+        elif rqst_db_action == 'delete':
             validate_params_for_delete_row(rqst_body, validated_params, rqst_errors)
         else:
             rqst_errors.append("No valid 'db_action' provided.")

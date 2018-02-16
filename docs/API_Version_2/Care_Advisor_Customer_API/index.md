@@ -42,7 +42,7 @@ In response, JSON formatted text with the following format will be returned in t
 ```
 
 - Creating a row in the care_advisor_customer table.
-    - To create a row in the care_advisor_customer table, the value for the "db_action" key in the root object must equal "create_row".
+    - To create a row in the care_advisor_customer table, the value for the "db_action" key in the root object must equal "create".
     - Request root object information
         - Keys that MUST be omitted:
             - "id"
@@ -56,7 +56,7 @@ In response, JSON formatted text with the following format will be returned in t
         - It contains the key "db_id", the value for which is the database id of the created entry
     
 - Updating a row in the care_advisor_customer table.
-    - To update a row in the care_advisor_customer table, the value for the "db_action" key in the root object must equal "update_row".
+    - To update a row in the care_advisor_customer table, the value for the "db_action" key in the root object must equal "update".
     - Request root object information
         - Keys that MUST be omitted:
             - None
@@ -73,7 +73,7 @@ In response, JSON formatted text with the following format will be returned in t
         - It contains the key "db_id", the value for which is the database id of the updated entry
 
 - Deleting a row in the care_advisor_customer table.
-    - To delete a row in the care_advisor_customer table, the value for the "db_action" key in the root object must equal "delete_row".
+    - To delete a row in the care_advisor_customer table, the value for the "db_action" key in the root object must equal "delete".
     - Request root object information
         - Keys that MUST be omitted:
             - all except "id" and "db_action"

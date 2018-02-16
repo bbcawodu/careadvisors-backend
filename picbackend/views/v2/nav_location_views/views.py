@@ -8,12 +8,10 @@ from django.views.generic import View
 
 from picbackend.views.utils import JSONGETRspMixin
 from picbackend.views.utils import JSONPUTRspMixin
-from picbackend.views.utils import clean_string_value_from_dict_object
+
 from picmodels.models import NavMetricsLocation
-from .tools import retrieve_nav_hub_location_data_by_id
-from .tools import validate_rqst_params_and_add_instance
-from .tools import validate_rqst_params_and_delete_instance
-from .tools import validate_rqst_params_and_modify_instance
+
+from .tools import validate_put_rqst_params
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -23,40 +21,36 @@ class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
 
     def nav_hub_location_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
-        rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
+        validated_put_rqst_params = validate_put_rqst_params(rqst_body, rqst_errors)
+        rqst_action = validated_put_rqst_params['rqst_action']
 
         if not rqst_errors:
-            if rqst_action == "Location Addition":
-                location_instance = validate_rqst_params_and_add_instance(rqst_body, rqst_errors)
+            if rqst_action == "create":
+                location_instance = NavMetricsLocation.create_row_w_validated_params(
+                    validated_put_rqst_params,
+                    rqst_errors
+                )
 
                 if location_instance:
-                    response_raw_data['Data'] = {"Database ID": location_instance.id}
-            elif rqst_action == "Location Modification":
-                location_instance = validate_rqst_params_and_modify_instance(rqst_body, rqst_errors)
+                    response_raw_data['Data']["row"] = location_instance.return_values_dict()
+            elif rqst_action == "update":
+                location_instance = NavMetricsLocation.update_row_w_validated_params(
+                    validated_put_rqst_params,
+                    rqst_errors
+                )
 
                 if location_instance:
-                    response_raw_data['Data'] = {"Database ID": location_instance.id}
-            elif rqst_action == "Location Deletion":
-                validate_rqst_params_and_delete_instance(rqst_body, rqst_errors)
+                    response_raw_data['Data']["row"] = location_instance.return_values_dict()
+            elif rqst_action == "delete":
+                NavMetricsLocation.delete_row_w_validated_params(validated_put_rqst_params, rqst_errors)
 
                 if not rqst_errors:
-                    response_raw_data['Data']["Database ID"] = "Deleted"
+                    response_raw_data['Data']["row"] = "Deleted"
             else:
-                rqst_errors.append("No valid 'Database Action' provided.")
+                rqst_errors.append("No valid 'db_action' provided.")
 
     def nav_hub_location_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
-        nav_hub_location_qset = NavMetricsLocation.objects.all()
-
-        def filter_db_objects_by_secondary_params(db_objects):
-            if 'is_cps_location' in validated_GET_rqst_params:
-                is_cps_location = validated_GET_rqst_params['is_cps_location']
-                db_objects = db_objects.filter(cps_location=is_cps_location)
-
-            return db_objects
-
-        nav_hub_location_qset = filter_db_objects_by_secondary_params(nav_hub_location_qset)
-
-        def retrieve_data_by_primary_params_and_add_to_response(db_object_qset):
+        def retrieve_data_and_add_to_response():
             if 'id' in validated_GET_rqst_params:
                 rqst_nav_hub_location_id = validated_GET_rqst_params['id']
                 if rqst_nav_hub_location_id != 'all':
@@ -67,12 +61,16 @@ class NavHubLocationManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 rqst_nav_hub_location_id = 'all'
                 list_of_ids = None
 
-            data_list = retrieve_nav_hub_location_data_by_id(db_object_qset, rqst_nav_hub_location_id, list_of_ids,
-                                                             rqst_errors)
+            data_list = NavMetricsLocation.retrieve_nav_hub_location_data_by_id(
+                validated_GET_rqst_params,
+                rqst_nav_hub_location_id,
+                list_of_ids,
+                rqst_errors
+            )
 
             response_raw_data["Data"] = data_list
 
-        retrieve_data_by_primary_params_and_add_to_response(nav_hub_location_qset)
+        retrieve_data_and_add_to_response()
 
     parse_PUT_request_and_add_response = nav_hub_location_management_put_logic
 

@@ -6,8 +6,8 @@ from django.views.generic import View
 
 from picbackend.views.utils import JSONGETRspMixin
 from picbackend.views.utils import JSONPUTRspMixin
-from picbackend.views.utils import clean_string_value_from_dict_object
 from picmodels.models import ConsumerSpecificConcern
+from .tools import validate_put_rqst_params
 from .tools import retrieve_specific_concern_data_by_gen_concern_id
 from .tools import retrieve_specific_concern_data_by_gen_concern_id_subset
 from .tools import retrieve_specific_concern_data_by_gen_concern_name
@@ -20,15 +20,14 @@ from .tools import validate_rqst_params_and_modify_instance
 from .tools import validate_rqst_params_and_remove_general_concern_from_instance
 
 
-#Need to abstract common variables in get and post class methods into class attributes
 class SpecificConcernsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     """
     Defines views that handles healthcare carrier related requests
     """
 
     def specific_concerns_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
-        # Retrieve database action from post data
-        rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
+        validated_put_rqst_params = validate_put_rqst_params(rqst_body, rqst_errors)
+        rqst_action = validated_put_rqst_params['rqst_action']
 
         # If there are no parsing errors, process PUT data based on database action
         if not rqst_errors:

@@ -8,25 +8,28 @@ from picbackend.views.utils import clean_dict_value_from_dict_object
 from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_list_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
+
 from picmodels.models import NavMetricsLocation
 from picmodels.models import PlanStat
-from picmodels.services.metrics_submission_services import create_or_update_metrics_obj_using_validated_params
-from picmodels.services.metrics_submission_services import delete_instance_using_validated_params
 
 
-def validate_rqst_params_then_add_or_update_metrics_instance(post_data, post_errors):
-    rqst_metrics_params = validate_metrics_mgmt_params(post_data, post_errors)
+def validate_put_rqst_params(rqst_body, rqst_errors):
+    validated_params = {
+        'rqst_action': clean_string_value_from_dict_object(rqst_body, "root", "db_action", rqst_errors, no_key_allowed=True)
+    }
 
-    metrics_instance = None
-    metrics_instance_message = None
-    if not post_errors:
-        metrics_instance, metrics_instance_message = create_or_update_metrics_obj_using_validated_params(rqst_metrics_params, post_errors)
+    rqst_action = validated_params['rqst_action']
 
-    return metrics_instance, metrics_instance_message
+    if rqst_action == 'delete':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+    else:
+        validate_create_or_update_row_params(rqst_body, validated_params, rqst_errors)
+
+    return validated_params
 
 
-def validate_metrics_mgmt_params(rqst_data, rqst_errors):
-    consumer_metrics = clean_dict_value_from_dict_object(rqst_data, "root", "Consumer Metrics", rqst_errors)
+def validate_create_or_update_row_params(rqst_body, validated_params, rqst_errors):
+    consumer_metrics = clean_dict_value_from_dict_object(rqst_body, "root", "Consumer Metrics", rqst_errors)
     if not consumer_metrics:
         consumer_metrics = {}
 
@@ -96,39 +99,141 @@ def validate_metrics_mgmt_params(rqst_data, rqst_errors):
             if plan_name_valid and premium_type_valid and metal_level_valid:
                 unsaved_plan_stat_objs.append(planstatobject)
 
-    return {
-        "rqst_usr_email": clean_string_value_from_dict_object(rqst_data, "root", "Email", rqst_errors),
-        "rqst_no_general_assis": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_general_assis", rqst_errors),
-        "rqst_no_plan_usage_assis": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_plan_usage_assis", rqst_errors),
-        "rqst_no_locating_provider_assis": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_locating_provider_assis", rqst_errors),
-        "rqst_no_billing_assis": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_billing_assis", rqst_errors),
-        "rqst_no_enroll_apps_started": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_enroll_apps_started", rqst_errors),
-        "rqst_no_enroll_qhp": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_enroll_qhp", rqst_errors),
-        "rqst_no_enroll_abe_chip": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_enroll_abe_chip", rqst_errors),
-        "rqst_no_enroll_shop": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_enroll_shop", rqst_errors),
-        "rqst_no_referrals_agents_brokers": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_referrals_agents_brokers", rqst_errors),
-        "rqst_no_referrals_ship_medicare": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_referrals_ship_medicare", rqst_errors),
-        "rqst_no_referrals_other_assis_programs": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_referrals_other_assis_programs", rqst_errors),
-        "rqst_no_referrals_issuers": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_referrals_issuers", rqst_errors),
-        "rqst_no_referrals_doi": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_referrals_doi", rqst_errors),
-        "rqst_no_mplace_tax_form_assis": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_mplace_tax_form_assis", rqst_errors),
-        "rqst_no_mplace_exempt_assis": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_mplace_exempt_assis", rqst_errors),
-        "rqst_no_qhp_abe_appeals": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_qhp_abe_appeals", rqst_errors),
-        "rqst_no_data_matching_mplace_issues": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_data_matching_mplace_issues", rqst_errors),
-        "rqst_no_sep_eligible": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_sep_eligible", rqst_errors),
-        "rqst_no_employ_spons_cov_issues": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_employ_spons_cov_issues", rqst_errors),
-        "rqst_no_aptc_csr_assis": clean_int_value_from_dict_object(consumer_metrics, "Consumer Metrics", "no_aptc_csr_assis", rqst_errors),
-        "rqst_cmplx_cases_mplace_issues": clean_string_value_from_dict_object(consumer_metrics, "Consumer Metrics", "cmplx_cases_mplace_issues", rqst_errors, empty_string_allowed=True),
-        "rqst_no_cps_consumers": rqst_no_cps_consumers,
-        "rqst_metrics_county": clean_string_value_from_dict_object(consumer_metrics, "Consumer Metrics", "County", rqst_errors),
-        "location_instance_for_metrics": location_instance,
-        "unsaved_plan_stat_objs": unsaved_plan_stat_objs,
-        "metrics_date": metrics_date
-    }
-
-
-def validate_rqst_params_and_delete_instance(rqst_data, post_errors):
-    rqst_id = clean_int_value_from_dict_object(rqst_data, "root", "Database ID", post_errors)
-
-    if not post_errors:
-        delete_instance_using_validated_params(rqst_id, post_errors)
+    validated_params["rqst_usr_email"] = clean_string_value_from_dict_object(rqst_body, "root", "Email", rqst_errors)
+    validated_params["rqst_no_general_assis"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_general_assis",
+        rqst_errors
+    )
+    validated_params["rqst_no_plan_usage_assis"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_plan_usage_assis",
+        rqst_errors
+    )
+    validated_params["rqst_no_locating_provider_assis"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_locating_provider_assis",
+        rqst_errors
+    )
+    validated_params["rqst_no_billing_assis"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_billing_assis",
+        rqst_errors
+    )
+    validated_params["rqst_no_enroll_apps_started"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_enroll_apps_started",
+        rqst_errors
+    )
+    validated_params["rqst_no_enroll_qhp"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_enroll_qhp",
+        rqst_errors
+    )
+    validated_params["rqst_no_enroll_abe_chip"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_enroll_abe_chip",
+        rqst_errors
+    )
+    validated_params["rqst_no_enroll_shop"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_enroll_shop",
+        rqst_errors
+    )
+    validated_params["rqst_no_referrals_agents_brokers"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_referrals_agents_brokers",
+        rqst_errors
+    )
+    validated_params["rqst_no_referrals_ship_medicare"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_referrals_ship_medicare",
+        rqst_errors
+    )
+    validated_params["rqst_no_referrals_other_assis_programs"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_referrals_other_assis_programs",
+        rqst_errors
+    )
+    validated_params["rqst_no_referrals_issuers"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_referrals_issuers",
+        rqst_errors
+    )
+    validated_params["rqst_no_referrals_doi"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_referrals_doi",
+        rqst_errors
+    )
+    validated_params["rqst_no_mplace_tax_form_assis"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_mplace_tax_form_assis",
+        rqst_errors
+    )
+    validated_params["rqst_no_mplace_exempt_assis"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_mplace_exempt_assis",
+        rqst_errors
+    )
+    validated_params["rqst_no_qhp_abe_appeals"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_qhp_abe_appeals",
+        rqst_errors
+    )
+    validated_params["rqst_no_data_matching_mplace_issues"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_data_matching_mplace_issues",
+        rqst_errors
+    )
+    validated_params["rqst_no_sep_eligible"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_sep_eligible",
+        rqst_errors
+    )
+    validated_params["rqst_no_employ_spons_cov_issues"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_employ_spons_cov_issues",
+        rqst_errors
+    )
+    validated_params["rqst_no_aptc_csr_assis"] = clean_int_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "no_aptc_csr_assis",
+        rqst_errors
+    )
+    validated_params["rqst_cmplx_cases_mplace_issues"] = clean_string_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "cmplx_cases_mplace_issues",
+        rqst_errors,
+        empty_string_allowed=True
+    )
+    validated_params["rqst_no_cps_consumers"] = rqst_no_cps_consumers
+    validated_params["rqst_metrics_county"] = clean_string_value_from_dict_object(
+        consumer_metrics,
+        "Consumer Metrics",
+        "County",
+        rqst_errors
+    )
+    validated_params["location_instance_for_metrics"] = location_instance
+    validated_params["unsaved_plan_stat_objs"] = unsaved_plan_stat_objs
+    validated_params["metrics_date"] = metrics_date

@@ -8,16 +8,24 @@ from picbackend.views.utils import clean_list_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
 from picmodels.models import ConsumerGeneralConcern
 from picmodels.models import ConsumerSpecificConcern
-from picmodels.services.patient_story_models_services.consumer_specific_concern_services import \
-    add_general_concern_to_instance_using_validated_params
-from picmodels.services.patient_story_models_services.consumer_specific_concern_services import \
-    add_instance_using_validated_params
-from picmodels.services.patient_story_models_services.consumer_specific_concern_services import \
-    delete_instance_using_validated_params
-from picmodels.services.patient_story_models_services.consumer_specific_concern_services import \
-    modify_instance_using_validated_params
-from picmodels.services.patient_story_models_services.consumer_specific_concern_services import \
-    remove_general_concern_from_instance_using_validated_params
+
+
+def validate_put_rqst_params(rqst_body, rqst_errors):
+    validated_params = {
+        'rqst_action': clean_string_value_from_dict_object(rqst_body, "root", "db_action", rqst_errors)
+    }
+
+    rqst_action = validated_params['rqst_action']
+
+    if rqst_action == 'create':
+        validate_create_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'update':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validate_update_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'delete':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+
+    return validated_params
 
 
 def validate_rqst_params_and_add_instance(rqst_specific_concern_info, rqst_errors):

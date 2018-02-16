@@ -1,12 +1,14 @@
 from django.db import models
 from picmodels.models.care_advisors.staff_models import PICStaff
 from picmodels.models.care_advisors import NavMetricsLocation, Address
+
 from .services.create_update_delete import create_row_w_validated_params
 from .services.create_update_delete import update_row_w_validated_params
 from .services.create_update_delete import delete_row_w_validated_params
 from .services.create_update_delete import create_c_m_rows_w_validated_params
 from .services.create_update_delete import update_c_m_rows_w_validated_params
 from .services.create_update_delete import delete_c_m_rows_w_validated_params
+
 from .services.read import retrieve_consumer_data_by_id
 from .services.read import retrieve_consumer_data_by_f_and_l_name
 from .services.read import retrieve_consumer_data_by_email

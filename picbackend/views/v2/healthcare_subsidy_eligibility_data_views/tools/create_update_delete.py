@@ -1,62 +1,93 @@
 from picbackend.views.utils import clean_float_value_from_dict_object
 from picbackend.views.utils import clean_int_value_from_dict_object
-from picmodels.services import add_healthcare_subsidy_eligibility_data_instance_using_validated_params
-from picmodels.services import delete_healthcare_subsidy_eligibility_data_instance_using_validated_params
-from picmodels.services import modify_healthcare_subsidy_eligibility_data_instance_using_validated_params
+from picbackend.views.utils import clean_string_value_from_dict_object
 
 
-def validate_rqst_params_and_add_instance(rqst_healthcare_subsidy_eligibility_data_info, post_errors):
-    add_healthcare_subsidy_eligibility_data_params = get_healthcare_subsidy_eligibility_data_mgmt_put_params(rqst_healthcare_subsidy_eligibility_data_info, post_errors)
+def validate_put_rqst_params(rqst_body, rqst_errors):
+    validated_params = {
+        'rqst_action': clean_string_value_from_dict_object(rqst_body, "root", "db_action", rqst_errors)
+    }
 
-    healthcare_subsidy_eligibility_data_obj = None
-    if not post_errors:
-        healthcare_subsidy_eligibility_data_obj = add_healthcare_subsidy_eligibility_data_instance_using_validated_params(add_healthcare_subsidy_eligibility_data_params, post_errors)
+    rqst_action = validated_params['rqst_action']
 
-    return healthcare_subsidy_eligibility_data_obj
+    if rqst_action == 'create':
+        validate_create_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'update':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validate_update_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'delete':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+
+    return validated_params
 
 
-def get_healthcare_subsidy_eligibility_data_mgmt_put_params(rqst_healthcare_subsidy_eligibility_data_info, post_errors):
-    family_size = clean_int_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "family_size", post_errors)
+def validate_create_row_params(rqst_body, validated_params, rqst_errors):
+    family_size = clean_int_value_from_dict_object(rqst_body, "root", "family_size", rqst_errors)
     if family_size:
         if family_size < 0:
-            post_errors.append("family_size must be greater than 0")
+            rqst_errors.append("family_size must be greater than 0")
 
-    medicaid_income_limit = clean_float_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "medicaid_income_limit", post_errors)
+    medicaid_income_limit = clean_float_value_from_dict_object(rqst_body, "root", "medicaid_income_limit", rqst_errors)
     if medicaid_income_limit:
         if medicaid_income_limit < 0:
-            post_errors.append("medicaid_income_limit must be greater than 0")
+            rqst_errors.append("medicaid_income_limit must be greater than 0")
 
-    tax_cred_for_marketplace_income_limit = clean_float_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "tax_cred_for_marketplace_income_limit", post_errors)
+    tax_cred_for_marketplace_income_limit = clean_float_value_from_dict_object(rqst_body, "root", "tax_cred_for_marketplace_income_limit", rqst_errors)
     if tax_cred_for_marketplace_income_limit:
         if tax_cred_for_marketplace_income_limit < 0:
-            post_errors.append("tax_cred_for_marketplace_income_limit must be greater than 0")
+            rqst_errors.append("tax_cred_for_marketplace_income_limit must be greater than 0")
 
-    marketplace_without_subsidies_income_level = clean_float_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "marketplace_without_subsidies_income_level", post_errors)
+    marketplace_without_subsidies_income_level = clean_float_value_from_dict_object(rqst_body, "root", "marketplace_without_subsidies_income_level", rqst_errors)
     if marketplace_without_subsidies_income_level:
         if marketplace_without_subsidies_income_level < 0:
-            post_errors.append("marketplace_without_subsidies_income_level must be greater than 0")
+            rqst_errors.append("marketplace_without_subsidies_income_level must be greater than 0")
 
-    return {
-        "family_size": family_size,
-        "medicaid_income_limit": medicaid_income_limit,
-        "tax_cred_for_marketplace_income_limit": tax_cred_for_marketplace_income_limit,
-        "marketplace_without_subsidies_income_level": marketplace_without_subsidies_income_level,
-            }
+    validated_params["family_size"] = family_size
+    validated_params["medicaid_income_limit"] = medicaid_income_limit
+    validated_params["tax_cred_for_marketplace_income_limit"] = tax_cred_for_marketplace_income_limit
+    validated_params["marketplace_without_subsidies_income_level"] = marketplace_without_subsidies_income_level
 
 
-def validate_rqst_params_and_modify_instance(rqst_healthcare_subsidy_eligibility_data_info, post_errors):
-    modify_healthcare_subsidy_eligibility_data_params = get_healthcare_subsidy_eligibility_data_mgmt_put_params(rqst_healthcare_subsidy_eligibility_data_info, post_errors)
-    rqst_healthcare_subsidy_eligibility_data_id = clean_int_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "Database ID", post_errors)
+def validate_update_row_params(rqst_body, validated_params, rqst_errors):
+    if "family_size" in rqst_body:
+        family_size = clean_int_value_from_dict_object(rqst_body, "root", "family_size", rqst_errors)
+        if family_size:
+            if family_size < 0:
+                rqst_errors.append("family_size must be greater than 0")
+        validated_params["family_size"] = family_size
 
-    healthcare_subsidy_eligibility_data_obj = None
-    if not post_errors:
-        healthcare_subsidy_eligibility_data_obj = modify_healthcare_subsidy_eligibility_data_instance_using_validated_params(modify_healthcare_subsidy_eligibility_data_params, rqst_healthcare_subsidy_eligibility_data_id, post_errors)
+    if "medicaid_income_limit" in rqst_body:
+        medicaid_income_limit = clean_float_value_from_dict_object(
+            rqst_body,
+            "root",
+            "medicaid_income_limit",
+            rqst_errors
+        )
+        if medicaid_income_limit:
+            if medicaid_income_limit < 0:
+                rqst_errors.append("medicaid_income_limit must be greater than 0")
+        validated_params["medicaid_income_limit"] = medicaid_income_limit
 
-    return healthcare_subsidy_eligibility_data_obj
+    if "tax_cred_for_marketplace_income_limit" in rqst_body:
+        tax_cred_for_marketplace_income_limit = clean_float_value_from_dict_object(
+            rqst_body,
+            "root",
+            "tax_cred_for_marketplace_income_limit",
+            rqst_errors
+        )
+        if tax_cred_for_marketplace_income_limit:
+            if tax_cred_for_marketplace_income_limit < 0:
+                rqst_errors.append("tax_cred_for_marketplace_income_limit must be greater than 0")
+        validated_params["tax_cred_for_marketplace_income_limit"] = tax_cred_for_marketplace_income_limit
 
-
-def validate_rqst_params_and_delete_instance(rqst_healthcare_subsidy_eligibility_data_info, post_errors):
-    rqst_healthcare_subsidy_eligibility_data_id = clean_int_value_from_dict_object(rqst_healthcare_subsidy_eligibility_data_info, "root", "Database ID", post_errors)
-
-    if not post_errors:
-        delete_healthcare_subsidy_eligibility_data_instance_using_validated_params(rqst_healthcare_subsidy_eligibility_data_id, post_errors)
+    if "marketplace_without_subsidies_income_level" in rqst_body:
+        marketplace_without_subsidies_income_level = clean_float_value_from_dict_object(
+            rqst_body,
+            "root",
+            "marketplace_without_subsidies_income_level",
+            rqst_errors
+        )
+        if marketplace_without_subsidies_income_level:
+            if marketplace_without_subsidies_income_level < 0:
+                rqst_errors.append("marketplace_without_subsidies_income_level must be greater than 0")
+        validated_params["marketplace_without_subsidies_income_level"] = marketplace_without_subsidies_income_level
