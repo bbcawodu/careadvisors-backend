@@ -1,5 +1,5 @@
 # Making Requests to Backend Server Endpoints README
-####NOTE: All requests to backend endpoints must be made through AJAX. You will receive a 403 Forbidden error code if you make a request through any other method.
+#### NOTE: All requests to backend endpoints must be made through AJAX(Request header must include key:value, "X-Requested-With":"XMLHttpRequest"). You will receive a 403 Forbidden error code if you make a request through any other method.
 
 ## GET Endpoints
 All GET endpoints make no change to the database state.

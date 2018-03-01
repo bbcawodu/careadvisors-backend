@@ -52,3 +52,27 @@ def filter_general_concern_objs_by_name(qset, rqst_name):
 
     return qset
 
+
+def retrieve_related_gen_concern_rows_by_name(cls, gen_concern_names, rqst_errors):
+    gen_concern_names = list(set(gen_concern_names))
+    gen_concern_rows = []
+    gen_concern_errors = []
+
+    if gen_concern_names and not rqst_errors:
+        for related_general_concerns_name in gen_concern_names:
+            try:
+                related_general_concerns_object = cls.objects.get(
+                    name__iexact=related_general_concerns_name
+                )
+                gen_concern_rows.append(related_general_concerns_object)
+            except cls.DoesNotExist:
+                gen_concern_errors.append(
+                    "No related ConsumerGeneralConcern database entry found for name: {}".format(
+                        related_general_concerns_name
+                    )
+                )
+
+    for related_general_concerns_error in gen_concern_errors:
+        rqst_errors.append(related_general_concerns_error)
+
+    return gen_concern_rows

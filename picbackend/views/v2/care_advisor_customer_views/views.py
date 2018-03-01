@@ -28,10 +28,10 @@ class CareAdvisorCustomerMgmtView(JSONPUTRspMixin, JSONGETRspMixin, View):
             elif rqst_db_action == "delete":
                 CareAdvisorCustomer.delete_instance_using_validated_params(validated_params, rqst_errors)
                 if not rqst_errors:
-                    response_raw_data['Data']["id"] = "deleted"
+                    response_raw_data['Data']["row"] = "deleted"
 
             if care_advisor_customer_instance:
-                response_raw_data['Data']["id"] = care_advisor_customer_instance.id
+                response_raw_data['Data']["row"] = care_advisor_customer_instance.return_values_dict()
 
     def care_advisor_customer_mgmt_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         def retrieve_data_by_primary_params_and_add_to_response():

@@ -9,7 +9,7 @@ from picmodels.models.care_advisors.consumer_models import *
 from picmodels.models.care_advisors.daily_metrics_models import *
 from picmodels.models.care_advisors.presence_scheduler_models import *
 from picmodels.models.care_advisors.call_to_action_models import *
-from picmodels.models.care_advisors.providers_plan_network_models import *
+from picmodels.models.care_advisors.healthcare_provider_coverage_network_models import *
 from picmodels.models.care_advisors.patient_story_models import *
 from picmodels.models.care_advisors.hospital_web_traffic_models import *
 from picmodels.models.care_advisors.subsidy_eligibility_tool_models import *

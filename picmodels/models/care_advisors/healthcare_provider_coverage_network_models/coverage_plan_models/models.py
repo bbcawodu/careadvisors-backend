@@ -1,179 +1,20 @@
-"""
-This module defines the db Tables for storing provider networks and the plans that they accept.
-"""
-
 from django.db import models
-from django.conf import settings
-from django.dispatch import receiver
 from django.core.validators import MaxValueValidator
-import uuid
-import os
 import urllib
 
+from picmodels.models.care_advisors.healthcare_provider_coverage_network_models import HealthcareCarrier
 
-def get_sample_id_card_file_path(instance, filename):
-    ext = filename.split('.')[-1]
-    filename = "%s.%s" % (uuid.uuid4(), ext)
-    return os.path.join('carrier_sample_id_cards', filename)
+from .services.create_update_delete import create_row_w_validated_params
+from .services.create_update_delete import update_row_w_validated_params
+from .services.create_update_delete import delete_row_w_validated_params
+from .services.create_update_delete import check_for_healthcare_plan_objs_with_given_name_county_and_carrier
 
-
-class HealthcareCarrier(models.Model):
-    AL = "AL"
-    AK = "AK"
-    AZ = "AZ"
-    AR = "AR"
-    CA = "CA"
-    CO = "CO"
-    CT = "CT"
-    DE = "DE"
-    FL = "FL"
-    GA = "GA"
-    HI = "HI"
-    ID = "ID"
-    IL = "IL"
-    IN = "IN"
-    IA = "IA"
-    KS = "KS"
-    KY = "KY"
-    LA = "LA"
-    ME = "ME"
-    MD = "MD"
-    MA = "MA"
-    MI = "MI"
-    MN = "MN"
-    MS = "MS"
-    MO = "MO"
-    MT = "MT"
-    NE = "NE"
-    NV = "NV"
-    NH = "NH"
-    NJ = "NJ"
-    NM = "NM"
-    NY = "NY"
-    NC = "NC"
-    ND = "ND"
-    OH = "OH"
-    OK = "OK"
-    OR = "OR"
-    PA = "PA"
-    RI = "RI"
-    SC = "SC"
-    SD = "SD"
-    TN = "TN"
-    TX = "TX"
-    UT = "UT"
-    VT = "VT"
-    VA = "VA"
-    WA = "WA"
-    WV = "WV"
-    WI = "WI"
-    WY = "WY"
-
-    STATE_CHOICES = ((AL, "AL"),
-                     (AK, "AK"),
-                     (AZ, "AZ"),
-                     (AR, "AR"),
-                     (CA, "CA"),
-                     (CO, "CO"),
-                     (CT, "CT"),
-                     (DE, "DE"),
-                     (FL, "FL"),
-                     (GA, "GA"),
-                     (HI, "HI"),
-                     (ID, "ID"),
-                     (IL, "IL"),
-                     (IN, "IN"),
-                     (IA, "IA"),
-                     (KS, "KS"),
-                     (KY, "KY"),
-                     (LA, "LA"),
-                     (ME, "ME"),
-                     (MD, "MD"),
-                     (MA, "MA"),
-                     (MI, "MI"),
-                     (MN, "MN"),
-                     (MS, "MS"),
-                     (MO, "MO"),
-                     (MT, "MT"),
-                     (NE, "NE"),
-                     (NV, "NV"),
-                     (NH, "NH"),
-                     (NJ, "NJ"),
-                     (NM, "NM"),
-                     (NY, "NY"),
-                     (NC, "NC"),
-                     (ND, "ND"),
-                     (OH, "OH"),
-                     (OK, "OK"),
-                     (OR, "OR"),
-                     (PA, "PA"),
-                     (RI, "RI"),
-                     (SC, "SC"),
-                     (SD, "SD"),
-                     (TN, "TN"),
-                     (TX, "TX"),
-                     (UT, "UT"),
-                     (VT, "VT"),
-                     (VA, "VA"),
-                     (WA, "WA"),
-                     (WV, "WV"),
-                     (WI, "WI"),
-                     (WY, "WY")
-                     )
-
-    name = models.CharField(max_length=10000)
-    state_province = models.CharField("State/Province", max_length=40, blank=True, null=True, choices=STATE_CHOICES)
-    sample_id_card = models.ImageField(upload_to=get_sample_id_card_file_path, blank=True, null=True)
-
-    def check_state_choices(self,):
-        if self.state_province:
-            for state_tuple in self.STATE_CHOICES:
-                if state_tuple[1].lower() == self.state_province.lower():
-                    return True
-            return False
-        else:
-            return True
-
-    def return_values_dict(self):
-        valuesdict = {
-            "name": self.name,
-            "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
-            "state": None,
-            "plans": None,
-            "sample_id_card": None,
-            "Database ID": self.id
-        }
-
-        # add related plans to values dict
-        member_plans = []
-        if self.healthcareplan_set:
-            carrier_plan_qset = self.healthcareplan_set.all()
-            if len(carrier_plan_qset):
-                for plan_object in carrier_plan_qset:
-                    member_plans.append(plan_object.id)
-        if member_plans:
-            valuesdict["plans"] = member_plans
-
-        if self.state_province:
-            valuesdict['state'] = self.state_province
-
-        if self.sample_id_card:
-            valuesdict["sample_id_card"] = self.sample_id_card.url
-        else:
-            valuesdict["sample_id_card"] = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_CARRIER_SAMPLE_ID_CARD_URL)
-
-        return valuesdict
-
-    class Meta:
-        # maps model to the picmodels module
-        app_label = 'picmodels'
-
-
-@receiver(models.signals.post_delete, sender=HealthcareCarrier)
-def remove_file_from_s3(sender, instance, using, **kwargs):
-    default_sample_id_card_url = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_CARRIER_SAMPLE_ID_CARD_URL)
-    if instance.sample_id_card.url != default_sample_id_card_url:
-        instance.sample_id_card.delete(save=False)
+from .services.read import retrieve_plan_data_by_id
+from .services.read import retrieve_plan_data_by_name
+from .services.read import retrieve_plan_data_by_carrier_name
+from .services.read import retrieve_plan_data_by_accepted_location_id
+from .services.read import retrieve_plan_data_by_carrier_state
+from .services.read import retrieve_plan_data_by_carrier_id
 
 
 class HealthcarePlan(models.Model):
@@ -348,6 +189,20 @@ class HealthcarePlan(models.Model):
         app_label = 'picmodels'
 
 
+HealthcarePlan.create_row_w_validated_params = classmethod(create_row_w_validated_params)
+HealthcarePlan.update_row_w_validated_params = classmethod(update_row_w_validated_params)
+HealthcarePlan.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
+HealthcarePlan.check_for_healthcare_plan_objs_with_given_name_county_and_carrier = classmethod(check_for_healthcare_plan_objs_with_given_name_county_and_carrier)
+
+
+HealthcarePlan.retrieve_plan_data_by_id = classmethod(retrieve_plan_data_by_id)
+HealthcarePlan.retrieve_plan_data_by_name = classmethod(retrieve_plan_data_by_name)
+HealthcarePlan.retrieve_plan_data_by_carrier_name = classmethod(retrieve_plan_data_by_carrier_name)
+HealthcarePlan.retrieve_plan_data_by_accepted_location_id = classmethod(retrieve_plan_data_by_accepted_location_id)
+HealthcarePlan.retrieve_plan_data_by_carrier_state = classmethod(retrieve_plan_data_by_carrier_state)
+HealthcarePlan.retrieve_plan_data_by_carrier_id = classmethod(retrieve_plan_data_by_carrier_id)
+
+
 class HealthcareServiceCostEntry(models.Model):
     BEFORE = "Before"
     AFTER = "After"
@@ -379,66 +234,6 @@ class HealthcareServiceCostEntry(models.Model):
             return False
         else:
             return True
-
-    class Meta:
-        # maps model to the picmodels module
-        app_label = 'picmodels'
-
-
-class ProviderNetwork(models.Model):
-    name = models.CharField(max_length=10000)
-
-    def return_values_dict(self):
-        valuesdict = {"name": self.name,
-                      "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
-                      "provider_locations": None,
-                      "Database ID": self.id}
-
-        # add related plans to values dict
-        provider_locations = []
-        provider_location_qset = self.providerlocation_set.all()
-        if len(provider_location_qset):
-            for provider_location in provider_location_qset:
-                provider_locations.append(provider_location.id)
-
-        if provider_locations:
-            valuesdict["provider_locations"] = provider_locations
-
-        return valuesdict
-
-    class Meta:
-        # maps model to the picmodels module
-        app_label = 'picmodels'
-
-
-class ProviderLocation(models.Model):
-    name = models.CharField(max_length=10000)
-    accepted_plans = models.ManyToManyField(HealthcarePlan, blank=True, related_name='locations_accepted_at')
-    provider_network = models.ForeignKey(ProviderNetwork, on_delete=models.CASCADE, blank=True, null=True)
-
-    def return_values_dict(self):
-        valuesdict = {"name": self.name,
-                      "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
-                      "provider_network info": None,
-                      "accepted_plans": None,
-                      "Database ID": self.id}
-
-        if self.provider_network:
-            provider_network_object = self.provider_network
-            provider_network_info = {
-                                        "name": provider_network_object.name,
-                                        "Database ID": provider_network_object.id
-                                    }
-            valuesdict['provider_network info'] = provider_network_info
-
-        accepted_plans_queryset = self.accepted_plans.all()
-        if len(accepted_plans_queryset):
-            accepted_plans_ids = []
-            for plan_object in accepted_plans_queryset:
-                accepted_plans_ids.append(plan_object.id)
-            valuesdict['accepted_plans'] = accepted_plans_ids
-
-        return valuesdict
 
     class Meta:
         # maps model to the picmodels module

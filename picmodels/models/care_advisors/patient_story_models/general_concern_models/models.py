@@ -13,6 +13,7 @@ from .services.create_update_delete import check_for_general_concern_objs_with_g
 
 from .services.read import retrieve_general_concerns_by_id
 from .services.read import retrieve_general_concerns_by_name
+from .services.read import retrieve_related_gen_concern_rows_by_name
 
 
 class ConsumerGeneralConcern(Model):
@@ -51,3 +52,4 @@ ConsumerGeneralConcern.check_for_general_concern_objs_with_given_name = classmet
 
 ConsumerGeneralConcern.retrieve_general_concerns_by_id = classmethod(retrieve_general_concerns_by_id)
 ConsumerGeneralConcern.retrieve_general_concerns_by_name = classmethod(retrieve_general_concerns_by_name)
+ConsumerGeneralConcern.retrieve_related_gen_concern_rows_by_name = classmethod(retrieve_related_gen_concern_rows_by_name)

@@ -2,44 +2,44 @@ from django.views.generic import View
 
 from picbackend.views.utils import JSONGETRspMixin
 from picbackend.views.utils import JSONPUTRspMixin
-from picbackend.views.utils import clean_string_value_from_dict_object
+
 from picmodels.models import ProviderNetwork
-from .tools import retrieve_provider_network_data_by_id
-from .tools import retrieve_provider_network_data_by_name
-from .tools import validate_rqst_params_and_add_instance
-from .tools import validate_rqst_params_and_delete_instance
-from .tools import validate_rqst_params_and_modify_instance
+
+from .tools import validate_put_rqst_params
 
 
 # Need to abstract common variables in get and post class methods into class attributes
 class ProviderNetworksManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     def provider_networks_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
-        # Retrieve database action from post data
-        rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
+        validated_put_rqst_params = validate_put_rqst_params(rqst_body, rqst_errors)
+        rqst_action = validated_put_rqst_params['rqst_action']
 
-        # If there are no parsing errors, process PUT data based on database action
         if not rqst_errors:
             provider_network_obj = None
 
-            if rqst_action == "Provider Network Addition":
-                provider_network_obj = validate_rqst_params_and_add_instance(rqst_body, rqst_errors)
-            elif rqst_action == "Provider Network Modification":
-                provider_network_obj = validate_rqst_params_and_modify_instance(rqst_body, rqst_errors)
-            elif rqst_action == "Provider Network Deletion":
-                validate_rqst_params_and_delete_instance(rqst_body, rqst_errors)
+            if rqst_action == "create":
+                provider_network_obj = ProviderNetwork.create_row_w_validated_params(
+                    validated_put_rqst_params,
+                    rqst_errors
+                )
+            elif rqst_action == "update":
+                provider_network_obj = ProviderNetwork.update_row_w_validated_params(
+                    validated_put_rqst_params,
+                    rqst_errors
+                )
+            elif rqst_action == "delete":
+                ProviderNetwork.delete_row_w_validated_params(validated_put_rqst_params, rqst_errors)
 
                 if not rqst_errors:
-                    response_raw_data['Data']["Database ID"] = "Deleted"
+                    response_raw_data['Data']["row"] = "Deleted"
             else:
                 rqst_errors.append("No valid 'Database Action' provided.")
 
             if provider_network_obj:
-                response_raw_data['Data']["Database ID"] = provider_network_obj.id
+                response_raw_data['Data']["row"] = provider_network_obj.return_values_dict()
 
     def provider_networks_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
-        provider_networks = ProviderNetwork.objects.all()
-
-        def retrieve_data_by_primary_params_and_add_to_response(db_objects):
+        def retrieve_data_by_primary_params_and_add_to_response():
             data_list = []
 
             if 'id' in validated_GET_rqst_params:
@@ -49,17 +49,24 @@ class ProviderNetworksManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 else:
                     list_of_ids = None
 
-                data_list = retrieve_provider_network_data_by_id(db_objects, rqst_provider_network_id, list_of_ids, rqst_errors)
+                data_list = ProviderNetwork.retrieve_provider_network_data_by_id(
+                    rqst_provider_network_id,
+                    list_of_ids,
+                    rqst_errors
+                )
             elif 'name' in validated_GET_rqst_params:
                 rqst_name = validated_GET_rqst_params['name']
 
-                data_list = retrieve_provider_network_data_by_name(db_objects, rqst_name, rqst_errors)
+                data_list = ProviderNetwork.retrieve_provider_network_data_by_name(
+                    rqst_name,
+                    rqst_errors
+                )
             else:
                 rqst_errors.append('No Valid Parameters')
 
             response_raw_data['Data'] = data_list
 
-        retrieve_data_by_primary_params_and_add_to_response(provider_networks)
+        retrieve_data_by_primary_params_and_add_to_response()
 
     parse_PUT_request_and_add_response = provider_networks_management_put_logic
 

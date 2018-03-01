@@ -1,7 +1,7 @@
 ## Specific Concerns Backend API (IN MAINTENANCE)
 
 ### Specific Concerns Data Submission API
-To create, update, or delete members of the ConsumerSpecificConcern class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/specific_concerns/.
+To create, update, or delete rows in the ConsumerSpecificConcern Table of the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/specific_concerns/.
 
 - The headers of the request should include: 
     - "Content-Type: "application/json""
@@ -10,69 +10,84 @@ The body of the request should be a JSON document using the following template:
 
 ```
 {
-"question": String,
-"related_general_concerns": [
-                                Integer,
-                                ...,
-                                ...
-                            ],
-"research_weight": Integer(Can be omitted. iIf omitted, will be set to a default value of 50),
-"Database ID": Integer(Required when "Database Action" == "Modify Specific Concern", "Modify Specific Concern - add_general_concern"),
-               "Modify Specific Concern - remove_general_concern", or "Delete Specific Concern"
-"Database Action": String,
+    "question": String,
+    "add_related_general_concerns": [
+        String,
+        ...,
+        ...
+    ],
+    "remove_related_general_concerns": [
+        String,
+        ...,
+        ...
+    ],
+    "research_weight": Integer,
+    "id": Integer,
+    "db_action": String,
 }
 ```
 
 In response, a JSON document will be displayed with the following format:
 ```
 {
- "Status": {
-            "Error Code": Integer,
-            "Version": 2.0,
-            "Errors": Array,
-            "Warnings": Array,
-           },
- "Data": Dictionary Object or "Deleted",
+    "Status": {
+        "Error Code": Integer,
+        "Version": 2.0,
+        "Errors": Array,
+        "Warnings": Array,
+    },
+    "Data": Dictionary Object or "Deleted",
 }
 ```
 
-- Creating a ConsumerSpecificConcern database entry.
-    - To create a ConsumerSpecificConcern database entry, the value for "Database Action" in the JSON Body must equal "Add Specific Concern".
-    - All other fields except "Database ID" must be filled.
-    - related_general_concerns list information
-        - Must contain names of specific concerns that already exist as ConsumerGeneralConcern entries in the db.
-        - The ConsumerSpecificConcern entry will have an related_general_concerns list that EXACTLY matches the given list.
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the created entry
+- Create a ConsumerSpecificConcern database row.
+    - To create a row in the ConsumerSpecificConcern table, the value for "db_action" in the JSON Body must equal "create".
     
-- Updating a ConsumerSpecificConcern database entry.
-    - To update a ConsumerSpecificConcern database entry, the value for "Database Action" in the JSON Body must equal "Modify Specific Concern".
-    - All other fields must be filled.
-    - related_general_concerns list information
-        - Must contain names of specific concerns that already exist as ConsumerGeneralConcern entries in the db.
-        - The ConsumerSpecificConcern entry will have an related_general_concerns list that EXACTLY matches the given list.
-    - All key value pairs in the JSON Body correspond to updated fields of the entry for specified "Database ID"
-    
-- Updating a ConsumerSpecificConcern database entry - Adding an accepted plan.
-    - To update a ConsumerSpecificConcern database entry, the value for "Database Action" in the JSON Body must equal "Modify Specific Concern - add_general_concern".
-    - All other fields must be filled.
-    - related_general_concerns list information
-        - Must contain names of specific concerns that already exist as ConsumerGeneralConcern entries in the db.
-        - All given values will be added to the related_general_concerns list of the current ConsumerSpecificConcern.
-    - All key value pairs in the JSON Body correspond to updated fields of the entry for specified "Database ID"
-    
-- Updating a ConsumerSpecificConcern database entry - Removing an accepted plan.
-    - To update a ConsumerSpecificConcern database entry, the value for "Database Action" in the JSON Body must equal "Modify Specific Concern - remove_general_concern".
-    - All other fields must be filled.
-    - related_general_concerns information
-        - Must contain names of specific concerns that already exist as ConsumerGeneralConcern entries in the db.
-        - All given values will be removed from the related_general_concerns list of the current ConsumerSpecificConcern.
-    - All key value pairs in the JSON Body correspond to updated fields of the entry for specified "Database ID"
+        - Keys that can be omitted:
+            - "id"
+            - "research_weight"
+            - "add_related_general_concerns"
+            
+        - Keys that can be empty strings:
+            - None
+        
+        - Keys that can be empty arrays
+            - "add_related_general_concerns"
+            
+        - Keys that WILL NOT be read
+            - "remove_related_general_concerns"
 
-- Deleting a ConsumerSpecificConcern database entry.
-    - To delete a ConsumerSpecificConcern database entry, the value for "Database Action" in the JSON Body must equal "Delete Specific Concern".
-    - The only other field should be "Database ID".
-    - The response JSON document will have a "Deleted" as the value for the "Data" key.
+    - If there are no errors in the JSON Body document:        
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the created row.
+    
+- Update a ConsumerSpecificConcern database row.
+    - To update a row in the ConsumerSpecificConcern table, the value for "db_action" in the JSON Body must equal "update".
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "id"
+    - Note: at least one key other than "id" and "db_action" must be present
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+        - Keys that can be empty strings:
+            - None
+         
+         - Keys that can be empty arrays
+            - None
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the updated row.
+
+- Delete a ConsumerSpecificConcern database row.
+    - To delete a row in the ConsumerSpecificConcern table, the value for "db_action" in the JSON Body must equal "delete".
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is "Deleted".
     
 - If there are errors in the JSON Body document:
     - "Error Code" will be 1.

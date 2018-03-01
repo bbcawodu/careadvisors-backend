@@ -1,21 +1,77 @@
 import json
-from picmodels.models import ConsumerSpecificConcern
 
 
-def add_instance_using_validated_params(add_specific_concern_params, rqst_errors):
-    found_specific_concern_objs = check_for_specific_concern_objs_with_given_question(add_specific_concern_params["rqst_specific_concern_question"], rqst_errors)
+def create_row_w_validated_params(cls, validated_params, rqst_errors):
+    found_specific_concern_rows = cls.check_for_specific_concern_rows_with_given_question(
+        validated_params["rqst_specific_concern_question"],
+        rqst_errors
+    )
 
-    specific_concern_obj = None
-    if not found_specific_concern_objs and not rqst_errors:
-        specific_concern_obj = create_new_specific_concern_obj(add_specific_concern_params)
+    specific_concern_row = None
+    if not found_specific_concern_rows and not rqst_errors:
+        specific_concern_row = cls()
+        specific_concern_row.question = validated_params["rqst_specific_concern_question"]
+        specific_concern_row.research_weight = validated_params["rqst_specific_concern_research_weight"]
+        specific_concern_row.save()
 
-    return specific_concern_obj
+        if "add_related_general_concerns_objects" in validated_params:
+            add_related_general_concerns_to_row(specific_concern_row, validated_params, rqst_errors)
+
+        if not rqst_errors:
+            specific_concern_row.save()
+
+    return specific_concern_row
 
 
-def check_for_specific_concern_objs_with_given_question(specific_concern_question, post_errors, current_specific_concern_id=None):
+def update_row_w_validated_params(cls, validated_params, rqst_errors):
+    rqst_id = validated_params['rqst_id']
+
+    if "rqst_specific_concern_question" in validated_params:
+        found_specific_concern_rows = cls.check_for_specific_concern_rows_with_given_question(
+            validated_params["rqst_specific_concern_question"],
+            rqst_errors,
+            rqst_id
+        )
+    else:
+        found_specific_concern_rows = None
+
+    specific_concern_row = None
+    if not found_specific_concern_rows and not rqst_errors:
+        try:
+            specific_concern_row = cls.objects.get(id=rqst_id)
+
+            if "rqst_specific_concern_question" in validated_params:
+                specific_concern_row.question = validated_params["rqst_specific_concern_question"]
+            if "rqst_specific_concern_research_weight" in validated_params:
+                specific_concern_row.research_weight = validated_params["rqst_specific_concern_research_weight"]
+
+            if "add_related_general_concerns_objects" in validated_params:
+                add_related_general_concerns_to_row(specific_concern_row, validated_params, rqst_errors)
+            elif "remove_related_general_concerns_objects" in validated_params:
+                remove_related_general_concerns_from_row(specific_concern_row, validated_params, rqst_errors)
+
+            if not rqst_errors:
+                specific_concern_row.save()
+        except cls.DoesNotExist:
+            rqst_errors.append("Specific concern does not exist for database id: {}".format(rqst_id))
+
+    return specific_concern_row
+
+
+def delete_row_w_validated_params(cls, validated_params, rqst_errors):
+    rqst_id = validated_params['rqst_id']
+
+    try:
+        specific_concern_obj = cls.objects.get(id=rqst_id)
+        specific_concern_obj.delete()
+    except cls.DoesNotExist:
+        rqst_errors.append("Specific concern does not exist for database id: {}".format(rqst_id))
+
+
+def check_for_specific_concern_rows_with_given_question(cls, specific_concern_question, post_errors, current_specific_concern_id=None):
     found_specific_concern_obj = False
 
-    specific_concern_objs = ConsumerSpecificConcern.objects.filter(question__iexact=specific_concern_question)
+    specific_concern_objs = cls.objects.filter(question__iexact=specific_concern_question)
 
     if specific_concern_objs:
         found_specific_concern_obj = True
@@ -40,135 +96,44 @@ def check_for_specific_concern_objs_with_given_question(specific_concern_questio
     return found_specific_concern_obj
 
 
-def create_new_specific_concern_obj(specific_concern_params):
-    specific_concern_obj = ConsumerSpecificConcern()
-    specific_concern_obj.question = specific_concern_params["rqst_specific_concern_question"]
-    specific_concern_obj.research_weight = specific_concern_params["rqst_specific_concern_research_weight"]
-    specific_concern_obj.save()
-    specific_concern_obj.related_general_concerns = specific_concern_params["related_general_concerns_objects"]
-    specific_concern_obj.save()
+def add_related_general_concerns_to_row(specific_concern_row, validated_params, rqst_errors):
+    related_general_concerns_rows = validated_params["add_related_general_concerns_objects"]
+    if related_general_concerns_rows:
+        check_related_general_concerns_for_given_rows(specific_concern_row, related_general_concerns_rows, rqst_errors)
 
-    return specific_concern_obj
+        for related_general_concerns_row in related_general_concerns_rows:
+            specific_concern_row.related_general_concerns.add(related_general_concerns_row)
 
 
-def modify_instance_using_validated_params(modify_specific_concern_params, rqst_specific_concern_id, rqst_errors):
-    found_specific_concern_objs = check_for_specific_concern_objs_with_given_question(
-        modify_specific_concern_params["rqst_specific_concern_question"], rqst_errors, rqst_specific_concern_id)
+def remove_related_general_concerns_from_row(specific_concern_row, validated_params, rqst_errors):
+    related_general_concerns_rows = validated_params["remove_related_general_concerns_objects"]
+    check_related_general_concerns_for_not_given_rows(
+        specific_concern_row,
+        related_general_concerns_rows,
+        rqst_errors
+    )
 
-    specific_concern_obj = None
-    if not found_specific_concern_objs and not rqst_errors:
-        specific_concern_obj = modify_specific_concern_obj(modify_specific_concern_params, rqst_specific_concern_id, rqst_errors)
-
-    return specific_concern_obj
-
-
-def modify_specific_concern_obj(specific_concern_params, specific_concern_id, rqst_errors):
-    specific_concern_obj = None
-    try:
-        specific_concern_obj = ConsumerSpecificConcern.objects.get(id=specific_concern_id)
-        specific_concern_obj.question = specific_concern_params["rqst_specific_concern_question"]
-        specific_concern_obj.research_weight = specific_concern_params["rqst_specific_concern_research_weight"]
-        specific_concern_obj.related_general_concerns.clear()
-        specific_concern_obj.related_general_concerns = specific_concern_params["related_general_concerns_objects"]
-        specific_concern_obj.save()
-    except ConsumerSpecificConcern.DoesNotExist:
-        rqst_errors.append("Specific concern does not exist for database id: {}".format(specific_concern_id))
-
-    return specific_concern_obj
+    for related_general_concerns_row in related_general_concerns_rows:
+        specific_concern_row.related_general_concerns.remove(related_general_concerns_row)
 
 
-def add_general_concern_to_instance_using_validated_params(modify_specific_concern_params, rqst_specific_concern_id, rqst_errors):
-    specific_concern_obj = None
-
-    try:
-        specific_concern_obj = ConsumerSpecificConcern.objects.get(id=rqst_specific_concern_id)
-
-        if not modify_specific_concern_params['related_general_concerns_objects']:
-            rqst_errors.append("No related_general_concerns_objects given in request.")
-        else:
-            check_related_general_concerns_for_given_instances(specific_concern_obj,
-                                                               modify_specific_concern_params['related_general_concerns_objects'],
-                                                               rqst_errors)
-    except ConsumerSpecificConcern.DoesNotExist:
-        rqst_errors.append(
-            "Specific concern does not exist for database id: {}".format(rqst_specific_concern_id))
-
-    if not rqst_errors:
-        found_specific_concern_objs = check_for_specific_concern_objs_with_given_question(
-            modify_specific_concern_params["rqst_specific_concern_question"], rqst_errors, rqst_specific_concern_id)
-
-        if not found_specific_concern_objs and not rqst_errors:
-            add_general_concerns_to_instance(specific_concern_obj, modify_specific_concern_params)
-
-    return specific_concern_obj
-
-
-def check_related_general_concerns_for_given_instances(specific_concern_obj, related_general_concerns_objects, rqst_errors):
-    cur_related_general_concerns_qset = specific_concern_obj.related_general_concerns.all()
-    for related_general_concerns_object in related_general_concerns_objects:
+def check_related_general_concerns_for_given_rows(specific_concern_row, related_general_concerns_rows, rqst_errors):
+    cur_related_general_concerns_qset = specific_concern_row.related_general_concerns.all()
+    for related_general_concerns_object in related_general_concerns_rows:
         if related_general_concerns_object in cur_related_general_concerns_qset:
             rqst_errors.append(
                 "Related general concern with the following name already exists in db id {}'s related_general_concerns list (Hint - remove from parameter 'related_general_concerns' list): {})".format(
-                    specific_concern_obj.id, related_general_concerns_object.name
-                ))
+                    specific_concern_row.id, related_general_concerns_object.name
+                )
+            )
 
 
-def add_general_concerns_to_instance(specific_concern_obj, modify_specific_concern_params):
-    specific_concern_obj.question = modify_specific_concern_params["rqst_specific_concern_question"]
-    specific_concern_obj.research_weight = modify_specific_concern_params["rqst_specific_concern_research_weight"]
-    for related_general_concerns_object in modify_specific_concern_params['related_general_concerns_objects']:
-        specific_concern_obj.related_general_concerns.add(related_general_concerns_object)
-
-    specific_concern_obj.save()
-
-
-def remove_general_concern_from_instance_using_validated_params(modify_specific_concern_params, rqst_specific_concern_id, rqst_errors):
-    specific_concern_obj = None
-
-    try:
-        specific_concern_obj = ConsumerSpecificConcern.objects.get(id=rqst_specific_concern_id)
-        if not modify_specific_concern_params['related_general_concerns_objects']:
-            rqst_errors.append("No related_general_concerns_objects given in request.")
-        else:
-            check_related_general_concerns_for_not_given_instances(specific_concern_obj,
-                                                                   modify_specific_concern_params['related_general_concerns_objects'],
-                                                                   rqst_errors)
-    except ConsumerSpecificConcern.DoesNotExist:
-        rqst_errors.append(
-            "Specific concern does not exist for database id: {}".format(rqst_specific_concern_id))
-
-    if not rqst_errors:
-        found_specific_concern_objs = check_for_specific_concern_objs_with_given_question(
-            modify_specific_concern_params["rqst_specific_concern_question"], rqst_errors, rqst_specific_concern_id)
-
-        if not found_specific_concern_objs and not rqst_errors:
-            remove_general_concerns_from_instance(specific_concern_obj, modify_specific_concern_params)
-
-    return specific_concern_obj
-
-
-def check_related_general_concerns_for_not_given_instances(specific_concern_obj, related_general_concerns_objects, rqst_errors):
-    cur_related_general_concerns_qset = specific_concern_obj.related_general_concerns.all()
-    for related_general_concerns_object in related_general_concerns_objects:
+def check_related_general_concerns_for_not_given_rows(specific_concern_rows, related_general_concerns_rows, rqst_errors):
+    cur_related_general_concerns_qset = specific_concern_rows.related_general_concerns.all()
+    for related_general_concerns_object in related_general_concerns_rows:
         if related_general_concerns_object not in cur_related_general_concerns_qset:
             rqst_errors.append(
                 "Related general concern with the following name does not exist in db id {}'s related_general_concerns list (Hint - remove from parameter 'related_general_concerns' list): {})".format(
-                    specific_concern_obj.id, related_general_concerns_object.name
-                ))
-
-
-def remove_general_concerns_from_instance(specific_concern_obj, modify_specific_concern_params):
-    specific_concern_obj.question = modify_specific_concern_params["rqst_specific_concern_question"]
-    specific_concern_obj.research_weight = modify_specific_concern_params["rqst_specific_concern_research_weight"]
-    for related_general_concerns_object in modify_specific_concern_params['related_general_concerns_objects']:
-        specific_concern_obj.related_general_concerns.remove(related_general_concerns_object)
-
-    specific_concern_obj.save()
-
-
-def delete_instance_using_validated_params(rqst_specific_concern_id, rqst_errors):
-    try:
-        specific_concern_obj = ConsumerSpecificConcern.objects.get(id=rqst_specific_concern_id)
-        specific_concern_obj.delete()
-    except ConsumerSpecificConcern.DoesNotExist:
-        rqst_errors.append("Specific concern does not exist for database id: {}".format(rqst_specific_concern_id))
+                    specific_concern_rows.id, related_general_concerns_object.name
+                )
+            )

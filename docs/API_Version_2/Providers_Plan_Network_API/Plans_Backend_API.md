@@ -1,7 +1,7 @@
 ## Healthcare Plans Backend API
 
 ### Healthcare Plans Data Submission API
-To create, update, or delete members of the HealthcarePlan class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/plans/.
+To create, update, or delete rows in the HealthcarePlan table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/plans/.
 
 - The headers of the request should include: 
     - "Content-Type: "application/json""
@@ -10,35 +10,35 @@ The body of the request should be a JSON document using the following template:
 
 ```
 {
-"name": String,
-"metal_level": String,
-"premium_type": String,
-"Carrier Database ID": Integer (Database ID of the Carrier for this plan),
-"county" : String(Can be Null)(Can be omitted - db value will be set to null),
-
-### Summary Report Fields (Can be Null)(Can be omitted - db values will be set to null)
-"medical_deductible_individual_standard": Float,
-"medical_out_of_pocket_max_individual_standard": Float,
-"primary_care_physician_standard_cost": String,
-###
-
-### Detailed Report Fields (Can be Null)(Can be omitted - db values will be set to null)
-"specialist_standard_cost": String,
-"emergency_room_standard_cost": String,
-"inpatient_facility_standard_cost": String,
-"generic_drugs_standard_cost": String,
-"preferred_brand_drugs_standard_cost": String,
-"non_preferred_brand_drugs_standard_cost": String,
-"specialty_drugs_standard_cost": String,
-###
-
-### Extra Benefit Information Fields
-"medical_deductible_family_standard": Float,
-"medical_out_of_pocket_max_family_standard": Float,
-###
-
-"Database ID": Integer(Required when "Database Action" == "Plan Modification" or "Plan Deletion"),
-"Database Action": String,
+    "name": String,
+    "metal_level": String,
+    "premium_type": String,
+    "Carrier Database ID": Integer,
+    "county" : String,
+    
+    ### Summary Report Fields
+    "medical_deductible_individual_standard": Float,
+    "medical_out_of_pocket_max_individual_standard": Float,
+    "primary_care_physician_standard_cost": String,
+    ###
+    
+    ### Detailed Report Fields
+    "specialist_standard_cost": String,
+    "emergency_room_standard_cost": String,
+    "inpatient_facility_standard_cost": String,
+    "generic_drugs_standard_cost": String,
+    "preferred_brand_drugs_standard_cost": String,
+    "non_preferred_brand_drugs_standard_cost": String,
+    "specialty_drugs_standard_cost": String,
+    ###
+    
+    ### Extra Benefit Information Fields
+    "medical_deductible_family_standard": Float,
+    "medical_out_of_pocket_max_family_standard": Float,
+    ###
+    
+    "id": Integer,
+    "db_action": String,
 }
 ```
 
@@ -66,31 +66,98 @@ The Following is a list of possible values for the "metal_level" field along wit
 In response, a JSON document will be displayed with the following format:
 ```
 {
- "Status": {
+    "Status": {
             "Error Code": Integer,
             "Version": 2.0,
             "Errors": Array,
             "Warnings": Array,
            },
- "Data": Dictionary Object or "Deleted",
+    "Data": Dictionary Object or "Deleted",
 }
 ```
 
-- Creating a HealthcarePlan database entry.
-    - To create a HealthcarePlan database entry, the value for "Database Action" in the JSON Body must equal "Plan Addition".
-    - All other fields except "Database ID" must be filled.
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the created entry
+- Create a HealthcarePlan database row.
+    - To create a row in the HealthcarePlan table, the value for "db_action" in the JSON Body must equal "create".
     
-- Updating a HealthcarePlan database entry.
-    - To update a HealthcarePlan database entry, the value for "Database Action" in the JSON Body must equal "Plan Modification".
-    - All other fields must be filled.
-    - All key value pairs in the JSON Body correspond to updated fields of the entry for specified "Database ID"
+        - Keys that can be omitted:
+            - "medical_deductible_individual_standard"
+            - "medical_out_of_pocket_max_individual_standard"
+            - "primary_care_physician_standard_cost"
+            - "specialist_standard_cost"
+            - "emergency_room_standard_cost"
+            - "inpatient_facility_standard_cost"
+            - "generic_drugs_standard_cost"
+            - "preferred_brand_drugs_standard_cost"
+            - "non_preferred_brand_drugs_standard_cost"
+            - "specialty_drugs_standard_cost"
+            - "medical_deductible_family_standard"
+            - "medical_out_of_pocket_max_family_standard"
+            - "county"
+            
+        - Keys that can be empty strings:
+            - None
+        
+        - Keys that can be Null
+            - "medical_deductible_individual_standard"
+            - "medical_out_of_pocket_max_individual_standard"
+            - "primary_care_physician_standard_cost"
+            - "specialist_standard_cost"
+            - "emergency_room_standard_cost"
+            - "inpatient_facility_standard_cost"
+            - "generic_drugs_standard_cost"
+            - "preferred_brand_drugs_standard_cost"
+            - "non_preferred_brand_drugs_standard_cost"
+            - "specialty_drugs_standard_cost"
+            - "medical_deductible_family_standard"
+            - "medical_out_of_pocket_max_family_standard"
+            - "county"
+            
+        - Keys that WILL NOT be read
+            - "id"
 
-- Deleting a HealthcarePlan database entry.
-    - To delete a HealthcarePlan database entry, the value for "Database Action" in the JSON Body must equal "Plan Deletion".
-    - The only other field should be "Database ID".
-    - The response JSON document will have a "Deleted" as the value for the "Data" key.
+    - If there are no errors in the JSON Body document:        
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the created row.
+    
+- Update a HealthcarePlan database row.
+    - To update a row in the HealthcarePlan table, the value for "db_action" in the JSON Body must equal "update".
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "id"
+    - Note: at least one key other than "id" and "db_action" must be present
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+        - Keys that can be empty strings:
+            - None
+        
+        - Keys that can be Null
+            - - "medical_deductible_individual_standard"
+            - "medical_out_of_pocket_max_individual_standard"
+            - "primary_care_physician_standard_cost"
+            - "specialist_standard_cost"
+            - "emergency_room_standard_cost"
+            - "inpatient_facility_standard_cost"
+            - "generic_drugs_standard_cost"
+            - "preferred_brand_drugs_standard_cost"
+            - "non_preferred_brand_drugs_standard_cost"
+            - "specialty_drugs_standard_cost"
+            - "medical_deductible_family_standard"
+            - "medical_out_of_pocket_max_family_standard"
+            - "county"
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the updated row.
+
+- Delete a HealthcarePlan database row.
+    - To delete a row in the HealthcarePlan table, the value for "db_action" in the JSON Body must equal "delete".
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is "Deleted".
     
 - If there are errors in the JSON Body document:
     - "Error Code" will be 1.
