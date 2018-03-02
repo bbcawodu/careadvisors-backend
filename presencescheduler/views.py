@@ -3,7 +3,8 @@ Defines views that are mapped to url configurations
 """
 from django.http import HttpResponse
 from django.shortcuts import render
-from picmodels.models import Appointment, Location, PICConsumer, PICStaff
+from picmodels.models import PICConsumer, PICStaff
+from presencescheduler.models import Appointment, Location
 import datetime, json, sys, re
 from django.views.decorators.csrf import csrf_exempt
 
