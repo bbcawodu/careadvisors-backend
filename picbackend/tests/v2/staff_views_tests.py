@@ -26,6 +26,10 @@ class StaffAPITests(TestCase, BaseConsumerStaffMetricsTests):
 
         post_json = json.dumps(post_data)
         response = self.client_object.put(self.base_url, post_json, content_type="application/json")
+
+        # Test for a valid reponse code (200)
+        self.assertEqual(response.status_code, 200)
+
         response_json = response.content.decode('utf-8')
         response_data = json.loads(response_json)
 

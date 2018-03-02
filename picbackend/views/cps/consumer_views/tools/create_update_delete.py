@@ -12,9 +12,6 @@ from picbackend.views.utils import clean_dict_value_from_dict_object
 from picbackend.views.utils import clean_bool_value_from_dict_object
 from picmodels.models import PICStaff
 from picmodels.models import PICConsumer
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import create_row_w_validated_params
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import update_row_w_validated_params
-from picmodels.services.staff_consumer_models_services.pic_consumer_services import delete_row_w_validated_params
 from django.db import IntegrityError
 from django.core.validators import validate_email
 from django import forms

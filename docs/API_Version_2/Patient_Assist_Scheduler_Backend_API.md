@@ -232,24 +232,24 @@ The body of the request should be a JSON document using the following template:
 
 ```
 {
-"Navigator ID": Integer,
+"navigator_id": Integer,
 "Appointment Date and Time" : '2016-12-22T10:00:00',
 "Consumer Info": {
-                    "First Name": String,
-                    "Middle Name": String (Can be empty),
-                    "Last Name": String,
-                    "Email": String (Can be empty),
-                    "Phone Number": String,
-                    "Household Size": Integer,
-                    "Plan": String (Can be empty),
-                    "Preferred Language": String (Can be empty),
+                    "first_name": String,
+                    "middle_name": String (Can be empty),
+                    "last_name": String,
+                    "email": String (Can be empty),
+                    "phone": String,
+                    "household_size": Integer,
+                    "plan": String (Can be empty),
+                    "preferred language": String (Can be empty),
                     
                     Address(Every field within address can be given as an empty string. Address will only be recorded/updated iff a full address is given)
-                    "Address Line 1": String (Can be empty),
-                    "Address Line 2": String (Can be empty),
-                    "City": String (Can be empty),
-                    "State": String (Can be empty),
-                    "Zipcode": String (Can be empty),
+                    "address_line_1": String (Can be empty),
+                    "address_line_2": String (Can be empty),
+                    "city": String (Can be empty),
+                    "state_province": String (Can be empty),
+                    "zipcode": String (Can be empty),
                  }
  
 }

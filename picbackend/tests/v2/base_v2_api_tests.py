@@ -10,7 +10,7 @@ import json
 
 class BaseV2RqstTests(object):
     base_url = "/v2/"
-    client_object = Client()
+    client_object = Client(content_type='application/json', HTTP_X_REQUESTED_WITH='XMLHttpRequest')
     settings.DEBUG = True
 
     def test_base_rqst(self):

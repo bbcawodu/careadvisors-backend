@@ -165,7 +165,7 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
         confirmed_appointment, consumer_dict = add_nav_apt_to_google_calendar(rqst_body, rqst_errors)
         response_raw_data["Data"]["Confirmed Appointment"] = confirmed_appointment
         if consumer_dict:
-            response_raw_data["Data"]["Consumer ID"] = consumer_dict["Database ID"]
+            response_raw_data["Data"]["Consumer ID"] = consumer_dict["id"]
 
     def delete_nav_scheduled_appointment_logic(self, rqst_body, response_raw_data, rqst_errors):
         response_raw_data["Data"] = {"Deleted Appointment": False}
