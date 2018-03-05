@@ -14,16 +14,16 @@ class NavHubLocationAPITests(TestCase, BaseV2APITests):
 
     def test_add_or_update_nav_hub_location_view(self):
         post_data = {
-                      "Location Name": "CandyLand",
-                      "Address Line 1": "3133 S Ashland Ave",
-                      "Address Line 2": "",
-                      "City": "Chicago",
-                      "State": "IL",
-                      "Zipcode": "60608",
-                      "Country": "United States of America",
+            "Location Name": "CandyLand",
+            "Address Line 1": "3133 S Ashland Ave",
+            "Address Line 2": "",
+            "City": "Chicago",
+            "State": "IL",
+            "Zipcode": "60608",
+            "Country": "United States of America",
 
-                      "Database Action": "Location Addition"
-                      }
+            "db_action": "create"
+        }
 
         post_json = json.dumps(post_data)
         response = self.client_object.put(self.base_url, post_json, content_type="application/json")

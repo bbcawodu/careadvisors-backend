@@ -117,7 +117,7 @@ def build_authorized_cal_http_service_object(credential):
     return service
 
 
-def add_nav_apt_to_google_calendar(post_data, post_errors):
+def add_nav_apt_to_google_calendar(post_data, post_errors, response_raw_data):
     """
     This function takes a dictionary populated with data about a consumer appointment with a navigator, adds it to the
     navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar, and sends an email notification to the
@@ -145,7 +145,7 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
                 credentials_object.delete()
                 post_errors.append('Google Credentials database entry is invalid for the navigator with id: {!s}'.format(str(rqst_nav_id)))
             else:
-                scheduled_appointment = send_add_apt_rqst_to_google_and_email_consumer(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors)
+                scheduled_appointment = send_add_apt_rqst_to_google_and_email_consumer(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors, response_raw_data)
 
         except PICStaff.DoesNotExist:
             post_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(rqst_nav_id)))
@@ -190,7 +190,7 @@ def create_consumer_instance_from_apt_rqst(rqst_nav_id, post_data, post_errors):
     return consumer_info
 
 
-def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime, consumer_info, nav_info, post_errors):
+def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime, consumer_info, nav_info, post_errors, response_raw_data):
     """
     This function takes a dictionary populated with data about a consumer appointment with a navigator, adds the appointment
     to the navigators 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar, and sends an email to the corresponding
@@ -246,7 +246,7 @@ def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime
                         except forms.ValidationError:
                             post_errors.append("Email: {!s} for consumer database id: {!s} must be a valid email address, email to consumer not sent".format(consumer_info["email"], consumer_info["id"]))
                     else:
-                        post_errors.append("Consumer with database id: {!s} does not have an email address specified, email to consumer not sent".format(consumer_info["id"]))
+                        response_raw_data['Status']['Warnings'].append("Consumer with database id: {!s} does not have an email address specified, email to consumer not sent".format(consumer_info["id"]))
                 except Exception:
                     post_errors.append("Call to Google failed, Check API call")
             else:

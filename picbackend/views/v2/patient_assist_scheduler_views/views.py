@@ -162,7 +162,7 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
         response_raw_data["Data"] = {"Confirmed Appointment": None,
                                      "Consumer ID": None}
 
-        confirmed_appointment, consumer_dict = add_nav_apt_to_google_calendar(rqst_body, rqst_errors)
+        confirmed_appointment, consumer_dict = add_nav_apt_to_google_calendar(rqst_body, rqst_errors, response_raw_data)
         response_raw_data["Data"]["Confirmed Appointment"] = confirmed_appointment
         if consumer_dict:
             response_raw_data["Data"]["Consumer ID"] = consumer_dict["id"]

@@ -21,7 +21,7 @@ class StaffAPITests(TestCase, BaseConsumerStaffMetricsTests):
             "User County": "Montgomery",
             "MPN": "Cook",
             "Base Locations": ['Lincoln Belmont Library', 'Thorek Memorial Hospital'],
-            "Database Action": "Staff Addition",
+            "db_action": "create",
         }
 
         post_json = json.dumps(post_data)
@@ -51,4 +51,4 @@ class StaffAPITests(TestCase, BaseConsumerStaffMetricsTests):
         # Test decoded JSON data for non empty "Next Available Appointments" data
         staff_data = response_data["Data"]
 
-        self.assertIn("Database ID", staff_data)
+        self.assertIn("row", staff_data)

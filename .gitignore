@@ -9,5 +9,6 @@ idea/
 picbackend/settings/local.env
 *.pyc
 staticfiles
+.pytest_cache
 picbackend/wsgi.py
 picbackend/static/medi_sample_data.json
