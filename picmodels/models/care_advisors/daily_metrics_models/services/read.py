@@ -2,15 +2,15 @@ import datetime
 
 import picmodels.models
 from picmodels.models.utils import filter_db_queryset_by_id
-from picmodels.models.care_advisors.staff_models.services.read import filter_staff_objs_by_f_and_l_name
-from picmodels.models.care_advisors.staff_models.services.read import filter_staff_objs_by_first_name
-from picmodels.models.care_advisors.staff_models.services.read import filter_staff_objs_by_last_name
-from picmodels.models.care_advisors.staff_models.services.read import filter_staff_objs_by_email
-from picmodels.models.care_advisors.staff_models.services.read import filter_staff_objs_by_mpn
+from picmodels.models.care_advisors.navigator_models.services.read import filter_navigator_objs_by_f_and_l_name
+from picmodels.models.care_advisors.navigator_models.services.read import filter_navigator_objs_by_first_name
+from picmodels.models.care_advisors.navigator_models.services.read import filter_navigator_objs_by_last_name
+from picmodels.models.care_advisors.navigator_models.services.read import filter_navigator_objs_by_email
+from picmodels.models.care_advisors.navigator_models.services.read import filter_navigator_objs_by_mpn
 
 
 def retrieve_metrics_data_by_staff_id(cls, rqst_staff_id, list_of_ids, search_params, rqst_errors, fields=None):
-    staff_instances = filter_db_queryset_by_id(picmodels.models.PICStaff.objects.all(), rqst_staff_id, list_of_ids)
+    staff_instances = filter_db_queryset_by_id(picmodels.models.Navigators.objects.all(), rqst_staff_id, list_of_ids)
 
     response_list = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(staff_instances, search_params, fields)
 
@@ -48,7 +48,7 @@ def retrieve_metrics_data_by_staff_f_and_l_name(cls, list_of_first_names, list_o
             first_name = list_of_first_names[i]
             last_name = list_of_last_names[i]
 
-            staff_instances = filter_staff_objs_by_f_and_l_name(picmodels.models.PICStaff.objects.all(), first_name, last_name)
+            staff_instances = filter_navigator_objs_by_f_and_l_name(picmodels.models.Navigators.objects.all(), first_name, last_name)
 
             response_list_component = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(staff_instances, search_params, fields)
 
@@ -75,7 +75,7 @@ def retrieve_metrics_data_by_staff_first_name(cls, list_of_first_names, search_p
     missing_primary_parameters = []
 
     for first_name in list_of_first_names:
-        staff_instances = filter_staff_objs_by_first_name(picmodels.models.PICStaff.objects.all(), first_name)
+        staff_instances = filter_navigator_objs_by_first_name(picmodels.models.Navigators.objects.all(), first_name)
 
         response_list_component = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(staff_instances,
                                                                                                                 search_params,
@@ -102,7 +102,7 @@ def retrieve_metrics_data_by_staff_last_name(cls, list_of_last_names, search_par
     missing_primary_parameters = []
 
     for last_name in list_of_last_names:
-        staff_instances = filter_staff_objs_by_last_name(picmodels.models.PICStaff.objects.all(), last_name)
+        staff_instances = filter_navigator_objs_by_last_name(picmodels.models.Navigators.objects.all(), last_name)
 
         response_list_component = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(staff_instances, search_params, fields)
 
@@ -127,7 +127,7 @@ def retrieve_metrics_data_by_staff_email(cls, list_of_emails, search_params, rqs
     missing_primary_parameters = []
 
     for email in list_of_emails:
-        staff_instances = filter_staff_objs_by_email(picmodels.models.PICStaff.objects.all(), email)
+        staff_instances = filter_navigator_objs_by_email(picmodels.models.Navigators.objects.all(), email)
 
         response_list_component = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(staff_instances, search_params, fields)
 
@@ -152,7 +152,7 @@ def retrieve_metrics_data_by_staff_mpn(cls, list_of_staff_mpns, search_params, r
     missing_primary_parameters = []
 
     for staff_mpn in list_of_staff_mpns:
-        staff_instances = filter_staff_objs_by_mpn(picmodels.models.PICStaff.objects.all(), staff_mpn)
+        staff_instances = filter_navigator_objs_by_mpn(picmodels.models.Navigators.objects.all(), staff_mpn)
 
         response_list_component = create_metrics_response_list_from_filtered_staff_objects_and_secondary_params(
             staff_instances, search_params, fields)

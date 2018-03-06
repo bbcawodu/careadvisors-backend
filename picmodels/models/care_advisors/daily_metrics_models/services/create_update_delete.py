@@ -10,8 +10,8 @@ def create_or_update_row_w_validated_params(cls, validated_params, rqst_errors):
     location_instance_for_metrics = validated_params['location_instance_for_metrics']
 
     try:
-        user_instance = picmodels.models.PICStaff.objects.get(email__iexact=validated_params['rqst_usr_email'])
-    except picmodels.models.DoesNotExist:
+        user_instance = picmodels.models.Navigators.objects.get(email__iexact=validated_params['rqst_usr_email'])
+    except picmodels.models.Navigators.DoesNotExist:
         rqst_errors.append("Staff database entry does not exist for email: {!s}".format(rqst_usr_email))
     else:
         try:

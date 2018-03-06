@@ -25,7 +25,7 @@ from picbackend.views.utils import init_v2_response_data
 from picbackend.views.utils import parse_and_log_errors
 from picbackend.views.utils import validate_get_request_parameters
 from picmodels.models import CredentialsModel
-from picmodels.models import PICStaff
+from picmodels.models import Navigators
 from .tools import add_nav_apt_to_google_calendar
 from .tools import check_or_create_navigator_google_cal
 from .tools import delete_nav_apt_from_google_calendar
@@ -57,7 +57,7 @@ class NavGoogleCalendarAccessRequestView(View):
         if 'nav_id' in search_params:
             nav_id = search_params["nav_id"]
             try:
-                picstaff_object = PICStaff.objects.get(id=nav_id)
+                picstaff_object = Navigators.objects.get(id=nav_id)
                 storage = DjangoORMStorage(CredentialsModel, 'id', nav_id, 'credential')
                 credential = storage.get()
                 if credential is None or credential.invalid == True:
@@ -74,7 +74,7 @@ class NavGoogleCalendarAccessRequestView(View):
 
                     check_or_create_navigator_google_cal(credential, rqst_errors)
 
-            except PICStaff.DoesNotExist:
+            except Navigators.DoesNotExist:
                 rqst_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(nav_id)))
 
         else:
@@ -103,7 +103,7 @@ class GoogleCalendarAuthReturnView(View):
         # if not xsrfutil.validate_token(SECRET_KEY, bytes(request.GET['state'], 'utf-8'), search_params["nav_id"]):
         #     return HttpResponseBadRequest()
         credential = FLOW.step2_exchange(request.REQUEST)
-        storage = DjangoORMStorage(CredentialsModel, 'id', PICStaff.objects.get(id=state_dict["nav_id"]), 'credential')
+        storage = DjangoORMStorage(CredentialsModel, 'id', Navigators.objects.get(id=state_dict["nav_id"]), 'credential')
         storage.put(credential)
         return HttpResponseRedirect("/v2/calendar_auth/?nav_id={!s}".format(state_dict["nav_id"]))
 
@@ -121,14 +121,14 @@ class PatientAssistAptMgtView(JSONGETRspMixin, JSONPOSTRspMixin, JSONPUTRspMixin
             nav_id = validated_GET_rqst_params["nav_id"]
 
             try:
-                picstaff_object = PICStaff.objects.get(id=nav_id)
+                picstaff_object = Navigators.objects.get(id=nav_id)
                 credentials_object = CredentialsModel.objects.get(id=picstaff_object)
                 nav_info = picstaff_object.return_values_dict()
                 response_raw_data["Data"]["Scheduled Appointments"] = get_nav_scheduled_appointments(nav_info,
                                                                                                      credentials_object,
                                                                                                      rqst_errors)
 
-            except PICStaff.DoesNotExist:
+            except Navigators.DoesNotExist:
                 rqst_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(nav_id)))
             except CredentialsModel.DoesNotExist:
                 rqst_errors.append('Google Credentials database entry does not exist for the navigator with id: {!s}'.format(str(nav_id)))

@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from picmodels.models.care_advisors import PICConsumer, PICStaff
+from picmodels.models.care_advisors import PICConsumer, Navigators
 
 
 class PICUser(models.Model):
@@ -31,7 +31,7 @@ class Appointment(models.Model):
     # fields for appointment model
     consumer = models.ForeignKey(PICConsumer, on_delete=models.CASCADE, blank=True, null=True)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, blank=True, null=True)
-    poc = models.ForeignKey(PICStaff, on_delete=models.CASCADE, blank=True, null=True)
+    poc = models.ForeignKey(Navigators, on_delete=models.CASCADE, blank=True, null=True)
     date = models.CharField(max_length=2000)
     start_time = models.CharField(max_length=1000)
     end_time = models.CharField(max_length=1000)

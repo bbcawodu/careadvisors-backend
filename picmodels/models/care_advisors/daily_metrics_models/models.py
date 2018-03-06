@@ -1,5 +1,5 @@
 from django.db import models
-from picmodels.models.care_advisors import PICStaff, NavMetricsLocation
+from picmodels.models.care_advisors import Navigators, NavMetricsLocation
 
 from .services.create_update_delete import create_or_update_row_w_validated_params
 from .services.create_update_delete import delete_row_w_validated_params
@@ -13,7 +13,7 @@ from .services.read import retrieve_metrics_data_by_staff_mpn
 
 
 class MetricsSubmission(models.Model):
-    staff_member = models.ForeignKey(PICStaff, on_delete=models.CASCADE)
+    staff_member = models.ForeignKey(Navigators, on_delete=models.CASCADE)
     location = models.ForeignKey(NavMetricsLocation, blank=True, null=True, on_delete=models.SET_NULL)
     submission_date = models.DateField(blank=True, null=True)
     county = models.CharField(max_length=1000, default="")

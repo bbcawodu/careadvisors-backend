@@ -1,5 +1,5 @@
 from django.db import models
-from picmodels.models.care_advisors.staff_models import PICStaff
+from picmodels.models.care_advisors.navigator_models import Navigators
 from picmodels.models.care_advisors import NavMetricsLocation, Address
 
 from .services.create_update_delete import create_row_w_validated_params
@@ -38,8 +38,8 @@ class PICConsumerBase(models.Model):
     phone = models.CharField(max_length=1000, blank=True, null=True)
     preferred_language = models.CharField(max_length=1000, blank=True, null=True)
     best_contact_time = models.CharField(max_length=1000, blank=True, null=True)
-    navigator = models.ForeignKey(PICStaff, on_delete=models.SET_NULL, blank=True, null=True)
-    # navigators = models.ManyToManyField(PICStaff, blank=True)
+    navigator = models.ForeignKey(Navigators, on_delete=models.SET_NULL, blank=True, null=True)
+    # navigators = models.ManyToManyField(Navigators, blank=True)
 
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, blank=True, null=True)
     household_size = models.IntegerField()

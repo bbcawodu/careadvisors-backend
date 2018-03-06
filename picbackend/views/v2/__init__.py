@@ -6,7 +6,7 @@ Defines package for views that are mapped to url configurations.
 # Load all modules into v2 package
 from .consumer_views import *
 from .metrics_views import *
-from .staff_views import *
+from .navigator_views import *
 from .nav_location_views import *
 from .consumer_health_insurance_views import *
 from .patient_assist_scheduler_views import *

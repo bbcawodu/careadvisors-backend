@@ -1,5 +1,5 @@
 from django.contrib import admin
-from picmodels.models import PICConsumer, PICStaff, MetricsSubmission, PlanStat, Country, NavMetricsLocation, Address,\
+from picmodels.models import PICConsumer, Navigators, MetricsSubmission, PlanStat, Country, NavMetricsLocation, Address,\
     CredentialsModel, PICConsumerBackup, ConsumerCPSInfoEntry, CallToAction, HealthcareCarrier, HealthcarePlan,\
     HealthcareServiceCostEntry, HospitalWebTrafficData, ConsumerHospitalInfo, CaseManagementStatus, CareAdvisorCustomer
 
@@ -10,7 +10,7 @@ admin.site.register(PICUser)
 admin.site.register(Appointment)
 admin.site.register(Location)
 admin.site.register(PICConsumer)
-admin.site.register(PICStaff)
+admin.site.register(Navigators)
 admin.site.register(MetricsSubmission)
 admin.site.register(PlanStat)
 admin.site.register(Country)
