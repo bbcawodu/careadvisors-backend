@@ -3,7 +3,7 @@ from picmodels.models import PICConsumer, Navigators, MetricsSubmission, PlanSta
     CredentialsModel, PICConsumerBackup, ConsumerCPSInfoEntry, CallToAction, HealthcareCarrier, HealthcarePlan,\
     HealthcareServiceCostEntry, HospitalWebTrafficData, ConsumerHospitalInfo, CaseManagementStatus,\
     CareAdvisorCustomer, ConsumerNote, ProviderLocation, ProviderNetwork, ConsumerSpecificConcern,\
-    ConsumerGeneralConcern, HealthcareSubsidyEligibilityByFamSize, HealthcareServiceExpertise
+    ConsumerGeneralConcern, HealthcareSubsidyEligibilityByFamSize, HealthcareServiceExpertise, MarketplaceAppointments
 from presencescheduler.models import PICUser, Appointment, Location
 
 # Register your models here.
@@ -35,3 +35,4 @@ admin.site.register(ConsumerGeneralConcern)
 admin.site.register(ConsumerSpecificConcern)
 admin.site.register(HealthcareSubsidyEligibilityByFamSize)
 admin.site.register(HealthcareServiceExpertise)
+admin.site.register(MarketplaceAppointments)

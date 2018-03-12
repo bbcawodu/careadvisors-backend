@@ -184,6 +184,9 @@ class PICConsumerBase(models.Model):
             self.cps_info.delete()
         super(PICConsumerBase, self).delete(*args, **kwargs)
 
+    def __str__(self):
+        return "Name: {} {}, id: {}".format(self.first_name, self.last_name, self.id)
+
 
 PICConsumerBase.retrieve_consumer_data_by_id = classmethod(retrieve_consumer_data_by_id)
 PICConsumerBase.retrieve_consumer_data_by_f_and_l_name = classmethod(retrieve_consumer_data_by_f_and_l_name)
