@@ -103,7 +103,7 @@ In response, a JSON document will be displayed with the following format:
         "Data": [
             {
                 "name": String,
-                "Database ID": Integer,
+                "id": Integer,
             },
             ...,
             ...,

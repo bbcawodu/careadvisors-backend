@@ -139,6 +139,9 @@ class Navigators(models.Model):
 
         super(Navigators, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return "Name: {} {}, id: {}".format(self.first_name, self.last_name, self.id)
+
     class Meta:
         unique_together = ("email",)
         # maps model to the picmodels module
