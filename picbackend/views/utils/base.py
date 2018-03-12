@@ -3,7 +3,6 @@ import json
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 from django.conf import settings
 from .get_parameter_validation_functions import GET_PARAMETER_VALIDATION_FUNCTIONS
@@ -33,9 +32,9 @@ class JSONGETRspMixin(object):
     parse_GET_request_and_add_response = None
     accepted_GET_request_parameters = None
 
-    # @method_decorator(ensure_csrf_cookie)
-    # def dispatch(self, request, *args, **kwargs):
-    #     return super(JSONGETRspMixin, self).dispatch(request, *args, **kwargs)
+    @method_decorator(ensure_csrf_cookie)
+    def dispatch(self, request, *args, **kwargs):
+        return super(JSONGETRspMixin, self).dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         if self.parse_GET_request_and_add_response is None:
@@ -60,9 +59,9 @@ class JSONGETRspMixin(object):
 class JSONPOSTRspMixin(object):
     parse_POST_request_and_add_response = None
 
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(JSONPOSTRspMixin, self).dispatch(request, *args, **kwargs)
+    # @method_decorator(csrf_exempt)
+    # def dispatch(self, request, *args, **kwargs):
+    #     return super(JSONPOSTRspMixin, self).dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         if self.parse_POST_request_and_add_response:
@@ -84,9 +83,9 @@ class JSONPOSTRspMixin(object):
 class JSONPUTRspMixin(object):
     parse_PUT_request_and_add_response = None
 
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(JSONPUTRspMixin, self).dispatch(request, *args, **kwargs)
+    # @method_decorator(csrf_exempt)
+    # def dispatch(self, request, *args, **kwargs):
+    #     return super(JSONPUTRspMixin, self).dispatch(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
         if self.parse_PUT_request_and_add_response:
@@ -108,9 +107,9 @@ class JSONPUTRspMixin(object):
 class JSONDELETERspMixin(object):
     parse_DELETE_request_and_add_response = None
 
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(JSONDELETERspMixin, self).dispatch(request, *args, **kwargs)
+    # @method_decorator(csrf_exempt)
+    # def dispatch(self, request, *args, **kwargs):
+    #     return super(JSONDELETERspMixin, self).dispatch(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
         """
@@ -135,11 +134,10 @@ class JSONDELETERspMixin(object):
             raise NotImplementedError("Need to set class attribute, 'parse_DELETE_request_and_add_response'.")
 
 
-if not settings.DEBUG:
-    JSONGETRspMixin.get = ajax_required_attr_method_wrapper(JSONGETRspMixin.get)
-    JSONPUTRspMixin.put = ajax_required_attr_method_wrapper(JSONPUTRspMixin.put)
-    JSONPOSTRspMixin.post = ajax_required_attr_method_wrapper(JSONPOSTRspMixin.post)
-    JSONDELETERspMixin.delete = ajax_required_attr_method_wrapper(JSONDELETERspMixin.delete)
+JSONGETRspMixin.get = ajax_required_attr_method_wrapper(JSONGETRspMixin.get)
+JSONPUTRspMixin.put = ajax_required_attr_method_wrapper(JSONPUTRspMixin.put)
+JSONPOSTRspMixin.post = ajax_required_attr_method_wrapper(JSONPOSTRspMixin.post)
+JSONDELETERspMixin.delete = ajax_required_attr_method_wrapper(JSONDELETERspMixin.delete)
 
 
 class JSONRspMixin(object):
@@ -395,8 +393,8 @@ def parse_and_log_errors(response_raw_data, errors_list):
     """
 
     if settings.DEBUG:
-        db_queries_made = connection.queries
-        print(json.dumps(db_queries_made))
+        db_statements_made = connection.queries
+        print(db_statements_made)
         sys.stdout.flush()
 
     if errors_list:

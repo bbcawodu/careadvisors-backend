@@ -1,7 +1,7 @@
 ## Healthcare Carriers Backend API
 
 ### Healthcare Carrier Data Submission API
-To create, update, or delete members of the HealthcareCarrier class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/carriers/.
+To create, update, or delete rows in the HealthcareCarrier table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/carriers/.
 
 - The headers of the request should include: 
     - "Content-Type: "application/json""
@@ -12,8 +12,9 @@ The body of the request should be a JSON document using the following template:
 {
 "name": String,
 "state_province": String (Must be a valid State Abbreviation eg. TX),
-"Database ID": Integer(Required when "Database Action" == "Carrier Modification" or "Carrier Deletion"),
-"Database Action": String,
+
+"id": Integer,
+"db_action": String,
 }
 ```
 
@@ -30,21 +31,49 @@ In response, a JSON document will be displayed with the following format:
 }
 ```
 
-- Creating a HealthcareCarrier database entry.
-    - To create a HealthcareCarrier database entry, the value for "Database Action" in the JSON Body must equal "Carrier Addition".
-    - All other fields except "Database ID" must be filled.
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the created entry
+- Create a HealthcareCarrier database row.
+    - To create a row in the HealthcareCarrier table, the value for "db_action" in the JSON Body must equal "create".
     
-- Updating a HealthcareCarrier database entry.
-    - To update a HealthcareCarrier database entry, the value for "Database Action" in the JSON Body must equal "Carrier Modification".
-    - All other fields must be filled.
-    - All key value pairs in the JSON Body document correspond to updated fields for specified "Database ID"
+        - Keys that WILL NOT be read
+            - "id"
+            
+        - Keys that can be empty strings:
+            - None
+        
+        - Keys that can be Null
+            - None
 
-- Deleting a HealthcareCarrier database entry.
-    - To delete a HealthcareCarrier database entry, the value for "Database Action" in the JSON Body must equal "Carrier Deletion".
-    - The only other field should be "Database ID".
-    - The response JSON document will have a "Deleted" as the value for the "Data" key.
+    - If there are no errors in the JSON Body document:        
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the created row.
+    
+- Update a HealthcareCarrier database row.
+    - To update a row in the HealthcareCarrier table, the value for "db_action" in the JSON Body must equal "update".
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "id"
+    - Note: at least one key other than "id" and "db_action" must be present
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+        - Keys that can be empty strings:
+            - None
+        
+        - Keys that can be Null
+            - None
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the updated row.
+
+- Delete a HealthcareCarrier database row.
+    - To delete a row in the HealthcareCarrier table, the value for "db_action" in the JSON Body must equal "delete".
+    
+        - Keys that WILL NOT be read
+            - all except "id" and "db_action"
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is "Deleted".
     
 - If there are errors in the JSON Body document:
     - "Error Code" will be 1.

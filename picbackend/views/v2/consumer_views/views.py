@@ -4,8 +4,10 @@ from django.views.generic import View
 
 from picbackend.views.utils import JSONGETRspMixin
 from picbackend.views.utils import JSONPUTRspMixin
+
 from picmodels.models import PICConsumer
 from picmodels.models import PICConsumerBackup
+
 from .tools import validate_put_rqst_params
 from .tools import paginate_result_list_by_changing_excess_data_to_ids
 

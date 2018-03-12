@@ -7,93 +7,113 @@ from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_list_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
 from picmodels.models import HealthcarePlan
-from picmodels.services.provider_plan_network_services.provider_location_services import \
-    add_accepted_plans_to_instance_using_validated_params
-from picmodels.services.provider_plan_network_services.provider_location_services import \
-    add_instance_using_validated_params
-from picmodels.services.provider_plan_network_services.provider_location_services import \
-    delete_instance_using_validated_params
-from picmodels.services.provider_plan_network_services.provider_location_services import \
-    modify_instance_using_validated_params
-from picmodels.services.provider_plan_network_services.provider_location_services import \
-    remove_accepted_plans_from_instance_using_validated_params
 
 
-def validate_rqst_params_and_add_instance(rqst_provider_location_info, post_errors):
-    add_provider_location_params = get_provider_location_mgmt_put_params(rqst_provider_location_info, post_errors)
+def validate_put_rqst_params(rqst_body, rqst_errors):
+    validated_params = {
+        'rqst_action': clean_string_value_from_dict_object(rqst_body, "root", "db_action", rqst_errors)
+    }
 
-    provider_location_obj = None
-    if not post_errors:
-        provider_location_obj = add_instance_using_validated_params(add_provider_location_params, post_errors)
+    rqst_action = validated_params['rqst_action']
 
-    return provider_location_obj
+    if rqst_action == 'create':
+        validate_create_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'update':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validate_update_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'delete':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+
+    return validated_params
 
 
-def get_provider_location_mgmt_put_params(rqst_provider_location_info, post_errors):
-    rqst_provider_location_name = clean_string_value_from_dict_object(rqst_provider_location_info, "root", "name", post_errors)
-    rqst_provider_network_id = clean_int_value_from_dict_object(rqst_provider_location_info, "root",
-                                                                "provider_network Database ID", post_errors)
-    rqst_accepted_plans_ids = clean_list_value_from_dict_object(rqst_provider_location_info, "root", "accepted_plans",
-                                                            post_errors, empty_list_allowed=True)
-    for indx, plan_id in enumerate(rqst_accepted_plans_ids):
+def validate_create_row_params(rqst_body, validated_params, rqst_errors):
+    rqst_provider_location_name = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
+    validated_params["rqst_provider_location_name"] = rqst_provider_location_name
+
+    rqst_provider_network_id = clean_int_value_from_dict_object(
+        rqst_body,
+        "root",
+        "provider_network Database ID",
+        rqst_errors
+    )
+    validated_params["rqst_provider_network_id"] = rqst_provider_network_id
+
+    rqst_add_accepted_plans_ids = clean_list_value_from_dict_object(
+        rqst_body,
+        "root",
+        "add_accepted_plans",
+        rqst_errors,
+        empty_list_allowed=True
+    )
+
+    add_accepted_plan_objects = []
+    if rqst_add_accepted_plans_ids:
+        add_accepted_plan_objects = validate_accepted_plans_params(rqst_add_accepted_plans_ids, rqst_errors)
+    validated_params["add_accepted_plans_objects"] = add_accepted_plan_objects
+
+
+def validate_update_row_params(rqst_body, validated_params, rqst_errors):
+    if "name" in rqst_body:
+        rqst_provider_location_name = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
+        validated_params["rqst_provider_location_name"] = rqst_provider_location_name
+
+    if "provider_network Database ID" in rqst_body:
+        rqst_provider_network_id = clean_int_value_from_dict_object(
+            rqst_body,
+            "root",
+            "provider_network Database ID",
+            rqst_errors
+        )
+        validated_params["rqst_provider_network_id"] = rqst_provider_network_id
+
+    if "add_accepted_plans" in rqst_body:
+        rqst_add_accepted_plans_ids = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "add_accepted_plans",
+            rqst_errors,
+        )
+
+        if rqst_add_accepted_plans_ids:
+            add_accepted_plan_objects = validate_accepted_plans_params(rqst_add_accepted_plans_ids, rqst_errors)
+            validated_params["add_accepted_plans_objects"] = add_accepted_plan_objects
+    elif "remove_accepted_plans" in rqst_body:
+        rqst_remove_accepted_plans_ids = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "remove_accepted_plans",
+            rqst_errors,
+        )
+
+        if rqst_remove_accepted_plans_ids:
+            remove_accepted_plan_objects = validate_accepted_plans_params(rqst_remove_accepted_plans_ids, rqst_errors)
+            validated_params["remove_accepted_plans_objects"] = remove_accepted_plan_objects
+
+
+def validate_accepted_plans_params(accepted_plans_ids, rqst_errors):
+    for indx, plan_id in enumerate(accepted_plans_ids):
         if not isinstance(plan_id, int):
-            post_errors.append("All plan ids must be integers, plan id is not an integer for 'accepted_plans' field at index: {}".format(indx))
-    rqst_accepted_plans_ids = list(set(rqst_accepted_plans_ids))
+            rqst_errors.append(
+                "All plan ids must be integers, plan id is not an integer for 'accepted_plans' field at index: {}".format(
+                    indx
+                )
+            )
+
+    accepted_plans_ids = list(set(accepted_plans_ids))
     accepted_plans_objects = []
     plans_errors = []
-    if rqst_accepted_plans_ids and not post_errors:
-        for accepted_plan_id in rqst_accepted_plans_ids:
+
+    if accepted_plans_ids and not rqst_errors:
+        for accepted_plan_id in accepted_plans_ids:
             try:
                 accepted_plan_object = HealthcarePlan.objects.get(id=accepted_plan_id)
                 accepted_plans_objects.append(accepted_plan_object)
             except HealthcarePlan.DoesNotExist:
                 plans_errors.append(
                     "No HealthcarePlan database entry found for id: {}".format(accepted_plan_id))
+
     for plan_error in plans_errors:
-        post_errors.append(plan_error)
+        rqst_errors.append(plan_error)
 
-    return {"rqst_provider_location_name": rqst_provider_location_name,
-            "rqst_provider_network_id": rqst_provider_network_id,
-            "accepted_plans_objects": accepted_plans_objects}
-
-
-def validate_rqst_params_and_modify_instance(rqst_provider_location_info, post_errors):
-    modify_provider_location_params = get_provider_location_mgmt_put_params(rqst_provider_location_info, post_errors)
-    rqst_provider_location_id = clean_int_value_from_dict_object(rqst_provider_location_info, "root", "Database ID", post_errors)
-
-    provider_location_obj = None
-    if not post_errors:
-        provider_location_obj = modify_instance_using_validated_params(modify_provider_location_params, rqst_provider_location_id, post_errors)
-
-    return provider_location_obj
-
-
-def validate_rqst_params_and_add_accepted_plans_to_instance(rqst_provider_location_info, post_errors):
-    modify_provider_location_params = get_provider_location_mgmt_put_params(rqst_provider_location_info, post_errors)
-    rqst_provider_location_id = clean_int_value_from_dict_object(rqst_provider_location_info, "root",
-                                                                 "Database ID", post_errors)
-
-    provider_location_obj = None
-    if not post_errors:
-        provider_location_obj = add_accepted_plans_to_instance_using_validated_params(modify_provider_location_params, rqst_provider_location_id, post_errors)
-
-    return provider_location_obj
-
-
-def validate_rqst_params_and_remove_accepted_plans_from_instance(rqst_provider_location_info, post_errors):
-    modify_provider_location_params = get_provider_location_mgmt_put_params(rqst_provider_location_info, post_errors)
-    rqst_provider_location_id = clean_int_value_from_dict_object(rqst_provider_location_info, "root",
-                                                                 "Database ID", post_errors)
-
-    provider_location_obj = None
-    if not post_errors:
-        provider_location_obj = remove_accepted_plans_from_instance_using_validated_params(modify_provider_location_params, rqst_provider_location_id, post_errors)
-
-    return provider_location_obj
-
-
-def validate_rqst_params_and_delete_instance(rqst_provider_location_info, post_errors):
-    rqst_provider_location_id = clean_int_value_from_dict_object(rqst_provider_location_info, "root", "Database ID", post_errors)
-
-    if not post_errors:
-        delete_instance_using_validated_params(rqst_provider_location_id, post_errors)
+    return accepted_plans_objects

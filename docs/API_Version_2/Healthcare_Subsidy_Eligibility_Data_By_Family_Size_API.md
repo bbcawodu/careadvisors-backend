@@ -1,7 +1,7 @@
 ## Healthcare Subsidy Eligibility Data By Family Size API (IN DEVELOPMENT)
 
 ### Healthcare Subsidy Eligibility Data Submission API (IN DEVELOPMENT)
-To create a HealthcareSubsidyEligibilityByFamSize row in the database, make a PUT request to: http://picbackend.herokuapp.com/v2/subsidy_data_by_family_size/.
+To create, update, or delete a row in the HealthcareSubsidyEligibilityByFamSize table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/subsidy_data_by_family_size/.
 - Field 'family_size' Information
     - Is unique: Only one HealthcareSubsidyEligibilityByFamSize row with a given 'family_size' value is allowed
     - 'family_size' must be > 0
@@ -19,8 +19,8 @@ The body of the request should be a JSON document which has the following format
 "tax_cred_for_marketplace_income_limit": Float,
 "marketplace_without_subsidies_income_level": Float,
 
-"Database ID": Integer(Required when "Database Action" == "Instance Modification" or "Instance Deletion"),
-"Database Action": String,
+"id": Integer,
+"db_action": String,
 }
 ```
 
@@ -36,21 +36,52 @@ In response, a JSON document will be displayed with the following format:
 }
 ```
 
-- Creating a HealthcareSubsidyEligibilityByFamSize database row.
-    - To create a HealthcareSubsidyEligibilityByFamSize database row, the value for "Database Action" in the JSON Body must equal "Instance Addition".
-    - All other fields except "Database ID" must be filled.
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the created entry
+- Create a HealthcareSubsidyEligibilityByFamSize database row.
+    - To create a row in the HealthcareSubsidyEligibilityByFamSize table, the value for "db_action" in the JSON Body must equal "create".
     
-- Updating a HealthcareSubsidyEligibilityByFamSize database row.
-    - To update a HealthcareSubsidyEligibilityByFamSize database row, the value for "Database Action" in the JSON Body must equal "Instance Modification".
-    - All other fields must be filled.
-    - All key value pairs in the JSON Body document correspond to updated fields for specified "Database ID"
+        - Keys that can be omitted:
+            - "id"
+            
+        - Keys that can be empty strings:
+            - None
+        
+        - Keys that can be Null
+            - None
+            
+        - Keys that WILL NOT be read
+            - "id"
 
-- Deleting a HealthcareSubsidyEligibilityByFamSize database row.
-    - To delete a HealthcareSubsidyEligibilityByFamSize database row, the value for "Database Action" in the JSON Body must equal "Instance Deletion".
-    - The only other field should be "Database ID".
-    - The response JSON document will have a "Deleted" as the value for the "Data" key.
+    - If there are no errors in the JSON Body document:        
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the created row.
+    
+- Update a HealthcareSubsidyEligibilityByFamSize database row.
+    - To update a row in the HealthcareSubsidyEligibilityByFamSize table, the value for "db_action" in the JSON Body must equal "update".
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "id"
+    - Note: at least one key other than "id" and "db_action" must be present
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+        - Keys that can be empty strings:
+            - None
+        
+        - Keys that can be Null
+            - None
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the updated row.
+
+- Delete a HealthcareSubsidyEligibilityByFamSize database row.
+    - To delete a row in the HealthcareSubsidyEligibilityByFamSize table, the value for "db_action" in the JSON Body must equal "delete".
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is "Deleted".
     
 - If there are errors in the JSON Body document:
     - "Error Code" will be 1.

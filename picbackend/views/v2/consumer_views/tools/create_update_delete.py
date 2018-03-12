@@ -16,7 +16,7 @@ from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_list_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
 from picmodels.models import PICConsumer
-from picmodels.models import PICStaff
+from picmodels.models import Navigators
 from picmodels.models import CaseManagementStatus
 
 
@@ -176,8 +176,8 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
     nav_instance = None
     if rqst_nav_id and not rqst_errors:
         try:
-            nav_instance = PICStaff.objects.get(id=rqst_nav_id)
-        except PICStaff.DoesNotExist:
+            nav_instance = Navigators.objects.get(id=rqst_nav_id)
+        except Navigators.DoesNotExist:
             rqst_errors.append('Staff database entry does not exist for the navigator id: {}'.format(rqst_nav_id))
 
     rqst_cps_info_dict = clean_dict_value_from_dict_object(rqst_body,
@@ -430,8 +430,8 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
         rqst_nav_id = clean_int_value_from_dict_object(rqst_body, "root", "navigator_id", rqst_errors)
         if rqst_nav_id and not rqst_errors:
             try:
-                nav_instance = PICStaff.objects.get(id=rqst_nav_id)
-            except PICStaff.DoesNotExist:
+                nav_instance = Navigators.objects.get(id=rqst_nav_id)
+            except Navigators.DoesNotExist:
                 rqst_errors.append('Staff database entry does not exist for the navigator id: {}'.format(rqst_nav_id))
 
         validated_params["rqst_nav_id"] = rqst_nav_id

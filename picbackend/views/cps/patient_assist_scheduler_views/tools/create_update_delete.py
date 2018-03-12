@@ -15,7 +15,7 @@ from picbackend.views.utils import clean_string_value_from_dict_object
 from picbackend.views.utils import clean_dict_value_from_dict_object
 from picbackend.views.utils import init_v2_response_data
 from ...consumer_views import validate_rqst_params_and_add_instance
-from picmodels.models import PICStaff
+from picmodels.models import Navigators
 from picmodels.models import PICConsumer
 from picmodels.models import CredentialsModel
 from random import shuffle
@@ -134,7 +134,7 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
 
     consumer_info = create_consumer_instance_from_apt_rqst(rqst_nav_id, post_data, post_errors)
     try:
-        picstaff_object = PICStaff.objects.get(id=rqst_nav_id)
+        picstaff_object = Navigators.objects.get(id=rqst_nav_id)
         credentials_object = CredentialsModel.objects.get(id=picstaff_object)
         nav_info = picstaff_object.return_values_dict()
         if credentials_object.credential.invalid:
@@ -143,7 +143,7 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
         else:
             scheduled_appointment = send_add_apt_rqst_to_google_and_email_consumer(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors)
 
-    except PICStaff.DoesNotExist:
+    except Navigators.DoesNotExist:
         post_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(rqst_nav_id)))
     except CredentialsModel.DoesNotExist:
         post_errors.append('Google Credentials database entry does not exist for the navigator with id: {!s}'.format(str(rqst_nav_id)))
@@ -308,7 +308,7 @@ def delete_nav_apt_from_google_calendar(post_data, post_errors):
         post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(rqst_apt_datetime)))
 
     try:
-        picstaff_object = PICStaff.objects.get(id=rqst_nav_id)
+        picstaff_object = Navigators.objects.get(id=rqst_nav_id)
         credentials_object = CredentialsModel.objects.get(id=picstaff_object)
         nav_info = picstaff_object.return_values_dict()
         if credentials_object.credential.invalid:
@@ -329,7 +329,7 @@ def delete_nav_apt_from_google_calendar(post_data, post_errors):
             else:
                 post_errors.append('Appointment with consumer at {!s}, was not found in Navigator\'s Google Calendar'.format(rqst_apt_datetime))
 
-    except PICStaff.DoesNotExist:
+    except Navigators.DoesNotExist:
         post_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(rqst_nav_id)))
     except CredentialsModel.DoesNotExist:
         post_errors.append('Google Credentials database entry does not exist for the navigator with id: {!s}'.format(str(rqst_nav_id)))
@@ -726,7 +726,7 @@ def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_e
         free_busy_batch.execute()
 
         for key, value in nav_free_busy_dict.items():
-            nav_free_busy_list.append([PICStaff.objects.get(id=int(key)).return_values_dict(), value])
+            nav_free_busy_list.append([Navigators.objects.get(id=int(key)).return_values_dict(), value])
     except Exception:
         post_errors.append("Batch call to Google failed, Check API call")
 

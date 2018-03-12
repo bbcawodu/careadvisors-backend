@@ -85,24 +85,24 @@ class PatientAssistSchedulerAPITests(TestCase, BaseV2RqstTests):
     #     self.assertNotEqual(len(response_data["Data"]), 0)
 
     def test_add_consumer_apt_with_nav(self):
-        post_data = {"Navigator ID": 1,
-                     "Appointment Date and Time": '2018-01-24T21:00:00',
+        post_data = {"navigator_id": 1,
+                     "Appointment Date and Time": '2019-03-08T16:00:00',
 
                      "Consumer Info": {
-                                        "First Name": "calkfndy",
-                                        "Middle Name": "ljhvjhgjhgjhgoli",
-                                        "Last Name": "pophgfthcdfgcgh",
-                                        "Email": "niggmagician89@gmail.com",
-                                        "Phone Number": "2813308004",
-                                        "Household Size": 11,
-                                        "Plan": "String (Can be empty)",
-                                        "Preferred Language": "English",
+                                        "first_name": "calkfndy",
+                                        "middle_name": "ljhvjhgjhgjhgoli",
+                                        "last_name": "pophgfthcdfgcgh",
+                                        "email": "niggmagician89@gmail.com",
+                                        "phone": "2813308004",
+                                        "household_size": 11,
+                                        "plan": "String (Can be empty)",
+                                        "preferred_language": "English",
 
-                                        "Address Line 1": "6540 N Glenwood",
-                                        "Address Line 2": "",
-                                        "City": "",
-                                        "State": "",
-                                        "Zipcode": ""
+                                        "address_line_1": "6540 N Glenwood",
+                                        "address_line_2": "",
+                                        "city": "",
+                                        "state_province": "",
+                                        "zipcode": ""
                                       }
                      }
         post_json = json.dumps(post_data)
@@ -150,7 +150,7 @@ class PatientAssistSchedulerAPITests(TestCase, BaseV2RqstTests):
 
     def test_delete_consumer_apt_with_nav(self):
         post_data = {"Navigator ID": 1,
-                     "Appointment Date and Time": '2018-01-24T21:00:00',
+                     "Appointment Date and Time": '2019-03-08T16:00:00',
                      }
         post_json = json.dumps(post_data)
         response = self.client_object.delete(self.base_url, post_json, content_type="application/json")

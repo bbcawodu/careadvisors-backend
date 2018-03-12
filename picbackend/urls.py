@@ -61,8 +61,8 @@ urlpatterns = [
     ###################
 
     # urls for staff views
-    url(r"^v2/staff/$", views.StaffManagementView.as_view()),
-    url(r"^v2/staff_pic/$", views.upload_staff_pic),
+    url(r"^v2/navigators/$", views.NavigatorManagementView.as_view()),
+    url(r"^v2/navigator_pic/$", views.upload_navigator_pic),
 
     # urls for consumer views
     url(r"^v2/consumers/$", views.ConsumerManagementView.as_view()),
@@ -110,6 +110,9 @@ urlpatterns = [
 
     # dashboard urls
     url(r"^v2/dashboard/$", views.DashboardView.as_view()),
+
+    # healthcare service expertise urls
+    url(r'v2/service_expertise/$', views.ServiceExpertiseManagementView.as_view()),
 
 
     ###################

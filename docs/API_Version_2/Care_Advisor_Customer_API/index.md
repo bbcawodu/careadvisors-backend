@@ -17,12 +17,12 @@ The body of the request should be JSON formatted text using the following templa
 ```
 "
 {
-"full_name": String,
-"email": String (Must be in the following format: username@domanname.domain),
-"company_name": String,
-"phone_number": String (Must be in the following format: DDDDDDDDDD where D=base 10 digit),
-"id": Integer,
-"db_action": String,
+    "full_name": String,
+    "email": String (Must be in the following format: username@domanname.domain),
+    "company_name": String,
+    "phone_number": String (Must be in the following format: DDDDDDDDDD where D=base 10 digit),
+    "id": Integer,
+    "db_action": String,
 }
 "
 ```
@@ -41,9 +41,22 @@ In response, JSON formatted text with the following format will be returned in t
 }
 ```
 
-- Creating a row in the care_advisor_customer table.
-    - To create a row in the care_advisor_customer table, the value for the "db_action" key in the root object must equal "create_row".
-    - Request root object information
+In response, a JSON document will be displayed with the following format:
+```
+{
+    "Status": {
+            "Error Code": Integer,
+            "Version": 2.0,
+            "Errors": Array,
+            "Warnings": Array,
+           },
+    "Data": Dictionary Object or "Deleted",
+}
+```
+
+- Create a care_advisor_customer database row.
+    - To create a row in the care_advisor_customer table, the value for "db_action" in the JSON Body must equal "create".
+    
         - Keys that MUST be omitted:
             - "id"
         - Keys that CAN be omitted:
@@ -52,12 +65,16 @@ In response, JSON formatted text with the following format will be returned in t
             - None
         - Keys that can be Null
             - None
-    - The response JSON formatted text will have a object as the value for the "Data" key.
-        - It contains the key "db_id", the value for which is the database id of the created entry
+
+    - If there are no errors in the JSON Body document:        
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the created row.
     
-- Updating a row in the care_advisor_customer table.
-    - To update a row in the care_advisor_customer table, the value for the "db_action" key in the root object must equal "update_row".
-    - Request root object information
+- Update a care_advisor_customer database row.
+    - To update a row in the care_advisor_customer table, the value for "db_action" in the JSON Body must equal "update".
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "id"
+    - Note: at least one key other than "id" and "db_action" must be present
+    
         - Keys that MUST be omitted:
             - None
         - Keys that CAN be omitted:
@@ -69,29 +86,25 @@ In response, JSON formatted text with the following format will be returned in t
             - None
         - Keys that can be Null
             - None
-    - The response JSON formatted text will have a object as the value for the "Data" key.
-        - It contains the key "db_id", the value for which is the database id of the updated entry
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the updated row.
 
-- Deleting a row in the care_advisor_customer table.
-    - To delete a row in the care_advisor_customer table, the value for the "db_action" key in the root object must equal "delete_row".
-    - Request root object information
-        - Keys that MUST be omitted:
+- Delete a care_advisor_customer database row.
+    - To delete a row in the care_advisor_customer table, the value for "db_action" in the JSON Body must equal "delete".
+    
+        - Keys that can be omitted:
             - all except "id" and "db_action"
-        - Keys that CAN be omitted:
-            - None
-        - Keys that can be empty strings:
-            - None
-        - Keys that can be Null
-            - None
-    - The response JSON document will have a "Deleted" as the value for the "Data" key.
-
-- If there ARE NO errors parsing the request body:
-    - The value for the "Errors" key in the response root object will an empty array
-    - The value for the "Error Code" key in the response root object will be 0.    
-- If there ARE errors parsing the request body:
-    - The "Error Code" key in the root response object will be 1.
-    - An array of length > 0 will be the value for the "Errors" key in the "Status" object.
-        - Each object in the array is a string corresponding to an error in parsing the request BODY.
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is "Deleted".
+    
+- If there are errors in the JSON Body document:
+    - "Error Code" will be 1.
+    - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
+        -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
     
 ### Care Advisor Customer: Read Method Endpoint

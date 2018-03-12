@@ -6,40 +6,41 @@ from django.views.generic import View
 
 from picbackend.views.utils import JSONGETRspMixin
 from picbackend.views.utils import JSONPUTRspMixin
-from picbackend.views.utils import clean_string_value_from_dict_object
-from .tools import retrieve_plan_data_by_accepted_location_id
-from .tools import retrieve_plan_data_by_carrier_id
-from .tools import retrieve_plan_data_by_carrier_name
-from .tools import retrieve_plan_data_by_carrier_state
-from .tools import retrieve_plan_data_by_id
-from .tools import retrieve_plan_data_by_name
-from .tools import validate_rqst_params_and_add_instance
-from .tools import validate_rqst_params_and_delete_instance
-from .tools import validate_rqst_params_and_modify_instance
+
+from picmodels.models import HealthcarePlan
+
+from .tools import validate_put_rqst_params
 
 
 # Need to abstract common variables in get and post class methods into class attributes
 class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     def plans_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
-        rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
+        validated_put_rqst_params = validate_put_rqst_params(rqst_body, rqst_errors)
+        rqst_action = validated_put_rqst_params['rqst_action']
 
         if not rqst_errors:
             healthcare_plan_instance = None
 
-            if rqst_action == "Plan Addition":
-                healthcare_plan_instance = validate_rqst_params_and_add_instance(rqst_body, rqst_errors)
-            elif rqst_action == "Plan Modification":
-                healthcare_plan_instance = validate_rqst_params_and_modify_instance(rqst_body, rqst_errors)
-            elif rqst_action == "Plan Deletion":
-                validate_rqst_params_and_delete_instance(rqst_body, rqst_errors)
+            if rqst_action == "create":
+                healthcare_plan_instance = HealthcarePlan.create_row_w_validated_params(
+                    validated_put_rqst_params,
+                    rqst_errors
+                )
+            elif rqst_action == "update":
+                healthcare_plan_instance = HealthcarePlan.update_row_w_validated_params(
+                    validated_put_rqst_params,
+                    rqst_errors
+                )
+            elif rqst_action == "delete":
+                HealthcarePlan.delete_row_w_validated_params(validated_put_rqst_params, rqst_errors)
 
                 if not rqst_errors:
-                    response_raw_data['Data']["Database ID"] = "Deleted"
+                    response_raw_data['Data']["row"] = "Deleted"
             else:
-                rqst_errors.append("No valid 'Database Action' provided.")
+                rqst_errors.append("No valid 'db_action' provided.")
 
             if healthcare_plan_instance:
-                response_raw_data['Data']["Database ID"] = healthcare_plan_instance.id
+                response_raw_data['Data']["row"] = healthcare_plan_instance.return_values_dict()
 
     def plans_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
         def retrieve_data_by_primary_params_and_add_to_response():
@@ -52,27 +53,48 @@ class PlansManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 else:
                     list_of_ids = None
 
-                data_list = retrieve_plan_data_by_id(validated_GET_rqst_params, rqst_plan_id, list_of_ids, rqst_errors)
+                data_list = HealthcarePlan.retrieve_plan_data_by_id(
+                    validated_GET_rqst_params,
+                    rqst_plan_id,
+                    list_of_ids,
+                    rqst_errors
+                )
             elif 'name' in validated_GET_rqst_params:
                 rqst_name = validated_GET_rqst_params['name']
 
-                data_list = retrieve_plan_data_by_name(validated_GET_rqst_params, rqst_name, rqst_errors)
+                data_list = HealthcarePlan.retrieve_plan_data_by_name(validated_GET_rqst_params, rqst_name, rqst_errors)
             elif 'carrier_state' in validated_GET_rqst_params:
                 list_of_carrier_states = validated_GET_rqst_params['carrier_state_list']
 
-                data_list = retrieve_plan_data_by_carrier_state(validated_GET_rqst_params, list_of_carrier_states, rqst_errors)
+                data_list = HealthcarePlan.retrieve_plan_data_by_carrier_state(
+                    validated_GET_rqst_params,
+                    list_of_carrier_states,
+                    rqst_errors
+                )
             elif 'carrier_name' in validated_GET_rqst_params:
                 rqst_carrier_name = validated_GET_rqst_params['carrier_name']
 
-                data_list = retrieve_plan_data_by_carrier_name(validated_GET_rqst_params, rqst_carrier_name, rqst_errors)
+                data_list = HealthcarePlan.retrieve_plan_data_by_carrier_name(
+                    validated_GET_rqst_params,
+                    rqst_carrier_name,
+                    rqst_errors
+                )
             elif 'carrier_id' in validated_GET_rqst_params:
                 list_of_carrier_ids = validated_GET_rqst_params['carrier_id_list']
 
-                data_list = retrieve_plan_data_by_carrier_id(validated_GET_rqst_params, list_of_carrier_ids, rqst_errors)
+                data_list = HealthcarePlan.retrieve_plan_data_by_carrier_id(
+                    validated_GET_rqst_params,
+                    list_of_carrier_ids,
+                    rqst_errors
+                )
             elif 'accepted_location_id' in validated_GET_rqst_params:
                 list_of_accepted_location_ids = validated_GET_rqst_params['accepted_location_id_list']
 
-                data_list = retrieve_plan_data_by_accepted_location_id(validated_GET_rqst_params, list_of_accepted_location_ids, rqst_errors)
+                data_list = HealthcarePlan.retrieve_plan_data_by_accepted_location_id(
+                    validated_GET_rqst_params,
+                    list_of_accepted_location_ids,
+                    rqst_errors
+                )
             else:
                 rqst_errors.append('No Valid Parameters')
 

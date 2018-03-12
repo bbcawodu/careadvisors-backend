@@ -8,196 +8,529 @@ import re
 from picbackend.views.utils import clean_float_value_from_dict_object
 from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
+
 from picmodels.models import HealthcareServiceCostEntry
-from picmodels.services.provider_plan_network_services.healthcare_plan_services import \
-    add_instance_using_validated_params
-from picmodels.services.provider_plan_network_services.healthcare_plan_services import \
-    delete_instance_using_validated_params
-from picmodels.services.provider_plan_network_services.healthcare_plan_services import \
-    modify_instance_using_validated_params
 
 
-def validate_rqst_params_and_add_instance(rqst_plan_info, post_errors):
-    add_plan_params = get_plan_mgmt_put_params(rqst_plan_info, post_errors)
+def validate_put_rqst_params(rqst_body, rqst_errors):
+    validated_params = {
+        'rqst_action': clean_string_value_from_dict_object(rqst_body, "root", "db_action", rqst_errors)
+    }
 
-    healthcare_plan = None
-    if not post_errors:
-        healthcare_plan = add_instance_using_validated_params(add_plan_params, post_errors)
+    rqst_action = validated_params['rqst_action']
 
-    return healthcare_plan
+    if rqst_action == 'create':
+        validate_create_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'update':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validate_update_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'delete':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+
+    return validated_params
 
 
-def get_plan_mgmt_put_params(rqst_plan_info, post_errors):
+def validate_create_row_params(rqst_body, validated_params, rqst_errors):
     """
     This function parses the BODY of requests for PIC consumer management PUT requests, checks for errors, and returns
     relevant information as a dictionary
 
-    :param rqst_carrier_info: (type: dictionary) Carrier information to be parsed
-    :param post_errors: (type: list) list of error messages
+    :param rqst_body: (type: dictionary) Carrier information to be parsed
+    :param rqst_errors: (type: list) list of error messages
     :return: (type: dictionary) dictionary with relevant consumer information
     """
 
-    def create_healthcare_service_cost_instances_from_string(cost_string, field_name):
-        healthcare_service_cost_instances = []
+    # Summary report fields
+    validated_params["medical_deductible_individual_standard"] = clean_float_value_from_dict_object(
+        rqst_body,
+        "root",
+        "medical_deductible_individual_standard",
+        rqst_errors,
+        none_allowed=True,
+        no_key_allowed=True
+    )
 
-        if cost_string:
-            cost_string = cost_string.lower()
+    validated_params["medical_out_of_pocket_max_individual_standard"] = clean_float_value_from_dict_object(
+        rqst_body,
+        "root",
+        "medical_out_of_pocket_max_individual_standard",
+        rqst_errors,
+        none_allowed=True,
+        no_key_allowed=True
+    )
 
-            cost_string_list = re.split(" and ", cost_string)
+    rqst_primary_care_physician_standard_cost = create_healthcare_service_cost_instances_from_string(
+        clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "primary_care_physician_standard_cost",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        ),
+        "primary_care_physician_individual_standard_cost",
+        rqst_errors
+    )
+    validated_params["primary_care_physician_standard_cost"] = rqst_primary_care_physician_standard_cost
 
-            def create_healthcare_service_cost_instance_from_cost_string_fragment(cost_string_fragment):
-                def get_coinsurance_percentage_from_cost_string():
-                    coinsurance_percentage_return_value = None
+    # Detailed report fields
+    validated_params["rqst_plan_name"] = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
 
-                    coinsurance_percentage_string_list = re.findall("\d+%", cost_string_fragment)
-                    no_of_coinsurance_percentages = len(coinsurance_percentage_string_list)
-                    if no_of_coinsurance_percentages == 1:
-                        coinsurance_percentage_numbers = re.findall("\d+", coinsurance_percentage_string_list[0])
-                        no_of_coinsurance_percentage_numbers = len(coinsurance_percentage_numbers)
-                        if no_of_coinsurance_percentage_numbers == 1:
-                            if coinsurance_percentage_numbers[0] != "0":
-                                coinsurance_percentage_return_value = float(coinsurance_percentage_numbers[0])
-                            else:
-                                post_errors.append("Coinsurance percentage is improperly formatted(returned 0) for field: {}".format(field_name))
-                        elif no_of_coinsurance_percentage_numbers == 0 or no_of_coinsurance_percentage_numbers > 1:
-                            post_errors.append("Coinsurance percentage is improperly formatted for field: {}".format(field_name))
-                    elif no_of_coinsurance_percentages > 1:
-                        post_errors.append("More than one coinsurance percentage is included in field: {}".format(field_name))
+    validated_params["rqst_carrier_id"] = clean_int_value_from_dict_object(
+        rqst_body,
+        "root",
+        "Carrier Database ID",
+        rqst_errors
+    )
 
-                    return coinsurance_percentage_return_value
-                coinsurance_percentage = get_coinsurance_percentage_from_cost_string()
+    validated_params["rqst_plan_premium_type"] = clean_string_value_from_dict_object(
+        rqst_body,
+        "root",
+        "premium_type",
+        rqst_errors,
+        none_allowed=True,
+        no_key_allowed=True
+    )
 
-                def get_copay_from_cost_string():
-                    copay_return_value = None
+    validated_params["rqst_plan_metal_level"] = clean_string_value_from_dict_object(
+        rqst_body,
+        "root",
+        "metal_level",
+        rqst_errors,
+        none_allowed=True,
+        no_key_allowed=True
+    )
 
-                    copay_string_list = re.findall("\$\d+", cost_string_fragment)
-                    no_of_copays = len(copay_string_list)
-                    if no_of_copays == 1:
-                        copay_numbers = re.findall("\d+", copay_string_list[0])
-                        no_of_copay_numbers = len(copay_numbers)
-                        if no_of_copay_numbers == 1:
-                            if copay_numbers[0] != "0":
-                                copay_return_value = float(copay_numbers[0])
-                            else:
-                                post_errors.append("Copay cost is improperly formatted(returned 0) for field: {}".format(field_name))
-                        elif no_of_copay_numbers == 0 or no_of_copay_numbers > 1:
-                            post_errors.append("Copay cost is improperly formatted for field: {}".format(field_name))
-                    elif no_of_copays > 1:
-                        post_errors.append("More than one copay cost is included in field: {}".format(field_name))
+    validated_params["county"] = clean_string_value_from_dict_object(
+        rqst_body,
+        "root",
+        "county",
+        rqst_errors,
+        none_allowed=True,
+        no_key_allowed=True
+    )
 
-                    return copay_return_value
-                copay = get_copay_from_cost_string()
-
-                def check_for_no_charge_in_cost_string():
-                    no_charge_in_string_return_value = False
-
-                    if re.findall("no charge", cost_string_fragment):
-                        no_charge_in_string_return_value = True
-
-                    return no_charge_in_string_return_value
-                no_charge_in_cost_string = check_for_no_charge_in_cost_string()
-                if no_charge_in_cost_string:
-                    coinsurance_percentage = 0.0
-                    copay = 0.0
-
-                if not post_errors:
-                    if coinsurance_percentage is not None or copay is not None:
-                        healthcare_service_cost_instance = HealthcareServiceCostEntry(coinsurance=coinsurance_percentage,
-                                                                                      copay=copay)
-
-                        def check_for_deductible_info_in_cost_string():
-                            relation_to_deductible_return_value = None
-
-                            if re.findall("after deductible", cost_string_fragment):
-                                relation_to_deductible_return_value = "After"
-                            elif re.findall("before deductible", cost_string_fragment):
-                                relation_to_deductible_return_value = "Before"
-
-                            return relation_to_deductible_return_value
-                        relation_to_deductible = check_for_deductible_info_in_cost_string()
-
-                        healthcare_service_cost_instance.cost_relation_to_deductible = relation_to_deductible
-                        if not healthcare_service_cost_instance.check_relative_to_deductible_choices():
-                            post_errors.append("Valid cost relation to deductible was not able to be processed for field: {}".format(field_name))
-
-                        if not post_errors:
-                            healthcare_service_cost_instances.append(healthcare_service_cost_instance)
-                    else:
-                        post_errors.append("Valid cost was not able to be processed for field: {}".format(field_name))
-            for cost_string_piece in cost_string_list:
-                create_healthcare_service_cost_instance_from_cost_string_fragment(cost_string_piece)
-
-        return healthcare_service_cost_instances
-
-    rqst_primary_care_physician_standard_cost = create_healthcare_service_cost_instances_from_string(clean_string_value_from_dict_object(rqst_plan_info, "root", "primary_care_physician_standard_cost", post_errors, none_allowed=True, no_key_allowed=True), "primary_care_physician_individual_standard_cost")
     rqst_specialist_standard_cost = create_healthcare_service_cost_instances_from_string(
-        clean_string_value_from_dict_object(rqst_plan_info, "root", "specialist_standard_cost",
-                                            post_errors, none_allowed=True, no_key_allowed=True),
-        "specialist_standard_cost")
+        clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "specialist_standard_cost",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        ),
+        "specialist_standard_cost",
+        rqst_errors
+    )
+    validated_params["specialist_standard_cost"] = rqst_specialist_standard_cost
+
     rqst_emergency_room_standard_cost = create_healthcare_service_cost_instances_from_string(
-        clean_string_value_from_dict_object(rqst_plan_info, "root", "emergency_room_standard_cost",
-                                            post_errors, none_allowed=True, no_key_allowed=True),
-        "emergency_room_standard_cost")
+        clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "emergency_room_standard_cost",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        ),
+        "emergency_room_standard_cost",
+        rqst_errors
+    )
+    validated_params["emergency_room_standard_cost"] = rqst_emergency_room_standard_cost
+
     rqst_inpatient_facility_standard_cost = create_healthcare_service_cost_instances_from_string(
-        clean_string_value_from_dict_object(rqst_plan_info, "root", "inpatient_facility_standard_cost",
-                                            post_errors, none_allowed=True, no_key_allowed=True),
-        "inpatient_facility_standard_cost")
+        clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "inpatient_facility_standard_cost",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        ),
+        "inpatient_facility_standard_cost",
+        rqst_errors
+    )
+    validated_params["inpatient_facility_standard_cost"] = rqst_inpatient_facility_standard_cost
+
     rqst_generic_drugs_standard_cost = create_healthcare_service_cost_instances_from_string(
-        clean_string_value_from_dict_object(rqst_plan_info, "root", "generic_drugs_standard_cost",
-                                            post_errors, none_allowed=True, no_key_allowed=True),
-        "generic_drugs_standard_cost")
+        clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "generic_drugs_standard_cost",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        ),
+        "generic_drugs_standard_cost",
+        rqst_errors
+    )
+    validated_params["generic_drugs_standard_cost"] = rqst_generic_drugs_standard_cost
+
     rqst_preferred_brand_drugs_standard_cost = create_healthcare_service_cost_instances_from_string(
-        clean_string_value_from_dict_object(rqst_plan_info, "root", "preferred_brand_drugs_standard_cost",
-                                            post_errors, none_allowed=True, no_key_allowed=True),
-        "preferred_brand_drugs_standard_cost")
+        clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "preferred_brand_drugs_standard_cost",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        ),
+        "preferred_brand_drugs_standard_cost",
+        rqst_errors
+    )
+    validated_params["preferred_brand_drugs_standard_cost"] = rqst_preferred_brand_drugs_standard_cost
+
     rqst_non_preferred_brand_drugs_standard_cost = create_healthcare_service_cost_instances_from_string(
-        clean_string_value_from_dict_object(rqst_plan_info, "root", "non_preferred_brand_drugs_standard_cost",
-                                            post_errors, none_allowed=True, no_key_allowed=True),
-        "non_preferred_brand_drugs_standard_cost")
+        clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "non_preferred_brand_drugs_standard_cost",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        ),
+        "non_preferred_brand_drugs_standard_cost",
+        rqst_errors
+    )
+    validated_params["non_preferred_brand_drugs_standard_cost"] = rqst_non_preferred_brand_drugs_standard_cost
+
     rqst_specialty_drugs_standard_cost = create_healthcare_service_cost_instances_from_string(
-        clean_string_value_from_dict_object(rqst_plan_info, "root", "specialty_drugs_standard_cost",
-                                            post_errors, none_allowed=True, no_key_allowed=True),
-        "specialty_drugs_standard_cost")
+        clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "specialty_drugs_standard_cost",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        ),
+        "specialty_drugs_standard_cost",
+        rqst_errors
+    )
+    validated_params["specialty_drugs_standard_cost"] = rqst_specialty_drugs_standard_cost
 
-    return {"rqst_plan_name": clean_string_value_from_dict_object(rqst_plan_info, "root", "name", post_errors),
-            "rqst_carrier_id": clean_int_value_from_dict_object(rqst_plan_info, "root", "Carrier Database ID", post_errors),
-            "rqst_plan_premium_type": clean_string_value_from_dict_object(rqst_plan_info, "root", "premium_type", post_errors, none_allowed=True, no_key_allowed=True),
-            "rqst_plan_metal_level": clean_string_value_from_dict_object(rqst_plan_info, "root", "metal_level", post_errors, none_allowed=True, no_key_allowed=True),
-            "county": clean_string_value_from_dict_object(rqst_plan_info, "root", "county", post_errors, none_allowed=True, no_key_allowed=True),
+    # Extra benefit report fields
+    validated_params["medical_deductible_family_standard"] = clean_float_value_from_dict_object(
+        rqst_body,
+        "root",
+        "medical_deductible_family_standard",
+        rqst_errors,
+        none_allowed=True,
+        no_key_allowed=True
+    )
 
-            # Summary report fields
-            "medical_deductible_individual_standard": clean_float_value_from_dict_object(rqst_plan_info, "root", "medical_deductible_individual_standard", post_errors, none_allowed=True, no_key_allowed=True),
-            "medical_out_of_pocket_max_individual_standard": clean_float_value_from_dict_object(rqst_plan_info, "root", "medical_out_of_pocket_max_individual_standard", post_errors, none_allowed=True, no_key_allowed=True),
-            "primary_care_physician_standard_cost": rqst_primary_care_physician_standard_cost,
-
-            # Detailed report fields
-            "specialist_standard_cost": rqst_specialist_standard_cost,
-            "emergency_room_standard_cost": rqst_emergency_room_standard_cost,
-            "inpatient_facility_standard_cost": rqst_inpatient_facility_standard_cost,
-            "generic_drugs_standard_cost": rqst_generic_drugs_standard_cost,
-            "preferred_brand_drugs_standard_cost": rqst_preferred_brand_drugs_standard_cost,
-            "non_preferred_brand_drugs_standard_cost": rqst_non_preferred_brand_drugs_standard_cost,
-            "specialty_drugs_standard_cost": rqst_specialty_drugs_standard_cost,
-
-            # Extra benefit report fields
-            "medical_deductible_family_standard": clean_float_value_from_dict_object(rqst_plan_info, "root", "medical_deductible_family_standard", post_errors, none_allowed=True, no_key_allowed=True),
-            "medical_out_of_pocket_max_family_standard": clean_float_value_from_dict_object(rqst_plan_info, "root", "medical_out_of_pocket_max_family_standard", post_errors, none_allowed=True, no_key_allowed=True),
-            }
-
-
-def validate_rqst_params_and_modify_instance(rqst_plan_info, post_errors):
-    modify_plan_params = get_plan_mgmt_put_params(rqst_plan_info, post_errors)
-    rqst_plan_id = clean_int_value_from_dict_object(rqst_plan_info, "root", "Database ID", post_errors)
-
-    healthcare_plan_obj = None
-    if not post_errors:
-        healthcare_plan_obj = modify_instance_using_validated_params(modify_plan_params, rqst_plan_id, post_errors)
-
-    return healthcare_plan_obj
+    validated_params["medical_out_of_pocket_max_family_standard"] = clean_float_value_from_dict_object(
+        rqst_body,
+        "root",
+        "medical_out_of_pocket_max_family_standard",
+        rqst_errors,
+        none_allowed=True,
+        no_key_allowed=True
+    )
 
 
-def validate_rqst_params_and_delete_instance(rqst_carrier_info, post_errors):
-    rqst_plan_id = clean_int_value_from_dict_object(rqst_carrier_info, "root", "Database ID", post_errors)
+def validate_update_row_params(rqst_body, validated_params, rqst_errors):
+    """
+    This function parses the BODY of requests for PIC consumer management PUT requests, checks for errors, and returns
+    relevant information as a dictionary
 
-    if not post_errors:
-        delete_instance_using_validated_params(rqst_plan_id, post_errors)
+    :param rqst_body: (type: dictionary) Carrier information to be parsed
+    :param rqst_errors: (type: list) list of error messages
+    :return: (type: dictionary) dictionary with relevant consumer information
+    """
+
+    # Summary report fields
+    if "medical_deductible_individual_standard" in rqst_body:
+        validated_params["medical_deductible_individual_standard"] = clean_float_value_from_dict_object(
+            rqst_body,
+            "root",
+            "medical_deductible_individual_standard",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        )
+
+    if "medical_out_of_pocket_max_individual_standard" in rqst_body:
+        validated_params["medical_out_of_pocket_max_individual_standard"] = clean_float_value_from_dict_object(
+            rqst_body,
+            "root",
+            "medical_out_of_pocket_max_individual_standard",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        )
+
+    if "primary_care_physician_standard_cost" in rqst_body:
+        rqst_primary_care_physician_standard_cost = create_healthcare_service_cost_instances_from_string(
+            clean_string_value_from_dict_object(
+                rqst_body,
+                "root",
+                "primary_care_physician_standard_cost",
+                rqst_errors,
+                none_allowed=True,
+                no_key_allowed=True
+            ),
+            "primary_care_physician_individual_standard_cost",
+            rqst_errors
+        )
+        validated_params["primary_care_physician_standard_cost"] = rqst_primary_care_physician_standard_cost
+
+    # Detailed report fields
+    if "name" in rqst_body:
+        validated_params["rqst_plan_name"] = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
+
+    if "Carrier Database ID" in rqst_body:
+        validated_params["rqst_carrier_id"] = clean_int_value_from_dict_object(
+            rqst_body,
+            "root",
+            "Carrier Database ID",
+            rqst_errors
+        )
+
+    if "premium_type" in rqst_body:
+        validated_params["rqst_plan_premium_type"] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "premium_type",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        )
+
+    if "metal_level" in rqst_body:
+        validated_params["rqst_plan_metal_level"] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "metal_level",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        )
+
+    if "county" in rqst_body:
+        validated_params["county"] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "county",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        )
+
+    if "specialist_standard_cost" in rqst_body:
+        rqst_specialist_standard_cost = create_healthcare_service_cost_instances_from_string(
+            clean_string_value_from_dict_object(
+                rqst_body,
+                "root",
+                "specialist_standard_cost",
+                rqst_errors,
+                none_allowed=True,
+                no_key_allowed=True
+            ),
+            "specialist_standard_cost",
+            rqst_errors
+        )
+        validated_params["specialist_standard_cost"] = rqst_specialist_standard_cost
+
+    if "emergency_room_standard_cost" in rqst_body:
+        rqst_emergency_room_standard_cost = create_healthcare_service_cost_instances_from_string(
+            clean_string_value_from_dict_object(
+                rqst_body,
+                "root",
+                "emergency_room_standard_cost",
+                rqst_errors,
+                none_allowed=True,
+                no_key_allowed=True
+            ),
+            "emergency_room_standard_cost",
+            rqst_errors
+        )
+        validated_params["emergency_room_standard_cost"] = rqst_emergency_room_standard_cost
+
+    if "inpatient_facility_standard_cost" in rqst_body:
+        rqst_inpatient_facility_standard_cost = create_healthcare_service_cost_instances_from_string(
+            clean_string_value_from_dict_object(
+                rqst_body,
+                "root",
+                "inpatient_facility_standard_cost",
+                rqst_errors,
+                none_allowed=True,
+                no_key_allowed=True
+            ),
+            "inpatient_facility_standard_cost",
+            rqst_errors
+        )
+        validated_params["inpatient_facility_standard_cost"] = rqst_inpatient_facility_standard_cost
+
+    if "generic_drugs_standard_cost" in rqst_body:
+        rqst_generic_drugs_standard_cost = create_healthcare_service_cost_instances_from_string(
+            clean_string_value_from_dict_object(
+                rqst_body,
+                "root",
+                "generic_drugs_standard_cost",
+                rqst_errors,
+                none_allowed=True,
+                no_key_allowed=True
+            ),
+            "generic_drugs_standard_cost",
+            rqst_errors
+        )
+        validated_params["generic_drugs_standard_cost"] = rqst_generic_drugs_standard_cost
+
+    if "preferred_brand_drugs_standard_cost" in rqst_body:
+        rqst_preferred_brand_drugs_standard_cost = create_healthcare_service_cost_instances_from_string(
+            clean_string_value_from_dict_object(
+                rqst_body,
+                "root",
+                "preferred_brand_drugs_standard_cost",
+                rqst_errors,
+                none_allowed=True,
+                no_key_allowed=True
+            ),
+            "preferred_brand_drugs_standard_cost",
+            rqst_errors
+        )
+        validated_params["preferred_brand_drugs_standard_cost"] = rqst_preferred_brand_drugs_standard_cost
+
+    if "non_preferred_brand_drugs_standard_cost" in rqst_body:
+        rqst_non_preferred_brand_drugs_standard_cost = create_healthcare_service_cost_instances_from_string(
+            clean_string_value_from_dict_object(
+                rqst_body,
+                "root",
+                "non_preferred_brand_drugs_standard_cost",
+                rqst_errors,
+                none_allowed=True,
+                no_key_allowed=True
+            ),
+            "non_preferred_brand_drugs_standard_cost",
+            rqst_errors
+        )
+        validated_params["non_preferred_brand_drugs_standard_cost"] = rqst_non_preferred_brand_drugs_standard_cost
+
+    if "specialty_drugs_standard_cost" in rqst_body:
+        rqst_specialty_drugs_standard_cost = create_healthcare_service_cost_instances_from_string(
+            clean_string_value_from_dict_object(
+                rqst_body,
+                "root",
+                "specialty_drugs_standard_cost",
+                rqst_errors,
+                none_allowed=True,
+                no_key_allowed=True
+            ),
+            "specialty_drugs_standard_cost",
+            rqst_errors
+        )
+        validated_params["specialty_drugs_standard_cost"] = rqst_specialty_drugs_standard_cost
+
+    # Extra benefit report fields
+    if "medical_deductible_family_standard" in rqst_body:
+        validated_params["medical_deductible_family_standard"] = clean_float_value_from_dict_object(
+            rqst_body,
+            "root",
+            "medical_deductible_family_standard",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        )
+
+    if "medical_out_of_pocket_max_family_standard" in rqst_body:
+        validated_params["medical_out_of_pocket_max_family_standard"] = clean_float_value_from_dict_object(
+            rqst_body,
+            "root",
+            "medical_out_of_pocket_max_family_standard",
+            rqst_errors,
+            none_allowed=True,
+            no_key_allowed=True
+        )
+
+
+def create_healthcare_service_cost_instances_from_string(cost_string, field_name, rqst_errors):
+    healthcare_service_cost_instances = []
+
+    if cost_string:
+        cost_string = cost_string.lower()
+
+        cost_string_list = re.split(" and ", cost_string)
+
+        def create_healthcare_service_cost_instance_from_cost_string_fragment(cost_string_fragment):
+            def get_coinsurance_percentage_from_cost_string():
+                coinsurance_percentage_return_value = None
+
+                coinsurance_percentage_string_list = re.findall("\d+%", cost_string_fragment)
+                no_of_coinsurance_percentages = len(coinsurance_percentage_string_list)
+                if no_of_coinsurance_percentages == 1:
+                    coinsurance_percentage_numbers = re.findall("\d+", coinsurance_percentage_string_list[0])
+                    no_of_coinsurance_percentage_numbers = len(coinsurance_percentage_numbers)
+                    if no_of_coinsurance_percentage_numbers == 1:
+                        if coinsurance_percentage_numbers[0] != "0":
+                            coinsurance_percentage_return_value = float(coinsurance_percentage_numbers[0])
+                        else:
+                            rqst_errors.append("Coinsurance percentage is improperly formatted(returned 0) for field: {}".format(field_name))
+                    elif no_of_coinsurance_percentage_numbers == 0 or no_of_coinsurance_percentage_numbers > 1:
+                        rqst_errors.append("Coinsurance percentage is improperly formatted for field: {}".format(field_name))
+                elif no_of_coinsurance_percentages > 1:
+                    rqst_errors.append("More than one coinsurance percentage is included in field: {}".format(field_name))
+
+                return coinsurance_percentage_return_value
+            coinsurance_percentage = get_coinsurance_percentage_from_cost_string()
+
+            def get_copay_from_cost_string():
+                copay_return_value = None
+
+                copay_string_list = re.findall("\$\d+", cost_string_fragment)
+                no_of_copays = len(copay_string_list)
+                if no_of_copays == 1:
+                    copay_numbers = re.findall("\d+", copay_string_list[0])
+                    no_of_copay_numbers = len(copay_numbers)
+                    if no_of_copay_numbers == 1:
+                        if copay_numbers[0] != "0":
+                            copay_return_value = float(copay_numbers[0])
+                        else:
+                            rqst_errors.append("Copay cost is improperly formatted(returned 0) for field: {}".format(field_name))
+                    elif no_of_copay_numbers == 0 or no_of_copay_numbers > 1:
+                        rqst_errors.append("Copay cost is improperly formatted for field: {}".format(field_name))
+                elif no_of_copays > 1:
+                    rqst_errors.append("More than one copay cost is included in field: {}".format(field_name))
+
+                return copay_return_value
+            copay = get_copay_from_cost_string()
+
+            def check_for_no_charge_in_cost_string():
+                no_charge_in_string_return_value = False
+
+                if re.findall("no charge", cost_string_fragment):
+                    no_charge_in_string_return_value = True
+
+                return no_charge_in_string_return_value
+            no_charge_in_cost_string = check_for_no_charge_in_cost_string()
+            if no_charge_in_cost_string:
+                coinsurance_percentage = 0.0
+                copay = 0.0
+
+            if not rqst_errors:
+                if coinsurance_percentage is not None or copay is not None:
+                    healthcare_service_cost_instance = HealthcareServiceCostEntry(coinsurance=coinsurance_percentage,
+                                                                                  copay=copay)
+
+                    def check_for_deductible_info_in_cost_string():
+                        relation_to_deductible_return_value = None
+
+                        if re.findall("after deductible", cost_string_fragment):
+                            relation_to_deductible_return_value = "After"
+                        elif re.findall("before deductible", cost_string_fragment):
+                            relation_to_deductible_return_value = "Before"
+
+                        return relation_to_deductible_return_value
+                    relation_to_deductible = check_for_deductible_info_in_cost_string()
+
+                    healthcare_service_cost_instance.cost_relation_to_deductible = relation_to_deductible
+                    if not healthcare_service_cost_instance.check_relative_to_deductible_choices():
+                        rqst_errors.append("Valid cost relation to deductible was not able to be processed for field: {}".format(field_name))
+
+                    if not rqst_errors:
+                        healthcare_service_cost_instances.append(healthcare_service_cost_instance)
+                else:
+                    rqst_errors.append("Valid cost was not able to be processed for field: {}".format(field_name))
+        for cost_string_piece in cost_string_list:
+            create_healthcare_service_cost_instance_from_cost_string_fragment(cost_string_piece)
+
+    return healthcare_service_cost_instances
