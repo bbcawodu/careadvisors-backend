@@ -22,8 +22,10 @@ from random import shuffle
 from picbackend.views.utils import clean_dict_value_from_dict_object
 from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
+
+from picbackend.views.v2.consumer_views.tools.create_update_delete import validate_put_rqst_params
 from picmodels.models import CredentialsModel
-from picmodels.models import PICStaff
+from picmodels.models import Navigators
 from picmodels.models import PICConsumer
 
 START_OF_BUSINESS_TIMESTAMP = datetime.time(hour=15, minute=0, second=0, microsecond=0)
@@ -115,7 +117,7 @@ def build_authorized_cal_http_service_object(credential):
     return service
 
 
-def add_nav_apt_to_google_calendar(post_data, post_errors):
+def add_nav_apt_to_google_calendar(post_data, post_errors, response_raw_data):
     """
     This function takes a dictionary populated with data about a consumer appointment with a navigator, adds it to the
     navigator's 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar, and sends an email notification to the
@@ -127,7 +129,7 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
     """
 
     scheduled_appointment = {}
-    rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "Navigator ID", post_errors)
+    rqst_nav_id = clean_int_value_from_dict_object(post_data, "root", "navigator_id", post_errors)
     rqst_apt_datetime = clean_string_value_from_dict_object(post_data, "root", "Appointment Date and Time", post_errors)
     if not isinstance(rqst_apt_datetime, str):
         post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(rqst_apt_datetime)))
@@ -136,16 +138,16 @@ def add_nav_apt_to_google_calendar(post_data, post_errors):
 
     if not post_errors:
         try:
-            picstaff_object = PICStaff.objects.get(id=rqst_nav_id)
+            picstaff_object = Navigators.objects.get(id=rqst_nav_id)
             credentials_object = CredentialsModel.objects.get(id=picstaff_object)
             nav_info = picstaff_object.return_values_dict()
             if credentials_object.credential.invalid:
                 credentials_object.delete()
                 post_errors.append('Google Credentials database entry is invalid for the navigator with id: {!s}'.format(str(rqst_nav_id)))
             else:
-                scheduled_appointment = send_add_apt_rqst_to_google_and_email_consumer(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors)
+                scheduled_appointment = send_add_apt_rqst_to_google_and_email_consumer(credentials_object.credential, rqst_apt_datetime, consumer_info, nav_info, post_errors, response_raw_data)
 
-        except PICStaff.DoesNotExist:
+        except Navigators.DoesNotExist:
             post_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(rqst_nav_id)))
         except CredentialsModel.DoesNotExist:
             post_errors.append('Google Credentials database entry does not exist for the navigator with id: {!s}'.format(str(rqst_nav_id)))
@@ -168,16 +170,19 @@ def create_consumer_instance_from_apt_rqst(rqst_nav_id, post_data, post_errors):
     rqst_consumer_info = clean_dict_value_from_dict_object(post_data, "root", "Consumer Info", post_errors)
 
     if not post_errors and rqst_consumer_info:
-        rqst_consumer_info['Database Action'] = "Consumer Addition"
+        rqst_consumer_info['db_action'] = "create"
         now_date_time = datetime.datetime.utcnow()
         rqst_consumer_info['date_met_nav'] = {"Day": now_date_time.day, "Month": now_date_time.month, "Year": now_date_time.year}
-        rqst_consumer_info['Met Navigator At'] = "Patient Assist"
-        rqst_consumer_info["Navigator Notes"] = []
+        rqst_consumer_info["met_nav_at"] = "Patient Assist"
+        rqst_consumer_info["consumer_notes"] = []
         rqst_consumer_info['force_create_consumer'] = True
-        rqst_consumer_info['Navigator Database ID'] = rqst_nav_id
+        rqst_consumer_info["navigator_id"] = rqst_nav_id
 
+        new_consumer_params = validate_put_rqst_params(rqst_consumer_info, post_errors)
         matching_consumer_instances, consumer_instance, backup_consumer_obj = PICConsumer.create_row_w_validated_params(
-            rqst_consumer_info, post_errors)
+            new_consumer_params,
+            post_errors
+        )
 
         if not post_errors:
             consumer_info = consumer_instance.return_values_dict()
@@ -185,7 +190,7 @@ def create_consumer_instance_from_apt_rqst(rqst_nav_id, post_data, post_errors):
     return consumer_info
 
 
-def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime, consumer_info, nav_info, post_errors):
+def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime, consumer_info, nav_info, post_errors, response_raw_data):
     """
     This function takes a dictionary populated with data about a consumer appointment with a navigator, adds the appointment
     to the navigators 'Navigator-Consumer Appointments (DO NOT CHANGE)' calendar, and sends an email to the corresponding
@@ -214,34 +219,34 @@ def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime
                     navigator_calendar_id = add_nav_cal_to_google_cals(service, post_errors)
 
                 service = build_authorized_cal_http_service_object(credential)
-                nav_apt_args = {"summary": "Navigator ({!s} {!s}) appointment with {!s} {!s}".format(nav_info["First Name"],
-                                                                                                     nav_info["Last Name"],
-                                                                                                     consumer_info["First Name"],
-                                                                                                     consumer_info["Last Name"]),
-                                "description": "Consumer will be expecting a call at {!s}\nOther Consumer Info:\nFirst Name: {!s}\nLast Name: {!s}\nEmail: {!s}".format(consumer_info["Phone Number"],
-                                                                                                                                                                        consumer_info["First Name"],
-                                                                                                                                                                        consumer_info["Last Name"],
-                                                                                                                                                                        consumer_info["Email"]),
+                nav_apt_args = {"summary": "Navigator ({!s} {!s}) appointment with {!s} {!s}".format(nav_info["first_name"],
+                                                                                                     nav_info["last_name"],
+                                                                                                     consumer_info["first_name"],
+                                                                                                     consumer_info["last_name"]),
+                                "description": "Consumer will be expecting a call at {!s}\nOther Consumer Info:\nFirst Name: {!s}\nLast Name: {!s}\nEmail: {!s}".format(consumer_info["phone"],
+                                                                                                                                                                        consumer_info["first_name"],
+                                                                                                                                                                        consumer_info["last_name"],
+                                                                                                                                                                        consumer_info["email"]),
                                 "start": {"dateTime": rqst_apt_datetime + 'Z'},
                                 "end": {"dateTime": apt_end_timestamp.isoformat() + 'Z'}
                                 }
                 try:
                     navigator_appointment_object = service.events().insert(calendarId=navigator_calendar_id, body=nav_apt_args, sendNotifications=True).execute()
 
-                    scheduled_appointment["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
-                    scheduled_appointment["Navigator Database ID"] = nav_info["Database ID"]
+                    scheduled_appointment["Navigator Name"] = "{!s} {!s}".format(nav_info["first_name"],nav_info["last_name"])
+                    scheduled_appointment["Navigator Database ID"] = nav_info["id"]
                     scheduled_appointment["Appointment Date and Time"] = rqst_apt_datetime
                     scheduled_appointment["Appointment Title"] = navigator_appointment_object["summary"]
                     scheduled_appointment["Appointment Summary"] = navigator_appointment_object["description"]
 
                     if "Email" in consumer_info:
                         try:
-                            validate_email(consumer_info["Email"])
+                            validate_email(consumer_info["email"])
                             send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointment, post_errors)
                         except forms.ValidationError:
-                            post_errors.append("Email: {!s} for consumer database id: {!s} must be a valid email address, email to consumer not sent".format(consumer_info["Email"], consumer_info["Database ID"]))
+                            post_errors.append("Email: {!s} for consumer database id: {!s} must be a valid email address, email to consumer not sent".format(consumer_info["email"], consumer_info["id"]))
                     else:
-                        post_errors.append("Consumer with database id: {!s} does not have an email address specified, email to consumer not sent".format(consumer_info["Database ID"]))
+                        response_raw_data['Status']['Warnings'].append("Consumer with database id: {!s} does not have an email address specified, email to consumer not sent".format(consumer_info["id"]))
                 except Exception:
                     post_errors.append("Call to Google failed, Check API call")
             else:
@@ -267,7 +272,7 @@ def send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointme
 
     try:
         mandrill_client = mandrill.Mandrill('1veuJ5Rt5CtLEDj64ijXIA')
-        message_content = "Hello, you have an appointment scheduled with {!s} {!s} at {!s}. They will be contacting you at {!s}. We look forward to speaking with you!".format(nav_info["First Name"], nav_info["Last Name"], scheduled_appointment["Appointment Date and Time"], consumer_info["Phone Number"])
+        message_content = "Hello, you have an appointment scheduled with {!s} {!s} at {!s}. They will be contacting you at {!s}. We look forward to speaking with you!".format(nav_info["First Name"], nav_info["Last Name"], scheduled_appointment["Appointment Date and Time"], consumer_info["phone"])
         message = {'auto_html': None,
                      'auto_text': None,
                      'from_email': 'tech@piccares.org',
@@ -277,8 +282,8 @@ def send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointme
                      'important': True,
                      'subject': scheduled_appointment["Appointment Title"],
                      # 'text': 'Example text content',
-                     'to': [{'email': consumer_info["Email"],
-                             'name': '{!s} {!s}'.format(consumer_info["First Name"], consumer_info["Last Name"]),
+                     'to': [{'email': consumer_info["email"],
+                             'name': '{!s} {!s}'.format(consumer_info["first_name"], consumer_info["last_name"]),
                              'type': 'to'}],}
         result = mandrill_client.messages.send(message=message)
         '''
@@ -312,7 +317,7 @@ def delete_nav_apt_from_google_calendar(post_data, post_errors):
         post_errors.append("{!s} is not a string, Preferred Times must be a string iso formatted date and time".format(str(rqst_apt_datetime)))
 
     try:
-        picstaff_object = PICStaff.objects.get(id=rqst_nav_id)
+        picstaff_object = Navigators.objects.get(id=rqst_nav_id)
         credentials_object = CredentialsModel.objects.get(id=picstaff_object)
         nav_info = picstaff_object.return_values_dict()
         if credentials_object.credential.invalid:
@@ -333,7 +338,7 @@ def delete_nav_apt_from_google_calendar(post_data, post_errors):
             else:
                 post_errors.append('Appointment with consumer at {!s}, was not found in Navigator\'s Google Calendar'.format(rqst_apt_datetime))
 
-    except PICStaff.DoesNotExist:
+    except Navigators.DoesNotExist:
         post_errors.append('Navigator database entry does not exist for the id: {!s}'.format(str(rqst_nav_id)))
     except CredentialsModel.DoesNotExist:
         post_errors.append('Google Credentials database entry does not exist for the navigator with id: {!s}'.format(str(rqst_nav_id)))
@@ -542,10 +547,10 @@ def create_navigator_apt_entry(nav_info, appointment_timestamp):
     :return:
     """
 
-    next_available_apt_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"]),
-                                "Navigator Database ID": nav_info["Database ID"],
+    next_available_apt_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["first_name"],nav_info["last_name"]),
+                                "Navigator Database ID": nav_info["id"],
                                 "Appointment Date and Time": appointment_timestamp.isoformat()[:-6],
-                                "Schedule Appointment Link": "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id={!s}".format(str(nav_info["Database ID"])),
+                                "Schedule Appointment Link": "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id={!s}".format(str(nav_info["id"])),
                                 }
 
     return next_available_apt_entry
@@ -730,7 +735,7 @@ def get_free_busy_list(start_timestamp, end_timestamp, nav_cal_list_dict, post_e
         free_busy_batch.execute()
 
         for key, value in nav_free_busy_dict.items():
-            nav_free_busy_list.append([PICStaff.objects.get(id=int(key)).return_values_dict(), value])
+            nav_free_busy_list.append([Navigators.objects.get(id=int(key)).return_values_dict(), value])
     except Exception:
         post_errors.append("Batch call to Google failed, Check API call")
 
@@ -775,8 +780,8 @@ def get_nav_scheduled_appointments(nav_info, credentials_object, rqst_errors):
 
                 if nav_cal_events:
                     for cal_event in nav_cal_events:
-                        scheduled_appointment_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"]),
-                                                       "Navigator Database ID": nav_info["Database ID"],
+                        scheduled_appointment_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["first_name"],nav_info["last_name"]),
+                                                       "Navigator Database ID": nav_info["id"],
                                                        "Appointment Date and Time": cal_event["start"]["dateTime"][:-1],
                                                        "Appointment Summary": None}
                         if "description" in cal_event:

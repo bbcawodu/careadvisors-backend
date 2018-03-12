@@ -16,4 +16,4 @@ class CPSStaffImageUploadForm(Form):
     #         'staff_id': staff_id
     #     })
     #
-    #     super(StaffImageUploadForm, self).__init__()
+    #     super(NavigatorImageUploadForm, self).__init__()

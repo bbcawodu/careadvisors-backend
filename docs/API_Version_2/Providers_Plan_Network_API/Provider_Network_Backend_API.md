@@ -1,7 +1,7 @@
 ## Healthcare Provider Network Backend API
 
 ### Healthcare Provider Network Data Submission API
-To create, update, or delete members of the ProviderNetwork class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/provider_networks/.
+To create, update, or delete rows in the ProviderNetwork table in the database, make a PUT request to: http://picbackend.herokuapp.com/v2/provider_networks/.
 
 - The headers of the request should include: 
     - "Content-Type: "application/json""
@@ -10,40 +10,86 @@ The body of the request should be a JSON document using the following template:
 
 ```
 {
-"name": String,
-"Database ID": Integer(Required when "Database Action" == "Provider Network Modification" or "Provider Network Deletion"),
-"Database Action": String,
+    "name": String,
+    "id": Integer,
+    "db_action": String,
 }
 ```
 
 In response, a JSON document will be displayed with the following format:
 ```
 {
- "Status": {
+    "Status": {
             "Error Code": Integer,
             "Version": 2.0,
             "Errors": Array,
             "Warnings": Array,
            },
- "Data": Dictionary Object or "Deleted",
+    "Data": Dictionary Object or "Deleted",
 }
 ```
 
-- Creating a ProviderNetwork database entry.
-    - To create a ProviderNetwork database entry, the value for "Database Action" in the JSON Body must equal "Provider Network Addition".
-    - All other fields except "Database ID" must be filled.
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the created entry
+- Create a ProviderNetwork database row.
+    - To create a row in the PICConsumer table, the value for "db_action" in the JSON Body must equal "create".
     
-- Updating a ProviderNetwork database entry.
-    - To update a ProviderNetwork database entry, the value for "Database Action" in the JSON Body must equal "Provider Network Modification".
-    - All other fields must be filled.
-    - All key value pairs in the JSON Body correspond to updated fields of the entry for specified "Database ID"
+        - Keys that can be omitted:
+            - None
+            
+        - Keys that can be empty strings:
+            - None
+        
+        - Keys that can be Null
+            - None
+            
+        - Keys that WILL NOT be read
+            - "id"
 
-- Deleting a ProviderNetwork database entry.
-    - To delete a ProviderNetwork database entry, the value for "Database Action" in the JSON Body must equal "Provider Network Deletion".
-    - The only other field should be "Database ID".
-    - The response JSON document will have a "Deleted" as the value for the "Data" key.
+    - If there are no errors in the JSON Body document:        
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the created row.
+    
+- Update a ProviderNetwork database row.
+    - To update a row in the ProviderNetwork table, the value for "db_action" in the JSON Body must equal "update".
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "id"
+    - Note: at least one key other than "id" and "db_action" must be present
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+        - Keys that can be empty strings:
+            - "middle_name"
+            - "best_contact_time"
+            - "email"
+            - "phone"
+            - "plan"
+            - "preferred_language"
+            - "address_line_1"
+            - "address_line_2"
+            - "city"
+            - "state_province"
+            - "zipcode"
+         
+         - Keys that can be empty arrays
+            - "consumer_notes"
+            - cps_info["secondary_dependents"]
+        
+        - Keys that can be Null
+            - "date_met_nav"
+            - "cps_info"
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the updated row.
+
+- Delete a ProviderNetwork database row.
+    - To delete a row in the ProviderNetwork table, the value for "db_action" in the JSON Body must equal "delete".
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is "Deleted".
     
 - If there are errors in the JSON Body document:
     - "Error Code" will be 1.

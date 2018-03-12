@@ -10,107 +10,107 @@ The body of the request should be a JSON document using the following template:
 
 ```
 {
-"first_name": String,
-"middle_name": String,
-"last_name": String,
-"email": String,
-"phone": String,
-"met_bav_at": String,
-"household_size": Integer,
-"consumer_notes": [
-    "These are",
-    "sample notes",
-    "navigators write about consumers",
-    ...
-],
-"plan": String,
-"preferred_language": String,
-"best_contact_time": String,
-"navigator_id": Integer,
-
-Address Keys(Every field within address can be given as an empty string. Address will only be recorded/updated iff a full address is given)
-"address_line_1": String,
-"address_line_2": String,
-"city": String,
-"state_province": String,
-"zipcode": String,
-
-"date_met_nav":{
-    "Day": Integer,
-    "Month": Integer,
-    "Year": Integer
-},
-
-"create_case_management_rows": [
-    {
-        "management_step": Integer,
-        "management_notes": String,
+    "first_name": String,
+    "middle_name": String,
+    "last_name": String,
+    "email": String,
+    "phone": String,
+    "met_bav_at": String,
+    "household_size": Integer,
+    "consumer_notes": [
+        "These are",
+        "sample notes",
+        "navigators write about consumers",
+        ...
+    ],
+    "plan": String,
+    "preferred_language": String,
+    "best_contact_time": String,
+    "navigator_id": Integer,
+    
+    Address Keys(Every field within address can be given as an empty string. Address will only be recorded/updated iff a full address is given)
+    "address_line_1": String,
+    "address_line_2": String,
+    "city": String,
+    "state_province": String,
+    "zipcode": String,
+    
+    "date_met_nav":{
+        "Day": Integer,
+        "Month": Integer,
+        "Year": Integer
     },
-    ...
-],
-"update_case_management_rows": [
-    {
-        "management_step": Integer,
-        "management_notes": String,
-        "id": Integer
-    },
-    ...
-],
-"delete_case_management_rows": [
-    Integer,
-    Integer,
-    Integer
-    ...
-],
-                
-"cps_info": {
-                "primary_dependent": {
-                                        "first_name": String (Required when "Consumer Database ID" is omitted),
-                                        "last_name": String (Required when "Consumer Database ID" is omitted),
-                                        "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted),
-                                        "force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
-                                     },
-                "cps_location": String (Must be the name of a NavMetricsLocation instance with cps_location=True),
-                "apt_date": {
-                                "Day": Integer,
-                                "Month": Integer,
-                                "Year": Integer,
-                          },
-                "target_list": Boolean,
-                "phone_apt": Boolean,
-                "case_mgmt_type": String,
-                "case_mgmt_status": String (Must be one of these choices: "Open", "Resolved", "Not Available"),
-                "secondary_dependents": [
-                                             {
-                                                "first_name": String (Required when "Consumer Database ID" is omitted),
-                                                "last_name": String (Required when "Consumer Database ID" is omitted),
-                                                "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted),
-                                                "force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
-                                             },
-                                             ...
-                                        ],
-                "app_type": String (Must be one of these choices: "Medicaid", "SNAP", "Medicaid/SNAP", "Redetermination", "Plan Selection", "Fax FCRC", "Education", "MMCO", "Not Available"),
-                "app_status": String (Must be one of these choices: "Submitted", "Pending", "Approved", "Denied", "Not Available"),
-                "point_of_origin": String (Must be one of these choices: "Walk-in", "Appointment", "Referral from call", "Referral from school letter", "Enrollment event", "Not Available"),
-            }(Contains relevant CPS info),
-
-"id": Integer,
-"db_action": String,
-"create_backup": Boolean (Whether or not to create a backup instance of this consumer),
-"force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
+    
+    "create_case_management_rows": [
+        {
+            "management_step": Integer,
+            "management_notes": String,
+        },
+        ...
+    ],
+    "update_case_management_rows": [
+        {
+            "management_step": Integer,
+            "management_notes": String,
+            "id": Integer
+        },
+        ...
+    ],
+    "delete_case_management_rows": [
+        Integer,
+        Integer,
+        Integer
+        ...
+    ],
+                    
+    "cps_info": {
+                    "primary_dependent": {
+                                            "first_name": String (Required when "Consumer Database ID" is omitted),
+                                            "last_name": String (Required when "Consumer Database ID" is omitted),
+                                            "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted),
+                                            "force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
+                                         },
+                    "cps_location": String (Must be the name of a NavMetricsLocation instance with cps_location=True),
+                    "apt_date": {
+                                    "Day": Integer,
+                                    "Month": Integer,
+                                    "Year": Integer,
+                              },
+                    "target_list": Boolean,
+                    "phone_apt": Boolean,
+                    "case_mgmt_type": String,
+                    "case_mgmt_status": String (Must be one of these choices: "Open", "Resolved", "Not Available"),
+                    "secondary_dependents": [
+                                                 {
+                                                    "first_name": String (Required when "Consumer Database ID" is omitted),
+                                                    "last_name": String (Required when "Consumer Database ID" is omitted),
+                                                    "Consumer Database ID": Integer (Required when "first_name" and "last_name" are omitted),
+                                                    "force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
+                                                 },
+                                                 ...
+                                            ],
+                    "app_type": String (Must be one of these choices: "Medicaid", "SNAP", "Medicaid/SNAP", "Redetermination", "Plan Selection", "Fax FCRC", "Education", "MMCO", "Not Available"),
+                    "app_status": String (Must be one of these choices: "Submitted", "Pending", "Approved", "Denied", "Not Available"),
+                    "point_of_origin": String (Must be one of these choices: "Walk-in", "Appointment", "Referral from call", "Referral from school letter", "Enrollment event", "Not Available"),
+                }(Contains relevant CPS info),
+    
+    "id": Integer,
+    "db_action": String,
+    "create_backup": Boolean (Whether or not to create a backup instance of this consumer),
+    "force_create_consumer": Boolean (Set to True to create new Consumer instance despite possible matches in db),
 }
 ```
 
 In response, a JSON document will be displayed with the following format:
 ```
 {
- "Status": {
+    "Status": {
             "Error Code": Integer,
             "Version": 2.0,
             "Errors": Array,
             "Warnings": Array,
            },
- "Data": Dictionary Object or "Deleted",
+    "Data": Dictionary Object or "Deleted",
 }
 ```
 

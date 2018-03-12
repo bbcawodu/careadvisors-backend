@@ -11,20 +11,17 @@ from picbackend.views.utils import clean_string_value_from_dict_object
 
 
 def validate_put_rqst_params(rqst_body, rqst_errors):
-    validated_params = {}
+    validated_params = {'db_action': clean_string_value_from_dict_object(rqst_body, "root", "db_action", rqst_errors)}
 
-    rqst_db_action = clean_string_value_from_dict_object(rqst_body, "root", "db_action", rqst_errors)
-    validated_params['db_action'] = rqst_db_action
-
-    if not rqst_errors:
-        if rqst_db_action == 'create_row':
-            validate_params_for_create_row(rqst_body, validated_params, rqst_errors)
-        elif rqst_db_action == 'update_row':
-            validate_params_for_update_row(rqst_body, validated_params, rqst_errors)
-        elif rqst_db_action == 'delete_row':
-            validate_params_for_delete_row(rqst_body, validated_params, rqst_errors)
-        else:
-            rqst_errors.append("No valid 'db_action' provided.")
+    if validated_params['db_action'] == 'create':
+        validate_params_for_create_row(rqst_body, validated_params, rqst_errors)
+    elif validated_params['db_action'] == 'update':
+        validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validate_params_for_update_row(rqst_body, validated_params, rqst_errors)
+    elif validated_params['db_action'] == 'delete':
+        validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+    else:
+        rqst_errors.append("No valid 'db_action' provided.")
 
     return validated_params
 
@@ -55,7 +52,6 @@ def validate_phone_number(phone_number, rqst_errors):
 
 
 def validate_params_for_update_row(rqst_body, validated_params, rqst_errors):
-    validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
     if 'full_name' in rqst_body:
         validated_params['full_name'] = clean_string_value_from_dict_object(rqst_body, "root", "full_name", rqst_errors)
     if 'email' in rqst_body:
@@ -74,7 +70,3 @@ def validate_params_for_update_row(rqst_body, validated_params, rqst_errors):
         if rqst_phone_number is not None:
             validate_phone_number(rqst_phone_number, rqst_errors)
         validated_params['phone_number'] = rqst_phone_number
-
-
-def validate_params_for_delete_row(rqst_body, validated_params, rqst_errors):
-    validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)

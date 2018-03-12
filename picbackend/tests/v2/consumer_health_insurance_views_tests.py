@@ -418,8 +418,8 @@ class UnitedHealthcareTestsWithValidPost(TestCase, EligibilityValidPostTestBase)
         cls.post_data["Trading Partner ID"] = "united_health_care"
         json_post_data = json.dumps(cls.post_data)
 
-        c = Client()
-        cls.response = c.post('/v2/consumer_health_insurance_benefits/', json_post_data, content_type="application/json")
+        c = Client(content_type='application/json', HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        cls.response = c.post('/v2/consumer_health_insurance_benefits/', json_post_data, content_type='application/json')
 
         response_data_json = cls.response.content.decode('utf-8')
         cls.response_data = json.loads(response_data_json)

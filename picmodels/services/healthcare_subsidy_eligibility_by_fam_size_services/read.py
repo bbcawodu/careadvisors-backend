@@ -1,4 +1,0 @@
-def filter_healthcare_subsidy_eligibility_data_instances_by_family_size(healthcare_subsidy_eligibility_data_objs, list_of_family_sizes):
-    healthcare_subsidy_eligibility_data_objs = healthcare_subsidy_eligibility_data_objs.filter(family_size__in=list_of_family_sizes).order_by("family_size")
-
-    return healthcare_subsidy_eligibility_data_objs

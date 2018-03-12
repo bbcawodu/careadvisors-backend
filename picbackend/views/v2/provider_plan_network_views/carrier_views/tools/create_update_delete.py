@@ -5,45 +5,39 @@ PIC
 
 from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
-from picmodels.services.provider_plan_network_services.healthcare_carrier_services import \
-    add_instance_using_validated_params
-from picmodels.services.provider_plan_network_services.healthcare_carrier_services import \
-    delete_instance_using_validated_params
-from picmodels.services.provider_plan_network_services.healthcare_carrier_services import \
-    modify_instance_using_validated_params
 
 
-def validate_rqst_params_and_add_instance(rqst_carrier_info, post_errors):
-    add_carrier_params = get_carrier_mgmt_put_params(rqst_carrier_info, post_errors)
+def validate_put_rqst_params(rqst_body, rqst_errors):
+    validated_params = {
+        'rqst_action': clean_string_value_from_dict_object(rqst_body, "root", "db_action", rqst_errors)
+    }
 
-    healthcare_carrier_obj = None
-    if not post_errors:
-        healthcare_carrier_obj = add_instance_using_validated_params(add_carrier_params, post_errors)
+    rqst_action = validated_params['rqst_action']
 
-    return healthcare_carrier_obj
+    if rqst_action == 'create':
+        validate_create_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'update':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validate_update_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'delete':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
 
-
-def get_carrier_mgmt_put_params(rqst_carrier_info, post_errors):
-    rqst_carrier_name = clean_string_value_from_dict_object(rqst_carrier_info, "root", "name", post_errors)
-    rqst_carrier_state = clean_string_value_from_dict_object(rqst_carrier_info, "root", "state_province", post_errors)
-
-    return {"rqst_carrier_name": rqst_carrier_name,
-            "rqst_carrier_state": rqst_carrier_state}
-
-
-def validate_rqst_params_and_modify_instance(rqst_carrier_info, post_errors):
-    modify_carrier_params = get_carrier_mgmt_put_params(rqst_carrier_info, post_errors)
-    rqst_carrier_id = clean_int_value_from_dict_object(rqst_carrier_info, "root", "Database ID", post_errors)
-
-    healthcare_carrier_obj = None
-    if not post_errors:
-        healthcare_carrier_obj = modify_instance_using_validated_params(modify_carrier_params, rqst_carrier_id, post_errors)
-
-    return healthcare_carrier_obj
+    return validated_params
 
 
-def validate_rqst_params_and_delete_instance(rqst_carrier_info, post_errors):
-    rqst_carrier_id = clean_int_value_from_dict_object(rqst_carrier_info, "root", "Database ID", post_errors)
+def validate_create_row_params(rqst_body, validated_params, rqst_errors):
+    rqst_carrier_name = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
+    rqst_carrier_state = clean_string_value_from_dict_object(rqst_body, "root", "state_province", rqst_errors)
 
-    if not post_errors:
-        delete_instance_using_validated_params(rqst_carrier_id, post_errors)
+    validated_params["rqst_carrier_name"] = rqst_carrier_name
+    validated_params["rqst_carrier_state"] = rqst_carrier_state
+
+
+def validate_update_row_params(rqst_body, validated_params, rqst_errors):
+    if "name" in rqst_body:
+        rqst_carrier_name = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
+        validated_params["rqst_carrier_name"] = rqst_carrier_name
+
+    if "state_province" in rqst_body:
+        rqst_carrier_state = clean_string_value_from_dict_object(rqst_body, "root", "state_province", rqst_errors)
+        validated_params["rqst_carrier_state"] = rqst_carrier_state

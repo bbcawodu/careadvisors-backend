@@ -49,8 +49,8 @@ The body of the request should be a JSON document which has the following format
                                   ],
                     }
 
-"Database Action": String (Can be omitted),
-"Database ID": Integer(Required when "Database Action" == "Instance Deletion"),
+"db_action": String (Can be omitted),
+"id": Integer(Required when "db_action" == "delete"),
 }
 ```
 

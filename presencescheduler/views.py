@@ -3,7 +3,8 @@ Defines views that are mapped to url configurations
 """
 from django.http import HttpResponse
 from django.shortcuts import render
-from picmodels.models import Appointment, Location, PICConsumer, PICStaff
+from picmodels.models import PICConsumer, Navigators
+from presencescheduler.models import Appointment, Location
 import datetime, json, sys, re
 from django.views.decorators.csrf import csrf_exempt
 
@@ -167,8 +168,8 @@ def appointment_submission_handler(request):
             poc_request_values = {"first_name": request_poc_first_name,
                                   "last_name": request_poc_last_name,
                                   "type": request_poc_type}
-            appointment_poc, appointment_poc_created = PICStaff.objects.get_or_create(email=request_poc_email,
-                                                                                      defaults=poc_request_values)
+            appointment_poc, appointment_poc_created = Navigators.objects.get_or_create(email=request_poc_email,
+                                                                                        defaults=poc_request_values)
             new_appointment = Appointment(consumer=pic_consumer,
                                           location=appointment_location,
                                           poc=appointment_poc,

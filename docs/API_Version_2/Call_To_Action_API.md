@@ -1,7 +1,7 @@
 ## Call to Action API
 
 ### Call to Action Management API
-- To create/update the Call to Action for a given intent keyword, submit a GET request to http://picbackend.herokuapp.com/v2/cta_management/
+- To create/update the Call to Action for a given intent keyword, make a GET request to http://picbackend.herokuapp.com/v2/cta_management/
   with the following optional parameter: "intent".
     - If intent keyword is present in the request, the current image will be shown for the given intent keyword if there
       is an entry for it in the db. If there is no intent entry in the db, a blank form will be shown.

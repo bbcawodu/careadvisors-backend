@@ -5,44 +5,40 @@ PIC
 
 from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
-from picmodels.services.patient_story_models_services.consumer_general_concern_services import \
-    add_instance_using_validated_params
-from picmodels.services.patient_story_models_services.consumer_general_concern_services import \
-    delete_instance_using_validated_params
-from picmodels.services.patient_story_models_services.consumer_general_concern_services import \
-    modify_instance_using_validated_params
 
 
-def validate_rqst_params_and_add_instance(rqst_gen_concern_info, rqst_errors):
-    add_general_concern_params = get_general_concern_mgmt_put_params(rqst_gen_concern_info, rqst_errors)
+def validate_put_rqst_params(rqst_body, rqst_errors):
+    validated_params = {
+        'rqst_action': clean_string_value_from_dict_object(rqst_body, "root", "db_action", rqst_errors)
+    }
 
-    general_concern_obj = None
-    if not rqst_errors:
-        general_concern_obj = add_instance_using_validated_params(add_general_concern_params, rqst_errors)
+    rqst_action = validated_params['rqst_action']
 
-    return general_concern_obj
+    if rqst_action == 'create':
+        validate_create_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'update':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validate_update_row_params(rqst_body, validated_params, rqst_errors)
+    elif rqst_action == 'delete':
+        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
 
-
-def get_general_concern_mgmt_put_params(rqst_carrier_info, rqst_errors):
-
-    return {
-        "rqst_general_concern_name": clean_string_value_from_dict_object(rqst_carrier_info, "root", "name", rqst_errors),
-            }
-
-
-def validate_rqst_params_and_modify_instance(rqst_general_concern_info, rqst_errors):
-    modify_general_concern_params = get_general_concern_mgmt_put_params(rqst_general_concern_info, rqst_errors)
-    rqst_general_concern_id = clean_int_value_from_dict_object(rqst_general_concern_info, "root", "Database ID", rqst_errors)
-
-    general_concern_obj = None
-    if not rqst_errors:
-        general_concern_obj = modify_instance_using_validated_params(modify_general_concern_params, rqst_general_concern_id, rqst_errors)
-
-    return general_concern_obj
+    return validated_params
 
 
-def validate_rqst_params_and_delete_instance(rqst_general_concern_info, rqst_errors):
-    rqst_general_concern_id = clean_int_value_from_dict_object(rqst_general_concern_info, "root", "Database ID", rqst_errors)
+def validate_create_row_params(rqst_body, validated_params, rqst_errors):
+    validated_params["rqst_general_concern_name"] = clean_string_value_from_dict_object(
+        rqst_body,
+        "root",
+        "name",
+        rqst_errors
+    )
 
-    if not rqst_errors:
-        delete_instance_using_validated_params(rqst_general_concern_id, rqst_errors)
+
+def validate_update_row_params(rqst_body, validated_params, rqst_errors):
+    if "name" in rqst_body:
+        validated_params["rqst_general_concern_name"] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "name",
+            rqst_errors
+        )

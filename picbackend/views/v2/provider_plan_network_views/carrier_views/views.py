@@ -4,81 +4,61 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.views.generic import View
 
+from picmodels.models import HealthcareCarrier
+
 from picbackend.views.utils import JSONGETRspMixin
 from picbackend.views.utils import JSONPUTRspMixin
-from picbackend.views.utils import clean_string_value_from_dict_object
 from picbackend.views.utils import init_v2_response_data
 from picbackend.views.utils import validate_get_request_parameters
+
+from .tools import validate_put_rqst_params
+
 from picmodels.forms import CarrierSampleIDCardUploadForm
-from picmodels.models import HealthcareCarrier
-from .tools import retrieve_carrier_data_by_id
-from .tools import retrieve_carrier_data_by_name
-from .tools import retrieve_carrier_data_by_state
-from .tools import validate_rqst_params_and_add_instance
-from .tools import validate_rqst_params_and_delete_instance
-from .tools import validate_rqst_params_and_modify_instance
 
 
 # Need to abstract common variables in get and post class methods into class attributes
 class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     def carriers_management_put_logic(self, rqst_body, response_raw_data, rqst_errors):
-        # Retrieve database action from post data
-        rqst_action = clean_string_value_from_dict_object(rqst_body, "root", "Database Action", rqst_errors)
+        validated_put_rqst_params = validate_put_rqst_params(rqst_body, rqst_errors)
+        rqst_action = validated_put_rqst_params['rqst_action']
 
         # If there are no parsing errors, process PUT data based on database action
         if not rqst_errors:
             healthcare_carrier_obj = None
-            if rqst_action == "Carrier Addition":
-                healthcare_carrier_obj = validate_rqst_params_and_add_instance(rqst_body, rqst_errors)
-            elif rqst_action == "Carrier Modification":
-                healthcare_carrier_obj = validate_rqst_params_and_modify_instance(rqst_body, rqst_errors)
-            elif rqst_action == "Carrier Deletion":
-                validate_rqst_params_and_delete_instance(rqst_body, rqst_errors)
+            if rqst_action == "create":
+                healthcare_carrier_obj = HealthcareCarrier.create_row_w_validated_params(
+                    validated_put_rqst_params,
+                    rqst_errors
+                )
+            elif rqst_action == "update":
+                healthcare_carrier_obj = HealthcareCarrier.update_row_w_validated_params(
+                    validated_put_rqst_params,
+                    rqst_errors
+                )
+            elif rqst_action == "delete":
+                HealthcareCarrier.delete_row_w_validated_params(
+                    validated_put_rqst_params,
+                    rqst_errors
+                )
 
                 if not rqst_errors:
-                    response_raw_data['Data']["Database ID"] = "Deleted"
+                    response_raw_data['Data']["row"] = "Deleted"
             else:
-                rqst_errors.append("No valid 'Database Action' provided.")
+                rqst_errors.append("No valid 'db_action' provided.")
 
             if healthcare_carrier_obj:
-                response_raw_data['Data']["Database ID"] = healthcare_carrier_obj.id
+                response_raw_data['Data']["row"] = healthcare_carrier_obj.return_values_dict()
 
     def carriers_management_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
-        carriers = [HealthcareCarrier.objects.all()]
-
-        def filter_results_by_secondary_params():
-            if 'has_sample_id_card' in validated_GET_rqst_params:
-                def filter_by_has_sample_id_card_param():
-                    carriers_have_sample_id_cards = validated_GET_rqst_params['has_sample_id_card']
-
-                    def filter_carriers_by_default_sample_id_card_url():
-                        if carriers_have_sample_id_cards:
-                            carriers[0] = carriers[0].exclude(sample_id_card=settings.DEFAULT_CARRIER_SAMPLE_ID_CARD_URL)
-                        else:
-                            carriers[0] = carriers[0].filter(sample_id_card=settings.DEFAULT_CARRIER_SAMPLE_ID_CARD_URL)
-                    filter_carriers_by_default_sample_id_card_url()
-                filter_by_has_sample_id_card_param()
-        filter_results_by_secondary_params()
-
         def retrieve_data_by_primary_params_and_add_to_response():
             data_list = []
 
             if 'id' in validated_GET_rqst_params:
-                rqst_carrier_id = validated_GET_rqst_params['id']
-                if rqst_carrier_id != 'all':
-                    list_of_ids = validated_GET_rqst_params['id_list']
-                else:
-                    list_of_ids = None
-
-                data_list = retrieve_carrier_data_by_id(carriers[0], rqst_carrier_id, list_of_ids, rqst_errors)
+                data_list = HealthcareCarrier.retrieve_carrier_data_by_id(validated_GET_rqst_params, rqst_errors)
             elif 'name' in validated_GET_rqst_params:
-                rqst_name = validated_GET_rqst_params['name']
-
-                data_list = retrieve_carrier_data_by_name(carriers[0], rqst_name, rqst_errors)
+                data_list = HealthcareCarrier.retrieve_carrier_data_by_name(validated_GET_rqst_params, rqst_errors)
             elif 'state' in validated_GET_rqst_params:
-                list_of_states = validated_GET_rqst_params['state_list']
-
-                data_list = retrieve_carrier_data_by_state(carriers[0], list_of_states, rqst_errors)
+                data_list = HealthcareCarrier.retrieve_carrier_data_by_state(validated_GET_rqst_params, rqst_errors)
             else:
                 rqst_errors.append('No Valid Parameters')
 

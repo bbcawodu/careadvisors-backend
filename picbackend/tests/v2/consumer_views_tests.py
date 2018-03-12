@@ -13,30 +13,33 @@ class ConsumerAPITests(TestCase, BaseConsumerStaffMetricsTests):
         self.base_url += "consumers/"
 
     def test_add_consumer_view(self):
-        post_data = {"First Name": "Johnsafsa",
-                     "Middle Name": "",
-                     "Last Name": "Consumerfasfsa",
-                     "Email": "",
-                     "Phone Number": "",
-                     "Met Navigator At": "Mariano's Bridgeport",
-                     "Household Size": 3,
-                     "Plan": "",
-                     "Preferred Language": "",
-                     "Navigator Notes": [
-                     ],
+        post_data = {
+            "first_name": "Johnsafsa",
+            "middle_name": "",
+            "last_name": "Consumerfasfsa",
+            "email": "",
+            "phone": "",
+            "met_nav_at": "Mariano's Bridgeport",
+            "household_size": 3,
+            "plan": "",
+            "preferred_language": "",
+            "consumer_notes": [
+            ],
 
-                     "Address Line 1": "",
-                     "Address Line 2": "",
-                     "City": "",
-                     "State": "",
-                     "Zipcode": "",
+            "address_line_1": "",
+            "address_line_2": "",
+            "city": "",
+            "state_province": "",
+            "zipcode": "",
 
-                     "date_met_nav": {"Day": 31,
-                                      "Month": 10,
-                                      "Year": 2018,
-                                      },
-                     "Navigator Database ID": 1,
-                     "Database Action": "Consumer Addition",}
+            "date_met_nav": {
+                "Day": 31,
+                "Month": 10,
+                "Year": 2018,
+            },
+            "navigator_id": 1,
+            "db_action": "create"
+        }
 
         post_json = json.dumps(post_data)
         response = self.client_object.put(self.base_url, post_json, content_type="application/json")
@@ -61,62 +64,66 @@ class ConsumerAPITests(TestCase, BaseConsumerStaffMetricsTests):
         # Test decoded JSON data for non empty "Next Available Appointments" data
         consumer_data = response_data["Data"]
 
-        self.assertIn("Database ID", consumer_data)
+        self.assertIn("row", consumer_data)
 
     def test_add_cps_consumer_view(self):
-        post_data = {"First Name": "Johnsafsa",
-                     "Middle Name": "",
-                     "Last Name": "Consumerfasfsa",
-                     "Email": "",
-                     "Phone Number": "",
-                     "Met Navigator At": "Mariano's Bridgeport",
-                     "Household Size": 3,
-                     "Plan": "",
-                     "Preferred Language": "",
-                     "Navigator Notes": [
-                     ],
+        post_data = {
+            "first_name": "Johnsafsddsa",
+            "middle_name": "",
+            "last_name": "Consumerfasfsa",
+            "email": "",
+            "phone": "",
+            "met_nav_at": "Mariano's Bridgeport",
+            "household_size": 3,
+            "plan": "",
+            "preferred_language": "",
+            "consumer_notes": [
+            ],
 
-                     "Address Line 1": "",
-                     "Address Line 2": "",
-                     "City": "",
-                     "State": "",
-                     "Zipcode": "",
+            "address_line_1": "",
+            "address_line_2": "",
+            "city": "",
+            "state_province": "",
+            "zipcode": "",
 
-                     "date_met_nav": {"Day": 31,
-                                      "Month": 10,
-                                      "Year": 2018,
-                                      },
-                     "Navigator Database ID": 1,
+            "date_met_nav": {
+                "Day": 31,
+                "Month": 10,
+                "Year": 2018,
+            },
 
-                     "cps_consumer": True,
-                     "cps_info": {
-                         "primary_dependent": {
-                             "first_name": "Kensdgset",
-                             "last_name": "Massdgdsfsdeters",
-                             # "Consumer Database ID": 134,
-                         },
-                         "cps_location": "Marquette Elementary School",
-                         "apt_date": {
-                             "Day": 22,
-                             "Month": 2,
-                             "Year": 2017,
-                         },
-                         "target_list": True,
-                         "phone_apt": True,
-                         "case_mgmt_type": "String",
-                         "case_mgmt_status": "Open",
-                         "secondary_dependents": [
-                             {
-                                 "first_name": "Brstdsdyan",
-                                 "last_name": "Furgsdfdsy",
-                                 # "Consumer Database ID": 135,
-                             },
-                         ],
-                         "app_type": "SNAP",
-                         "app_status": "Pending",
-                     },
+            "cps_consumer": True,
+            "cps_info": {
+                "primary_dependent": {
+                    "first_name": "Kensdgset",
+                    "last_name": "Massdgdsfsdeters",
+                    # "Consumer Database ID": 134,
+                },
+                "cps_location": "Marquette Elementary School",
+                "apt_date": {
+                    "Day": 22,
+                    "Month": 2,
+                    "Year": 2017,
+                },
+                "target_list": True,
+                "phone_apt": True,
+                "case_mgmt_type": "String",
+                "case_mgmt_status": "Open",
+                "secondary_dependents": [
+                    {
+                        "first_name": "Brstdsdyan",
+                        "last_name": "Furgsdfdsy",
+                        # "Consumer Database ID": 135,
+                    },
+                ],
+                "app_type": "SNAP",
+                "app_status": "Pending",
+                "point_of_origin": "Not Available"
+            },
 
-                     "Database Action": "Consumer Addition",}
+            "navigator_id": 1,
+            "db_action": "create"
+        }
 
         post_json = json.dumps(post_data)
         response = self.client_object.put(self.base_url, post_json, content_type="application/json")
@@ -141,4 +148,4 @@ class ConsumerAPITests(TestCase, BaseConsumerStaffMetricsTests):
         # Test decoded JSON data for non empty "Next Available Appointments" data
         consumer_data = response_data["Data"]
 
-        self.assertIn("Database ID", consumer_data)
+        self.assertIn("row", consumer_data)

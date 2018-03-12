@@ -11,7 +11,7 @@ from django.forms import IntegerField
 from django.forms import CharField
 
 
-class StaffImageUploadForm(Form):
+class NavigatorImageUploadForm(Form):
     """Image upload form."""
     staff_id = IntegerField(widget=HiddenInput())
     staff_pic = ImageField()
@@ -23,7 +23,7 @@ class StaffImageUploadForm(Form):
     #         'staff_id': staff_id
     #     })
     #
-    #     super(StaffImageUploadForm, self).__init__()
+    #     super(NavigatorImageUploadForm, self).__init__()
 
 
 class CTAManagementForm(Form):

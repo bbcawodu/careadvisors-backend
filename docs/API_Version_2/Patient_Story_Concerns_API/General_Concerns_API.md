@@ -1,7 +1,7 @@
 ## General Concerns Backend API
 
 ### General Concerns Data Submission API
-To create, update, or delete members of the ConsumerGeneralConcern class in the database, submit a PUT request to: http://picbackend.herokuapp.com/v2/general_concerns/.
+To create, update, or delete rows in the ConsumerGeneralConcern table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/general_concerns/.
 
 - The headers of the request should include: 
     - "Content-Type: "application/json""
@@ -11,8 +11,8 @@ The body of the request should be a JSON document using the following template:
 ```
 {
 "name": String,
-"Database ID": Integer(Required when "Database Action" == "Carrier Modification" or "Carrier Deletion"),
-"Database Action": String,
+"id": Integer,
+"db_action": String,
 }
 ```
 
@@ -25,25 +25,53 @@ In response, a JSON document will be displayed with the following format:
             "Errors": Array,
             "Warnings": Array,
            },
- "Data": Dictionary Object or "Deleted",
+ "Data": Object,
 }
 ```
 
-- Creating a ConsumerGeneralConcern database entry.
-    - To create a ConsumerGeneralConcern database entry, the value for "Database Action" in the JSON Body must equal "Concern Addition".
-    - All other fields except "Database ID" must be filled.
-    - The response JSON document will have a dictionary object as the value for the "Data" key.
-        - It contains the key "Database ID", the value for which is the database id of the created entry
+- Create a ConsumerGeneralConcern database row.
+    - To create a row in the ConsumerGeneralConcern table, the value for "db_action" in the JSON Body must equal "create".
     
-- Updating a ConsumerGeneralConcern database entry.
-    - To update a HealthcareCarrier database entry, the value for "Database Action" in the JSON Body must equal "Concern Modification".
-    - All other fields must be filled.
-    - All key value pairs in the JSON Body document correspond to updated fields for specified "Database ID"
+        - Keys that can be omitted:
+            - "id"
+            
+        - Keys that can be empty strings:
+            - None
+            
+        - Keys that can be Null
+            - None
 
-- Deleting a ConsumerGeneralConcern database entry.
-    - To delete a HealthcareCarrier database entry, the value for "Database Action" in the JSON Body must equal "Concern Deletion".
-    - The only other field should be "Database ID".
-    - The response JSON document will have a "Deleted" as the value for the "Data" key.
+    - If there are no errors in the JSON Body document:        
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the created row.
+    
+- Update a ConsumerGeneralConcern database row.
+    - To update a row in the ConsumerGeneralConcern table, the value for "db_action" in the JSON Body must equal "update".
+    - All key value pairs in the JSON Body document correspond to updated fields for specified "id"
+    - Note: at least one key other than "id" and "db_action" must be present
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+        - Keys that can be empty strings:
+            - None
+        
+        - Keys that can be Null
+            - None
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is an object with the fields of the updated row.
+
+- Delete a ConsumerGeneralConcern database row.
+    - To delete a row in the ConsumerGeneralConcern table, the value for "db_action" in the JSON Body must equal "delete".
+    
+        - Keys that can be omitted:
+            - all except "id" and "db_action"
+        
+    - If there are no errors in the JSON Body document:
+        - The response JSON document will have a dictionary object as the value for the "Data" key.
+            - It contains the key "row", the value for which is "Deleted".
     
 - If there are errors in the JSON Body document:
     - "Error Code" will be 1.
@@ -53,7 +81,7 @@ In response, a JSON document will be displayed with the following format:
     
     
 ### General Concerns Data Retrieval API
-- To retrieve ConsumerGeneralConcern data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/general_concerns/
+- To read rows from the ConsumerGeneralConcern table, make a GET request to http://picbackend.herokuapp.com/v2/general_concerns/
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"
     
