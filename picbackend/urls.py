@@ -114,6 +114,9 @@ urlpatterns = [
     # healthcare service expertise urls
     url(r'v2/service_expertise/$', views.ServiceExpertiseManagementView.as_view()),
 
+    # healthcare service expertise urls
+    url(r'v2/marketplace_appointments/$', views.MarketplaceAppointmentManagementView.as_view()),
+
 
     ###################
     #CPS API V1 URLS

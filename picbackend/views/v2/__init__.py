@@ -18,3 +18,4 @@ from .healthcare_subsidy_eligibility_data_views import *
 from .care_advisor_customer_views import *
 from .dashboard_views import *
 from .healthcare_service_expertise_views import *
+from .marketplace_appointment_views import *
