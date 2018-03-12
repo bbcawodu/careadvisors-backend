@@ -1,8 +1,9 @@
 from django.contrib import admin
 from picmodels.models import PICConsumer, Navigators, MetricsSubmission, PlanStat, Country, NavMetricsLocation, Address,\
     CredentialsModel, PICConsumerBackup, ConsumerCPSInfoEntry, CallToAction, HealthcareCarrier, HealthcarePlan,\
-    HealthcareServiceCostEntry, HospitalWebTrafficData, ConsumerHospitalInfo, CaseManagementStatus, CareAdvisorCustomer
-
+    HealthcareServiceCostEntry, HospitalWebTrafficData, ConsumerHospitalInfo, CaseManagementStatus,\
+    CareAdvisorCustomer, ConsumerNote, ProviderLocation, ProviderNetwork, ConsumerSpecificConcern,\
+    ConsumerGeneralConcern, HealthcareSubsidyEligibilityByFamSize, HealthcareServiceExpertise
 from presencescheduler.models import PICUser, Appointment, Location
 
 # Register your models here.
@@ -27,3 +28,10 @@ admin.site.register(HospitalWebTrafficData)
 admin.site.register(ConsumerHospitalInfo)
 admin.site.register(CaseManagementStatus)
 admin.site.register(CareAdvisorCustomer)
+admin.site.register(ConsumerNote)
+admin.site.register(ProviderNetwork)
+admin.site.register(ProviderLocation)
+admin.site.register(ConsumerGeneralConcern)
+admin.site.register(ConsumerSpecificConcern)
+admin.site.register(HealthcareSubsidyEligibilityByFamSize)
+admin.site.register(HealthcareServiceExpertise)

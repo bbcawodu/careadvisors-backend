@@ -86,7 +86,7 @@ class PatientAssistSchedulerAPITests(TestCase, BaseV2RqstTests):
 
     def test_add_consumer_apt_with_nav(self):
         post_data = {"navigator_id": 1,
-                     "Appointment Date and Time": '2018-03-08T16:00:00',
+                     "Appointment Date and Time": '2019-03-08T16:00:00',
 
                      "Consumer Info": {
                                         "first_name": "calkfndy",
@@ -150,7 +150,7 @@ class PatientAssistSchedulerAPITests(TestCase, BaseV2RqstTests):
 
     def test_delete_consumer_apt_with_nav(self):
         post_data = {"Navigator ID": 1,
-                     "Appointment Date and Time": '2018-03-08T16:00:00',
+                     "Appointment Date and Time": '2019-03-08T16:00:00',
                      }
         post_json = json.dumps(post_data)
         response = self.client_object.delete(self.base_url, post_json, content_type="application/json")

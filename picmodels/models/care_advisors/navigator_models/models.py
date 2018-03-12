@@ -80,18 +80,18 @@ class Navigators(models.Model):
 
     def return_values_dict(self):
         valuesdict = {
-            "First Name": self.first_name,
-            "Last Name": self.last_name,
-            "MPN": self.mpn,
-            "Email": self.email,
-            "Authorized Credentials": False,
-            "Type": self.type,
-            "Database ID": self.id,
-            "County": self.county,
-            "Region": None,
-            "Picture": None,
-            "Base Locations": [],
-            "Consumers": []
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "mpn": self.mpn,
+            "email": self.email,
+            "authorized_redentials": False,
+            "type": self.type,
+            "id": self.id,
+            "county": self.county,
+            "region": None,
+            "picture": None,
+            "base_locations": [],
+            "consumers": []
         }
 
         # consumers = PICConsumer.objects.filter(navigator=self.id)
@@ -100,12 +100,12 @@ class Navigators(models.Model):
         if len(consumers):
             for consumer in consumers:
                 consumer_list.append(consumer.id)
-        valuesdict['Consumers'] = consumer_list
+        valuesdict['consumers'] = consumer_list
 
         if self.county:
             for region in self.REGIONS:
                 if self.county.lower() in self.REGIONS[region]:
-                    valuesdict["Region"] = region
+                    valuesdict["region"] = region
                     break
 
         base_locations = self.base_locations.all()
@@ -113,7 +113,7 @@ class Navigators(models.Model):
             base_location_values = []
             for base_location in base_locations:
                 base_location_values.append(base_location.return_values_dict())
-            valuesdict["Base Locations"] = base_location_values
+            valuesdict["base_locations"] = base_location_values
 
         credentials_queryset = self.credentialsmodel_set.all()
         if len(credentials_queryset):
@@ -121,12 +121,12 @@ class Navigators(models.Model):
                 if credentials_instance.credential.invalid:
                     credentials_instance.delete()
                 else:
-                    valuesdict["Authorized Credentials"] = True
+                    valuesdict["authorized_credentials"] = True
 
         if self.staff_pic:
-            valuesdict["Picture"] = self.staff_pic.url
+            valuesdict["picture"] = self.staff_pic.url
         else:
-            valuesdict["Picture"] = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_STAFF_PIC_URL)
+            valuesdict["picture"] = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_STAFF_PIC_URL)
 
         return valuesdict
 

@@ -10,9 +10,9 @@ This file is documentation for the backend API library for Patient Innovation Ce
 [Backend Server Request Instructions README](making_requests_to_backend.md)
 
 
-### Presence Healthcare Appointment Scheduler Backend
+### Healthcare Service Expertise Endpoints API
 
-[Presence Healthcare Backend README](Presence.md)
+[Healthcare Service Expertise Endpoints API README](healthcare_service_expertise_API.md)
 
 
 ### Navigator Data Backend API
@@ -73,3 +73,8 @@ This file is documentation for the backend API library for Patient Innovation Ce
 ### Care Advisor Customer Backend API
 
 [Care Advisor Customer Backend API README](Care_Advisor_Customer_API/index.md)
+
+
+### Presence Healthcare Appointment Scheduler Backend
+
+[Presence Healthcare Backend README](Presence.md)

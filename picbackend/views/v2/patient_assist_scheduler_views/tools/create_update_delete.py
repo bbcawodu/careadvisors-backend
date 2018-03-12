@@ -219,8 +219,8 @@ def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime
                     navigator_calendar_id = add_nav_cal_to_google_cals(service, post_errors)
 
                 service = build_authorized_cal_http_service_object(credential)
-                nav_apt_args = {"summary": "Navigator ({!s} {!s}) appointment with {!s} {!s}".format(nav_info["First Name"],
-                                                                                                     nav_info["Last Name"],
+                nav_apt_args = {"summary": "Navigator ({!s} {!s}) appointment with {!s} {!s}".format(nav_info["first_name"],
+                                                                                                     nav_info["last_name"],
                                                                                                      consumer_info["first_name"],
                                                                                                      consumer_info["last_name"]),
                                 "description": "Consumer will be expecting a call at {!s}\nOther Consumer Info:\nFirst Name: {!s}\nLast Name: {!s}\nEmail: {!s}".format(consumer_info["phone"],
@@ -233,8 +233,8 @@ def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime
                 try:
                     navigator_appointment_object = service.events().insert(calendarId=navigator_calendar_id, body=nav_apt_args, sendNotifications=True).execute()
 
-                    scheduled_appointment["Navigator Name"] = "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"])
-                    scheduled_appointment["Navigator Database ID"] = nav_info["Database ID"]
+                    scheduled_appointment["Navigator Name"] = "{!s} {!s}".format(nav_info["first_name"],nav_info["last_name"])
+                    scheduled_appointment["Navigator Database ID"] = nav_info["id"]
                     scheduled_appointment["Appointment Date and Time"] = rqst_apt_datetime
                     scheduled_appointment["Appointment Title"] = navigator_appointment_object["summary"]
                     scheduled_appointment["Appointment Summary"] = navigator_appointment_object["description"]
@@ -547,10 +547,10 @@ def create_navigator_apt_entry(nav_info, appointment_timestamp):
     :return:
     """
 
-    next_available_apt_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"]),
-                                "Navigator Database ID": nav_info["Database ID"],
+    next_available_apt_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["first_name"],nav_info["last_name"]),
+                                "Navigator Database ID": nav_info["id"],
                                 "Appointment Date and Time": appointment_timestamp.isoformat()[:-6],
-                                "Schedule Appointment Link": "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id={!s}".format(str(nav_info["Database ID"])),
+                                "Schedule Appointment Link": "http://picbackend.herokuapp.com/v1/scheduleappointment/?nav_id={!s}".format(str(nav_info["id"])),
                                 }
 
     return next_available_apt_entry
@@ -780,8 +780,8 @@ def get_nav_scheduled_appointments(nav_info, credentials_object, rqst_errors):
 
                 if nav_cal_events:
                     for cal_event in nav_cal_events:
-                        scheduled_appointment_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["First Name"],nav_info["Last Name"]),
-                                                       "Navigator Database ID": nav_info["Database ID"],
+                        scheduled_appointment_entry = {"Navigator Name": "{!s} {!s}".format(nav_info["first_name"],nav_info["last_name"]),
+                                                       "Navigator Database ID": nav_info["id"],
                                                        "Appointment Date and Time": cal_event["start"]["dateTime"][:-1],
                                                        "Appointment Summary": None}
                         if "description" in cal_event:

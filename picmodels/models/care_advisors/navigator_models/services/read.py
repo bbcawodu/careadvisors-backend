@@ -9,7 +9,7 @@ def retrieve_navigator_data_by_id(cls, rqst_staff_id, list_of_ids, rqst_errors):
         else:
             if list_of_ids:
                 for db_id in list_of_ids:
-                    tuple_of_bools_if_id_in_data = (instance_data['Database ID'] == db_id for instance_data in response_list)
+                    tuple_of_bools_if_id_in_data = (instance_data['id'] == db_id for instance_data in response_list)
                     if not any(tuple_of_bools_if_id_in_data):
                         rqst_errors.append('Navigator instance with id: {} not found in database'.format(db_id))
 

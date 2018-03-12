@@ -131,16 +131,16 @@ In response, a JSON document will be displayed with the following format:
     {
         "Data": [
             {
-                "Email": String,
-                "Type": String,
-                "Database ID": Integer,
-                "County": String,
-                "Region": String,
-                "First Name": String,
-                "Last Name": String,
-                "Authorized Credentials": Boolean,
-                "Picture": Link,
-                "Base Location": [{
+                "email": String,
+                "type": String,
+                "id": Integer,
+                "county": String,
+                "region": String,
+                "first_name": String,
+                "last_name": String,
+                "authorized_credentials": Boolean,
+                "picture": Link,
+                "base_location": [{
                                     "Location Name": String,
                                     "Address Line 1": String,
                                     "Address Line 2": String,
@@ -151,18 +151,9 @@ In response, a JSON document will be displayed with the following format:
                                     "Database Action": String
                                  },
                                   ...(Can be Empty)],
-                "MPN": String,
-                "Consumers":[
-                                {
-                                "First Name": String,
-                                "Best Contact Time": String,
-                                "Database ID": Integer,
-                                "Last Name": String,
-                                "Preferred Language": String,
-                                "Navigator": String,
-                                "Phone Number": String,
-                                "Email": String
-                                },
+                "mpn": String,
+                "consumers":[
+                                Integer,
                                 ....
                             ],
             },

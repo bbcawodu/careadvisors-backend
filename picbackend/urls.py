@@ -111,6 +111,9 @@ urlpatterns = [
     # dashboard urls
     url(r"^v2/dashboard/$", views.DashboardView.as_view()),
 
+    # healthcare service expertise urls
+    url(r'v2/service_expertise/$', views.ServiceExpertiseManagementView.as_view()),
+
 
     ###################
     #CPS API V1 URLS
