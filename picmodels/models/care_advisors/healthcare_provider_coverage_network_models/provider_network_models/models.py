@@ -6,8 +6,8 @@ from .services.create_update_delete import update_row_w_validated_params
 from .services.create_update_delete import delete_row_w_validated_params
 from .services.create_update_delete import check_for_provider_network_objs_with_given_name
 
-from .services.read import retrieve_provider_network_data_by_id
-from .services.read import retrieve_provider_network_data_by_name
+from .services.read import get_serialized_rows_by_id
+from .services.read import get_serialized_rows_by_name
 
 
 class ProviderNetwork(models.Model):
@@ -43,5 +43,5 @@ ProviderNetwork.update_row_w_validated_params = classmethod(update_row_w_validat
 ProviderNetwork.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
 ProviderNetwork.check_for_provider_network_objs_with_given_name = classmethod(check_for_provider_network_objs_with_given_name)
 
-ProviderNetwork.retrieve_provider_network_data_by_id = classmethod(retrieve_provider_network_data_by_id)
-ProviderNetwork.retrieve_provider_network_data_by_name = classmethod(retrieve_provider_network_data_by_name)
+ProviderNetwork.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
+ProviderNetwork.get_serialized_rows_by_name = classmethod(get_serialized_rows_by_name)

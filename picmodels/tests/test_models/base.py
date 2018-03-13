@@ -36,10 +36,9 @@ class DBModelsBaseTestCase(object):
 
         self.assertEqual(len(rqst_errors), 0, "{}".format(rqst_errors))
 
-    def use_get_serialized_rows_by_id(self, ids_to_get_string, ids_to_get, test_errors):
+    def use_get_serialized_rows_by_id(self, validated_params, test_errors):
         serialized_table_data = self.db_model.get_serialized_rows_by_id(
-            ids_to_get_string,
-            ids_to_get,
+            validated_params,
             test_errors
         )
 
@@ -48,9 +47,9 @@ class DBModelsBaseTestCase(object):
 
         return serialized_table_data
 
-    def use_get_serialized_rows_by_name(self, name_to_get, test_errors):
+    def use_get_serialized_rows_by_name(self, validated_params, test_errors):
         serialized_table_data = self.db_model.get_serialized_rows_by_name(
-            name_to_get,
+            validated_params,
             test_errors
         )
 
@@ -59,9 +58,31 @@ class DBModelsBaseTestCase(object):
 
         return serialized_table_data
 
-    def use_get_serialized_rows_by_nav_id(self, nav_ids, test_errors):
+    def use_get_serialized_rows_by_nav_id(self, validated_params, test_errors):
         serialized_table_data = self.db_model.get_serialized_rows_by_nav_id(
-            nav_ids,
+            validated_params,
+            test_errors
+        )
+
+        self.assertEqual(len(test_errors), 0, "{}".format(test_errors))
+        self.assertNotEqual(len(serialized_table_data), 0, "{}".format([serialized_table_data]))
+
+        return serialized_table_data
+
+    def use_get_serialized_rows_by_network_name(self, validated_params, test_errors):
+        serialized_table_data = self.db_model.get_serialized_rows_by_network_name(
+            validated_params,
+            test_errors
+        )
+
+        self.assertEqual(len(test_errors), 0, "{}".format(test_errors))
+        self.assertNotEqual(len(serialized_table_data), 0, "{}".format([serialized_table_data]))
+
+        return serialized_table_data
+
+    def use_get_serialized_rows_by_network_id(self, validated_params, test_errors):
+        serialized_table_data = self.db_model.get_serialized_rows_by_network_id(
+            validated_params,
             test_errors
         )
 

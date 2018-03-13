@@ -11,7 +11,7 @@ The body of the request should be a JSON document using the following template:
 ```
 {
     "name": String,
-    "provider_network Database ID": Integer (Database ID of the Network this location belongs to.),
+    "provider_network_id": Integer (Database ID of the Network this location belongs to.),
     "add_accepted_plans": [
         Integer,
         ...,

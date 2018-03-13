@@ -1,11 +1,7 @@
-"""
-This module defines utility functions and classes for views that handle locations for provider networks that are
-contracted with PIC
-"""
-
 from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_list_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
+
 from picmodels.models import HealthcarePlan
 
 
@@ -19,25 +15,25 @@ def validate_put_rqst_params(rqst_body, rqst_errors):
     if rqst_action == 'create':
         validate_create_row_params(rqst_body, validated_params, rqst_errors)
     elif rqst_action == 'update':
-        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
         validate_update_row_params(rqst_body, validated_params, rqst_errors)
     elif rqst_action == 'delete':
-        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
 
     return validated_params
 
 
 def validate_create_row_params(rqst_body, validated_params, rqst_errors):
     rqst_provider_location_name = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
-    validated_params["rqst_provider_location_name"] = rqst_provider_location_name
+    validated_params["name"] = rqst_provider_location_name
 
     rqst_provider_network_id = clean_int_value_from_dict_object(
         rqst_body,
         "root",
-        "provider_network Database ID",
+        "provider_network_id",
         rqst_errors
     )
-    validated_params["rqst_provider_network_id"] = rqst_provider_network_id
+    validated_params["provider_network_id"] = rqst_provider_network_id
 
     rqst_add_accepted_plans_ids = clean_list_value_from_dict_object(
         rqst_body,
@@ -56,16 +52,16 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
 def validate_update_row_params(rqst_body, validated_params, rqst_errors):
     if "name" in rqst_body:
         rqst_provider_location_name = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
-        validated_params["rqst_provider_location_name"] = rqst_provider_location_name
+        validated_params["name"] = rqst_provider_location_name
 
-    if "provider_network Database ID" in rqst_body:
+    if "provider_network_id" in rqst_body:
         rqst_provider_network_id = clean_int_value_from_dict_object(
             rqst_body,
             "root",
-            "provider_network Database ID",
+            "provider_network_id",
             rqst_errors
         )
-        validated_params["rqst_provider_network_id"] = rqst_provider_network_id
+        validated_params["provider_network_id"] = rqst_provider_network_id
 
     if "add_accepted_plans" in rqst_body:
         rqst_add_accepted_plans_ids = clean_list_value_from_dict_object(

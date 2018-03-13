@@ -44,21 +44,15 @@ class ServiceExpertiseManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             data_list = []
 
             if 'id' in validated_GET_rqst_params:
-                rqst_id = validated_GET_rqst_params['id']
-                if rqst_id != 'all':
-                    list_of_ids = validated_GET_rqst_params['id_list']
-                else:
-                    list_of_ids = None
-
                 data_list = HealthcareServiceExpertise.get_serialized_rows_by_id(
-                    rqst_id,
-                    list_of_ids,
+                    validated_GET_rqst_params,
                     rqst_errors
                 )
             elif 'name' in validated_GET_rqst_params:
-                rqst_name = validated_GET_rqst_params['name']
-
-                data_list = HealthcareServiceExpertise.get_serialized_rows_by_name(rqst_name, rqst_errors)
+                data_list = HealthcareServiceExpertise.get_serialized_rows_by_name(
+                    validated_GET_rqst_params,
+                    rqst_errors
+                )
             else:
                 rqst_errors.append('No Valid Parameters')
 

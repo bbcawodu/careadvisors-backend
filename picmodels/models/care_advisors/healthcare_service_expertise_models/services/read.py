@@ -1,8 +1,14 @@
 from picmodels.models.utils import filter_db_queryset_by_id
 
 
-def get_serialized_rows_by_id(cls, rqst_general_concerns_id, list_of_ids, rqst_errors):
-    rows = filter_db_queryset_by_id(cls.objects.all(), rqst_general_concerns_id, list_of_ids)
+def get_serialized_rows_by_id(cls, validated_params, rqst_errors):
+    rqst_id = validated_params['id']
+    if rqst_id != 'all':
+        list_of_ids = validated_params['id_list']
+    else:
+        list_of_ids = None
+
+    rows = filter_db_queryset_by_id(cls.objects.all(), rqst_id, list_of_ids)
 
     response_list = create_response_list_from_db_objects(rows)
 
@@ -22,7 +28,9 @@ def get_serialized_rows_by_id(cls, rqst_general_concerns_id, list_of_ids, rqst_e
     return response_list
 
 
-def get_serialized_rows_by_name(cls, rqst_name, rqst_errors):
+def get_serialized_rows_by_name(cls, validated_params, rqst_errors):
+    rqst_name = validated_params['name']
+
     rows = filter_rows_by_name(cls.objects.all(), rqst_name)
     if len(rows) > 1:
         rqst_errors.append('Multiple rows found in db for name: {!s}'.format(rqst_name))
