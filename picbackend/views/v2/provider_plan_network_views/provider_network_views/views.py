@@ -43,22 +43,13 @@ class ProviderNetworksManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             data_list = []
 
             if 'id' in validated_GET_rqst_params:
-                rqst_provider_network_id = validated_GET_rqst_params['id']
-                if rqst_provider_network_id != 'all':
-                    list_of_ids = validated_GET_rqst_params['id_list']
-                else:
-                    list_of_ids = None
-
-                data_list = ProviderNetwork.retrieve_provider_network_data_by_id(
-                    rqst_provider_network_id,
-                    list_of_ids,
+                data_list = ProviderNetwork.get_serialized_rows_by_id(
+                    validated_GET_rqst_params,
                     rqst_errors
                 )
             elif 'name' in validated_GET_rqst_params:
-                rqst_name = validated_GET_rqst_params['name']
-
-                data_list = ProviderNetwork.retrieve_provider_network_data_by_name(
-                    rqst_name,
+                data_list = ProviderNetwork.get_serialized_rows_by_name(
+                    validated_GET_rqst_params,
                     rqst_errors
                 )
             else:

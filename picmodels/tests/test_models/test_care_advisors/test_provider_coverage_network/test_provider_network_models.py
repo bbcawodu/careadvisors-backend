@@ -2,11 +2,11 @@ from django.test import TestCase
 
 from picmodels.tests.test_models.base import DBModelsBaseTestCase
 
-from picmodels.models import HealthcareServiceExpertise
+from picmodels.models import ProviderNetwork
 
 
-class HealthcareServiceExpertiseTestCase(DBModelsBaseTestCase, TestCase):
-    db_model = HealthcareServiceExpertise
+class ProviderNetworkTestCase(DBModelsBaseTestCase, TestCase):
+    db_model = ProviderNetwork
 
     def test_create_row_w_validated_params(self):
         validated_params = {
@@ -66,7 +66,6 @@ class HealthcareServiceExpertiseTestCase(DBModelsBaseTestCase, TestCase):
             "id_list": [1],
             "id": u"1"
         }
-
         test_errors = []
 
         serialized_table_data = self.use_get_serialized_rows_by_id(
@@ -76,9 +75,8 @@ class HealthcareServiceExpertiseTestCase(DBModelsBaseTestCase, TestCase):
 
     def test_get_serialized_rows_by_name(self):
         validated_params = {
-            "name": "cancer"
+            "name": "Edward-Elmhurst"
         }
-
         test_errors = []
 
         serialized_table_data = self.use_get_serialized_rows_by_name(

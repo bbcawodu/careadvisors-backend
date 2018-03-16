@@ -9,10 +9,10 @@ from .services.create_update_delete import update_row_w_validated_params
 from .services.create_update_delete import delete_row_w_validated_params
 from .services.create_update_delete import check_for_provider_location_objs_with_given_name_and_network
 
-from .services.read import retrieve_provider_locations_by_id
-from .services.read import retrieve_provider_locations_by_name
-from .services.read import retrieve_provider_locations_by_network_id
-from .services.read import retrieve_provider_locations_by_network_name
+from .services.read import get_serialized_rows_by_id
+from .services.read import get_serialized_rows_by_name
+from .services.read import get_serialized_rows_by_network_id
+from .services.read import get_serialized_rows_by_network_name
 
 class ProviderLocation(models.Model):
     name = models.CharField(max_length=10000)
@@ -62,7 +62,7 @@ ProviderLocation.update_row_w_validated_params = classmethod(update_row_w_valida
 ProviderLocation.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
 ProviderLocation.check_for_provider_location_objs_with_given_name_and_network = classmethod(check_for_provider_location_objs_with_given_name_and_network)
 
-ProviderLocation.retrieve_provider_locations_by_id = classmethod(retrieve_provider_locations_by_id)
-ProviderLocation.retrieve_provider_locations_by_name = classmethod(retrieve_provider_locations_by_name)
-ProviderLocation.retrieve_provider_locations_by_network_id = classmethod(retrieve_provider_locations_by_network_id)
-ProviderLocation.retrieve_provider_locations_by_network_name= classmethod(retrieve_provider_locations_by_network_name)
+ProviderLocation.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
+ProviderLocation.get_serialized_rows_by_name = classmethod(get_serialized_rows_by_name)
+ProviderLocation.get_serialized_rows_by_network_id = classmethod(get_serialized_rows_by_network_id)
+ProviderLocation.get_serialized_rows_by_network_name = classmethod(get_serialized_rows_by_network_name)

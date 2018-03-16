@@ -1,7 +1,7 @@
 from django.conf import settings
 
 
-def retrieve_carrier_data_by_id(cls, validated_params, rqst_errors):
+def get_serialized_rows_by_id(cls, validated_params, rqst_errors):
     rqst_carrier_id = validated_params['id']
     if rqst_carrier_id != 'all':
         list_of_ids = validated_params['id_list']
@@ -28,7 +28,7 @@ def retrieve_carrier_data_by_id(cls, validated_params, rqst_errors):
     return response_list
 
 
-def retrieve_carrier_data_by_state(cls, validated_params, rqst_errors):
+def get_serialized_rows_by_state(cls, validated_params, rqst_errors):
     list_of_states = validated_params['state_list']
     carrier_qset = cls.objects.all()
     response_list = []
@@ -54,7 +54,7 @@ def retrieve_carrier_data_by_state(cls, validated_params, rqst_errors):
     return response_list
 
 
-def retrieve_carrier_data_by_name(cls, validated_params, rqst_errors):
+def get_serialized_rows_by_name(cls, validated_params, rqst_errors):
     rqst_name = validated_params['name']
 
     carrier_qset = filter_carrier_objs_by_name(cls.objects.all(), rqst_name)

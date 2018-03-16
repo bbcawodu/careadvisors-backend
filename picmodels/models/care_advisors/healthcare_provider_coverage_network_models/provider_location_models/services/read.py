@@ -1,8 +1,14 @@
 from picmodels.models.utils import filter_db_queryset_by_id
 
 
-def retrieve_provider_locations_by_id(cls, rqst_provider_location_id, list_of_ids, rqst_errors):
-    provider_location_qset = filter_db_queryset_by_id(cls.objects.all(), rqst_provider_location_id, list_of_ids)
+def get_serialized_rows_by_id(cls, validated_params, rqst_errors):
+    rqst_id = validated_params['id']
+    if rqst_id != 'all':
+        list_of_ids = validated_params['id_list']
+    else:
+        list_of_ids = None
+
+    provider_location_qset = filter_db_queryset_by_id(cls.objects.all(), rqst_id, list_of_ids)
 
     response_list = create_response_list_from_db_objects(provider_location_qset)
 
@@ -22,7 +28,9 @@ def retrieve_provider_locations_by_id(cls, rqst_provider_location_id, list_of_id
     return response_list
 
 
-def retrieve_provider_locations_by_name(cls, rqst_name, rqst_errors):
+def get_serialized_rows_by_name(cls, validated_params, rqst_errors):
+    rqst_name = validated_params['name']
+
     provider_location_qset = filter_provider_location_instances_by_name(cls.objects.all(), rqst_name)
 
     response_list = create_response_list_from_db_objects(provider_location_qset)
@@ -36,8 +44,13 @@ def retrieve_provider_locations_by_name(cls, rqst_name, rqst_errors):
     return response_list
 
 
-def retrieve_provider_locations_by_network_name(cls, rqst_network_name, rqst_errors):
-    provider_location_qset = filter_provider_location_instances_by_provider_network_name(cls.objects.all(), rqst_network_name)
+def get_serialized_rows_by_network_name(cls, validated_params, rqst_errors):
+    rqst_network_name = validated_params['network_name']
+
+    provider_location_qset = filter_provider_location_instances_by_provider_network_name(
+        cls.objects.all(),
+        rqst_network_name
+    )
 
     response_list = create_response_list_from_db_objects(provider_location_qset)
 
@@ -50,18 +63,25 @@ def retrieve_provider_locations_by_network_name(cls, rqst_network_name, rqst_err
     return response_list
 
 
-def retrieve_provider_locations_by_network_id(cls, list_of_network_ids, rqst_errors):
+def get_serialized_rows_by_network_id(cls, validated_params, rqst_errors):
+    list_of_network_ids = validated_params['network_id_list']
+
     response_list = []
 
     provider_location_qset = cls.objects.all()
     for network_id in list_of_network_ids:
-        filtered_provider_location_qset = filter_provider_location_instances_by_provider_network_id(provider_location_qset, network_id)
+        filtered_provider_location_qset = filter_provider_location_instances_by_provider_network_id(
+            provider_location_qset,
+            network_id
+        )
 
         response_list_component = create_response_list_from_db_objects(filtered_provider_location_qset)
 
         def check_response_component_for_requested_data():
             if not response_list_component:
-                rqst_errors.append(rqst_errors.append("No provider location instances in network for provider network with id: {}".format(network_id)))
+                rqst_errors.append(
+                    "No provider location instances in network for provider network with id: {}".format(network_id)
+                )
 
         check_response_component_for_requested_data()
 
@@ -89,7 +109,9 @@ def filter_provider_location_instances_by_name(provider_location_qset, rqst_name
 
 
 def filter_provider_location_instances_by_provider_network_name(provider_location_qset, rqst_provider_network_name):
-    provider_location_qset = provider_location_qset.filter(provider_network__name__iexact=rqst_provider_network_name).order_by("id")
+    provider_location_qset = provider_location_qset.filter(
+        provider_network__name__iexact=rqst_provider_network_name
+    ).order_by("id")
 
     return provider_location_qset
 

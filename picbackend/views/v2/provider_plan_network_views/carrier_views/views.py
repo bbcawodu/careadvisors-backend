@@ -54,11 +54,11 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             data_list = []
 
             if 'id' in validated_GET_rqst_params:
-                data_list = HealthcareCarrier.retrieve_carrier_data_by_id(validated_GET_rqst_params, rqst_errors)
+                data_list = HealthcareCarrier.get_serialized_rows_by_id(validated_GET_rqst_params, rqst_errors)
             elif 'name' in validated_GET_rqst_params:
-                data_list = HealthcareCarrier.retrieve_carrier_data_by_name(validated_GET_rqst_params, rqst_errors)
+                data_list = HealthcareCarrier.get_serialized_rows_by_name(validated_GET_rqst_params, rqst_errors)
             elif 'state' in validated_GET_rqst_params:
-                data_list = HealthcareCarrier.retrieve_carrier_data_by_state(validated_GET_rqst_params, rqst_errors)
+                data_list = HealthcareCarrier.get_serialized_rows_by_state(validated_GET_rqst_params, rqst_errors)
             else:
                 rqst_errors.append('No Valid Parameters')
 

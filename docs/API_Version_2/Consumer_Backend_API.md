@@ -32,7 +32,7 @@ The body of the request should be a JSON document using the following template:
     "address_line_1": String,
     "address_line_2": String,
     "city": String,
-    "state_province": String,
+    "state_province": String(2 letter code),
     "zipcode": String,
     
     "date_met_nav":{
@@ -60,6 +60,22 @@ The body of the request should be a JSON document using the following template:
         Integer,
         Integer,
         Integer
+        ...
+    ],
+    
+    'billing_amount': Float,
+    'consumer_need': String,
+    'service_expertise_need': String,
+    'insurance_carrier': {
+        'name': String,
+        'state_province': String(2 letter code),
+    },
+    'add_healthcare_networks_used': [
+        String,
+        ...
+    ],
+    'remove_healthcare_networks_used': [
+        String,
         ...
     ],
                     
@@ -101,6 +117,17 @@ The body of the request should be a JSON document using the following template:
 }
 ```
 
+
+The Following is a list of possible consumer_need values with corresponding model constant names:
+```
+[
+    CHOOSE_A_DOC = "choose a doctor",
+    BILLING_ISSUES = "billing issues",
+    N_A = "Not Available"
+]
+```
+
+
 In response, a JSON document will be displayed with the following format:
 ```
 {
@@ -133,6 +160,13 @@ In response, a JSON document will be displayed with the following format:
             - cps_info["secondary_dependents"][index]["force_create_consumer"]
             - "id"
             - "create_case_management_rows"
+            - 'billing_amount'
+            - 'consumer_need'
+            - 'service_expertise_need'
+            - insurance_carrier['name']
+            - insurance_carrier['state_province']
+            - 'add_healthcare_networks_used'
+            - 'remove_healthcare_networks_used'
             
         - Keys that can be empty strings:
             - "middle_name"
@@ -146,6 +180,8 @@ In response, a JSON document will be displayed with the following format:
             - "city"
             - "state_province"
             - "zipcode"
+            - 'consumer_need'
+            - 'service_expertise_need'
         
         - Keys that can be empty arrays
             - "consumer_notes"
@@ -153,6 +189,8 @@ In response, a JSON document will be displayed with the following format:
         
         - Keys that can be Null
             - "date_met_nav"
+            - "cps_info"
+            - insurance_carrier
             
         - Keys that WILL NOT be read
             - "update_case_management_rows"
@@ -182,6 +220,8 @@ In response, a JSON document will be displayed with the following format:
             - "city"
             - "state_province"
             - "zipcode"
+            - 'consumer_need'
+            - 'service_expertise_need'
          
          - Keys that can be empty arrays
             - "consumer_notes"
@@ -190,6 +230,7 @@ In response, a JSON document will be displayed with the following format:
         - Keys that can be Null
             - "date_met_nav"
             - "cps_info"
+            - insurance_carrier
         
     - If there are no errors in the JSON Body document:
         - The response JSON document will have a dictionary object as the value for the "Data" key.
@@ -278,6 +319,21 @@ In response, a JSON document will be displayed with the following format:
                 "household_size": Integer,
                 "plan": String,
                 "best_contact_time": String,
+                'billing_amount': Float,
+                'consumer_need': String,
+                'service_expertise_need': String,
+                'insurance_carrier': {
+                    'name': String,
+                    'state_province': String(2 letter code),
+                },
+                'add_healthcare_networks_used': [
+                    String,
+                    ...
+                ],
+                'remove_healthcare_networks_used': [
+                    String,
+                    ...
+                ],
                 "address": Will either be None or a dictionary of the following form:
                            {
                             "address_line_1": String,

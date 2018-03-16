@@ -16,20 +16,20 @@ def validate_put_rqst_params(rqst_body, rqst_errors):
     if rqst_action == 'create':
         validate_create_row_params(rqst_body, validated_params, rqst_errors)
     elif rqst_action == 'update':
-        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
         validate_update_row_params(rqst_body, validated_params, rqst_errors)
     elif rqst_action == 'delete':
-        validated_params['rqst_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
 
     return validated_params
 
 
 def validate_create_row_params(rqst_body, validated_params, rqst_errors):
     rqst_provider_network_name = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
-    validated_params["rqst_provider_network_name"] = rqst_provider_network_name
+    validated_params["name"] = rqst_provider_network_name
 
 
 def validate_update_row_params(rqst_body, validated_params, rqst_errors):
     if "name" in rqst_body:
         rqst_provider_network_name = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
-        validated_params["rqst_provider_network_name"] = rqst_provider_network_name
+        validated_params["name"] = rqst_provider_network_name

@@ -1,8 +1,14 @@
 from picmodels.models.utils import filter_db_queryset_by_id
 
 
-def get_serialized_rows_by_id(cls, rqst_general_concerns_id, list_of_ids, rqst_errors):
-    rows = filter_db_queryset_by_id(cls.objects.all(), rqst_general_concerns_id, list_of_ids)
+def get_serialized_rows_by_id(cls, validated_params, rqst_errors):
+    rqst_id = validated_params['id']
+    if rqst_id != 'all':
+        list_of_ids = validated_params['id_list']
+    else:
+        list_of_ids = None
+
+    rows = filter_db_queryset_by_id(cls.objects.all(), rqst_id, list_of_ids)
     rows = prefetch_related_rows(rows)
 
     response_list = create_response_list_from_db_objects(rows)
@@ -23,8 +29,10 @@ def get_serialized_rows_by_id(cls, rqst_general_concerns_id, list_of_ids, rqst_e
     return response_list
 
 
-def get_serialized_rows_by_nav_id(cls, list_of_ids, rqst_errors):
-    rows = filter_rows_by_nav_id(cls.objects.all(), list_of_ids)
+def get_serialized_rows_by_nav_id(cls, validated_params, rqst_errors):
+    list_of_nav_ids = validated_params['nav_id_list']
+
+    rows = filter_rows_by_nav_id(cls.objects.all(), list_of_nav_ids)
     rows = prefetch_related_rows(rows)
 
     response_list = create_response_list_from_db_objects(rows)

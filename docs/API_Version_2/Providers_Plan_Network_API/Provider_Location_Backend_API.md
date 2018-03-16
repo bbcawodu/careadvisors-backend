@@ -11,7 +11,7 @@ The body of the request should be a JSON document using the following template:
 ```
 {
     "name": String,
-    "provider_network Database ID": Integer (Database ID of the Network this location belongs to.),
+    "provider_network_id": Integer (Database ID of the Network this location belongs to.),
     "add_accepted_plans": [
         Integer,
         ...,
@@ -53,7 +53,7 @@ In response, a JSON document will be displayed with the following format:
             - "add_accepted_plans"
         
         - Keys that can be Null
-            - None
+            - "provider_network_id"
             
         - Keys that WILL NOT be read
             - "remove_accepted_plans"
@@ -77,7 +77,7 @@ In response, a JSON document will be displayed with the following format:
             - None
         
         - Keys that can be Null
-            - None
+            - "provider_network_id"
         
     - If there are no errors in the JSON Body document:
         - The response JSON document will have a dictionary object as the value for the "Data" key.
