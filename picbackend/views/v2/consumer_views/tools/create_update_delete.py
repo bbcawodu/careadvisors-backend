@@ -30,11 +30,11 @@ def validate_put_rqst_params(rqst_body, rqst_errors):
     if rqst_action == 'create':
         validate_create_row_params(rqst_body, validated_params, rqst_errors)
     elif rqst_action == 'update':
-        validated_params['rqst_consumer_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
         validate_update_row_params(rqst_body, validated_params, rqst_errors)
     elif rqst_action == 'delete':
-        validated_params['rqst_consumer_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
-        validated_params['rqst_create_backup'] = clean_bool_value_from_dict_object(
+        validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validated_params['create_backup'] = clean_bool_value_from_dict_object(
             rqst_body,
             "root",
             "create_backup",
@@ -46,52 +46,69 @@ def validate_put_rqst_params(rqst_body, rqst_errors):
 
 
 def validate_create_row_params(rqst_body, validated_params, rqst_errors):
-    rqst_consumer_email = clean_string_value_from_dict_object(
+    email = clean_string_value_from_dict_object(
         rqst_body,
         "root",
         "email",
         rqst_errors,
         empty_string_allowed=True
     )
-    if rqst_consumer_email and not rqst_errors:
+    if email and not rqst_errors:
         try:
-            validate_email(rqst_consumer_email)
+            validate_email(email)
         except forms.ValidationError:
-            rqst_errors.append("{!s} must be a valid email address".format(rqst_consumer_email))
+            rqst_errors.append("{!s} must be a valid email address".format(email))
+    validated_params["email"] = email
 
-    rqst_consumer_f_name = clean_string_value_from_dict_object(rqst_body, "root", "first_name", rqst_errors)
-    rqst_consumer_m_name = clean_string_value_from_dict_object(
+    first_name = clean_string_value_from_dict_object(rqst_body, "root", "first_name", rqst_errors)
+    validated_params["first_name"] = first_name
+
+    middle_name = clean_string_value_from_dict_object(
         rqst_body,
         "root",
         "middle_name",
         rqst_errors,
         empty_string_allowed=True
     )
-    rqst_consumer_l_name = clean_string_value_from_dict_object(rqst_body, "root", "last_name", rqst_errors)
-    rqst_consumer_plan = clean_string_value_from_dict_object(
+    validated_params["middle_name"] = middle_name
+
+    last_name = clean_string_value_from_dict_object(rqst_body, "root", "last_name", rqst_errors)
+    validated_params["last_name"] = last_name
+
+    plan = clean_string_value_from_dict_object(
         rqst_body,
         "root",
         "plan",
         rqst_errors,
         empty_string_allowed=True
     )
-    rqst_consumer_met_nav_at = clean_string_value_from_dict_object(rqst_body, "root", "met_nav_at", rqst_errors)
-    rqst_consumer_household_size = clean_int_value_from_dict_object(rqst_body, "root", "household_size", rqst_errors)
-    rqst_consumer_phone = clean_string_value_from_dict_object(
+    validated_params["plan"] = plan
+
+    met_nav_at = clean_string_value_from_dict_object(rqst_body, "root", "met_nav_at", rqst_errors)
+    validated_params["met_nav_at"] = met_nav_at
+
+    household_size = clean_int_value_from_dict_object(rqst_body, "root", "household_size", rqst_errors)
+    validated_params["household_size"] = household_size
+
+    phone = clean_string_value_from_dict_object(
         rqst_body,
         "root",
         "phone",
         rqst_errors,
         empty_string_allowed=True
     )
-    rqst_consumer_pref_lang = clean_string_value_from_dict_object(
+    validated_params["phone"] = phone
+
+    preferred_language = clean_string_value_from_dict_object(
         rqst_body,
         "root",
         "preferred_language",
         rqst_errors,
         empty_string_allowed=True
     )
-    rqst_best_contact_time = clean_string_value_from_dict_object(
+    validated_params["preferred_language"] = preferred_language
+
+    best_contact_time = clean_string_value_from_dict_object(
         rqst_body,
         "root",
         "best_contact_time",
@@ -99,45 +116,57 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
         no_key_allowed=True,
         empty_string_allowed=True
     )
-    rqst_navigator_notes = clean_list_value_from_dict_object(
+    validated_params['best_contact_time'] = best_contact_time
+
+    consumer_notes = clean_list_value_from_dict_object(
         rqst_body,
         "root",
         "consumer_notes",
         rqst_errors,
         empty_list_allowed=True
     )
+    validated_params["consumer_notes"] = consumer_notes
 
-    rqst_address_line_1 = clean_string_value_from_dict_object(
+    address_line_1 = clean_string_value_from_dict_object(
         rqst_body,
         "root",
         "address_line_1",
         rqst_errors,
         empty_string_allowed=True
     )
-    rqst_address_line_2 = clean_string_value_from_dict_object(
+    validated_params["address_line_1"] = address_line_1
+
+    address_line_2 = clean_string_value_from_dict_object(
         rqst_body,
         "root",
         "address_line_2",
         rqst_errors,
         empty_string_allowed=True
     )
-    if rqst_address_line_2 is None:
-        rqst_address_line_2 = ''
-    rqst_city = clean_string_value_from_dict_object(rqst_body, "root", "city", rqst_errors, empty_string_allowed=True)
-    rqst_state = clean_string_value_from_dict_object(
+    if address_line_2 is None:
+        address_line_2 = ''
+    validated_params["address_line_2"] = address_line_2
+
+    city = clean_string_value_from_dict_object(rqst_body, "root", "city", rqst_errors, empty_string_allowed=True)
+    validated_params["city"] = city
+
+    state_province = clean_string_value_from_dict_object(
         rqst_body,
         "root",
         "state_province",
         rqst_errors,
         empty_string_allowed=True
     )
-    rqst_zipcode = clean_string_value_from_dict_object(
+    validated_params["state_province"] = state_province
+
+    zipcode = clean_string_value_from_dict_object(
         rqst_body,
         "root",
         "zipcode",
         rqst_errors,
         empty_string_allowed=True
     )
+    validated_params["zipcode"] = zipcode
 
     validated_params['force_create_consumer'] = clean_bool_value_from_dict_object(rqst_body,
                                                                                   "root",
@@ -152,7 +181,7 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
         rqst_errors,
         none_allowed=True
     )
-    rqst_date_met_nav = None
+    date_met_nav = None
     if date_met_nav_dict is not None:
         month = clean_int_value_from_dict_object(date_met_nav_dict, "date_met_nav", "Month", rqst_errors)
         if month:
@@ -170,32 +199,37 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
                 rqst_errors.append("Year must be between 1 and 9999 inclusive")
 
         if not rqst_errors:
-            rqst_date_met_nav = datetime.date(year, month, day)
+            date_met_nav = datetime.date(year, month, day)
+    validated_params["date_met_nav"] = date_met_nav
 
-    rqst_nav_id = clean_int_value_from_dict_object(rqst_body, "root", "navigator_id", rqst_errors)
-    nav_instance = None
-    if rqst_nav_id and not rqst_errors:
+    navigator_id = clean_int_value_from_dict_object(rqst_body, "root", "navigator_id", rqst_errors)
+    navigator_row = None
+    if navigator_id and not rqst_errors:
         try:
-            nav_instance = Navigators.objects.get(id=rqst_nav_id)
+            navigator_row = Navigators.objects.get(id=navigator_id)
         except Navigators.DoesNotExist:
-            rqst_errors.append('Staff database entry does not exist for the navigator id: {}'.format(rqst_nav_id))
+            rqst_errors.append('Staff database entry does not exist for the navigator id: {}'.format(navigator_id))
+    validated_params["navigator_id"] = navigator_id
+    validated_params["navigator_row"] = navigator_row
 
-    rqst_cps_info_dict = clean_dict_value_from_dict_object(rqst_body,
+    cps_info_dict = clean_dict_value_from_dict_object(rqst_body,
                                                            "root",
                                                            "cps_info",
                                                            rqst_errors,
                                                            no_key_allowed=True,
                                                            none_allowed=True)
-
     validated_cps_info_dict = None
-    if rqst_cps_info_dict:
-        validated_cps_info_dict = validate_cps_info_params_for_add_instance_rqst(rqst_cps_info_dict, rqst_consumer_met_nav_at, rqst_consumer_household_size, nav_instance, rqst_errors)
+    if cps_info_dict:
+        validated_cps_info_dict = validate_cps_info_params_for_add_instance_rqst(cps_info_dict, met_nav_at, household_size, navigator_row, rqst_errors)
+    validated_params["cps_info_dict"] = cps_info_dict
+    validated_params["validated_cps_info_dict"] = validated_cps_info_dict
 
-    rqst_create_backup = clean_bool_value_from_dict_object(rqst_body,
+    create_backup = clean_bool_value_from_dict_object(rqst_body,
                                                            "root",
                                                            "create_backup",
                                                            rqst_errors,
                                                            no_key_allowed=True)
+    validated_params["create_backup"] = create_backup
 
     rqst_hospital_info_dict = clean_dict_value_from_dict_object(rqst_body,
                                                                 "root",
@@ -206,30 +240,7 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
     validated_hospital_info_dict = None
     if rqst_hospital_info_dict:
         validated_hospital_info_dict = validate_hospital_info_params(rqst_hospital_info_dict, rqst_errors)
-
-    validated_params["rqst_consumer_email"] = rqst_consumer_email
-    validated_params["rqst_consumer_f_name"] = rqst_consumer_f_name
-    validated_params["rqst_consumer_m_name"] = rqst_consumer_m_name
-    validated_params["rqst_consumer_l_name"] = rqst_consumer_l_name
-    validated_params["rqst_consumer_plan"] = rqst_consumer_plan
-    validated_params["rqst_consumer_met_nav_at"] = rqst_consumer_met_nav_at
-    validated_params["rqst_consumer_household_size"] = rqst_consumer_household_size
-    validated_params["rqst_consumer_phone"] = rqst_consumer_phone
-    validated_params["rqst_consumer_pref_lang"] = rqst_consumer_pref_lang
-    validated_params['rqst_best_contact_time'] = rqst_best_contact_time
-    validated_params["rqst_navigator_notes"] = rqst_navigator_notes
-    validated_params["rqst_nav_id"] = rqst_nav_id
-    validated_params["nav_instance"] = nav_instance
-    validated_params["rqst_address_line_1"] = rqst_address_line_1
-    validated_params["rqst_address_line_2"] = rqst_address_line_2
-    validated_params["rqst_city"] = rqst_city
-    validated_params["rqst_state"] = rqst_state
-    validated_params["rqst_zipcode"] = rqst_zipcode
-    validated_params["rqst_date_met_nav"] = rqst_date_met_nav
-    validated_params["rqst_cps_info_dict"] = rqst_cps_info_dict
-    validated_params["validated_cps_info_dict"] = validated_cps_info_dict
     validated_params["validated_hospital_info_dict"] = validated_hospital_info_dict
-    validated_params["rqst_create_backup"] = rqst_create_backup
 
     if "create_case_management_rows" in rqst_body:
         rqst_case_management_row_data = clean_list_value_from_dict_object(
@@ -253,41 +264,42 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
 
         validated_params['validated_create_c_m_params'] = validated_create_c_m_params
 
+    validate_indiv_seeking_nav_params(rqst_body, validated_params, rqst_errors)
+
 
 def validate_update_row_params(rqst_body, validated_params, rqst_errors):
     consumer_instance = None
-    rqst_consumer_id = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
-    validated_params['rqst_consumer_id'] = rqst_consumer_id
+    rqst_id = validated_params['id']
     if not rqst_errors:
         try:
-            consumer_instance = PICConsumer.objects.get(id=rqst_consumer_id)
+            consumer_instance = PICConsumer.objects.get(id=rqst_id)
         except PICConsumer.DoesNotExist:
-            rqst_errors.append('Consumer database entry does not exist for the id: {}'.format(rqst_consumer_id))
+            rqst_errors.append('Consumer database entry does not exist for the id: {}'.format(rqst_id))
     validated_params['consumer_instance'] = consumer_instance
 
     if "email" in rqst_body:
-        rqst_consumer_email = clean_string_value_from_dict_object(
+        email = clean_string_value_from_dict_object(
             rqst_body,
             "root",
             "email",
             rqst_errors,
             empty_string_allowed=True
         )
-        if rqst_consumer_email:
+        if email:
             try:
-                validate_email(rqst_consumer_email)
+                validate_email(email)
             except forms.ValidationError:
-                rqst_errors.append("{!s} must be a valid email address".format(rqst_consumer_email))
+                rqst_errors.append("{!s} must be a valid email address".format(email))
 
-        validated_params["rqst_consumer_email"] = rqst_consumer_email
+        validated_params["email"] = email
 
     if "first_name" in rqst_body:
-        rqst_consumer_f_name = clean_string_value_from_dict_object(rqst_body, "root", "first_name", rqst_errors)
+        first_name = clean_string_value_from_dict_object(rqst_body, "root", "first_name", rqst_errors)
 
-        validated_params["rqst_consumer_f_name"] = rqst_consumer_f_name
+        validated_params["first_name"] = first_name
 
     if "middle_name" in rqst_body:
-        rqst_consumer_m_name = clean_string_value_from_dict_object(
+        middle_name = clean_string_value_from_dict_object(
             rqst_body,
             "root",
             "middle_name",
@@ -295,15 +307,15 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             empty_string_allowed=True
         )
 
-        validated_params["rqst_consumer_m_name"] = rqst_consumer_m_name
+        validated_params["middle_name"] = middle_name
 
     if "last_name" in rqst_body:
-        rqst_consumer_l_name = clean_string_value_from_dict_object(rqst_body, "root", "last_name", rqst_errors)
+        last_name = clean_string_value_from_dict_object(rqst_body, "root", "last_name", rqst_errors)
 
-        validated_params["rqst_consumer_l_name"] = rqst_consumer_l_name
+        validated_params["last_name"] = last_name
 
     if "plan" in rqst_body:
-        rqst_consumer_plan = clean_string_value_from_dict_object(
+        plan = clean_string_value_from_dict_object(
             rqst_body,
             "root",
             "plan",
@@ -311,22 +323,22 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             empty_string_allowed=True
         )
 
-        validated_params["rqst_consumer_plan"] = rqst_consumer_plan
+        validated_params["plan"] = plan
 
-    rqst_consumer_met_nav_at = None
+    met_nav_at = None
     if "met_nav_at" in rqst_body:
-        rqst_consumer_met_nav_at = clean_string_value_from_dict_object(rqst_body, "root", "met_nav_at", rqst_errors)
+        met_nav_at = clean_string_value_from_dict_object(rqst_body, "root", "met_nav_at", rqst_errors)
 
-        validated_params["rqst_consumer_met_nav_at"] = rqst_consumer_met_nav_at
+        validated_params["met_nav_at"] = met_nav_at
 
-    rqst_consumer_household_size = None
+    household_size = None
     if "household_size" in rqst_body:
-        rqst_consumer_household_size = clean_int_value_from_dict_object(rqst_body, "root", "household_size", rqst_errors)
+        household_size = clean_int_value_from_dict_object(rqst_body, "root", "household_size", rqst_errors)
 
-        validated_params["rqst_consumer_household_size"] = rqst_consumer_household_size
+        validated_params["household_size"] = household_size
 
     if "phone" in rqst_body:
-        rqst_consumer_phone = clean_string_value_from_dict_object(
+        phone = clean_string_value_from_dict_object(
             rqst_body,
             "root",
             "phone",
@@ -334,10 +346,10 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             empty_string_allowed=True
         )
 
-        validated_params["rqst_consumer_phone"] = rqst_consumer_phone
+        validated_params["phone"] = phone
 
     if "preferred_language" in rqst_body:
-        rqst_consumer_pref_lang = clean_string_value_from_dict_object(
+        preferred_language = clean_string_value_from_dict_object(
             rqst_body,
             "root",
             "preferred_language",
@@ -345,20 +357,20 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             empty_string_allowed=True
         )
 
-        validated_params["rqst_consumer_pref_lang"] = rqst_consumer_pref_lang
+        validated_params["preferred_language"] = preferred_language
 
     if "best_contact_time" in rqst_body:
-        rqst_best_contact_time = clean_string_value_from_dict_object(
+        best_contact_time = clean_string_value_from_dict_object(
             rqst_body,
             "root",
             "best_contact_time",
             rqst_errors,
             empty_string_allowed=True
         )
-        validated_params["rqst_best_contact_time"] = rqst_best_contact_time
+        validated_params["best_contact_time"] = best_contact_time
 
     if "consumer_notes" in rqst_body:
-        rqst_navigator_notes = clean_list_value_from_dict_object(
+        consumer_notes = clean_list_value_from_dict_object(
             rqst_body,
             "root",
             "consumer_notes",
@@ -366,10 +378,10 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             empty_list_allowed=True
         )
 
-        validated_params["rqst_navigator_notes"] = rqst_navigator_notes
+        validated_params["consumer_notes"] = consumer_notes
 
     if "address_line_1" in rqst_body:
-        rqst_address_line_1 = clean_string_value_from_dict_object(
+        address_line_1 = clean_string_value_from_dict_object(
             rqst_body,
             "root",
             "address_line_1",
@@ -377,23 +389,23 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             empty_string_allowed=True
         )
 
-        validated_params["rqst_address_line_1"] = rqst_address_line_1
+        validated_params["address_line_1"] = address_line_1
 
     if "address_line_2" in rqst_body:
-        rqst_address_line_2 = clean_string_value_from_dict_object(
+        address_line_2 = clean_string_value_from_dict_object(
             rqst_body,
             "root",
             "address_line_2",
             rqst_errors,
             empty_string_allowed=True
         )
-        if rqst_address_line_2 is None:
-            rqst_address_line_2 = ''
+        if address_line_2 is None:
+            address_line_2 = ''
 
-        validated_params["rqst_address_line_2"] = rqst_address_line_2
+        validated_params["address_line_2"] = address_line_2
 
     if "city" in rqst_body:
-        rqst_city = clean_string_value_from_dict_object(
+        city = clean_string_value_from_dict_object(
             rqst_body,
             "root",
             "city",
@@ -401,10 +413,10 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             empty_string_allowed=True
         )
 
-        validated_params["rqst_city"] = rqst_city
+        validated_params["city"] = city
 
     if "state_province" in rqst_body:
-        rqst_state = clean_string_value_from_dict_object(
+        state_province = clean_string_value_from_dict_object(
             rqst_body,
             "root",
             "state_province",
@@ -412,10 +424,10 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             empty_string_allowed=True
         )
 
-        validated_params["rqst_state"] = rqst_state
+        validated_params["state_province"] = state_province
 
     if "zipcode" in rqst_body:
-        rqst_zipcode = clean_string_value_from_dict_object(
+        zipcode = clean_string_value_from_dict_object(
             rqst_body,
             "root",
             "zipcode",
@@ -423,21 +435,21 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             empty_string_allowed=True
         )
 
-        validated_params["rqst_zipcode"] = rqst_zipcode
+        validated_params["zipcode"] = zipcode
 
-    nav_instance = None
+    navigator_row = None
     if "navigator_id" in rqst_body:
-        rqst_nav_id = clean_int_value_from_dict_object(rqst_body, "root", "navigator_id", rqst_errors)
-        if rqst_nav_id and not rqst_errors:
+        navigator_id = clean_int_value_from_dict_object(rqst_body, "root", "navigator_id", rqst_errors)
+        if navigator_id and not rqst_errors:
             try:
-                nav_instance = Navigators.objects.get(id=rqst_nav_id)
+                navigator_row = Navigators.objects.get(id=navigator_id)
             except Navigators.DoesNotExist:
-                rqst_errors.append('Staff database entry does not exist for the navigator id: {}'.format(rqst_nav_id))
+                rqst_errors.append('Staff database entry does not exist for the navigator id: {}'.format(navigator_id))
 
-        validated_params["rqst_nav_id"] = rqst_nav_id
-        validated_params["nav_instance"] = nav_instance
+        validated_params["navigator_id"] = navigator_id
+        validated_params["navigator_row"] = navigator_row
 
-    rqst_date_met_nav = None
+    date_met_nav = None
     if "date_met_nav" in rqst_body:
         date_met_nav_dict = clean_dict_value_from_dict_object(rqst_body, "root", "date_met_nav", rqst_errors,
                                                               none_allowed=True)
@@ -458,32 +470,32 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
                     rqst_errors.append("Year must be between 1 and 9999 inclusive")
 
             if not rqst_errors:
-                rqst_date_met_nav = datetime.date(year, month, day)
+                date_met_nav = datetime.date(year, month, day)
 
-        validated_params["rqst_date_met_nav"] = rqst_date_met_nav
+        validated_params["date_met_nav"] = date_met_nav
 
     if "cps_info" in rqst_body:
-        rqst_cps_info_dict = clean_dict_value_from_dict_object(rqst_body,
+        cps_info_dict = clean_dict_value_from_dict_object(rqst_body,
                                                                "root",
                                                                "cps_info",
                                                                rqst_errors,
                                                                none_allowed=True)
         validated_cps_info_dict = None
-        if consumer_instance and rqst_cps_info_dict:
+        if consumer_instance and cps_info_dict:
             validated_cps_info_dict = validate_cps_info_params_for_modify_instance_rqst(
-                rqst_cps_info_dict,
+                cps_info_dict,
                 consumer_instance,
-                rqst_consumer_met_nav_at,
-                rqst_consumer_household_size,
-                nav_instance,
+                met_nav_at,
+                household_size,
+                navigator_row,
                 rqst_errors
             )
 
-        validated_params["rqst_cps_info_dict"] = rqst_cps_info_dict
+        validated_params["cps_info_dict"] = cps_info_dict
         validated_params["validated_cps_info_dict"] = validated_cps_info_dict
 
     if "create_backup" in rqst_body:
-        validated_params['rqst_create_backup'] = clean_bool_value_from_dict_object(rqst_body,
+        validated_params['create_backup'] = clean_bool_value_from_dict_object(rqst_body,
                                                                                    "root",
                                                                                    "create_backup",
                                                                                    rqst_errors,
@@ -548,7 +560,9 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
 
         validated_params['validated_delete_c_m_params'] = validated_delete_c_m_params
 
-    if len(validated_params) < 3 or "rqst_consumer_id" not in validated_params:
+    validate_indiv_seeking_nav_params(rqst_body, validated_params, rqst_errors)
+
+    if len(validated_params) < 3 or "id" not in validated_params:
         rqst_errors.append("No parameters to modify are given.")
 
 
@@ -577,10 +591,10 @@ def validate_create_c_m_status_data(rqst_case_management_dict, rqst_case_row_ind
                                                                 )
     validated_c_m_row_params['rqst_management_notes'] = rqst_management_notes
 
-    if "rqst_consumer_id" in validated_params and not rqst_errors:
+    if "id" in validated_params and not rqst_errors:
         matching_c_m_steps = CaseManagementStatus.objects.all().filter(
             management_step=rqst_management_step,
-            contact=validated_params["rqst_consumer_id"]
+            contact=validated_params["id"]
         ).values_list('id', flat=True)
 
         if len(matching_c_m_steps):
@@ -1148,3 +1162,92 @@ def validate_cps_info_params_for_modify_instance_rqst(rqst_cps_info_params, cons
         validated_params["rqst_point_of_origin"] = rqst_point_of_origin
 
     return validated_params
+
+
+def validate_indiv_seeking_nav_params(rqst_body, validated_params, rqst_errors):
+    if 'billing_amount' in rqst_body:
+        validated_params['billing_amount'] = clean_float_value_from_dict_object(
+            rqst_body,
+            "root",
+            'billing_amount',
+            rqst_errors,
+            none_allowed=True,
+        )
+        if validated_params['billing_amount'] and validated_params['billing_amount'] < 0:
+            rqst_errors.append(
+                "Value for 'billing_amount' must be greater than 0. Given value is: {}".format(
+                    validated_params['billing_amount']
+                )
+            )
+    if 'consumer_need' in rqst_body:
+        validated_params['consumer_need'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            'consumer_need',
+            rqst_errors,
+            empty_string_allowed=True
+        )
+        if validated_params['consumer_need'] == '':
+            validated_params['consumer_need'] = 'not available'
+    if 'service_expertise_need' in rqst_body:
+        validated_params['service_expertise_need'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            'service_expertise_need',
+            rqst_errors,
+            empty_string_allowed=True
+        )
+    if 'insurance_carrier' in rqst_body:
+        carrier_dict = clean_dict_value_from_dict_object(
+            rqst_body,
+            "root",
+            'insurance_carrier',
+            rqst_errors,
+            none_allowed=True
+        )
+        validated_carrier_info = None
+        if carrier_dict:
+            validated_carrier_info = {
+                "name": clean_string_value_from_dict_object(
+                    carrier_dict,
+                    "insurance_carrier",
+                    'name',
+                    rqst_errors,
+                    empty_string_allowed=True
+                ),
+                "state_province": clean_string_value_from_dict_object(
+                    carrier_dict,
+                    "insurance_carrier",
+                    'state_province',
+                    rqst_errors,
+                    empty_string_allowed=True
+                )
+            }
+        validated_params['insurance_carrier'] = validated_carrier_info
+
+    if 'add_healthcare_networks_used' in rqst_body:
+        add_healthcare_networks_used = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "add_healthcare_networks_used",
+            rqst_errors
+        )
+
+        for network_name in add_healthcare_networks_used:
+            if not isinstance(network_name, str):
+                rqst_errors.append('Error: A network name in \'add_healthcare_networks_used\' is not a string.')
+
+        validated_params['add_healthcare_networks_used'] = add_healthcare_networks_used
+    elif 'remove_healthcare_networks_used' in rqst_body:
+        remove_healthcare_networks_used = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "remove_healthcare_networks_used",
+            rqst_errors
+        )
+
+        for network_name in remove_healthcare_networks_used:
+            if not isinstance(network_name, str):
+                rqst_errors.append('Error: A network name in \'remove_healthcare_networks_used\' is not a string.')
+
+        validated_params['remove_healthcare_networks_used'] = remove_healthcare_networks_used

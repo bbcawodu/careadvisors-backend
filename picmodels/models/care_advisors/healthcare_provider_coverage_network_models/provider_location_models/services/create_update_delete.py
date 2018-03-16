@@ -109,11 +109,14 @@ def delete_row_w_validated_params(cls, validated_params, rqst_errors):
 
 
 def return_provider_network_obj_with_given_id(provider_network_id, post_errors):
-    try:
-        provider_network_obj = picmodels.models.ProviderNetwork.objects.get(id=provider_network_id)
-    except picmodels.models.ProviderNetwork.DoesNotExist:
-        provider_network_obj = None
-        post_errors.append("No ProviderNetwork objects found for id: {}".format(provider_network_id))
+    provider_network_obj = None
+
+    if provider_network_id:
+        try:
+            provider_network_obj = picmodels.models.ProviderNetwork.objects.get(id=provider_network_id)
+        except picmodels.models.ProviderNetwork.DoesNotExist:
+            provider_network_obj = None
+            post_errors.append("No ProviderNetwork objects found for id: {}".format(provider_network_id))
 
     return provider_network_obj
 

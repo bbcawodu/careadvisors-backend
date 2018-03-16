@@ -90,3 +90,47 @@ class DBModelsBaseTestCase(object):
         self.assertNotEqual(len(serialized_table_data), 0, "{}".format([serialized_table_data]))
 
         return serialized_table_data
+
+    def use_get_serialized_rows_by_first_name(self, validated_params, test_errors):
+        serialized_table_data = self.db_model.get_serialized_rows_by_first_name(
+            validated_params,
+            test_errors
+        )
+
+        self.assertEqual(len(test_errors), 0, "{}".format(test_errors))
+        self.assertNotEqual(len(serialized_table_data), 0, "{}".format([serialized_table_data]))
+
+        return serialized_table_data
+
+    def use_get_serialized_rows_by_last_name(self, validated_params, test_errors):
+        serialized_table_data = self.db_model.get_serialized_rows_by_last_name(
+            validated_params,
+            test_errors
+        )
+
+        self.assertEqual(len(test_errors), 0, "{}".format(test_errors))
+        self.assertNotEqual(len(serialized_table_data), 0, "{}".format([serialized_table_data]))
+
+        return serialized_table_data
+
+    def use_get_serialized_rows_by_f_and_l_name(self, validated_params, test_errors):
+        serialized_table_data = self.db_model.get_serialized_rows_by_f_and_l_name(
+            validated_params,
+            test_errors
+        )
+
+        self.assertEqual(len(test_errors), 0, "{}".format(test_errors))
+        self.assertNotEqual(len(serialized_table_data), 0, "{}".format([serialized_table_data]))
+
+        return serialized_table_data
+
+    def use_get_serialized_rows_by_email(self, validated_params, test_errors):
+        serialized_table_data = self.db_model.get_serialized_rows_by_email(
+            validated_params,
+            test_errors
+        )
+
+        self.assertEqual(len(test_errors), 0, "{}".format(test_errors))
+        self.assertNotEqual(len(serialized_table_data), 0, "{}".format([serialized_table_data]))
+
+        return serialized_table_data

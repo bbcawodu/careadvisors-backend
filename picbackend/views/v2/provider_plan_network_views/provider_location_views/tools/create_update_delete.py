@@ -31,7 +31,8 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
         rqst_body,
         "root",
         "provider_network_id",
-        rqst_errors
+        rqst_errors,
+        none_allowed=True
     )
     validated_params["provider_network_id"] = rqst_provider_network_id
 
@@ -59,7 +60,8 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             rqst_body,
             "root",
             "provider_network_id",
-            rqst_errors
+            rqst_errors,
+            none_allowed=True
         )
         validated_params["provider_network_id"] = rqst_provider_network_id
 
