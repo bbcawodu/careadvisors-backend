@@ -1,4 +1,8 @@
 from django.db import models
+from django.core.validators import MinValueValidator
+
+from decimal import Decimal
+
 from picmodels.models.care_advisors.navigator_models import Navigators
 from picmodels.models.care_advisors import NavMetricsLocation, Address
 
@@ -9,11 +13,11 @@ from .services.create_update_delete import create_c_m_rows_w_validated_params
 from .services.create_update_delete import update_c_m_rows_w_validated_params
 from .services.create_update_delete import delete_c_m_rows_w_validated_params
 
-from .services.read import retrieve_consumer_data_by_id
-from .services.read import retrieve_consumer_data_by_f_and_l_name
-from .services.read import retrieve_consumer_data_by_email
-from .services.read import retrieve_consumer_data_by_first_name
-from .services.read import retrieve_consumer_data_by_last_name
+from .services.read import get_serialized_rows_by_id
+from .services.read import get_serialized_rows_by_f_and_l_name
+from .services.read import get_serialized_rows_by_email
+from .services.read import get_serialized_rows_by_first_name
+from .services.read import get_serialized_rows_by_last_name
 
 
 class PICConsumerBaseQuerySet(models.QuerySet):
@@ -28,6 +32,15 @@ class PICConsumerBaseQuerySet(models.QuerySet):
 
 
 class PICConsumerBase(models.Model):
+    N_A = "Not Available"
+    CHOOSE_A_DOC = "choose a doctor"
+    BILLING_ISSUES = "billing issues"
+    CONSUMER_NEED_CHOICES = (
+        (CHOOSE_A_DOC, "choose a doctor"),
+        (BILLING_ISSUES, "billing issues"),
+        (N_A, "Not Available")
+    )
+
     objects = PICConsumerBaseQuerySet.as_manager()
 
     # fields for PICConsumer model
@@ -49,6 +62,32 @@ class PICConsumerBase(models.Model):
 
     cps_info = models.ForeignKey('ConsumerCPSInfoEntry', on_delete=models.SET_NULL, blank=True, null=True)
     consumer_hospital_info = models.ForeignKey('ConsumerHospitalInfo', on_delete=models.SET_NULL, blank=True, null=True)
+
+    # Individual Seeking Navigator fields/columns
+    consumer_need = models.CharField(blank=True, null=True, max_length=1000, choices=CONSUMER_NEED_CHOICES, default=N_A)
+    billing_amount = models.DecimalField(
+        blank=True,
+        null=True,
+        decimal_places=2,
+        max_digits=14,
+        validators=[MinValueValidator(Decimal('0.01'))]
+    )
+    service_expertise_need = models.ForeignKey(
+        'HealthcareServiceExpertise',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+    insurance_carrier = models.ForeignKey(
+        'HealthcareCarrier',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+    healthcare_networks_used = models.ManyToManyField(
+        'ProviderNetwork',
+        blank=True,
+    )
 
     class Meta:
         # maps model to the picmodels module
@@ -108,6 +147,12 @@ class PICConsumerBase(models.Model):
 
             "case_management_rows": None,
 
+            "consumer_need": self.consumer_need,
+            "billing_amount": self.billing_amount,
+            "service_expertise_need": None,
+            "insurance_carrier": None,
+            "healthcare_networks_used": None,
+
             "id": self.id
         }
 
@@ -153,6 +198,22 @@ class PICConsumerBase(models.Model):
         if self.consumer_hospital_info:
             valuesdict['consumer_hospital_info'] = self.consumer_hospital_info.return_values_dict()
 
+        if self.service_expertise_need:
+            valuesdict['service_expertise_need'] = self.service_expertise_need.return_values_dict()
+
+        if self.insurance_carrier:
+            valuesdict['insurance_carrier'] = self.insurance_carrier.return_values_dict()
+
+        if self.healthcare_networks_used:
+            healthcare_networks_used_objects = self.healthcare_networks_used.all()
+            healthcare_networks_used_list = []
+
+            if len(healthcare_networks_used_objects):
+                for healthcare_networks_used in healthcare_networks_used_objects:
+                    healthcare_networks_used_list.append(healthcare_networks_used.return_values_dict())
+
+            valuesdict["healthcare_networks_used"] = healthcare_networks_used_list
+
         # if self.primary_guardian:
         #     primary_guardian_info = []
         #
@@ -187,12 +248,18 @@ class PICConsumerBase(models.Model):
     def __str__(self):
         return "Name: {} {}, id: {}".format(self.first_name, self.last_name, self.id)
 
+    def check_consumer_need_choices(self,):
+        for consumer_need_tuple in self.CONSUMER_NEED_CHOICES:
+            if consumer_need_tuple[1].lower() == self.consumer_need.lower():
+                return True
+        return False
 
-PICConsumerBase.retrieve_consumer_data_by_id = classmethod(retrieve_consumer_data_by_id)
-PICConsumerBase.retrieve_consumer_data_by_f_and_l_name = classmethod(retrieve_consumer_data_by_f_and_l_name)
-PICConsumerBase.retrieve_consumer_data_by_email = classmethod(retrieve_consumer_data_by_email)
-PICConsumerBase.retrieve_consumer_data_by_first_name = classmethod(retrieve_consumer_data_by_first_name)
-PICConsumerBase.retrieve_consumer_data_by_last_name = classmethod(retrieve_consumer_data_by_last_name)
+
+PICConsumerBase.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
+PICConsumerBase.get_serialized_rows_by_f_and_l_name = classmethod(get_serialized_rows_by_f_and_l_name)
+PICConsumerBase.get_serialized_rows_by_email = classmethod(get_serialized_rows_by_email)
+PICConsumerBase.get_serialized_rows_by_first_name = classmethod(get_serialized_rows_by_first_name)
+PICConsumerBase.get_serialized_rows_by_last_name = classmethod(get_serialized_rows_by_last_name)
 
 
 class PICConsumer(PICConsumerBase):

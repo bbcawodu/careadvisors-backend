@@ -3,21 +3,21 @@ import json
 
 def create_row_w_validated_params(cls, validated_params, rqst_errors):
     found_provider_network_objs = cls.check_for_provider_network_objs_with_given_name(
-        validated_params['rqst_provider_network_name'],
+        validated_params['name'],
         rqst_errors
     )
 
     provider_network_obj = None
     if not found_provider_network_objs and not rqst_errors:
         provider_network_obj = cls()
-        provider_network_obj.name = validated_params['rqst_provider_network_name']
+        provider_network_obj.name = validated_params['name']
         provider_network_obj.save()
 
     return provider_network_obj
 
 
 def update_row_w_validated_params(cls, validated_params, rqst_errors):
-    rqst_id = validated_params['rqst_id']
+    rqst_id = validated_params['id']
 
     try:
         provider_network_obj = cls.objects.get(id=rqst_id)
@@ -26,8 +26,8 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         provider_network_obj = None
 
     if provider_network_obj:
-        if 'rqst_provider_network_name' in validated_params:
-            rqst_provider_network_name = validated_params['rqst_provider_network_name']
+        if 'name' in validated_params:
+            rqst_provider_network_name = validated_params['name']
         else:
             rqst_provider_network_name = provider_network_obj.name
 
@@ -38,8 +38,8 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         )
 
         if not found_provider_network_objs and not rqst_errors:
-            if 'rqst_provider_network_name' in validated_params:
-                provider_network_obj.name = validated_params['rqst_provider_network_name']
+            if 'name' in validated_params:
+                provider_network_obj.name = validated_params['name']
 
             provider_network_obj.save()
 
@@ -47,7 +47,7 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
 
 
 def delete_row_w_validated_params(cls, validated_params, rqst_errors):
-    rqst_id = validated_params['rqst_id']
+    rqst_id = validated_params['id']
 
     try:
         provider_network_obj = cls.objects.get(id=rqst_id)

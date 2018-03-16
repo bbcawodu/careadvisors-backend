@@ -2,15 +2,16 @@ from django.test import TestCase
 
 from picmodels.tests.test_models.base import DBModelsBaseTestCase
 
-from picmodels.models import HealthcareServiceExpertise
+from picmodels.models import HealthcareCarrier
 
 
-class HealthcareServiceExpertiseTestCase(DBModelsBaseTestCase, TestCase):
-    db_model = HealthcareServiceExpertise
+class HealthcareCarrierTestCase(DBModelsBaseTestCase, TestCase):
+    db_model = HealthcareCarrier
 
     def test_create_row_w_validated_params(self):
         validated_params = {
             "name": "Neonatal",
+            "state": "il",
 
             "db_action": "create"
         }
@@ -31,8 +32,9 @@ class HealthcareServiceExpertiseTestCase(DBModelsBaseTestCase, TestCase):
     def test_update_row_w_validated_params(self):
         validated_params = {
             "name": "Neonatalss",
+            "state": "il",
 
-            "id": 1,
+            "id": 6097,
             "db_action": "update"
         }
         test_errors = []
@@ -51,7 +53,7 @@ class HealthcareServiceExpertiseTestCase(DBModelsBaseTestCase, TestCase):
 
     def test_delete_row_w_validated_params(self):
         validated_params = {
-            "id": 1,
+            "id": 6095,
             "db_action": "delete"
         }
         test_errors = []
@@ -63,10 +65,9 @@ class HealthcareServiceExpertiseTestCase(DBModelsBaseTestCase, TestCase):
 
     def test_get_serialized_rows_by_id(self):
         validated_params = {
-            "id_list": [1],
-            "id": u"1"
+            "id_list": [6097],
+            "id": u"6097"
         }
-
         test_errors = []
 
         serialized_table_data = self.use_get_serialized_rows_by_id(
@@ -76,9 +77,8 @@ class HealthcareServiceExpertiseTestCase(DBModelsBaseTestCase, TestCase):
 
     def test_get_serialized_rows_by_name(self):
         validated_params = {
-            "name": "cancer"
+            "name" : "Premera Blue Cross Blue Shield of Alaska"
         }
-
         test_errors = []
 
         serialized_table_data = self.use_get_serialized_rows_by_name(

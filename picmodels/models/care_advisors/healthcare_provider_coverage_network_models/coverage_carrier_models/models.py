@@ -10,9 +10,9 @@ from .services.create_update_delete import update_row_w_validated_params
 from .services.create_update_delete import delete_row_w_validated_params
 from .services.create_update_delete import check_for_healthcare_carrier_objs_with_given_name_and_state
 
-from .services.read import retrieve_carrier_data_by_id
-from .services.read import retrieve_carrier_data_by_name
-from .services.read import retrieve_carrier_data_by_state
+from .services.read import get_serialized_rows_by_id
+from .services.read import get_serialized_rows_by_name
+from .services.read import get_serialized_rows_by_state
 
 
 def get_sample_id_card_file_path(instance, filename):
@@ -178,9 +178,9 @@ HealthcareCarrier.update_row_w_validated_params = classmethod(update_row_w_valid
 HealthcareCarrier.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
 HealthcareCarrier.check_for_healthcare_carrier_objs_with_given_name_and_state = classmethod(check_for_healthcare_carrier_objs_with_given_name_and_state)
 
-HealthcareCarrier.retrieve_carrier_data_by_id = classmethod(retrieve_carrier_data_by_id)
-HealthcareCarrier.retrieve_carrier_data_by_name = classmethod(retrieve_carrier_data_by_name)
-HealthcareCarrier.retrieve_carrier_data_by_state = classmethod(retrieve_carrier_data_by_state)
+HealthcareCarrier.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
+HealthcareCarrier.get_serialized_rows_by_name = classmethod(get_serialized_rows_by_name)
+HealthcareCarrier.get_serialized_rows_by_state = classmethod(get_serialized_rows_by_state)
 
 
 @receiver(models.signals.post_delete, sender=HealthcareCarrier)

@@ -130,15 +130,15 @@ def get_and_add_consumer_data_to_response(request, db_model, validated_GET_rqst_
                 response_raw_data['Page URLs'] = extra_urls
 
         if 'first_name' in validated_GET_rqst_params and 'last_name' in validated_GET_rqst_params:
-            data_list = db_model_class.retrieve_consumer_data_by_f_and_l_name(validated_GET_rqst_params, rqst_errors)
+            data_list = db_model_class.get_serialized_rows_by_f_and_l_name(validated_GET_rqst_params, rqst_errors)
         elif 'email' in validated_GET_rqst_params:
-            data_list = db_model_class.retrieve_consumer_data_by_email(validated_GET_rqst_params, rqst_errors)
+            data_list = db_model_class.get_serialized_rows_by_email(validated_GET_rqst_params, rqst_errors)
         elif 'first_name' in validated_GET_rqst_params:
-            data_list = db_model_class.retrieve_consumer_data_by_first_name(validated_GET_rqst_params, rqst_errors)
+            data_list = db_model_class.get_serialized_rows_by_first_name(validated_GET_rqst_params, rqst_errors)
         elif 'last_name' in validated_GET_rqst_params:
-            data_list = db_model_class.retrieve_consumer_data_by_last_name(validated_GET_rqst_params, rqst_errors)
+            data_list = db_model_class.get_serialized_rows_by_last_name(validated_GET_rqst_params, rqst_errors)
         elif 'id' in validated_GET_rqst_params:
-            data_list = db_model_class.retrieve_consumer_data_by_id(validated_GET_rqst_params, rqst_errors)
+            data_list = db_model_class.get_serialized_rows_by_id(validated_GET_rqst_params, rqst_errors)
         else:
             rqst_errors.append('No Valid Parameters')
 

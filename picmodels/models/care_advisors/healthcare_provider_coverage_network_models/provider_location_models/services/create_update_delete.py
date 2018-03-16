@@ -4,13 +4,13 @@ import picmodels.models
 
 def create_row_w_validated_params(cls, validated_params, post_errors):
     provider_network_obj = return_provider_network_obj_with_given_id(
-        validated_params['rqst_provider_network_id'],
+        validated_params['provider_network_id'],
         post_errors
     )
 
     provider_location_obj = None
     if provider_network_obj and not post_errors:
-        rqst_provider_location_name = validated_params['rqst_provider_location_name']
+        rqst_provider_location_name = validated_params['name']
         found_provider_location_objs = cls.check_for_provider_location_objs_with_given_name_and_network(
             rqst_provider_location_name,
             provider_network_obj,
@@ -29,7 +29,7 @@ def create_row_w_validated_params(cls, validated_params, post_errors):
 
 
 def update_row_w_validated_params(cls, validated_params, rqst_errors):
-    rqst_id = validated_params['rqst_id']
+    rqst_id = validated_params['id']
 
     try:
         provider_location_obj = cls.objects.get(id=rqst_id)
@@ -38,17 +38,17 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         rqst_errors.append("Provider Location does not exist for database id: {}".format(rqst_id))
 
     if provider_location_obj:
-        if 'rqst_provider_network_id' in validated_params:
+        if 'provider_network_id' in validated_params:
             provider_network_obj = return_provider_network_obj_with_given_id(
-                validated_params['rqst_provider_network_id'],
+                validated_params['provider_network_id'],
                 rqst_errors
             )
         else:
             provider_network_obj = provider_location_obj.provider_network
 
         if not rqst_errors:
-            if 'rqst_provider_location_name' in validated_params:
-                provider_location_name = validated_params['rqst_provider_location_name']
+            if 'name' in validated_params:
+                provider_location_name = validated_params['name']
             else:
                 provider_location_name = provider_location_obj.name
 
@@ -60,10 +60,10 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
             )
 
             if not found_provider_location_objs and not rqst_errors:
-                if 'rqst_provider_location_name' in validated_params:
-                    provider_location_obj.name = validated_params['rqst_provider_location_name']
+                if 'name' in validated_params:
+                    provider_location_obj.name = validated_params['name']
 
-                if 'rqst_provider_network_id' in validated_params:
+                if 'provider_network_id' in validated_params:
                     provider_location_obj.provider_network = provider_network_obj
 
                 if 'add_accepted_plans_objects' in validated_params:
@@ -99,7 +99,7 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
 
 
 def delete_row_w_validated_params(cls, validated_params, rqst_errors):
-    rqst_id = validated_params['rqst_id']
+    rqst_id = validated_params['id']
 
     try:
         provider_location_obj = cls.objects.get(id=rqst_id)
@@ -109,11 +109,14 @@ def delete_row_w_validated_params(cls, validated_params, rqst_errors):
 
 
 def return_provider_network_obj_with_given_id(provider_network_id, post_errors):
-    try:
-        provider_network_obj = picmodels.models.ProviderNetwork.objects.get(id=provider_network_id)
-    except picmodels.models.ProviderNetwork.DoesNotExist:
-        provider_network_obj = None
-        post_errors.append("No ProviderNetwork objects found for id: {}".format(provider_network_id))
+    provider_network_obj = None
+
+    if provider_network_id:
+        try:
+            provider_network_obj = picmodels.models.ProviderNetwork.objects.get(id=provider_network_id)
+        except picmodels.models.ProviderNetwork.DoesNotExist:
+            provider_network_obj = None
+            post_errors.append("No ProviderNetwork objects found for id: {}".format(provider_network_id))
 
     return provider_network_obj
 
