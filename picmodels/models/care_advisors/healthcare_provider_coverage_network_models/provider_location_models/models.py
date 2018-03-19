@@ -14,7 +14,114 @@ from .services.read import get_serialized_rows_by_name
 from .services.read import get_serialized_rows_by_network_id
 from .services.read import get_serialized_rows_by_network_name
 
+
 class ProviderLocation(models.Model):
+    N_A = "Not Available"
+    AL = "AL"
+    AK = "AK"
+    AZ = "AZ"
+    AR = "AR"
+    CA = "CA"
+    CO = "CO"
+    CT = "CT"
+    DE = "DE"
+    FL = "FL"
+    GA = "GA"
+    HI = "HI"
+    ID = "ID"
+    IL = "IL"
+    IN = "IN"
+    IA = "IA"
+    KS = "KS"
+    KY = "KY"
+    LA = "LA"
+    ME = "ME"
+    MD = "MD"
+    MA = "MA"
+    MI = "MI"
+    MN = "MN"
+    MS = "MS"
+    MO = "MO"
+    MT = "MT"
+    NE = "NE"
+    NV = "NV"
+    NH = "NH"
+    NJ = "NJ"
+    NM = "NM"
+    NY = "NY"
+    NC = "NC"
+    ND = "ND"
+    OH = "OH"
+    OK = "OK"
+    OR = "OR"
+    PA = "PA"
+    RI = "RI"
+    SC = "SC"
+    SD = "SD"
+    TN = "TN"
+    TX = "TX"
+    UT = "UT"
+    VT = "VT"
+    VA = "VA"
+    WA = "WA"
+    WV = "WV"
+    WI = "WI"
+    WY = "WY"
+
+    STATE_PROVINCE_CHOICES = (
+        (N_A, "Not Available"),
+        (AL, "AL"),
+        (AK, "AK"),
+        (AZ, "AZ"),
+        (AR, "AR"),
+        (CA, "CA"),
+        (CO, "CO"),
+        (CT, "CT"),
+        (DE, "DE"),
+        (FL, "FL"),
+        (GA, "GA"),
+        (HI, "HI"),
+        (ID, "ID"),
+        (IL, "IL"),
+        (IN, "IN"),
+        (IA, "IA"),
+        (KS, "KS"),
+        (KY, "KY"),
+        (LA, "LA"),
+        (ME, "ME"),
+        (MD, "MD"),
+        (MA, "MA"),
+        (MI, "MI"),
+        (MN, "MN"),
+        (MS, "MS"),
+        (MO, "MO"),
+        (MT, "MT"),
+        (NE, "NE"),
+        (NV, "NV"),
+        (NH, "NH"),
+        (NJ, "NJ"),
+        (NM, "NM"),
+        (NY, "NY"),
+        (NC, "NC"),
+        (ND, "ND"),
+        (OH, "OH"),
+        (OK, "OK"),
+        (OR, "OR"),
+        (PA, "PA"),
+        (RI, "RI"),
+        (SC, "SC"),
+        (SD, "SD"),
+        (TN, "TN"),
+        (TX, "TX"),
+        (UT, "UT"),
+        (VT, "VT"),
+        (VA, "VA"),
+        (WA, "WA"),
+        (WV, "WV"),
+        (WI, "WI"),
+        (WY, "WY")
+    )
+
     name = models.CharField(max_length=10000)
     accepted_plans = models.ManyToManyField(
         HealthcarePlan,
@@ -27,6 +134,7 @@ class ProviderLocation(models.Model):
         blank=True,
         null=True
     )
+    state_province = models.CharField("State/Province", max_length=40, blank=True, null=True, choices=STATE_PROVINCE_CHOICES)
 
     def return_values_dict(self):
         valuesdict = {"name": self.name,
@@ -55,6 +163,12 @@ class ProviderLocation(models.Model):
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
+
+    def check_state_province_choices(self,):
+        for state_province_tuple in self.STATE_PROVINCE_CHOICES:
+            if state_province_tuple[1].lower() == self.state_province.lower():
+                return True
+        return False
 
 
 ProviderLocation.create_row_w_validated_params = classmethod(create_row_w_validated_params)

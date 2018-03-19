@@ -70,11 +70,11 @@ The body of the request should be a JSON document using the following template:
         'name': String,
         'state_province': String(2 letter code),
     },
-    'add_healthcare_networks_used': [
+    'add_healthcare_locations_used': [
         String,
         ...
     ],
-    'remove_healthcare_networks_used': [
+    'remove_healthcare_locations_used': [
         String,
         ...
     ],
@@ -166,7 +166,7 @@ In response, a JSON document will be displayed with the following format:
             - insurance_carrier['name']
             - insurance_carrier['state_province']
             - 'add_healthcare_networks_used'
-            - 'remove_healthcare_networks_used'
+            - 'remove_healthcare_locations_used'
             
         - Keys that can be empty strings:
             - "middle_name"

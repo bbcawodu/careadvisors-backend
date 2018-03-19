@@ -4,6 +4,7 @@ from django.contrib import admin
 from oauth2client.contrib.django_util.models import CredentialsField
 from django.dispatch import receiver
 from django.conf import settings
+from django.core.validators import URLValidator
 
 from .services.create_update_delete import create_row_w_validated_params
 from .services.create_update_delete import update_row_w_validated_params
@@ -77,6 +78,26 @@ class Navigators(models.Model):
     mpn = models.CharField(blank=True, max_length=1000, default="")
     staff_pic = models.ImageField(upload_to=get_staff_pic_file_path, blank=True, null=True)
     base_locations = models.ManyToManyField(NavMetricsLocation, blank=True)
+
+    # Navigator Sign Up fields/columns
+    healthcare_locations_worked = models.ManyToManyField(
+        'ProviderLocation',
+        related_name='navigators_working_here',
+        blank=True,
+    )
+    healthcare_service_expertises = models.ManyToManyField(
+        'ProviderLocation',
+        related_name='navigators_with_expertise',
+        blank=True,
+    )
+    insurance_carrier_specialties = models.ManyToManyField(
+        'HealthcareCarrier',
+        blank=True,
+    )
+    address = models.ForeignKey('Address', on_delete=models.SET_NULL, blank=True, null=True)
+    phone = models.CharField(max_length=1000, blank=True, null=True)
+    reported_region = models.CharField(max_length=1000, blank=True, null=True)
+    video_link = models.TextField(blank=True, null=True, validators=[URLValidator()])
 
     def return_values_dict(self):
         valuesdict = {
@@ -182,3 +203,39 @@ class CredentialsModel(models.Model):
 
 class CredentialsAdmin(admin.ModelAdmin):
     pass
+
+
+class Resume(models.Model):
+    profile_description = models.TextField(blank=True, null=True)
+    navigator = models.ForeignKey(Navigators)
+
+
+class Education(models.Model):
+    N_A = "Not Available"
+    UNDERGRADUATE = "undergraduate"
+    GRADUATE = "graduate"
+    BACHELORS = "bachelors"
+    MASTERS = "masters"
+    DEGREE_TYPE_CHOICES = (
+        (UNDERGRADUATE, "undergraduate"),
+        (GRADUATE, "graduate"),
+        (BACHELORS, 'bachelors'),
+        (MASTERS, 'masters'),
+        (N_A, "Not Available")
+    )
+
+    school = models.CharField(max_length=100)
+    major = models.CharField(max_length=100)
+    degree_type = models.CharField(blank=True, null=True, max_length=100, choices=DEGREE_TYPE_CHOICES, default=N_A)
+    Resume = models.ForeignKey(Resume)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+
+
+class Job(models.Model):
+    title = models.CharField(max_length=200)
+    company = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    Resume = models.ForeignKey(Resume)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)

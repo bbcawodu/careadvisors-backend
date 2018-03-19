@@ -587,34 +587,34 @@ def update_indiv_seeking_nav_columns_for_row(row, validated_params, rqst_errors)
         if carrier_row:
             row.insurance_carrier = carrier_row
 
-    if 'add_healthcare_networks_used' in validated_params:
-        healthcare_network_names = validated_params['add_healthcare_networks_used']
-        healthcare_network_rows = []
-        for network_name in healthcare_network_names:
-            healthcare_network_rows.append(get_provider_network_row_with_given_name(network_name, rqst_errors))
-        check_healthcare_networks_used_for_given_rows(
-            row.healthcare_networks_used.all(),
-            healthcare_network_rows,
+    if 'add_healthcare_locations_used' in validated_params:
+        healthcare_location_names = validated_params['add_healthcare_locations_used']
+        healthcare_location_rows = []
+        for location_name in healthcare_location_names:
+            healthcare_location_rows.append(get_provider_location_row_with_given_name(location_name, rqst_errors))
+        check_healthcare_locations_used_for_given_rows(
+            row.healthcare_locations_used.all(),
+            healthcare_location_rows,
             row,
             rqst_errors
         )
         if not rqst_errors:
-            for network_row in healthcare_network_rows:
-                row.healthcare_networks_used.add(network_row)
-    elif 'remove_healthcare_networks_used' in validated_params:
-        healthcare_network_names = validated_params['remove_healthcare_networks_used']
-        healthcare_network_rows = []
-        for network_name in healthcare_network_names:
-            healthcare_network_rows.append(get_provider_network_row_with_given_name(network_name, rqst_errors))
-        check_healthcare_networks_used_for_not_given_rows(
-            row.healthcare_networks_used.all(),
-            healthcare_network_rows,
+            for location_row in healthcare_location_rows:
+                row.healthcare_locations_used.add(location_row)
+    elif 'remove_healthcare_locations_used' in validated_params:
+        healthcare_location_names = validated_params['remove_healthcare_locations_used']
+        healthcare_location_rows = []
+        for location_name in healthcare_location_names:
+            healthcare_location_rows.append(get_provider_location_row_with_given_name(location_name, rqst_errors))
+        check_healthcare_locations_used_for_not_given_rows(
+            row.healthcare_locations_used.all(),
+            healthcare_location_rows,
             row,
             rqst_errors
         )
         if not rqst_errors:
-            for network_row in healthcare_network_rows:
-                row.healthcare_networks_used.remove(network_row)
+            for location_row in healthcare_location_rows:
+                row.healthcare_locations_used.remove(location_row)
 
 
 def get_service_expertise_row_with_given_name(name, rqst_errors):
@@ -645,34 +645,34 @@ def get_carrier_row_with_given_name_and_state(validated_params, rqst_errors):
     return row
 
 
-def get_provider_network_row_with_given_name(name, rqst_errors):
+def get_provider_location_row_with_given_name(name, rqst_errors):
     row = None
 
     if name:
         try:
-            row = picmodels.models.ProviderNetwork.objects.get(name__iexact=name)
-        except picmodels.models.ProviderNetwork.DoesNotExist:
+            row = picmodels.models.ProviderLocation.objects.get(name__iexact=name)
+        except picmodels.models.ProviderLocation.DoesNotExist:
             row = None
-            rqst_errors.append("No ProviderNetwork row found with name: {}".format(name))
+            rqst_errors.append("No ProviderLocation row found with name: {}".format(name))
 
     return row
 
 
-def check_healthcare_networks_used_for_given_rows(cur_networks_used_qset, given_networks_used_list, consumer_row, rqst_errors):
-    for network_used in given_networks_used_list:
-        if network_used in cur_networks_used_qset:
+def check_healthcare_locations_used_for_given_rows(cur_locations_used_qset, given_locations_used_list, consumer_row, rqst_errors):
+    for location_used in given_locations_used_list:
+        if location_used in cur_locations_used_qset:
             rqst_errors.append(
-                "Healthcare network with the following name already exists in consumer id {}'s healthcare_networks_used list (Hint - remove from parameter 'add_healthcare_networks_used' list): {})".format(
-                    consumer_row.id, network_used.name
+                "Healthcare location with the following name already exists in consumer id {}'s healthcare_locations_used list (Hint - remove from parameter 'add_healthcare_locations_used' list): {})".format(
+                    consumer_row.id, location_used.name
                 )
             )
 
 
-def check_healthcare_networks_used_for_not_given_rows(cur_networks_used_qset, given_networks_used_list, consumer_row, rqst_errors):
-    for network_used in given_networks_used_list:
-        if network_used not in cur_networks_used_qset:
+def check_healthcare_locations_used_for_not_given_rows(cur_locations_used_qset, given_locations_used_list, consumer_row, rqst_errors):
+    for location_used in given_locations_used_list:
+        if location_used not in cur_locations_used_qset:
             rqst_errors.append(
-                "Healthcare network with the following name does not exist in consumer id {}'s healthcare_networks_used list (Hint - remove from parameter 'remove_healthcare_networks_used' list): {})".format(
-                    consumer_row.id, network_used.name
+                "Healthcare location with the following name does not exist in consumer id {}'s healthcare_locations_used list (Hint - remove from parameter 'remove_healthcare_locations_used' list): {})".format(
+                    consumer_row.id, location_used.name
                 )
             )
