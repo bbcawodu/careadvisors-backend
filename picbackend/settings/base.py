@@ -72,6 +72,22 @@ CORS_ORIGIN_WHITELIST = (
     "dashboard-console-demo.care-advisors.com",
 )
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        },
+    },
+}
+
 ROOT_URLCONF = 'picbackend.urls'
 
 # sets template directory to root/templates
