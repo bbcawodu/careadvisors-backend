@@ -84,8 +84,8 @@ class PICConsumerBase(models.Model):
         blank=True,
         null=True
     )
-    healthcare_networks_used = models.ManyToManyField(
-        'ProviderNetwork',
+    healthcare_locations_used = models.ManyToManyField(
+        'ProviderLocation',
         blank=True,
     )
 
@@ -151,7 +151,7 @@ class PICConsumerBase(models.Model):
             "billing_amount": self.billing_amount,
             "service_expertise_need": None,
             "insurance_carrier": None,
-            "healthcare_networks_used": None,
+            "healthcare_locations_used": None,
 
             "id": self.id
         }
@@ -204,15 +204,15 @@ class PICConsumerBase(models.Model):
         if self.insurance_carrier:
             valuesdict['insurance_carrier'] = self.insurance_carrier.return_values_dict()
 
-        if self.healthcare_networks_used:
-            healthcare_networks_used_objects = self.healthcare_networks_used.all()
-            healthcare_networks_used_list = []
+        if self.healthcare_locations_used:
+            healthcare_locations_used_objects = self.healthcare_locations_used.all()
+            healthcare_locations_used_list = []
 
-            if len(healthcare_networks_used_objects):
-                for healthcare_networks_used in healthcare_networks_used_objects:
-                    healthcare_networks_used_list.append(healthcare_networks_used.return_values_dict())
+            if len(healthcare_locations_used_objects):
+                for healthcare_location_used in healthcare_locations_used_objects:
+                    healthcare_locations_used_list.append(healthcare_location_used.return_values_dict())
 
-            valuesdict["healthcare_networks_used"] = healthcare_networks_used_list
+            valuesdict["healthcare_locations_used"] = healthcare_locations_used_list
 
         # if self.primary_guardian:
         #     primary_guardian_info = []

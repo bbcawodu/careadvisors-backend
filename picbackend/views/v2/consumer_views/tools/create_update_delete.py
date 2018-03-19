@@ -1225,29 +1225,29 @@ def validate_indiv_seeking_nav_params(rqst_body, validated_params, rqst_errors):
             }
         validated_params['insurance_carrier'] = validated_carrier_info
 
-    if 'add_healthcare_networks_used' in rqst_body:
-        add_healthcare_networks_used = clean_list_value_from_dict_object(
+    if 'add_healthcare_locations_used' in rqst_body:
+        add_healthcare_locations_used = clean_list_value_from_dict_object(
             rqst_body,
             "root",
-            "add_healthcare_networks_used",
+            "add_healthcare_locations_used",
             rqst_errors
         )
 
-        for network_name in add_healthcare_networks_used:
-            if not isinstance(network_name, str):
-                rqst_errors.append('Error: A network name in \'add_healthcare_networks_used\' is not a string.')
+        for location_name in add_healthcare_locations_used:
+            if not isinstance(location_name, str):
+                rqst_errors.append('Error: A location name in \'add_healthcare_locations_used\' is not a string.')
 
-        validated_params['add_healthcare_networks_used'] = add_healthcare_networks_used
-    elif 'remove_healthcare_networks_used' in rqst_body:
-        remove_healthcare_networks_used = clean_list_value_from_dict_object(
+        validated_params['add_healthcare_locations_used'] = add_healthcare_locations_used
+    elif 'remove_healthcare_locations_used' in rqst_body:
+        remove_healthcare_locations_used = clean_list_value_from_dict_object(
             rqst_body,
             "root",
-            "remove_healthcare_networks_used",
+            "remove_healthcare_locations_used",
             rqst_errors
         )
 
-        for network_name in remove_healthcare_networks_used:
-            if not isinstance(network_name, str):
-                rqst_errors.append('Error: A network name in \'remove_healthcare_networks_used\' is not a string.')
+        for location_name in remove_healthcare_locations_used:
+            if not isinstance(location_name, str):
+                rqst_errors.append('Error: A location name in \'remove_healthcare_locations_used\' is not a string.')
 
-        validated_params['remove_healthcare_networks_used'] = remove_healthcare_networks_used
+        validated_params['remove_healthcare_locations_used'] = remove_healthcare_locations_used

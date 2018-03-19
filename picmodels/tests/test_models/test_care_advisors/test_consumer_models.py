@@ -47,8 +47,8 @@ class PICConsumerTestCase(DBModelsBaseTestCase, TestCase):
                 'name': 'Health Alliance Medical Plans, Inc.',
                 'state_province': 'il'
             },
-            'add_healthcare_networks_used': [
-                'Edward-Elmhurst'
+            'add_healthcare_locations_used': [
+                'Edward Hospital & Immediate Care'
             ],
 
             "db_action": "create",
@@ -101,8 +101,8 @@ class PICConsumerTestCase(DBModelsBaseTestCase, TestCase):
                 'name': 'Health Alliance Medical Plans, Inc.',
                 'state_province': 'il'
             },
-            'add_healthcare_networks_used': [
-                'Edward-Elmhurst'
+            'add_healthcare_locations_used': [
+                'Edward Hospital & Immediate Care'
             ],
 
             "db_action": "update",
