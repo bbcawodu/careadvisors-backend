@@ -13,7 +13,7 @@ class ProviderLocationTestCase(DBModelsBaseTestCase, TestCase):
         validated_params = {
             "name": "Neonatal",
             'state_province': 'il',
-            "provider_network_id": 1,
+            "provider_network_id": None,
 
             "add_accepted_plans_objects": [
                 HealthcarePlan.objects.get(id=8778)
@@ -39,7 +39,7 @@ class ProviderLocationTestCase(DBModelsBaseTestCase, TestCase):
         validated_params = {
             "name": "Neonatalss",
             'state_province': 'il',
-            "provider_network_id": 1,
+            "provider_network_id": None,
 
             "add_accepted_plans_objects": [
                 HealthcarePlan.objects.get(id=8778)
