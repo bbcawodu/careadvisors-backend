@@ -27,6 +27,18 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
     rqst_provider_location_name = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
     validated_params["name"] = rqst_provider_location_name
 
+    state_province = clean_string_value_from_dict_object(
+        rqst_body,
+        "root",
+        "state_province",
+        rqst_errors,
+        none_allowed=True,
+        empty_string_allowed=True
+    )
+    if not state_province:
+        state_province = 'not available'
+    validated_params["state_province"] = state_province
+
     rqst_provider_network_id = clean_int_value_from_dict_object(
         rqst_body,
         "root",
@@ -54,6 +66,19 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
     if "name" in rqst_body:
         rqst_provider_location_name = clean_string_value_from_dict_object(rqst_body, "root", "name", rqst_errors)
         validated_params["name"] = rqst_provider_location_name
+
+    if 'state_province' in rqst_body:
+        state_province = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "state_province",
+            rqst_errors,
+            none_allowed=True,
+            empty_string_allowed=True
+        )
+        if not state_province:
+            state_province = 'not available'
+        validated_params["state_province"] = state_province
 
     if "provider_network_id" in rqst_body:
         rqst_provider_network_id = clean_int_value_from_dict_object(

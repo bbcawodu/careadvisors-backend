@@ -2,55 +2,64 @@ import json
 import picmodels.models
 
 
-def create_row_w_validated_params(cls, validated_params, post_errors):
+def create_row_w_validated_params(cls, validated_params, rqst_errors):
     provider_network_obj = return_provider_network_obj_with_given_id(
         validated_params['provider_network_id'],
-        post_errors
+        rqst_errors
     )
 
-    provider_location_obj = None
-    if provider_network_obj and not post_errors:
+    row = None
+    if provider_network_obj and not rqst_errors:
         rqst_provider_location_name = validated_params['name']
         found_provider_location_objs = cls.check_for_provider_location_objs_with_given_name_and_network(
             rqst_provider_location_name,
             provider_network_obj,
-            post_errors
+            rqst_errors
         )
 
-        if not found_provider_location_objs and not post_errors:
-            provider_location_obj = cls()
-            provider_location_obj.name = rqst_provider_location_name
-            provider_location_obj.provider_network = provider_network_obj
-            provider_location_obj.save()
-            provider_location_obj.accepted_plans = validated_params['add_accepted_plans_objects']
-            provider_location_obj.save()
+        if not found_provider_location_objs and not rqst_errors:
+            row = cls()
+            row.name = rqst_provider_location_name
+            row.provider_network = provider_network_obj
+            row.state_province = validated_params['state_province']
+            if not row.check_state_province_choices():
+                rqst_errors.append(
+                    "state_province: {!s} is not a valid choice".format(row.state_province)
+                )
 
-    return provider_location_obj
+            if not rqst_errors:
+                row.save()
+                row.accepted_plans = validated_params['add_accepted_plans_objects']
+                row.save()
+            else:
+                row = None
+
+    return row
 
 
 def update_row_w_validated_params(cls, validated_params, rqst_errors):
     rqst_id = validated_params['id']
 
     try:
-        provider_location_obj = cls.objects.get(id=rqst_id)
+        row = cls.objects.get(id=rqst_id)
     except cls.DoesNotExist:
-        provider_location_obj = None
+        row = None
         rqst_errors.append("Provider Location does not exist for database id: {}".format(rqst_id))
 
-    if provider_location_obj:
+    if row:
         if 'provider_network_id' in validated_params:
             provider_network_obj = return_provider_network_obj_with_given_id(
                 validated_params['provider_network_id'],
                 rqst_errors
             )
         else:
-            provider_network_obj = provider_location_obj.provider_network
+            provider_network_obj = row.provider_network
 
         if not rqst_errors:
             if 'name' in validated_params:
                 provider_location_name = validated_params['name']
             else:
-                provider_location_name = provider_location_obj.name
+                provider_location_name = row.name
 
             found_provider_location_objs = cls.check_for_provider_location_objs_with_given_name_and_network(
                 provider_location_name,
@@ -61,41 +70,48 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
 
             if not found_provider_location_objs and not rqst_errors:
                 if 'name' in validated_params:
-                    provider_location_obj.name = validated_params['name']
+                    row.name = validated_params['name']
 
                 if 'provider_network_id' in validated_params:
-                    provider_location_obj.provider_network = provider_network_obj
+                    row.provider_network = provider_network_obj
+
+                if 'state_province' in validated_params:
+                    row.state_province = validated_params['state_province']
+                    if not row.check_state_province_choices():
+                        rqst_errors.append(
+                            "state_province: {!s} is not a valid choice".format(row.state_province)
+                        )
 
                 if 'add_accepted_plans_objects' in validated_params:
                     check_accepted_plans_for_given_instances(
-                        provider_location_obj.accepted_plans.all(),
+                        row.accepted_plans.all(),
                         validated_params['add_accepted_plans_objects'],
-                        provider_location_obj,
+                        row,
                         rqst_errors
                     )
 
                     if not rqst_errors:
                         for plan in validated_params['add_accepted_plans_objects']:
-                            provider_location_obj.accepted_plans.add(plan)
+                            row.accepted_plans.add(plan)
                 elif 'remove_accepted_plans_objects' in validated_params:
                     check_accepted_plans_for_not_given_instances(
-                        provider_location_obj.accepted_plans.all(),
+                        row.accepted_plans.all(),
                         validated_params['remove_accepted_plans_objects'],
-                        provider_location_obj,
+                        row,
                         rqst_errors
                     )
 
                     if not rqst_errors:
                         for plan in validated_params['remove_accepted_plans_objects']:
-                            provider_location_obj.accepted_plans.remove(plan)
+                            row.accepted_plans.remove(plan)
 
                 if not rqst_errors:
-                    provider_location_obj.save()
+                    row.save()
 
     if rqst_errors:
-        provider_location_obj = None
+        row = None
 
-    return provider_location_obj
+    return row
 
 
 def delete_row_w_validated_params(cls, validated_params, rqst_errors):

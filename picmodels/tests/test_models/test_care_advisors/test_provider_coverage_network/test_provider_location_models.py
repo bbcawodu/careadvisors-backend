@@ -12,6 +12,7 @@ class ProviderLocationTestCase(DBModelsBaseTestCase, TestCase):
     def test_create_row_w_validated_params(self):
         validated_params = {
             "name": "Neonatal",
+            'state_province': 'il',
             "provider_network_id": 1,
 
             "add_accepted_plans_objects": [
@@ -37,6 +38,7 @@ class ProviderLocationTestCase(DBModelsBaseTestCase, TestCase):
     def test_update_row_w_validated_params(self):
         validated_params = {
             "name": "Neonatalss",
+            'state_province': 'il',
             "provider_network_id": 1,
 
             "add_accepted_plans_objects": [
