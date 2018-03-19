@@ -9,6 +9,7 @@ def get_serialized_rows_by_id(cls, validated_params, rqst_errors):
         list_of_ids = None
 
     provider_location_qset = filter_db_queryset_by_id(cls.objects.all(), rqst_id, list_of_ids)
+    provider_location_qset = prefetch_related_rows(provider_location_qset)
 
     response_list = create_response_list_from_db_objects(provider_location_qset)
 
@@ -32,6 +33,7 @@ def get_serialized_rows_by_name(cls, validated_params, rqst_errors):
     rqst_name = validated_params['name']
 
     provider_location_qset = filter_provider_location_instances_by_name(cls.objects.all(), rqst_name)
+    provider_location_qset = prefetch_related_rows(provider_location_qset)
 
     response_list = create_response_list_from_db_objects(provider_location_qset)
 
@@ -51,6 +53,7 @@ def get_serialized_rows_by_network_name(cls, validated_params, rqst_errors):
         cls.objects.all(),
         rqst_network_name
     )
+    provider_location_qset = prefetch_related_rows(provider_location_qset)
 
     response_list = create_response_list_from_db_objects(provider_location_qset)
 
@@ -100,6 +103,18 @@ def create_response_list_from_db_objects(db_objects):
         return_list.append(db_instance.return_values_dict())
 
     return return_list
+
+
+def prefetch_related_rows(db_queryset):
+    db_queryset = db_queryset.select_related(
+        'provider_network'
+    )
+
+    db_queryset = db_queryset.prefetch_related(
+        'accepted_plans'
+    )
+
+    return db_queryset
 
 
 def filter_provider_location_instances_by_name(provider_location_qset, rqst_name):
