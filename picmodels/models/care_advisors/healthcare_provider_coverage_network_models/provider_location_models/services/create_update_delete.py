@@ -9,10 +9,11 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
     )
 
     row = None
-    if provider_network_obj and not rqst_errors:
+    if not rqst_errors:
         rqst_provider_location_name = validated_params['name']
-        found_provider_location_objs = cls.check_for_provider_location_objs_with_given_name_and_network(
+        found_provider_location_objs = cls.check_for_provider_location_objs_with_given_name_state_and_network(
             rqst_provider_location_name,
+            validated_params['state_province'],
             provider_network_obj,
             rqst_errors
         )
@@ -61,8 +62,14 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
             else:
                 provider_location_name = row.name
 
-            found_provider_location_objs = cls.check_for_provider_location_objs_with_given_name_and_network(
+            if 'state_province' in validated_params:
+                state_province = validated_params['state_province']
+            else:
+                state_province = row.state_province
+
+            found_provider_location_objs = cls.check_for_provider_location_objs_with_given_name_state_and_network(
                 provider_location_name,
+                state_province,
                 provider_network_obj,
                 rqst_errors,
                 rqst_id
@@ -137,11 +144,12 @@ def return_provider_network_obj_with_given_id(provider_network_id, post_errors):
     return provider_network_obj
 
 
-def check_for_provider_location_objs_with_given_name_and_network(cls, provider_location_name, provider_network_obj, rqst_errors, current_provider_location_id=None):
+def check_for_provider_location_objs_with_given_name_state_and_network(cls, provider_location_name, state, provider_network_obj, rqst_errors, current_provider_location_id=None):
     found_provider_location_obj = False
 
     provider_location_objs = cls.objects.filter(
         name__iexact=provider_location_name,
+        state_province__iexact=state,
         provider_network=provider_network_obj
     )
 
@@ -155,13 +163,13 @@ def check_for_provider_location_objs_with_given_name_and_network(cls, provider_l
 
         if len_of_provider_location_qset > 1:
             rqst_errors.append(
-                "Multiple provider locations with name: {} and provider network id: {} already exist in db. (Hint - Delete all but one and modify the remaining) id's: {}".format(
-                    provider_location_name, provider_network_obj.id, json.dumps(provider_location_ids)))
+                "Multiple provider locations with name: {}, state: {}, and provider network id: {} already exist in db. (Hint - Delete all but one and modify the remaining) id's: {}".format(
+                    provider_location_name, state, provider_network_obj.id, json.dumps(provider_location_ids)))
         else:
             if not current_provider_location_id or current_provider_location_id not in provider_location_ids:
                 rqst_errors.append(
-                    "Provider location with name: {} and provider network id: {} already exists in db. (Hint - Modify that entry) id: {}".format(
-                        provider_location_name, provider_network_obj.id, provider_location_ids[0]))
+                    "Provider location with name: {}, state: {},  and provider network id: {} already exists in db. (Hint - Modify that entry) id: {}".format(
+                        provider_location_name, state, provider_network_obj.id, provider_location_ids[0]))
             else:
                 found_provider_location_obj = False
 
