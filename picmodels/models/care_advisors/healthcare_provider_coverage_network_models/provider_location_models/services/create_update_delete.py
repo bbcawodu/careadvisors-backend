@@ -164,12 +164,12 @@ def check_for_provider_location_objs_with_given_name_state_and_network(cls, prov
         if len_of_provider_location_qset > 1:
             rqst_errors.append(
                 "Multiple provider locations with name: {}, state: {}, and provider network id: {} already exist in db. (Hint - Delete all but one and modify the remaining) id's: {}".format(
-                    provider_location_name, state, provider_network_obj.id, json.dumps(provider_location_ids)))
+                    provider_location_name, state, provider_network_obj.id if provider_network_obj else provider_network_obj, json.dumps(provider_location_ids)))
         else:
             if not current_provider_location_id or current_provider_location_id not in provider_location_ids:
                 rqst_errors.append(
                     "Provider location with name: {}, state: {},  and provider network id: {} already exists in db. (Hint - Modify that entry) id: {}".format(
-                        provider_location_name, state, provider_network_obj.id, provider_location_ids[0]))
+                        provider_location_name, state, provider_network_obj.id if provider_network_obj else provider_network_obj, provider_location_ids[0]))
             else:
                 found_provider_location_obj = False
 
