@@ -11,6 +11,8 @@ from picbackend.views.utils import validate_get_request_parameters
 from picmodels.forms import NavigatorImageUploadForm
 from picmodels.models import Navigators
 
+import json
+
 from .tools import validate_put_rqst_params
 
 
@@ -110,8 +112,10 @@ def upload_navigator_pic(request):
         response_raw_data, rqst_errors = init_v2_response_data()
         search_params = validate_get_request_parameters(request.GET, ["id"], rqst_errors)
 
-        if 'id' in search_params:
-            rqst_staff_id = search_params['id']
+        if rqst_errors:
+            return HttpResponseForbidden(json.dumps(rqst_errors))
+        elif 'id' in search_params:
+            rqst_staff_id = search_params['id_list'][0]
             try:
                 staff_object = Navigators.objects.get(pk=rqst_staff_id)
                 form = NavigatorImageUploadForm(initial={'staff_id': staff_object.id,

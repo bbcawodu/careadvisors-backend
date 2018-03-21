@@ -9,6 +9,7 @@ def get_serialized_rows_by_id(cls, validated_params, rqst_errors):
         list_of_ids = None
 
     carrier_qset = filter_carrier_qset_by_id(cls.objects.all(), rqst_carrier_id, list_of_ids)
+    carrier_qset = prefetch_related_rows(carrier_qset)
     carrier_qset = filter_results_by_secondary_params(validated_params, carrier_qset)
 
     response_list = create_response_list_from_db_objects(carrier_qset)
@@ -31,6 +32,7 @@ def get_serialized_rows_by_id(cls, validated_params, rqst_errors):
 def get_serialized_rows_by_state(cls, validated_params, rqst_errors):
     list_of_states = validated_params['state_list']
     carrier_qset = cls.objects.all()
+    carrier_qset = prefetch_related_rows(carrier_qset)
     response_list = []
 
     for state in list_of_states:
@@ -58,6 +60,7 @@ def get_serialized_rows_by_name(cls, validated_params, rqst_errors):
     rqst_name = validated_params['name']
 
     carrier_qset = filter_carrier_objs_by_name(cls.objects.all(), rqst_name)
+    carrier_qset = prefetch_related_rows(carrier_qset)
     carrier_qset = filter_results_by_secondary_params(validated_params, carrier_qset)
 
     response_list = create_response_list_from_db_objects(carrier_qset)
@@ -87,8 +90,6 @@ def prefetch_related_rows(db_queryset):
 
 
 def filter_carrier_qset_by_id(db_queryset, rqst_id, list_of_ids):
-    db_queryset = prefetch_related_rows(db_queryset)
-
     if isinstance(rqst_id, str) and rqst_id.lower() == "all":
         db_queryset = db_queryset.order_by("id")
     else:
@@ -98,16 +99,12 @@ def filter_carrier_qset_by_id(db_queryset, rqst_id, list_of_ids):
 
 
 def filter_carrier_objs_by_state(db_queryset, state):
-    db_queryset = prefetch_related_rows(db_queryset)
-
     db_queryset = db_queryset.filter(state_province__iexact=state).order_by("state_province")
 
     return db_queryset
 
 
 def filter_carrier_objs_by_name(db_queryset, name):
-    db_queryset = prefetch_related_rows(db_queryset)
-
     db_queryset = db_queryset.filter(name__iexact=name).order_by("name")
 
     return db_queryset

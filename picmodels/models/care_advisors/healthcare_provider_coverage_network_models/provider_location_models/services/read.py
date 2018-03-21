@@ -77,6 +77,7 @@ def get_serialized_rows_by_network_id(cls, validated_params, rqst_errors):
             provider_location_qset,
             network_id
         )
+        filtered_provider_location_qset = prefetch_related_rows(filtered_provider_location_qset)
 
         response_list_component = create_response_list_from_db_objects(filtered_provider_location_qset)
 
@@ -90,6 +91,32 @@ def get_serialized_rows_by_network_id(cls, validated_params, rqst_errors):
 
         def add_response_component_to_response_data():
             response_list.append(response_list_component)
+
+        add_response_component_to_response_data()
+
+    return response_list
+
+
+def get_serialized_rows_by_state(cls, validated_params, rqst_errors):
+    list_of_states = validated_params['state_list']
+    db_qset = cls.objects.all()
+    response_list = []
+
+    for state in list_of_states:
+        filtered_db_qset = filter_provider_location_instances_by_state(db_qset, state)
+        filtered_db_qset = prefetch_related_rows(filtered_db_qset)
+
+        response_list_component = create_response_list_from_db_objects(filtered_db_qset)
+
+        def check_response_component_for_requested_data():
+            if not response_list_component:
+                rqst_errors.append('Hospital locations in the state: {} not found in database'.format(state))
+
+        check_response_component_for_requested_data()
+
+        def add_response_component_to_response_data():
+            if response_list_component:
+                response_list.append(response_list_component)
 
         add_response_component_to_response_data()
 
@@ -133,5 +160,11 @@ def filter_provider_location_instances_by_provider_network_name(provider_locatio
 
 def filter_provider_location_instances_by_provider_network_id(provider_location_qset, rqst_provider_network_id):
     provider_location_qset = provider_location_qset.filter(provider_network__id=rqst_provider_network_id).order_by("id")
+
+    return provider_location_qset
+
+
+def filter_provider_location_instances_by_state(provider_location_qset, state):
+    provider_location_qset = provider_location_qset.filter(state_province__iexact=state).order_by("name")
 
     return provider_location_qset
