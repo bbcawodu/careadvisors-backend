@@ -110,6 +110,7 @@ urlpatterns = [
 
     # dashboard urls
     url(r"^v2/dashboard/$", views.DashboardView.as_view()),
+    url(r"^v2/dashboard_demo/$", views.v2.render_demo_dashboard),
 
     # healthcare service expertise urls
     url(r'v2/service_expertise/$', views.ServiceExpertiseManagementView.as_view()),

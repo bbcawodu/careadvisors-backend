@@ -6,6 +6,8 @@ from django.views.generic import View
 
 from picmodels.models import HealthcareCarrier
 
+import json
+
 from picbackend.views.utils import JSONGETRspMixin
 from picbackend.views.utils import JSONPUTRspMixin
 from picbackend.views.utils import init_v2_response_data
@@ -82,8 +84,10 @@ def handle_carrier_sample_id_card_mgmt_rqst(request):
         response_raw_data, rqst_errors = init_v2_response_data()
         search_params = validate_get_request_parameters(request.GET, ["id"], rqst_errors)
 
-        if 'id' in search_params:
-            rqst_carrier_id = search_params['id']
+        if rqst_errors:
+            return HttpResponseForbidden(json.dumps(rqst_errors))
+        elif 'id' in search_params:
+            rqst_carrier_id = search_params['id_list'][0]
 
             try:
                 carrier_object = HealthcareCarrier.objects.get(id=rqst_carrier_id)

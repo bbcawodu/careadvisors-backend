@@ -10,6 +10,8 @@ from picbackend.views.utils import JSONPUTRspMixin
 from picbackend.views.utils import JSONGETRspMixin
 from .tools import validate_staff_put_rqst_params
 
+import json
+
 
 # Need to abstract common variables in get and post class methods into class attributes
 class CPSStaffManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
@@ -101,8 +103,10 @@ def upload_cps_staff_pic(request):
         response_raw_data, rqst_errors = init_v2_response_data()
         search_params = validate_get_request_parameters(request.GET, ["id"], rqst_errors)
 
-        if 'id' in search_params:
-            rqst_staff_id = search_params['id']
+        if rqst_errors:
+            return HttpResponseForbidden(json.dumps(rqst_errors))
+        elif 'id' in search_params:
+            rqst_staff_id = search_params['id_list'][0]
             try:
                 cps_staff_object = CPSStaff.objects.get(pk=rqst_staff_id)
                 form = CPSStaffImageUploadForm(initial={'staff_id': cps_staff_object.id,

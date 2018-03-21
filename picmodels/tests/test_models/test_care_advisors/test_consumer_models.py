@@ -48,7 +48,10 @@ class PICConsumerTestCase(DBModelsBaseTestCase, TestCase):
                 'state_province': 'il'
             },
             'add_healthcare_locations_used': [
-                'Edward Hospital & Immediate Care'
+                {
+                    'name': 'Edward Hospital & Immediate Careasdss',
+                    'state_province': 'not available'
+                }
             ],
 
             "db_action": "create",
@@ -101,12 +104,15 @@ class PICConsumerTestCase(DBModelsBaseTestCase, TestCase):
                 'name': 'Health Alliance Medical Plans, Inc.',
                 'state_province': 'il'
             },
-            'add_healthcare_locations_used': [
-                'Edward Hospital & Immediate Care'
+            'remove_healthcare_locations_used': [
+                {
+                    'name': 'Edward Hospital & Immediate Careasdss',
+                    'state_province': 'not available'
+                }
             ],
 
             "db_action": "update",
-            "id": 4,
+            "id": 312,
             # "create_backup": True,
             # "force_create_consumer": True,
         }

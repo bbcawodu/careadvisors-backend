@@ -1230,14 +1230,36 @@ def validate_indiv_seeking_nav_params(rqst_body, validated_params, rqst_errors):
             rqst_body,
             "root",
             "add_healthcare_locations_used",
-            rqst_errors
+            rqst_errors,
+            empty_list_allowed=True
         )
 
-        for location_name in add_healthcare_locations_used:
-            if not isinstance(location_name, str):
-                rqst_errors.append('Error: A location name in \'add_healthcare_locations_used\' is not a string.')
+        validated_location_info = []
+        for location_dict in add_healthcare_locations_used:
+            if not isinstance(location_dict, dict):
+                rqst_errors.append('Error: A location object in \'add_healthcare_locations_used\' is not a object.')
+            else:
+                location_info = {
+                    "name": clean_string_value_from_dict_object(
+                        location_dict,
+                        "add_location_object",
+                        'name',
+                        rqst_errors
+                    ),
+                    "state_province": clean_string_value_from_dict_object(
+                        location_dict,
+                        "add_location_object",
+                        'state_province',
+                        rqst_errors,
+                        none_allowed=True
+                    )
+                }
+                if not location_info['state_province']:
+                    location_info['state_province'] = 'not available'
 
-        validated_params['add_healthcare_locations_used'] = add_healthcare_locations_used
+                validated_location_info.append(location_info)
+
+        validated_params['add_healthcare_locations_used'] = validated_location_info
     elif 'remove_healthcare_locations_used' in rqst_body:
         remove_healthcare_locations_used = clean_list_value_from_dict_object(
             rqst_body,
@@ -1246,8 +1268,29 @@ def validate_indiv_seeking_nav_params(rqst_body, validated_params, rqst_errors):
             rqst_errors
         )
 
-        for location_name in remove_healthcare_locations_used:
-            if not isinstance(location_name, str):
-                rqst_errors.append('Error: A location name in \'remove_healthcare_locations_used\' is not a string.')
+        validated_location_info = []
+        for location_dict in remove_healthcare_locations_used:
+            if not isinstance(location_dict, dict):
+                rqst_errors.append('Error: A location object in \'remove_healthcare_locations_used\' is not a object.')
+            else:
+                location_info = {
+                    "name": clean_string_value_from_dict_object(
+                        location_dict,
+                        "remove_location_object",
+                        'name',
+                        rqst_errors
+                    ),
+                    "state_province": clean_string_value_from_dict_object(
+                        location_dict,
+                        "remove_location_object",
+                        'state_province',
+                        rqst_errors,
+                        none_allowed=True
+                    )
+                }
+                if not location_info['state_province']:
+                    location_info['state_province'] = 'not available'
 
-        validated_params['remove_healthcare_locations_used'] = remove_healthcare_locations_used
+                validated_location_info.append(location_info)
+
+        validated_params['remove_healthcare_locations_used'] = validated_location_info

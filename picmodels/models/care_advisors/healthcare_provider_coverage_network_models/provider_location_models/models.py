@@ -13,6 +13,7 @@ from .services.read import get_serialized_rows_by_id
 from .services.read import get_serialized_rows_by_name
 from .services.read import get_serialized_rows_by_network_id
 from .services.read import get_serialized_rows_by_network_name
+from .services.read import get_serialized_rows_by_state
 
 
 class ProviderLocation(models.Model):
@@ -137,11 +138,14 @@ class ProviderLocation(models.Model):
     state_province = models.CharField("State/Province", max_length=40, blank=True, null=True, choices=STATE_PROVINCE_CHOICES)
 
     def return_values_dict(self):
-        valuesdict = {"name": self.name,
-                      "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
-                      "provider_network info": None,
-                      "accepted_plans": None,
-                      "Database ID": self.id}
+        valuesdict = {
+            "name": self.name,
+            'state': self.state_province,
+            "url_encoded_name": urllib.parse.quote(self.name) if self.name else None,
+            "provider_network info": None,
+            "accepted_plans": None,
+            "Database ID": self.id
+        }
 
         if self.provider_network:
             provider_network_object = self.provider_network
@@ -180,3 +184,4 @@ ProviderLocation.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_
 ProviderLocation.get_serialized_rows_by_name = classmethod(get_serialized_rows_by_name)
 ProviderLocation.get_serialized_rows_by_network_id = classmethod(get_serialized_rows_by_network_id)
 ProviderLocation.get_serialized_rows_by_network_name = classmethod(get_serialized_rows_by_network_name)
+ProviderLocation.get_serialized_rows_by_state = classmethod(get_serialized_rows_by_state)

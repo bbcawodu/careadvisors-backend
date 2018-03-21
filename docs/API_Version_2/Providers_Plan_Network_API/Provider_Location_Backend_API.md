@@ -118,7 +118,11 @@ In response, a JSON document will be displayed with the following format:
             - Can be multiple values separated by commas.
     - "network_name" corresponds to a provider network name that a provider location belongs to.
         - Must be a string
-        - all non ASCII characters must be url encoded
+        - all non ASCII characters must be url encoded.
+    - "state" corresponds to the state of a hospital.
+        - must be a string.
+        - Must be state's 2 letter code
+        - Can be multiple values separated by commas.
     - "network_id" corresponds to database id of a provider network that locations belong to.
         - passing "all" as the value will return all provider locations for all provider networks
         - All other cases:
