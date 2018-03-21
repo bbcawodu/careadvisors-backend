@@ -52,7 +52,7 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                         response_raw_data['Data']["backup_consumer"] = backup_consumer_obj.return_values_dict()
             elif rqst_action == "delete":
                 backup_consumer_obj = PICConsumer.delete_row_w_validated_params(
-                    validated_put_rqst_params['rqst_consumer_id'],
+                    validated_put_rqst_params['rqst_id'],
                     validated_put_rqst_params['rqst_create_backup'],
                     rqst_errors
                 )
