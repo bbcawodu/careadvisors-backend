@@ -97,6 +97,7 @@ In response, a JSON document will be displayed with the following format:
                 - Can be multiple values separated by commas.
         - "state" corresponds to the coverage state of a carrier.
             - must be a string.
+            - Must be state's 2 letter code
             - Can be multiple values separated by commas.
     - "Secondary" parameters - Any number of these parameters can be added to a request.
         - "has_sample_id_card" corresponds to whether HealthcareCarrier object has a non default sample id card image.

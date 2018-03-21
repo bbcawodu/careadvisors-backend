@@ -57,6 +57,8 @@ class ProviderLocationsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
                 data_list = ProviderLocation.get_serialized_rows_by_network_name(validated_GET_rqst_params, rqst_errors)
             elif 'network_id' in validated_GET_rqst_params:
                 data_list = ProviderLocation.get_serialized_rows_by_network_id(validated_GET_rqst_params, rqst_errors)
+            elif 'state' in validated_GET_rqst_params:
+                data_list = ProviderLocation.get_serialized_rows_by_state(validated_GET_rqst_params, rqst_errors)
             else:
                 rqst_errors.append('No Valid Parameters')
 
@@ -70,6 +72,7 @@ class ProviderLocationsManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
         "id",
         "name",
         "network_name",
+        'state',
         "network_id"
     ]
     parse_GET_request_and_add_response = provider_locations_management_get_logic
