@@ -10,6 +10,11 @@ This file is documentation for the backend API library for Patient Innovation Ce
 [Backend Server Request Instructions README](making_requests_to_backend.md)
 
 
+### Dashboard Endpoints API
+
+[Dashboard Endpoints API README](dashboard_API.md)
+
+
 ### Care Advisors Marketplace Appointment Endpoints API
 
 [Care Advisors Marketplace Appointment Endpoints API README](ca_marketplace_appointments_API.md)

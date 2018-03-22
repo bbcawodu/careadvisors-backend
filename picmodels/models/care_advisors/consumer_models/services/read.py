@@ -9,6 +9,7 @@ def get_serialized_rows_by_id(cls, validated_params, rqst_errors):
         list_of_ids = None
 
     consumers = filter_consumer_qset_by_id(cls.objects.all(), rqst_consumer_id, list_of_ids)
+    consumers = prefetch_related_rows(consumers)
     consumers = filter_db_objects_by_secondary_params(consumers, validated_params)
 
     print('Finished db query.')
@@ -42,6 +43,7 @@ def get_serialized_rows_by_f_and_l_name(cls, validated_params, rqst_errors):
     rqst_last_name = validated_params['last_name']
 
     consumers = filter_consumer_objs_by_f_and_l_name(cls.objects.all(), rqst_first_name, rqst_last_name)
+    consumers = prefetch_related_rows(consumers)
     consumers = filter_db_objects_by_secondary_params(consumers, validated_params)
 
     response_list = create_response_list_from_db_objects(consumers)
@@ -60,6 +62,7 @@ def get_serialized_rows_by_f_and_l_name(cls, validated_params, rqst_errors):
 def get_serialized_rows_by_email(cls, validated_params, rqst_errors):
     list_of_emails = validated_params['email_list']
     consumers = cls.objects.all()
+    consumers = prefetch_related_rows(consumers)
     consumers = filter_db_objects_by_secondary_params(consumers, validated_params)
     response_list = []
 
@@ -86,6 +89,7 @@ def get_serialized_rows_by_email(cls, validated_params, rqst_errors):
 def get_serialized_rows_by_first_name(cls, validated_params, rqst_errors):
     list_of_first_names = validated_params['first_name_list']
     consumers = cls.objects.all()
+    consumers = prefetch_related_rows(consumers)
     consumers = filter_db_objects_by_secondary_params(consumers, validated_params)
     response_list = []
 
@@ -112,6 +116,7 @@ def get_serialized_rows_by_first_name(cls, validated_params, rqst_errors):
 def get_serialized_rows_by_last_name(cls, validated_params, rqst_errors):
     list_of_last_names = validated_params['last_name_list']
     consumers = cls.objects.all()
+    consumers = prefetch_related_rows(consumers)
     consumers = filter_db_objects_by_secondary_params(consumers, validated_params)
     response_list = []
 
@@ -186,8 +191,6 @@ def prefetch_related_rows(db_queryset):
 
 
 def filter_consumer_qset_by_id(db_queryset, rqst_id, list_of_ids):
-    db_queryset = prefetch_related_rows(db_queryset)
-
     if isinstance(rqst_id, str) and rqst_id.lower() == "all":
         db_queryset = db_queryset.order_by("id")
     else:
@@ -197,32 +200,24 @@ def filter_consumer_qset_by_id(db_queryset, rqst_id, list_of_ids):
 
 
 def filter_consumer_objs_by_f_and_l_name(db_queryset, rqst_first_name, rqst_last_name):
-    db_queryset = prefetch_related_rows(db_queryset)
-
     db_queryset = db_queryset.filter(first_name__iexact=rqst_first_name, last_name__iexact=rqst_last_name).order_by("last_name", "first_name")
 
     return db_queryset
 
 
 def filter_consumer_objs_by_email(db_queryset, rqst_email):
-    db_queryset = prefetch_related_rows(db_queryset)
-
     db_queryset = db_queryset.filter(email__iexact=rqst_email).order_by("email")
 
     return db_queryset
 
 
 def filter_consumer_objs_by_first_name(db_queryset, rqst_first_name):
-    db_queryset = prefetch_related_rows(db_queryset)
-
     db_queryset = db_queryset.filter(first_name__iexact=rqst_first_name).order_by("first_name")
 
     return db_queryset
 
 
 def filter_consumer_objs_by_last_name(db_queryset, rqst_last_name):
-    db_queryset = prefetch_related_rows(db_queryset)
-
     db_queryset = db_queryset.filter(last_name__iexact=rqst_last_name).order_by("last_name")
 
     return db_queryset
