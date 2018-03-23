@@ -6,6 +6,4 @@ DEBUG = True
 HOSTURL = "https://metricsbackend-demo.herokuapp.com"
 
 if DEBUG:
-    CORS_ORIGIN_WHITELIST += ('localhost:8080', 'localhost:5000')
-
-CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ORIGIN_WHITELIST += ('localhost:8080', 'localhost:5000', 'localhost:3000')
