@@ -67,6 +67,11 @@ CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_REPLACE_HTTPS_REFERER = True
 
+CORS_EXPOSE_HEADERS = (
+    'Set-Cookie',
+    'csrftoken'
+)
+
 CORS_ORIGIN_WHITELIST = (
     "google.com",
     "pic-reporting-system.herokuapp.com",
