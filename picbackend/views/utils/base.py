@@ -134,10 +134,10 @@ class JSONDELETERspMixin(object):
             raise NotImplementedError("Need to set class attribute, 'parse_DELETE_request_and_add_response'.")
 
 
-# JSONGETRspMixin.get = ajax_required_attr_method_wrapper(JSONGETRspMixin.get)
-# JSONPUTRspMixin.put = ajax_required_attr_method_wrapper(JSONPUTRspMixin.put)
-# JSONPOSTRspMixin.post = ajax_required_attr_method_wrapper(JSONPOSTRspMixin.post)
-# JSONDELETERspMixin.delete = ajax_required_attr_method_wrapper(JSONDELETERspMixin.delete)
+JSONGETRspMixin.get = ajax_required_attr_method_wrapper(JSONGETRspMixin.get)
+JSONPUTRspMixin.put = ajax_required_attr_method_wrapper(JSONPUTRspMixin.put)
+JSONPOSTRspMixin.post = ajax_required_attr_method_wrapper(JSONPOSTRspMixin.post)
+JSONDELETERspMixin.delete = ajax_required_attr_method_wrapper(JSONDELETERspMixin.delete)
 
 
 class JSONRspMixin(object):
