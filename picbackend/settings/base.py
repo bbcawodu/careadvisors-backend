@@ -74,6 +74,15 @@ CORS_ORIGIN_WHITELIST = (
     "dashboard-console-demo.care-advisors.com",
 )
 
+CSRF_TRUSTED_ORIGINS = (
+    "google.com",
+    "pic-reporting-system.herokuapp.com",
+    "navigatornetwork.org",
+    "patient-assist-backend.herokuapp.com",
+    "dashboard-console-demo.herokuapp.com",
+    "dashboard-console-demo.care-advisors.com",
+)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
