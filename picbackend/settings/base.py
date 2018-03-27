@@ -60,6 +60,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'picbackend.middleware.CsrfHeaderMiddleware'
 )
 
 CORS_ORIGIN_ALLOW_ALL = False
@@ -68,8 +69,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_REPLACE_HTTPS_REFERER = True
 
 CORS_EXPOSE_HEADERS = (
-    'Set-Cookie',
-    'csrftoken'
+    'X-CSRFTOKEN'
 )
 
 CORS_ORIGIN_WHITELIST = (
