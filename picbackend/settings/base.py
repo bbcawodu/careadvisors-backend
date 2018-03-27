@@ -68,6 +68,7 @@ CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_REPLACE_HTTPS_REFERER = True
 
+# sets Access-Control-Expose-Headers response header
 CORS_EXPOSE_HEADERS = [
     'X-CSRFTOKEN'
 ]
