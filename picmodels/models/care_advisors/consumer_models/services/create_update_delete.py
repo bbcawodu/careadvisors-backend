@@ -669,25 +669,25 @@ def get_provider_location_row_with_given_name_and_state(location_dict, rqst_erro
     return row
 
 
-def check_healthcare_locations_used_for_given_rows(cur_locations_used_qset, given_locations_used_list, consumer_row, rqst_errors):
+def check_healthcare_locations_used_for_given_rows(cur_locations_used_qset, given_locations_used_list, row, rqst_errors):
     for location_used in given_locations_used_list:
         if location_used in cur_locations_used_qset:
             rqst_errors.append(
-                "Healthcare location with the name: {} and state: {} already exists in consumer id {}'s healthcare_locations_used list (Hint - remove from parameter 'add_healthcare_locations_used' list)".format(
+                "Healthcare location with the name: {} and state: {} already exists in row id {}'s healthcare_locations_used list (Hint - remove from parameter 'add_healthcare_locations_used' list)".format(
                     location_used.name,
                     location_used.state_province,
-                    consumer_row.id,
+                    row.id,
                 )
             )
 
 
-def check_healthcare_locations_used_for_not_given_rows(cur_locations_used_qset, given_locations_used_list, consumer_row, rqst_errors):
+def check_healthcare_locations_used_for_not_given_rows(cur_locations_used_qset, given_locations_used_list, row, rqst_errors):
     for location_used in given_locations_used_list:
         if location_used not in cur_locations_used_qset:
             rqst_errors.append(
-                "Healthcare location with the name: {} and state: {} does not exist in consumer id {}'s healthcare_locations_used list (Hint - remove from parameter 'add_healthcare_locations_used' list)".format(
+                "Healthcare location with the name: {} and state: {} does not exist in row id {}'s healthcare_locations_used list (Hint - remove from parameter 'add_healthcare_locations_used' list)".format(
                     location_used.name,
                     location_used.state_province,
-                    consumer_row.id,
+                    row.id,
                 )
             )

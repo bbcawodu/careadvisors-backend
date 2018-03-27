@@ -6,7 +6,7 @@ DEBUG = True
 HOSTURL = "https://picbackend-dev.herokuapp.com"
 
 if DEBUG:
-    CORS_ORIGIN_WHITELIST += ('localhost:8080', 'localhost:5000')
-    CSRF_TRUSTED_ORIGINS += ('localhost:8080', 'localhost:5000', 'localhost:3000')
+    CORS_ORIGIN_WHITELIST += ('localhost:8080/', 'localhost:5000/', 'localhost:3000/')
+    CSRF_TRUSTED_ORIGINS += ('localhost:8080/', 'localhost:5000/', 'localhost:3000/')
 
 CORS_ORIGIN_ALLOW_ALL = True
