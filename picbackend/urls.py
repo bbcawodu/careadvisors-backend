@@ -62,6 +62,7 @@ urlpatterns = [
 
     # urls for staff views
     url(r"^v2/navigators/$", views.NavigatorManagementView.as_view()),
+    # url(r"^v2/navigator_sign_up/$", views.NavigatorSignUpView.as_view()),
     url(r"^v2/navigator_pic/$", views.upload_navigator_pic),
 
     # urls for consumer views

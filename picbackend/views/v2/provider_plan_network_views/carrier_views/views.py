@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.views.generic import View
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from picmodels.models import HealthcareCarrier
 
@@ -79,6 +80,7 @@ class CarriersManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     parse_GET_request_and_add_response = carriers_management_get_logic
 
 
+@xframe_options_exempt
 def handle_carrier_sample_id_card_mgmt_rqst(request):
     if request.method == 'GET':
         response_raw_data, rqst_errors = init_v2_response_data()

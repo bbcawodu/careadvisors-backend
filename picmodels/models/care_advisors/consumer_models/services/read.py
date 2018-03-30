@@ -8,8 +8,8 @@ def get_serialized_rows_by_id(cls, validated_params, rqst_errors):
     else:
         list_of_ids = None
 
-    consumers = filter_consumer_qset_by_id(cls.objects.all(), rqst_consumer_id, list_of_ids)
-    consumers = prefetch_related_rows(consumers)
+    consumers = prefetch_related_rows(cls.objects.all())
+    consumers = filter_consumer_qset_by_id(consumers, rqst_consumer_id, list_of_ids)
     consumers = filter_db_objects_by_secondary_params(consumers, validated_params)
 
     print('Finished db query.')
@@ -42,8 +42,8 @@ def get_serialized_rows_by_f_and_l_name(cls, validated_params, rqst_errors):
     rqst_first_name = validated_params['first_name']
     rqst_last_name = validated_params['last_name']
 
-    consumers = filter_consumer_objs_by_f_and_l_name(cls.objects.all(), rqst_first_name, rqst_last_name)
-    consumers = prefetch_related_rows(consumers)
+    consumers = prefetch_related_rows(cls.objects.all())
+    consumers = filter_consumer_objs_by_f_and_l_name(consumers, rqst_first_name, rqst_last_name)
     consumers = filter_db_objects_by_secondary_params(consumers, validated_params)
 
     response_list = create_response_list_from_db_objects(consumers)
@@ -61,8 +61,7 @@ def get_serialized_rows_by_f_and_l_name(cls, validated_params, rqst_errors):
 
 def get_serialized_rows_by_email(cls, validated_params, rqst_errors):
     list_of_emails = validated_params['email_list']
-    consumers = cls.objects.all()
-    consumers = prefetch_related_rows(consumers)
+    consumers = prefetch_related_rows(cls.objects.all())
     consumers = filter_db_objects_by_secondary_params(consumers, validated_params)
     response_list = []
 
@@ -88,8 +87,7 @@ def get_serialized_rows_by_email(cls, validated_params, rqst_errors):
 
 def get_serialized_rows_by_first_name(cls, validated_params, rqst_errors):
     list_of_first_names = validated_params['first_name_list']
-    consumers = cls.objects.all()
-    consumers = prefetch_related_rows(consumers)
+    consumers = prefetch_related_rows(cls.objects.all())
     consumers = filter_db_objects_by_secondary_params(consumers, validated_params)
     response_list = []
 
@@ -115,8 +113,7 @@ def get_serialized_rows_by_first_name(cls, validated_params, rqst_errors):
 
 def get_serialized_rows_by_last_name(cls, validated_params, rqst_errors):
     list_of_last_names = validated_params['last_name_list']
-    consumers = cls.objects.all()
-    consumers = prefetch_related_rows(consumers)
+    consumers = prefetch_related_rows(cls.objects.all())
     consumers = filter_db_objects_by_secondary_params(consumers, validated_params)
     response_list = []
 
@@ -166,11 +163,13 @@ def filter_db_objects_by_secondary_params(db_objects, validated_GET_rqst_params)
 def prefetch_related_rows(db_queryset):
     db_queryset = db_queryset.select_related(
         'address',
+        'address__country',
         'navigator',
         # 'primary_guardian',
         'cps_info',
         'cps_info__cps_location',
         'cps_info__cps_location__address',
+        'cps_info__cps_location__address__country',
         'cps_info__primary_dependent',
         "consumer_hospital_info",
         'service_expertise_need',

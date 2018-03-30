@@ -213,6 +213,7 @@ def prefetch_related_rows(db_queryset):
         'staff_member',
         'location',
         'location__address',
+        'location__address__country'
     )
 
     db_queryset = db_queryset.prefetch_related(

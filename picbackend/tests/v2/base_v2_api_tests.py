@@ -44,9 +44,9 @@ class BaseV2APITests(BaseV2RqstTests):
         self.assertNotEqual(len(response_data["Data"]), 0)
 
 
-class BaseConsumerStaffMetricsTests(BaseV2APITests):
+class BaseConsumerNavigatorsMetricsTests(BaseV2APITests):
 
     def test_base_fetch_all_objects_request(self):
         self.base_url += "?id=all"
 
-        super(BaseConsumerStaffMetricsTests, self).test_base_fetch_all_objects_request()
+        super(BaseConsumerNavigatorsMetricsTests, self).test_base_fetch_all_objects_request()

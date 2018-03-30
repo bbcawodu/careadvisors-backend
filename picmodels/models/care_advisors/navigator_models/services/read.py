@@ -1,4 +1,10 @@
-def retrieve_navigator_data_by_id(cls, rqst_staff_id, list_of_ids, rqst_errors):
+def get_serialized_rows_by_id(cls, validated_params, rqst_errors):
+    rqst_staff_id = validated_params['id']
+    if rqst_staff_id != 'all':
+        list_of_ids = validated_params['id_list']
+    else:
+        list_of_ids = None
+
     navigator_qset = filter_navigator_qset_by_id(cls.objects.all(), rqst_staff_id, list_of_ids)
 
     response_list = create_response_list_from_db_objects(navigator_qset)
@@ -18,7 +24,10 @@ def retrieve_navigator_data_by_id(cls, rqst_staff_id, list_of_ids, rqst_errors):
     return response_list
 
 
-def retrieve_navigator_data_by_f_and_l_name(cls, rqst_first_name, rqst_last_name, rqst_errors):
+def get_serialized_rows_by_f_and_l_name(cls, validated_params, rqst_errors):
+    rqst_first_name = validated_params['first_name']
+    rqst_last_name = validated_params['last_name']
+
     navigator_qset = filter_navigator_objs_by_f_and_l_name(cls.objects.all(), rqst_first_name, rqst_last_name)
 
     response_list = create_response_list_from_db_objects(navigator_qset)
@@ -34,7 +43,9 @@ def retrieve_navigator_data_by_f_and_l_name(cls, rqst_first_name, rqst_last_name
     return response_list
 
 
-def retrieve_navigator_data_by_email(cls, list_of_emails, rqst_errors):
+def get_serialized_rows_by_email(cls, validated_params, rqst_errors):
+    list_of_emails = validated_params['email_list']
+
     response_list = []
 
     for email in list_of_emails:
@@ -57,7 +68,9 @@ def retrieve_navigator_data_by_email(cls, list_of_emails, rqst_errors):
     return response_list
 
 
-def retrieve_navigator_data_by_first_name(cls, list_of_first_names, rqst_errors):
+def get_serialized_rows_by_first_name(cls, validated_params, rqst_errors):
+    list_of_first_names = validated_params['first_name_list']
+
     response_list = []
 
     for first_name in list_of_first_names:
@@ -80,7 +93,9 @@ def retrieve_navigator_data_by_first_name(cls, list_of_first_names, rqst_errors)
     return response_list
 
 
-def retrieve_navigator_data_by_last_name(cls, list_of_last_names, rqst_errors):
+def get_serialized_rows_by_last_name(cls, validated_params, rqst_errors):
+    list_of_last_names = validated_params['last_name_list']
+
     response_list = []
 
     for last_name in list_of_last_names:
@@ -103,7 +118,9 @@ def retrieve_navigator_data_by_last_name(cls, list_of_last_names, rqst_errors):
     return response_list
 
 
-def retrieve_navigator_data_by_county(cls, list_of_counties, rqst_errors):
+def get_serialized_rows_by_county(cls, validated_params, rqst_errors):
+    list_of_counties = validated_params['county_list']
+
     response_list = []
 
     for county in list_of_counties:
@@ -126,7 +143,9 @@ def retrieve_navigator_data_by_county(cls, list_of_counties, rqst_errors):
     return response_list
 
 
-def retrieve_navigator_data_by_region(cls, list_of_regions, rqst_errors):
+def get_serialized_rows_by_region(cls, validated_params, rqst_errors):
+    list_of_regions = validated_params['region_list']
+
     response_list = []
 
     counties_mapped_to_regions = cls.REGIONS
@@ -162,7 +181,9 @@ def retrieve_navigator_data_by_region(cls, list_of_regions, rqst_errors):
     return response_list
 
 
-def retrieve_navigator_data_by_mpn(cls, list_of_mpns, rqst_errors):
+def get_serialized_rows_by_mpn(cls, validated_params, rqst_errors):
+    list_of_mpns = validated_params['mpn_list']
+
     response_list = []
 
     for mpn in list_of_mpns:
@@ -195,11 +216,23 @@ def create_response_list_from_db_objects(db_objects):
 
 
 def prefetch_related_rows(db_queryset):
+    db_queryset = db_queryset.select_related(
+        'address',
+        'address__country',
+    )
+
     db_queryset = db_queryset.prefetch_related(
         'picconsumer_set',
         'base_locations',
         'base_locations__address',
-        'credentialsmodel_set'
+        'base_locations__address__country',
+        'credentialsmodel_set',
+        "healthcare_locations_worked",
+        "healthcare_service_expertises",
+        "insurance_carrier_specialties",
+        "resume_set",
+        "resume_set__education_set",
+        "resume_set__job_set",
     )
 
     return db_queryset
