@@ -4,6 +4,7 @@ import jwt
 import json
 from django.conf import settings
 from django.views.generic import View
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from picbackend.views.utils import JSONGETRspMixin
 
@@ -32,6 +33,7 @@ class DashboardView(JSONGETRspMixin, View):
     parse_GET_request_and_add_response = dashboard_get_logic
 
 
+@xframe_options_exempt
 def render_demo_dashboard(request):
     if request.method == 'GET':
         return render(request, 'dashboard_demo_view.html')

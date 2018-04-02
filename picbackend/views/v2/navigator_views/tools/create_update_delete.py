@@ -1,7 +1,3 @@
-"""
-Defines utility functions and classes for staff views
-"""
-
 from django import forms
 from django.core.validators import validate_email
 from django.core.validators import URLValidator
@@ -10,7 +6,7 @@ from django.core.exceptions import ValidationError
 from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_list_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
-from picmodels.models import NavMetricsLocation
+from picbackend.views.utils import clean_dict_value_from_dict_object
 
 
 def validate_put_rqst_params(rqst_body, rqst_errors):
@@ -23,108 +19,143 @@ def validate_put_rqst_params(rqst_body, rqst_errors):
     if rqst_action == 'create':
         validate_create_row_params(rqst_body, validated_params, rqst_errors)
     elif rqst_action == 'update':
-        validated_params['rqst_usr_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
         validate_update_row_params(rqst_body, validated_params, rqst_errors)
     elif rqst_action == 'delete':
-        validated_params['rqst_usr_id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
+        validated_params['id'] = clean_int_value_from_dict_object(rqst_body, "root", "id", rqst_errors)
 
     return validated_params
 
 
 def validate_create_row_params(rqst_body, validated_params, rqst_errors):
-    rqst_usr_email = clean_string_value_from_dict_object(rqst_body, "root", "Email", rqst_errors)
-    if rqst_usr_email and not rqst_errors:
+    email = clean_string_value_from_dict_object(rqst_body, "root", "email", rqst_errors)
+    if email and not rqst_errors:
         try:
-            validate_email(rqst_usr_email)
+            validate_email(email)
         except forms.ValidationError:
-            rqst_errors.append("{!s} must be a valid email address".format(rqst_usr_email))
+            rqst_errors.append("{!s} must be a valid email address".format(email))
+    validated_params["email"] = email
 
-    rqst_usr_mpn = clean_string_value_from_dict_object(rqst_body, "root", "MPN", rqst_errors, empty_string_allowed=True,
-                                                       none_allowed=True)
-    if rqst_usr_mpn is None:
-        rqst_usr_mpn = ''
-    rqst_usr_f_name = clean_string_value_from_dict_object(rqst_body, "root", "First Name", rqst_errors)
-    rqst_usr_l_name = clean_string_value_from_dict_object(rqst_body, "root", "Last Name", rqst_errors)
-    rqst_county = clean_string_value_from_dict_object(rqst_body, "root", "User County", rqst_errors)
-    rqst_usr_type = clean_string_value_from_dict_object(rqst_body, "root", "User Type", rqst_errors)
-    rqst_base_locations = clean_list_value_from_dict_object(rqst_body, "root", "Base Locations", rqst_errors,
-                                                            empty_list_allowed=True)
+    mpn = clean_string_value_from_dict_object(
+        rqst_body,
+        "root",
+        "mpn",
+        rqst_errors,
+        empty_string_allowed=True,
+        none_allowed=True
+    )
+    if mpn is None:
+        mpn = ''
+    validated_params["mpn"] = mpn
 
-    base_location_objects = []
-    location_errors = []
-    if rqst_base_locations:
-        rqst_base_locations = list(set(rqst_base_locations))
-        for base_location_name in rqst_base_locations:
-            try:
-                base_location_object = NavMetricsLocation.objects.get(name=base_location_name)
-                base_location_objects.append(base_location_object)
-            except NavMetricsLocation.DoesNotExist:
-                location_errors.append(
-                    "No Nav Hub Location Database entry found for name: {!s}".format(base_location_name))
-    for location_error in location_errors:
-        rqst_errors.append(location_error)
+    first_name = clean_string_value_from_dict_object(rqst_body, "root", "first_name", rqst_errors)
+    validated_params["first_name"] = first_name
 
-    validated_params["rqst_usr_email"] = rqst_usr_email
-    validated_params["rqst_usr_mpn"] = rqst_usr_mpn
-    validated_params["rqst_usr_f_name"] = rqst_usr_f_name
-    validated_params["rqst_usr_l_name"] = rqst_usr_l_name
-    validated_params["rqst_county"] = rqst_county
-    validated_params["rqst_usr_type"] = rqst_usr_type
-    validated_params["base_location_objects"] = base_location_objects
+    last_name = clean_string_value_from_dict_object(rqst_body, "root", "last_name", rqst_errors)
+    validated_params["last_name"] = last_name
+
+    county = clean_string_value_from_dict_object(rqst_body, "root", "county", rqst_errors)
+    validated_params["county"] = county
+
+    type = clean_string_value_from_dict_object(rqst_body, "root", "type", rqst_errors)
+    validated_params["type"] = type
+
+    if 'add_base_locations' in rqst_body:
+        add_base_location_names = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "add_base_locations",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_base_location_names = []
+        for base_location_name in add_base_location_names:
+            if not isinstance(base_location_name, str):
+                rqst_errors.append('Error: A base_location_name in \'add_base_locations\' is not a string.')
+                continue
+
+            validated_base_location_names.append(base_location_name)
+
+        validated_params['add_base_locations'] = validated_base_location_names
 
     validate_nav_signup_params(rqst_body, validated_params, rqst_errors)
 
 
 def validate_update_row_params(rqst_body, validated_params, rqst_errors):
-    if "Email" in rqst_body:
-        rqst_usr_email = clean_string_value_from_dict_object(rqst_body, "root", "Email", rqst_errors)
-        if rqst_usr_email and not rqst_errors:
+    if "email" in rqst_body:
+        email = clean_string_value_from_dict_object(rqst_body, "root", "email", rqst_errors)
+        if email and not rqst_errors:
             try:
-                validate_email(rqst_usr_email)
+                validate_email(email)
             except forms.ValidationError:
-                rqst_errors.append("{!s} must be a valid email address".format(rqst_usr_email))
-        validated_params["rqst_usr_email"] = rqst_usr_email
+                rqst_errors.append("{!s} must be a valid email address".format(email))
+        validated_params["email"] = email
 
-    if "MPN" in rqst_body:
-        rqst_usr_mpn = clean_string_value_from_dict_object(rqst_body, "root", "MPN", rqst_errors, empty_string_allowed=True,
-                                                           none_allowed=True)
-        if rqst_usr_mpn is None:
-            rqst_usr_mpn = ''
-        validated_params["rqst_usr_mpn"] = rqst_usr_mpn
+    if "mpn" in rqst_body:
+        mpn = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "mpn",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+        if mpn is None:
+            mpn = ''
+        validated_params["mpn"] = mpn
 
-    if "First Name" in rqst_body:
-        rqst_usr_f_name = clean_string_value_from_dict_object(rqst_body, "root", "First Name", rqst_errors)
-        validated_params["rqst_usr_f_name"] = rqst_usr_f_name
+    if "first_name" in rqst_body:
+        first_name = clean_string_value_from_dict_object(rqst_body, "root", "first_name", rqst_errors)
+        validated_params["first_name"] = first_name
 
-    if "Last Name" in rqst_body:
-        rqst_usr_l_name = clean_string_value_from_dict_object(rqst_body, "root", "Last Name", rqst_errors)
-        validated_params["rqst_usr_l_name"] = rqst_usr_l_name
+    if "last_name" in rqst_body:
+        last_name = clean_string_value_from_dict_object(rqst_body, "root", "last_name", rqst_errors)
+        validated_params["last_name"] = last_name
 
-    if "User County" in rqst_body:
-        rqst_county = clean_string_value_from_dict_object(rqst_body, "root", "User County", rqst_errors)
-        validated_params["rqst_county"] = rqst_county
+    if "county" in rqst_body:
+        county = clean_string_value_from_dict_object(rqst_body, "root", "county", rqst_errors)
+        validated_params["county"] = county
 
-    if "User Type" in rqst_body:
-        rqst_usr_type = clean_string_value_from_dict_object(rqst_body, "root", "User Type", rqst_errors)
-        validated_params["rqst_usr_type"] = rqst_usr_type
+    if "type" in rqst_body:
+        type = clean_string_value_from_dict_object(rqst_body, "root", "type", rqst_errors)
+        validated_params["type"] = type
 
-    if "Base Locations" in rqst_body:
-        rqst_base_locations = clean_list_value_from_dict_object(rqst_body, "root", "Base Locations", rqst_errors,
-                                                                empty_list_allowed=True)
-        base_location_objects = []
-        location_errors = []
-        if rqst_base_locations:
-            rqst_base_locations = list(set(rqst_base_locations))
-            for base_location_name in rqst_base_locations:
-                try:
-                    base_location_object = NavMetricsLocation.objects.get(name=base_location_name)
-                    base_location_objects.append(base_location_object)
-                except NavMetricsLocation.DoesNotExist:
-                    location_errors.append(
-                        "No Nav Hub Location Database entry found for name: {!s}".format(base_location_name))
-        for location_error in location_errors:
-            rqst_errors.append(location_error)
-        validated_params["base_location_objects"] = base_location_objects
+    if 'add_base_locations' in rqst_body:
+        add_base_location_names = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "add_base_locations",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_base_location_names = []
+        for base_location_name in add_base_location_names:
+            if not isinstance(base_location_name, str):
+                rqst_errors.append('Error: A base_location_name in \'add_base_locations\' is not a string.')
+                continue
+
+            validated_base_location_names.append(base_location_name)
+
+        validated_params['add_base_locations'] = validated_base_location_names
+    elif 'remove_base_locations' in rqst_body:
+        remove_base_location_names = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "remove_base_locations",
+            rqst_errors
+        )
+
+        validated_base_location_names = []
+        for base_location_name in remove_base_location_names:
+            if not isinstance(base_location_name, str):
+                rqst_errors.append('Error: A base_location_name in \'remove_base_locations\' is not a string.')
+                continue
+
+            validated_base_location_names.append(base_location_name)
+
+        validated_params['remove_base_locations'] = validated_base_location_names
 
     validate_nav_signup_params(rqst_body, validated_params, rqst_errors)
 
@@ -392,3 +423,422 @@ def validate_nav_signup_params(rqst_body, validated_params, rqst_errors):
                 rqst_errors.append("'video_link' is not a valid url. value is: {}".format(video_link))
 
         validated_params["video_link"] = video_link
+
+    validate_nav_signup_resume_params(rqst_body, validated_params, rqst_errors)
+
+
+def validate_nav_signup_resume_params(rqst_body, validated_params, rqst_errors):
+    if "create_resume_row" in rqst_body:
+        resume_row_params = clean_dict_value_from_dict_object(
+            rqst_body,
+            "root",
+            "create_resume_row",
+            rqst_errors
+        )
+
+        validated_resume_row_params = {}
+        if resume_row_params:
+            validated_resume_row_params = validate_create_resume_row_params(
+                resume_row_params,
+                rqst_errors
+            )
+
+        validated_params['create_resume_row'] = validated_resume_row_params
+    elif "update_resume_row" in rqst_body:
+        resume_row_params = clean_dict_value_from_dict_object(
+            rqst_body,
+            "root",
+            "update_resume_row",
+            rqst_errors
+        )
+
+        validated_resume_row_params = {}
+        if resume_row_params:
+            validated_resume_row_params = validate_update_resume_row_params(
+                resume_row_params,
+                rqst_errors
+            )
+
+        validated_params['update_resume_row'] = validated_resume_row_params
+    elif "delete_resume_row" in rqst_body:
+        resume_row_params = clean_dict_value_from_dict_object(
+            rqst_body,
+            "root",
+            "delete_resume_row",
+            rqst_errors
+        )
+
+        validated_resume_row_params = {}
+        if resume_row_params:
+            validated_resume_row_params = validate_delete_resume_row_params(
+                resume_row_params,
+                rqst_errors
+            )
+
+        validated_params['delete_resume_row'] = validated_resume_row_params
+
+
+def validate_create_resume_row_params(resume_row_params, rqst_errors):
+    validated_resume_row_params = {
+        'profile_description': clean_string_value_from_dict_object(
+            resume_row_params,
+            "create_resume_row",
+            "profile_description",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        ),
+    }
+
+    if "create_education_rows" in resume_row_params:
+        education_row_params = clean_list_value_from_dict_object(
+            resume_row_params,
+            "create_resume_row",
+            "create_education_rows",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_education_row_params = []
+        if education_row_params:
+            for education_row_index, education_row_dict in enumerate(education_row_params):
+                validated_education_row_dict = validate_create_education_row_params(
+                    education_row_dict,
+                    education_row_index,
+                    rqst_errors
+                )
+                validated_education_row_params.append(validated_education_row_dict)
+
+            validated_resume_row_params['create_education_rows'] = validated_education_row_params
+
+    if "create_job_rows" in resume_row_params:
+        job_row_params = clean_list_value_from_dict_object(
+            resume_row_params,
+            "create_resume_row",
+            "create_job_rows",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_job_row_params = []
+        if job_row_params:
+            for job_row_index, job_row_dict in enumerate(job_row_params):
+                validated_job_row_dict = validate_create_job_row_params(
+                    job_row_dict,
+                    job_row_index,
+                    rqst_errors
+                )
+                validated_job_row_params.append(validated_job_row_dict)
+
+            validated_resume_row_params['create_job_rows'] = validated_job_row_params
+
+    return validated_resume_row_params
+
+
+def validate_update_resume_row_params(resume_row_params, rqst_errors):
+    validated_resume_row_params = {
+        'id': clean_int_value_from_dict_object(
+            resume_row_params,
+            "update_resume_row",
+            "id",
+            rqst_errors
+        )
+    }
+
+    if 'profile_description' in resume_row_params:
+        validated_resume_row_params['profile_description'] = clean_string_value_from_dict_object(
+            resume_row_params,
+            "update_resume_row",
+            "profile_description",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if "create_education_rows" in resume_row_params:
+        education_row_params = clean_list_value_from_dict_object(
+            resume_row_params,
+            "update_resume_row",
+            "create_education_rows",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_education_row_params = []
+        if education_row_params:
+            for education_row_index, education_row_dict in enumerate(education_row_params):
+                validated_education_row_dict = validate_create_education_row_params(
+                    education_row_dict,
+                    education_row_index,
+                    rqst_errors
+                )
+                validated_education_row_params.append(validated_education_row_dict)
+
+            validated_resume_row_params['create_education_rows'] = validated_education_row_params
+    elif "update_education_rows" in resume_row_params:
+        education_row_params = clean_list_value_from_dict_object(
+            resume_row_params,
+            "update_resume_row",
+            "update_education_rows",
+            rqst_errors
+        )
+
+        validated_education_row_params = []
+        if education_row_params:
+            for education_row_index, education_row_dict in enumerate(education_row_params):
+                validated_education_row_dict = validate_update_education_row_params(
+                    education_row_dict,
+                    education_row_index,
+                    rqst_errors
+                )
+                validated_education_row_params.append(validated_education_row_dict)
+
+            validated_resume_row_params['update_education_rows'] = validated_education_row_params
+    elif "delete_education_rows" in resume_row_params:
+        education_row_params = clean_list_value_from_dict_object(
+            resume_row_params,
+            "update_resume_row",
+            "delete_education_rows",
+            rqst_errors
+        )
+
+        validated_education_row_params = []
+        if education_row_params:
+            for education_row_index, education_row_dict in enumerate(education_row_params):
+                validated_education_row_dict = validate_delete_education_row_params(
+                    education_row_dict,
+                    education_row_index,
+                    rqst_errors
+                )
+                validated_education_row_params.append(validated_education_row_dict)
+
+            validated_resume_row_params['delete_education_rows'] = validated_education_row_params
+
+    if "create_job_rows" in resume_row_params:
+        job_row_params = clean_list_value_from_dict_object(
+            resume_row_params,
+            "update_resume_row",
+            "create_job_rows",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_job_row_params = []
+        if job_row_params:
+            for job_row_index, job_row_dict in enumerate(job_row_params):
+                validated_job_row_dict = validate_create_job_row_params(
+                    job_row_dict,
+                    job_row_index,
+                    rqst_errors
+                )
+                validated_job_row_params.append(validated_job_row_dict)
+
+            validated_resume_row_params['create_job_rows'] = validated_job_row_params
+    elif "update_job_rows" in resume_row_params:
+        job_row_params = clean_list_value_from_dict_object(
+            resume_row_params,
+            "update_resume_row",
+            "update_job_rows",
+            rqst_errors
+        )
+
+        validated_job_row_params = []
+        if job_row_params:
+            for job_row_index, job_row_dict in enumerate(job_row_params):
+                validated_job_row_dict = validate_update_job_row_params(
+                    job_row_dict,
+                    job_row_index,
+                    rqst_errors
+                )
+                validated_job_row_params.append(validated_job_row_dict)
+
+            validated_resume_row_params['update_job_rows'] = validated_job_row_params
+    elif "delete_job_rows" in resume_row_params:
+        job_row_params = clean_list_value_from_dict_object(
+            resume_row_params,
+            "update_resume_row",
+            "delete_job_rows",
+            rqst_errors
+        )
+
+        validated_job_row_params = []
+        if job_row_params:
+            for job_row_index, job_row_dict in enumerate(job_row_params):
+                validated_job_row_dict = validate_delete_job_row_params(
+                    job_row_dict,
+                    job_row_index,
+                    rqst_errors
+                )
+                validated_job_row_params.append(validated_job_row_dict)
+
+            validated_resume_row_params['delete_job_rows'] = validated_job_row_params
+
+    return validated_resume_row_params
+
+
+def validate_delete_resume_row_params(resume_row_params, rqst_errors):
+    validated_resume_row_params = {
+        'id': clean_int_value_from_dict_object(
+            resume_row_params,
+            "delete_resume_row",
+            "id",
+            rqst_errors
+        )
+    }
+
+    return validated_resume_row_params
+
+
+def validate_create_education_row_params(education_row_dict, education_row_index, rqst_errors):
+    validated_education_row_dict = {
+        'school': clean_string_value_from_dict_object(
+            education_row_dict,
+            "create_education_row[{}]".format(education_row_index),
+            "school",
+            rqst_errors,
+        ),
+        'major': clean_string_value_from_dict_object(
+            education_row_dict,
+            "create_education_row[{}]".format(education_row_index),
+            "major",
+            rqst_errors,
+        ),
+        'degree_type': clean_string_value_from_dict_object(
+            education_row_dict,
+            "create_education_row[{}]".format(education_row_index),
+            "degree_type",
+            rqst_errors,
+            none_allowed=True
+        ),
+    }
+
+    if not validated_education_row_dict['degree_type']:
+        validated_education_row_dict['degree_type'] = "Not Available"
+
+    return validated_education_row_dict
+
+
+def validate_update_education_row_params(education_row_dict, education_row_index, rqst_errors):
+    validated_education_row_dict = {
+        'id': clean_int_value_from_dict_object(
+            education_row_dict,
+            "update_education_row[{}]".format(education_row_index),
+            "id",
+            rqst_errors
+        )
+    }
+
+    if 'school' in education_row_dict:
+        validated_education_row_dict['school'] = clean_string_value_from_dict_object(
+            education_row_dict,
+            "update_education_row[{}]".format(education_row_index),
+            "school",
+            rqst_errors,
+        )
+    if 'major' in education_row_dict:
+        validated_education_row_dict['major'] = clean_string_value_from_dict_object(
+            education_row_dict,
+            "update_education_row[{}]".format(education_row_index),
+            "major",
+            rqst_errors,
+        )
+    if 'degree_type' in education_row_dict:
+        validated_education_row_dict['degree_type'] = clean_string_value_from_dict_object(
+            education_row_dict,
+            "update_education_row[{}]".format(education_row_index),
+            "degree_type",
+            rqst_errors,
+            none_allowed=True
+        )
+        if not validated_education_row_dict['degree_type']:
+            validated_education_row_dict['degree_type'] = "Not Available"
+
+    return validated_education_row_dict
+
+
+def validate_delete_education_row_params(education_row_dict, education_row_index, rqst_errors):
+    validated_education_row_dict = {
+        'id': clean_int_value_from_dict_object(
+            education_row_dict,
+            "delete_education_row[{}]".format(education_row_index),
+            "id",
+            rqst_errors
+        )
+    }
+
+    return validated_education_row_dict
+
+
+def validate_create_job_row_params(job_row_dict, job_row_index, rqst_errors):
+    validated_job_row_dict = {
+        'title': clean_string_value_from_dict_object(
+            job_row_dict,
+            "create_job_row[{}]".format(job_row_index),
+            "title",
+            rqst_errors,
+        ),
+        'company': clean_string_value_from_dict_object(
+            job_row_dict,
+            "create_job_row[{}]".format(job_row_index),
+            "company",
+            rqst_errors,
+        ),
+        'description': clean_string_value_from_dict_object(
+            job_row_dict,
+            "create_job_row[{}]".format(job_row_index),
+            "description",
+            rqst_errors,
+            none_allowed=True
+        ),
+    }
+
+    return validated_job_row_dict
+
+
+def validate_update_job_row_params(job_row_dict, job_row_index, rqst_errors):
+    validated_job_row_dict = {
+        'id': clean_int_value_from_dict_object(
+            job_row_dict,
+            "update_job_row[{}]".format(job_row_index),
+            "id",
+            rqst_errors
+        )
+    }
+
+    if 'title' in job_row_dict:
+        validated_job_row_dict['title'] = clean_string_value_from_dict_object(
+            job_row_dict,
+            "update_job_row[{}]".format(job_row_index),
+            "title",
+            rqst_errors,
+        )
+    if 'company' in job_row_dict:
+        validated_job_row_dict['company'] = clean_string_value_from_dict_object(
+            job_row_dict,
+            "update_job_row[{}]".format(job_row_index),
+            "company",
+            rqst_errors,
+        )
+    if 'description' in job_row_dict:
+        validated_job_row_dict['description'] = clean_string_value_from_dict_object(
+            job_row_dict,
+            "update_job_row[{}]".format(job_row_index),
+            "description",
+            rqst_errors,
+            none_allowed=True
+        )
+
+    return validated_job_row_dict
+
+
+def validate_delete_job_row_params(job_row_dict, job_row_index, rqst_errors):
+    validated_job_row_dict = {
+        'id': clean_int_value_from_dict_object(
+            job_row_dict,
+            "delete_job_row[{}]".format(job_row_index),
+            "id",
+            rqst_errors
+        )
+    }
+
+    return validated_job_row_dict

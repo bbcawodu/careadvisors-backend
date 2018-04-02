@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.views.generic import View
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from picbackend.views.utils import JSONGETRspMixin
 from picbackend.views.utils import JSONPUTRspMixin
@@ -14,6 +15,7 @@ from picmodels.models import Navigators
 import json
 
 from .tools import validate_put_rqst_params
+from .tools import validate_nav_sign_up_params
 
 
 # Need to abstract common variables in get and post class methods into class attributes
@@ -49,42 +51,21 @@ class NavigatorManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
             data_list = []
 
             if 'first_name' in validated_GET_rqst_params and 'last_name' in validated_GET_rqst_params:
-                rqst_first_name = validated_GET_rqst_params['first_name']
-                rqst_last_name = validated_GET_rqst_params['last_name']
-
-                data_list = Navigators.retrieve_navigator_data_by_f_and_l_name(rqst_first_name, rqst_last_name, rqst_errors)
+                data_list = Navigators.get_serialized_rows_by_f_and_l_name(validated_GET_rqst_params, rqst_errors)
             elif 'email' in validated_GET_rqst_params:
-                list_of_emails = validated_GET_rqst_params['email_list']
-
-                data_list = Navigators.retrieve_navigator_data_by_email(list_of_emails, rqst_errors)
+                data_list = Navigators.get_serialized_rows_by_email(validated_GET_rqst_params, rqst_errors)
             elif 'mpn' in validated_GET_rqst_params:
-                list_of_mpns = validated_GET_rqst_params['mpn_list']
-
-                data_list = Navigators.retrieve_navigator_data_by_mpn(list_of_mpns, rqst_errors)
+                data_list = Navigators.get_serialized_rows_by_mpn(validated_GET_rqst_params, rqst_errors)
             elif 'first_name' in validated_GET_rqst_params:
-                list_of_first_names = validated_GET_rqst_params['first_name_list']
-
-                data_list = Navigators.retrieve_navigator_data_by_first_name(list_of_first_names, rqst_errors)
+                data_list = Navigators.get_serialized_rows_by_first_name(validated_GET_rqst_params, rqst_errors)
             elif 'last_name' in validated_GET_rqst_params:
-                list_of_last_names = validated_GET_rqst_params['last_name_list']
-
-                data_list = Navigators.retrieve_navigator_data_by_last_name(list_of_last_names, rqst_errors)
+                data_list = Navigators.get_serialized_rows_by_last_name(validated_GET_rqst_params, rqst_errors)
             elif 'county' in validated_GET_rqst_params:
-                list_of_counties = validated_GET_rqst_params['county_list']
-
-                data_list = Navigators.retrieve_navigator_data_by_county(list_of_counties, rqst_errors)
+                data_list = Navigators.get_serialized_rows_by_county(validated_GET_rqst_params, rqst_errors)
             elif 'region' in validated_GET_rqst_params:
-                list_of_regions = validated_GET_rqst_params['region_list']
-
-                data_list = Navigators.retrieve_navigator_data_by_region(list_of_regions, rqst_errors)
+                data_list = Navigators.get_serialized_rows_by_region(validated_GET_rqst_params, rqst_errors)
             elif 'id' in validated_GET_rqst_params:
-                rqst_staff_id = validated_GET_rqst_params['id']
-                if rqst_staff_id != 'all':
-                    list_of_ids = validated_GET_rqst_params['id_list']
-                else:
-                    list_of_ids = None
-
-                data_list = Navigators.retrieve_navigator_data_by_id(rqst_staff_id, list_of_ids, rqst_errors)
+                data_list = Navigators.get_serialized_rows_by_id(validated_GET_rqst_params, rqst_errors)
             else:
                 rqst_errors.append('No Valid Parameters')
 
@@ -107,6 +88,38 @@ class NavigatorManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
     parse_GET_request_and_add_response = navigator_management_get_logic
 
 
+class NavigatorSignUpView(JSONPUTRspMixin, JSONGETRspMixin, View):
+    """
+    Defines views that handles Patient Innovation Center consumer instance related requests
+    """
+
+    def navigator_sign_up_put_logic(self, rqst_body, response_raw_data, rqst_errors):
+        validated_params = validate_nav_sign_up_params(rqst_body, rqst_errors)
+        rqst_action = validated_params['rqst_action']
+
+        if not rqst_errors:
+            navigator_row = None
+
+            if rqst_action == "create":
+                navigator_row = Navigators.create_row_w_validated_params(validated_params, rqst_errors)
+            else:
+                rqst_errors.append("No valid 'db_action' provided.")
+
+            if navigator_row:
+                response_raw_data['Data'] = {"row": navigator_row.return_values_dict()}
+
+    def navigator_sign_up_get_logic(self, request, validated_GET_rqst_params, response_raw_data, rqst_errors):
+        pass
+
+    parse_PUT_request_and_add_response = navigator_sign_up_put_logic
+
+    accepted_GET_request_parameters = [
+
+    ]
+    parse_GET_request_and_add_response = navigator_sign_up_get_logic
+
+
+@xframe_options_exempt
 def upload_navigator_pic(request):
     if request.method == 'GET':
         response_raw_data, rqst_errors = init_v2_response_data()

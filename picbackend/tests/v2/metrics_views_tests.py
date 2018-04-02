@@ -4,11 +4,11 @@ Defines tests for version 2 of the consumer metrics API for the picbackend app
 
 
 from django.test import TestCase
-from .base_v2_api_tests import BaseConsumerStaffMetricsTests
+from .base_v2_api_tests import BaseConsumerNavigatorsMetricsTests
 import json
 
 
-class ConsumerMetricsAPITests(TestCase, BaseConsumerStaffMetricsTests):
+class ConsumerMetricsAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
     def setUp(self):
         self.base_url += "metrics/"
 

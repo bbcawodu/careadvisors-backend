@@ -10,14 +10,14 @@ from .services.create_update_delete import create_row_w_validated_params
 from .services.create_update_delete import update_row_w_validated_params
 from .services.create_update_delete import delete_row_w_validated_params
 
-from .services.read import retrieve_navigator_data_by_id
-from .services.read import retrieve_navigator_data_by_f_and_l_name
-from .services.read import retrieve_navigator_data_by_first_name
-from .services.read import retrieve_navigator_data_by_last_name
-from .services.read import retrieve_navigator_data_by_email
-from .services.read import retrieve_navigator_data_by_county
-from .services.read import retrieve_navigator_data_by_region
-from .services.read import retrieve_navigator_data_by_mpn
+from .services.read import get_serialized_rows_by_id
+from .services.read import get_serialized_rows_by_f_and_l_name
+from .services.read import get_serialized_rows_by_first_name
+from .services.read import get_serialized_rows_by_last_name
+from .services.read import get_serialized_rows_by_email
+from .services.read import get_serialized_rows_by_county
+from .services.read import get_serialized_rows_by_region
+from .services.read import get_serialized_rows_by_mpn
 
 
 import uuid
@@ -86,7 +86,7 @@ class Navigators(models.Model):
         blank=True,
     )
     healthcare_service_expertises = models.ManyToManyField(
-        'ProviderLocation',
+        'HealthcareServiceExpertise',
         related_name='navigators_with_expertise',
         blank=True,
     )
@@ -105,14 +105,23 @@ class Navigators(models.Model):
             "last_name": self.last_name,
             "mpn": self.mpn,
             "email": self.email,
-            "authorized_redentials": False,
+            "authorized_credentials": False,
             "type": self.type,
             "id": self.id,
             "county": self.county,
             "region": None,
             "picture": None,
             "base_locations": [],
-            "consumers": []
+            "consumers": [],
+
+            "healthcare_locations_worked": None,
+            "healthcare_service_expertises": None,
+            "insurance_carrier_specialties": None,
+            "resume_info": None,
+            "phone": self.phone,
+            "reported_region": self.reported_region,
+            "video_link": self.video_link,
+            "address": None,
         }
 
         # consumers = PICConsumer.objects.filter(navigator=self.id)
@@ -149,6 +158,50 @@ class Navigators(models.Model):
         else:
             valuesdict["picture"] = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_STAFF_PIC_URL)
 
+        if self.address:
+            valuesdict["address"] = {}
+            address_values = self.address.return_values_dict()
+            for key in address_values:
+                valuesdict["address"][key] = address_values[key]
+
+        healthcare_locations_worked = self.healthcare_locations_worked.all()
+        if len(healthcare_locations_worked):
+            healthcare_locations_worked_values = []
+            for location_worked in healthcare_locations_worked:
+                location_info = {
+                    "name": location_worked.name,
+                    "state_province": location_worked.state_province,
+                    "id": location_worked.id
+                }
+                healthcare_locations_worked_values.append(location_info)
+            valuesdict["healthcare_locations_worked"] = healthcare_locations_worked_values
+
+        healthcare_service_expertises = self.healthcare_service_expertises.all()
+        if len(healthcare_service_expertises):
+            healthcare_service_expertises_values = []
+            for service_expertise in healthcare_service_expertises:
+                healthcare_service_expertises_values.append(service_expertise.name)
+            valuesdict["healthcare_service_expertises"] = healthcare_service_expertises_values
+
+        insurance_carrier_specialties = self.insurance_carrier_specialties.all()
+        if len(insurance_carrier_specialties):
+            insurance_carrier_specialties_values = []
+            for insurance_carrier_specialty in insurance_carrier_specialties:
+                insurance_carrier_specialty_info = {
+                    "name": insurance_carrier_specialty.name,
+                    "state_province": insurance_carrier_specialty.state_province,
+                    "id": insurance_carrier_specialty.id
+                }
+                insurance_carrier_specialties_values.append(insurance_carrier_specialty_info)
+            valuesdict["insurance_carrier_specialties"] = insurance_carrier_specialties_values
+
+        resume_qset = self.resume_set.all()
+        if len(resume_qset):
+            resume_values = []
+            for resume in resume_qset:
+                resume_values.append(resume.return_values_dict())
+            valuesdict["resume_info"] = resume_values
+
         return valuesdict
 
     def save(self, *args, **kwargs):
@@ -173,14 +226,14 @@ Navigators.create_row_w_validated_params = classmethod(create_row_w_validated_pa
 Navigators.update_row_w_validated_params = classmethod(update_row_w_validated_params)
 Navigators.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
 
-Navigators.retrieve_navigator_data_by_id = classmethod(retrieve_navigator_data_by_id)
-Navigators.retrieve_navigator_data_by_f_and_l_name = classmethod(retrieve_navigator_data_by_f_and_l_name)
-Navigators.retrieve_navigator_data_by_first_name = classmethod(retrieve_navigator_data_by_first_name)
-Navigators.retrieve_navigator_data_by_last_name = classmethod(retrieve_navigator_data_by_last_name)
-Navigators.retrieve_navigator_data_by_email = classmethod(retrieve_navigator_data_by_email)
-Navigators.retrieve_navigator_data_by_county = classmethod(retrieve_navigator_data_by_county)
-Navigators.retrieve_navigator_data_by_region = classmethod(retrieve_navigator_data_by_region)
-Navigators.retrieve_navigator_data_by_mpn = classmethod(retrieve_navigator_data_by_mpn)
+Navigators.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
+Navigators.get_serialized_rows_by_f_and_l_name = classmethod(get_serialized_rows_by_f_and_l_name)
+Navigators.get_serialized_rows_by_first_name = classmethod(get_serialized_rows_by_first_name)
+Navigators.get_serialized_rows_by_last_name = classmethod(get_serialized_rows_by_last_name)
+Navigators.get_serialized_rows_by_email = classmethod(get_serialized_rows_by_email)
+Navigators.get_serialized_rows_by_county = classmethod(get_serialized_rows_by_county)
+Navigators.get_serialized_rows_by_region = classmethod(get_serialized_rows_by_region)
+Navigators.get_serialized_rows_by_mpn = classmethod(get_serialized_rows_by_mpn)
 
 
 @receiver(models.signals.post_delete, sender=Navigators)
@@ -207,7 +260,31 @@ class CredentialsAdmin(admin.ModelAdmin):
 
 class Resume(models.Model):
     profile_description = models.TextField(blank=True, null=True)
-    navigator = models.ForeignKey(Navigators)
+    navigator = models.ForeignKey(Navigators, on_delete=models.CASCADE)
+
+    def return_values_dict(self):
+        values_dict = {
+            "profile_description": self.profile_description,
+            "id": self.id,
+            "education_info": None,
+            "job_info": None
+        }
+
+        education_qset = self.education_set.all()
+        if len(education_qset):
+            education_values = []
+            for education in education_qset:
+                education_values.append(education.return_values_dict())
+            values_dict["education_info"] = education_values
+
+        job_qset = self.job_set.all()
+        if len(job_qset):
+            job_values = []
+            for job in job_qset:
+                job_values.append(job.return_values_dict())
+            values_dict["job_info"] = job_values
+
+        return values_dict
 
 
 class Education(models.Model):
@@ -224,18 +301,48 @@ class Education(models.Model):
         (N_A, "Not Available")
     )
 
-    school = models.CharField(max_length=100)
-    major = models.CharField(max_length=100)
+    school = models.CharField(max_length=1000, blank=True, null=True)
+    major = models.CharField(max_length=1000, blank=True, null=True)
     degree_type = models.CharField(blank=True, null=True, max_length=100, choices=DEGREE_TYPE_CHOICES, default=N_A)
-    Resume = models.ForeignKey(Resume)
+    resume = models.ForeignKey(Resume, on_delete=models.CASCADE)
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
+
+    def return_values_dict(self):
+        values_dict = {
+            "school": self.school,
+            "major": self.major,
+            "degree_type": self.degree_type,
+            "id": self.id,
+            "start_date": self.start_date.isoformat() if self.start_date else None,
+            "end_date": self.end_date.isoformat() if self.end_date else None,
+        }
+
+        return values_dict
+
+    def check_degree_type_choices(self,):
+        for degree_type_tuple in self.DEGREE_TYPE_CHOICES:
+            if degree_type_tuple[1].lower() == self.degree_type.lower():
+                return True
+        return False
 
 
 class Job(models.Model):
-    title = models.CharField(max_length=200)
-    company = models.CharField(max_length=200)
+    title = models.CharField(max_length=2000, blank=True, null=True)
+    company = models.CharField(max_length=2000, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    Resume = models.ForeignKey(Resume)
+    resume = models.ForeignKey(Resume, on_delete=models.CASCADE)
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
+
+    def return_values_dict(self):
+        values_dict = {
+            "title": self.title,
+            "company": self.company,
+            "description": self.description,
+            "id": self.id,
+            "start_date": self.start_date.isoformat() if self.start_date else None,
+            "end_date": self.end_date.isoformat() if self.end_date else None,
+        }
+
+        return values_dict

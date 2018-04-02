@@ -34,7 +34,8 @@ def create_response_list_from_db_objects(db_objects):
 
 def prefetch_related_rows(qset):
     qset = qset.select_related(
-        "address"
+        "address",
+        'address__country'
     )
 
     return qset

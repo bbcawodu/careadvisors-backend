@@ -13,53 +13,94 @@ class NavigatorsTestCase(DBModelsBaseTestCase, TestCase):
     def test_create_row_w_validated_params(self):
         validated_params = {
             "first_name": "Hitsugaya",
-            "middle_name": "",
             "last_name": "Toshiro",
             "email": "ksf@lis.com",
-            "phone": "2813307004",
-            "met_nav_at": "Sullivan High School",
-            "household_size": 7,
-            "plan": "Medicaid",
-            "best_contact_time": "",
-            "preferred_language": "English",
-            "consumer_notes": [
-                # "",
-                #  "ksjdh"
+            "type": "Navigator",
+            "county": 'Cook',
+            "mpn": "12984892137",
+            "add_base_locations": [
+                "Presence Holy Family Medical Center"
             ],
+            # "remove_base_locations": [
+            #     # "",
+            #     #  "ksjdh"
+            # ],
+
+            'add_healthcare_locations_worked': [
+                {
+                    'name': 'Edward Hospital & Immediate Careasdss',
+                    'state_province': 'not available'
+                }
+            ],
+            # 'remove_healthcare_locations_worked': [
+            #     {
+            #         'name': 'Edward Hospital & Immediate Careasdss',
+            #         'state_province': 'not available'
+            #     }
+            # ],
+            'add_healthcare_service_expertises': [
+                'bariatrics',
+            ],
+            # 'remove_healthcare_service_expertises': [
+            #     'bariatrics',
+            # ],
+            'add_insurance_carrier_specialties': [
+                {
+                    'name': 'Health Alliance Medical Plans, Inc.',
+                    'state_province': 'il'
+                },
+            ],
+            # 'remove_insurance_carrier_specialties': [
+            #     {
+            #         'name': 'Health Alliance Medical Plans, Inc.',
+            #         'state_province': 'il'
+            #     },
+            # ],
+
+            "create_resume_row": {
+                "profile_description": "apple",
+                "create_education_rows": [
+                    {
+                        "school": "easy",
+                        "major": "peasy",
+                        "degree_type": "masters"
+                    },
+                    {
+                        "school": "lemon",
+                        "major": "squeezy",
+                        "degree_type": "masters"
+                    },
+                ],
+                "create_job_rows": [
+                    {
+                        "title": "easy",
+                        "company": "peasy",
+                        "description": "masters"
+                    },
+                    {
+                        "title": "lemon",
+                        "company": "squeezy",
+                        "description": "masters"
+                    },
+                ],
+            },
+
             "address_line_1": "",
             "address_line_2": "",
             "city": "",
             "state_province": "",
             "zipcode": "",
 
-            "date_met_nav": datetime.date(2018, 5, 3),
+            "phone": "2813307004",
+            "reported_region": "cook",
+            "video_link": "https://www.twitch.tv/videos/239858398",
 
-            "navigator_row": Navigators.objects.get(id=1),
-
-            "validated_cps_info_dict": None,
-            "validated_hospital_info_dict": None,
-
-            'billing_amount': 1000.0,
-            'consumer_need': 'choose a doctor',
-            'service_expertise_need': 'bariatrics',
-            'insurance_carrier': {
-                'name': 'Health Alliance Medical Plans, Inc.',
-                'state_province': 'il'
-            },
-            'add_healthcare_locations_used': [
-                {
-                    'name': 'Edward Hospital & Immediate Careasdss',
-                    'state_province': 'not available'
-                }
-            ],
 
             "db_action": "create",
-            "create_backup": True,
-            "force_create_consumer": True,
         }
         test_errors = []
 
-        matching_db_rows, db_row, backup_db_row = self.use_create_row_w_validated_params(
+        db_row = self.use_create_row_w_validated_params(
             validated_params,
             test_errors
         )
@@ -70,54 +111,200 @@ class NavigatorsTestCase(DBModelsBaseTestCase, TestCase):
                 validated_params['first_name'],
                 "row name: {}, request name: {}".format(db_row.first_name, validated_params['first_name'])
             )
+            self.assertEqual(
+                len(db_row.base_locations.all()),
+                1,
+                "row base locations count: {}".format(len(db_row.base_locations.all()))
+            )
+            self.assertEqual(
+                len(db_row.healthcare_locations_worked.all()),
+                1,
+                "row healthcare_locations_worked count: {}".format(len(db_row.healthcare_locations_worked.all()))
+            )
+            self.assertEqual(
+                len(db_row.insurance_carrier_specialties.all()),
+                1,
+                "row insurance_carrier_specialties count: {}".format(len(db_row.insurance_carrier_specialties.all()))
+            )
+            self.assertEqual(
+                len(db_row.healthcare_service_expertises.all()),
+                1,
+                "row healthcare_service_expertises count: {}".format(len(db_row.healthcare_service_expertises.all()))
+            )
+            self.assertEqual(
+                len(db_row.resume_set.all()),
+                1,
+                "row resume count: {}".format(len(db_row.resume_set.all()))
+            )
 
     def test_update_row_w_validated_params(self):
         validated_params = {
-            "first_name": "Zaraki",
-            "middle_name": "",
-            "last_name": "Kenpachi",
+            "first_name": "Hitsugayasdasa",
+            "last_name": "Toshiro",
             "email": "ksf@lis.com",
-            "phone": "2813307004",
-            "met_nav_at": "Sullivan High School",
-            "household_size": 7,
-            "plan": "Medicaid",
-            "preferred_language": "English",
-            "consumer_notes": [
-                # "",
-                #  "ksjdh"
+            "type": "Navigator",
+            "county": 'Cook',
+            "mpn": "12984892137",
+            # "add_base_locations": [
+            #     "Presence Holy Family Medical Center"
+            # ],
+            "remove_base_locations": [
+                "Illinois Department of Employment Security- Lawrence"
             ],
+
+            # 'add_healthcare_locations_worked': [
+            #     {
+            #         'name': 'Edward Hospital & Immediate Careasdss',
+            #         'state_province': 'not available'
+            #     }
+            # ],
+            'remove_healthcare_locations_worked': [
+                {
+                    'name': 'Edward Hospital & Immediate Careasdss',
+                    'state_province': 'not available'
+                }
+            ],
+            # 'add_healthcare_service_expertises': [
+            #     'bariatrics',
+            # ],
+            'remove_healthcare_service_expertises': [
+                'bariatrics',
+            ],
+            # 'add_insurance_carrier_specialties': [
+            #     {
+            #         'name': 'Health Alliance Medical Plans, Inc.',
+            #         'state_province': 'il'
+            #     },
+            # ],
+            'remove_insurance_carrier_specialties': [
+                {
+                    'name': 'Health Alliance Medical Plans, Inc.',
+                    'state_province': 'il'
+                },
+            ],
+
+            # "create_resume_row": {
+            #     "profile_description": "apple",
+            #     "create_education_rows": [
+            #         {
+            #             "school": "easy",
+            #             "major": "peasy",
+            #             "degree_type": "masters"
+            #         },
+            #         {
+            #             "school": "lemon",
+            #             "major": "squeezy",
+            #             "degree_type": "masters"
+            #         },
+            #     ],
+            #     "create_job_rows": [
+            #         {
+            #             "title": "easy",
+            #             "company": "peasy",
+            #             "description": "masters"
+            #         },
+            #         {
+            #             "title": "lemon",
+            #             "company": "squeezy",
+            #             "description": "masters"
+            #         },
+            #     ],
+            # },
+
+            # "update_resume_row": {
+            #     "profile_description": "applesauce",
+            #     # "create_education_rows": [
+            #     #     {
+            #     #         "school": "easy",
+            #     #         "major": "peasy",
+            #     #         "degree_type": "masters"
+            #     #     },
+            #     #     {
+            #     #         "school": "lemon",
+            #     #         "major": "squeezy",
+            #     #         "degree_type": "masters"
+            #     #     },
+            #     # ],
+            #     # "update_education_rows": [
+            #     #     {
+            #     #         "school": "easy",
+            #     #         "major": "peasy",
+            #     #         "degree_type": "bachelors",
+            #     #         "id": 4,
+            #     #     },
+            #     #     {
+            #     #         "school": "lemon",
+            #     #         "major": "squeezy",
+            #     #         "degree_type": "masters",
+            #     #         "id": 3,
+            #     #     },
+            #     # ],
+            #     "delete_education_rows": [
+            #         {
+            #             "id": 4,
+            #         },
+            #         {
+            #             "id": 3,
+            #         },
+            #     ],
+            #
+            #     # "create_job_rows": [
+            #     #     {
+            #     #         "title": "easy",
+            #     #         "company": "peasy",
+            #     #         "description": "masters"
+            #     #     },
+            #     #     {
+            #     #         "title": "lemon",
+            #     #         "company": "squeezy",
+            #     #         "description": "masters"
+            #     #     },
+            #     # ],
+            #     # "update_job_rows": [
+            #     #     {
+            #     #         "title": "easy",
+            #     #         "company": "peasy",
+            #     #         "description": "question",
+            #     #         "id": 4,
+            #     #     },
+            #     #     {
+            #     #         "title": "lemon",
+            #     #         "company": "squeezy",
+            #     #         "description": "blind",
+            #     #         "id": 3,
+            #     #     },
+            #     # ],
+            #     "delete_job_rows": [
+            #         {
+            #             "id": 4,
+            #         },
+            #         {
+            #             "id": 3,
+            #         },
+            #     ],
+            #     "id": 6,
+            # },
+
+            "delete_resume_row": {
+                "id": 6,
+            },
+
             "address_line_1": "",
             "address_line_2": "",
             "city": "",
             "state_province": "",
             "zipcode": "",
 
-            "date_met_nav": datetime.date(2018, 5, 3),
-
-            "navigator_row": Navigators.objects.get(id=1),
-
-            'billing_amount': 1000.0,
-            'consumer_need': 'choose a doctor',
-            'service_expertise_need': 'bariatrics',
-            'insurance_carrier': {
-                'name': 'Health Alliance Medical Plans, Inc.',
-                'state_province': 'il'
-            },
-            'remove_healthcare_locations_used': [
-                {
-                    'name': 'Edward Hospital & Immediate Careasdss',
-                    'state_province': 'not available'
-                }
-            ],
+            "phone": "2813307004",
+            "reported_region": "cook",
+            "video_link": "https://www.twitch.tv/videos/239858398",
 
             "db_action": "update",
-            "id": 312,
-            # "create_backup": True,
-            # "force_create_consumer": True,
+            "id": 59,
         }
         test_errors = []
 
-        db_row, backup_db_row = self.use_update_row_w_validated_params(
+        db_row = self.use_update_row_w_validated_params(
             validated_params,
             test_errors
         )
@@ -127,6 +314,31 @@ class NavigatorsTestCase(DBModelsBaseTestCase, TestCase):
                 db_row.first_name,
                 validated_params['first_name'],
                 "row name: {}, request name: {}".format(db_row.first_name, validated_params['first_name'])
+            )
+            self.assertEqual(
+                len(db_row.base_locations.all()),
+                0,
+                "row base locations count: {}".format(len(db_row.base_locations.all()))
+            )
+            self.assertEqual(
+                len(db_row.healthcare_locations_worked.all()),
+                0,
+                "row healthcare_locations_worked count: {}".format(len(db_row.healthcare_locations_worked.all()))
+            )
+            self.assertEqual(
+                len(db_row.insurance_carrier_specialties.all()),
+                0,
+                "row insurance_carrier_specialties count: {}".format(len(db_row.insurance_carrier_specialties.all()))
+            )
+            self.assertEqual(
+                len(db_row.healthcare_service_expertises.all()),
+                0,
+                "row healthcare_service_expertises count: {}".format(len(db_row.healthcare_service_expertises.all()))
+            )
+            self.assertEqual(
+                len(db_row.resume_set.all()),
+                0,
+                "row resume count: {}".format(len(db_row.resume_set.all()))
             )
 
     def test_delete_row_w_validated_params(self):
@@ -204,6 +416,45 @@ class NavigatorsTestCase(DBModelsBaseTestCase, TestCase):
         test_errors = []
 
         serialized_table_data = self.use_get_serialized_rows_by_email(
+            validated_params,
+            test_errors
+        )
+
+    def test_get_serialized_rows_by_county(self):
+        validated_params = {
+            "county_list": ['Cook'],
+            "county": u"Cook"
+        }
+
+        test_errors = []
+
+        serialized_table_data = self.use_get_serialized_rows_by_county(
+            validated_params,
+            test_errors
+        )
+
+    def test_get_serialized_rows_by_region(self):
+        validated_params = {
+            "region_list": ['1'],
+            "region": u"1"
+        }
+
+        test_errors = []
+
+        serialized_table_data = self.use_get_serialized_rows_by_region(
+            validated_params,
+            test_errors
+        )
+
+    def test_get_serialized_rows_by_mpn(self):
+        validated_params = {
+            "mpn_list": ['17074248'],
+            "mpn": u"17074248"
+        }
+
+        test_errors = []
+
+        serialized_table_data = self.use_get_serialized_rows_by_mpn(
             validated_params,
             test_errors
         )

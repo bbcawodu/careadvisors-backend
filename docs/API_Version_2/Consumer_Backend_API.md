@@ -1,6 +1,6 @@
 ## Consumer Account Backend API
 
-### Consumer Data Submission API
+### Consumer Data Submission API (IN DEVELOPMENT)
 To create, update, or delete rows in the PICConsumer table in the database, make a PUT request to: http://picbackend.herokuapp.com/v2/consumers/.
 
 - The headers of the request should include: 
@@ -71,11 +71,17 @@ The body of the request should be a JSON document using the following template:
         'state_province': String(2 letter code),
     },
     'add_healthcare_locations_used': [
-        String,
+        {
+            'name': String,
+            'state_province': String(2 letter code),
+        },
         ...
     ],
     'remove_healthcare_locations_used': [
-        String,
+        {
+            'name': String,
+            'state_province': String(2 letter code),
+        },
         ...
     ],
                     
@@ -163,8 +169,7 @@ In response, a JSON document will be displayed with the following format:
             - 'billing_amount'
             - 'consumer_need'
             - 'service_expertise_need'
-            - insurance_carrier['name']
-            - insurance_carrier['state_province']
+            - insurance_carrier
             - 'add_healthcare_networks_used'
             - 'remove_healthcare_locations_used'
             
@@ -182,15 +187,20 @@ In response, a JSON document will be displayed with the following format:
             - "zipcode"
             - 'consumer_need'
             - 'service_expertise_need'
+            - add_healthcare_networks_used[index]['state_province']
+            - remove_healthcare_locations_used[index]['state_province']
         
         - Keys that can be empty arrays
             - "consumer_notes"
             - cps_info["secondary_dependents"]
+            - 'add_healthcare_networks_used'
         
         - Keys that can be Null
             - "date_met_nav"
             - "cps_info"
             - insurance_carrier
+            - add_healthcare_networks_used[index]['state_province']
+            - remove_healthcare_locations_used[index]['state_province']
             
         - Keys that WILL NOT be read
             - "update_case_management_rows"
@@ -222,15 +232,20 @@ In response, a JSON document will be displayed with the following format:
             - "zipcode"
             - 'consumer_need'
             - 'service_expertise_need'
+            - add_healthcare_networks_used[index]['state_province']
+            - remove_healthcare_locations_used[index]['state_province']
          
          - Keys that can be empty arrays
             - "consumer_notes"
             - cps_info["secondary_dependents"]
+            - 'add_healthcare_networks_used'
         
         - Keys that can be Null
             - "date_met_nav"
             - "cps_info"
             - insurance_carrier
+            - add_healthcare_networks_used[index]['state_province']
+            - remove_healthcare_locations_used[index]['state_province']
         
     - If there are no errors in the JSON Body document:
         - The response JSON document will have a dictionary object as the value for the "Data" key.

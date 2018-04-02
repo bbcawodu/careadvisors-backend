@@ -1,7 +1,3 @@
-"""
-Defines utility functions and classes for staff views
-"""
-
 import re
 from django import forms
 from django.core.validators import validate_email

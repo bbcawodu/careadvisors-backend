@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.views.generic import View
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from picbackend.views.utils import JSONGETRspMixin
 from picbackend.views.utils import init_v2_response_data
@@ -10,6 +11,7 @@ from picmodels.forms import CTAManagementForm
 from picmodels.models import CallToAction
 
 
+@xframe_options_exempt
 def manage_cta_request(request):
     if request.method == 'GET':
         response_raw_data, rqst_errors = init_v2_response_data()

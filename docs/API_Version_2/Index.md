@@ -30,7 +30,17 @@ This file is documentation for the backend API library for Patient Innovation Ce
 [Navigator Data Backend API README](Navigator_Backend_API.md)
 
 
-### Consumer Account Backend API
+### Navigator Sign Up Backend API
+
+[Navigator Sign Up Backend API README](navigator_sign_up_backend_api.md)
+
+
+### Navigator Organizations From Care Advisors Form Backend API (IN DEVELOPMENT)
+
+[Navigator Organizations From Care Advisors Form Backend API README](nav_orgs_from_form_api.md)
+
+
+### Consumer Account Backend API (IN DEVELOPMENT)
 
 [Consumer Account Backend API README](Consumer_Backend_API.md)
     

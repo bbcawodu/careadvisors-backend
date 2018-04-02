@@ -3,93 +3,142 @@ import picmodels
 
 
 def create_row_w_validated_params(cls, validated_params, rqst_errors):
-    rqst_usr_email = validated_params['rqst_usr_email']
+    email = validated_params['email']
     usr_rqst_values = {
-        "first_name": validated_params['rqst_usr_f_name'],
-        "last_name": validated_params['rqst_usr_l_name'],
-        "type": validated_params['rqst_usr_type'],
-        "county": validated_params['rqst_county'],
-        "mpn": validated_params['rqst_usr_mpn']
+        "first_name": validated_params['first_name'],
+        "last_name": validated_params['last_name'],
+        "type": validated_params['type'],
+        "county": validated_params['county'],
+        "mpn": validated_params['mpn']
     }
 
     row, row_created = cls.objects.get_or_create(
-        email=rqst_usr_email,
+        email=email,
         defaults=usr_rqst_values
     )
 
     if not row_created:
-        rqst_errors.append('Staff database entry already exists for the email: {!s}'.format(rqst_usr_email))
+        rqst_errors.append('Navigator database entry already exists for the email: {!s}'.format(email))
         row = None
     else:
-        row.base_locations = validated_params['base_location_objects']
         row.save()
-    update_nav_signup_columns_for_row(row, validated_params, rqst_errors)
-    if rqst_errors:
-        row.delete()
-        row = None
+
+        if 'add_base_locations' in validated_params:
+            base_location_names = validated_params['add_base_locations']
+            base_location_rows = []
+            for base_location_name in base_location_names:
+                base_location_rows.append(
+                    get_nav_metrics_location_row_with_given_name(base_location_name, rqst_errors)
+                )
+            if not rqst_errors:
+                check_base_locations_for_given_rows(
+                    row.base_locations.all(),
+                    base_location_rows,
+                    row,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for base_location_row in base_location_rows:
+                        row.base_locations.add(base_location_row)
+
+        update_nav_signup_columns_for_row(row, validated_params, rqst_errors)
+        if rqst_errors:
+            row.delete()
+            row = None
 
     return row
 
 
 def update_row_w_validated_params(cls, validated_params, rqst_errors):
-    rqst_usr_id = validated_params['rqst_usr_id']
-    rqst_usr_email = None
+    rqst_id = validated_params['id']
+    email = None
 
     try:
-        row = cls.objects.get(id=rqst_usr_id)
+        row = cls.objects.get(id=rqst_id)
 
-        if 'rqst_usr_f_name' in validated_params:
-            row.first_name = validated_params['rqst_usr_f_name']
+        if 'first_name' in validated_params:
+            row.first_name = validated_params['first_name']
 
-        if 'rqst_usr_l_name' in validated_params:
-            row.last_name = validated_params['rqst_usr_l_name']
+        if 'last_name' in validated_params:
+            row.last_name = validated_params['last_name']
 
-        if 'rqst_usr_type' in validated_params:
-            row.type = validated_params['rqst_usr_type']
+        if 'type' in validated_params:
+            row.type = validated_params['type']
 
-        if 'rqst_county' in validated_params:
-            row.county = validated_params['rqst_county']
+        if 'county' in validated_params:
+            row.county = validated_params['county']
 
-        if 'rqst_usr_email' in validated_params:
-            rqst_usr_email = validated_params['rqst_usr_email']
-            row.email = rqst_usr_email
+        if 'email' in validated_params:
+            email = validated_params['email']
+            row.email = email
         else:
-            rqst_usr_email = row.email
+            email = row.email
 
-        if 'rqst_usr_mpn' in validated_params:
-            row.mpn = validated_params['rqst_usr_mpn']
+        if 'mpn' in validated_params:
+            row.mpn = validated_params['mpn']
 
-        update_nav_signup_columns_for_row(row, validated_params, rqst_errors)
+        if 'add_base_locations' in validated_params:
+            base_location_names = validated_params['add_base_locations']
+            base_location_rows = []
+            for base_location_name in base_location_names:
+                base_location_rows.append(
+                    get_nav_metrics_location_row_with_given_name(base_location_name, rqst_errors)
+                )
+            if not rqst_errors:
+                check_base_locations_for_given_rows(
+                    row.base_locations.all(),
+                    base_location_rows,
+                    row,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for base_location_row in base_location_rows:
+                        row.base_locations.add(base_location_row)
+        elif 'remove_base_locations' in validated_params:
+            base_location_names = validated_params['remove_base_locations']
+            base_location_rows = []
+            for base_location_name in base_location_names:
+                base_location_rows.append(
+                    get_nav_metrics_location_row_with_given_name(base_location_name, rqst_errors)
+                )
+            if not rqst_errors:
+                check_base_locations_for_not_given_rows(
+                    row.base_locations.all(),
+                    base_location_rows,
+                    row,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for base_location_row in base_location_rows:
+                        row.base_locations.remove(base_location_row)
 
         if not rqst_errors:
-            if 'base_location_objects' in validated_params:
-                row.base_locations.clear()
-                row.base_locations = validated_params['base_location_objects']
+            update_nav_signup_columns_for_row(row, validated_params, rqst_errors)
 
         row.save()
     except cls.DoesNotExist:
-        rqst_errors.append('Staff database entry does not exist for the id: {!s}'.format(str(rqst_usr_id)))
+        rqst_errors.append('Navigator database row does not exist for the id: {!s}'.format(str(rqst_id)))
         row = None
     except cls.MultipleObjectsReturned:
-        rqst_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
+        rqst_errors.append('Multiple database rows exist for the id: {!s}'.format(str(rqst_id)))
         row = None
     except IntegrityError:
-        rqst_errors.append('Database entry already exists for the email: {!s}'.format(rqst_usr_email))
+        rqst_errors.append('Database row already exists for the email: {!s}'.format(email))
         row = None
 
     return row
 
 
 def delete_row_w_validated_params(cls, validated_params, rqst_errors):
-    rqst_usr_id = validated_params['rqst_usr_id']
+    rqst_id = validated_params['id']
 
     try:
-        staff_instance = cls.objects.get(id=rqst_usr_id)
+        staff_instance = cls.objects.get(id=rqst_id)
         staff_instance.delete()
     except cls.DoesNotExist:
-        rqst_errors.append('Staff database entry does not exist for the id: {!s}'.format(str(rqst_usr_id)))
+        rqst_errors.append('Staff database entry does not exist for the id: {!s}'.format(str(rqst_id)))
     except cls.MultipleObjectsReturned:
-        rqst_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_usr_id)))
+        rqst_errors.append('Multiple database entries exist for the id: {!s}'.format(str(rqst_id)))
 
 
 def update_nav_signup_columns_for_row(row, validated_params, rqst_errors):
@@ -175,7 +224,7 @@ def update_nav_signup_columns_for_row(row, validated_params, rqst_errors):
         service_expertise_rows = []
         for service_expertise in service_expertise_info:
             service_expertise_rows.append(
-                get_provider_location_row_with_given_name_and_state(service_expertise, rqst_errors)
+                get_service_expertise_row_with_given_name(service_expertise, rqst_errors)
             )
         if not rqst_errors:
             check_service_expertises_for_given_rows(
@@ -192,7 +241,7 @@ def update_nav_signup_columns_for_row(row, validated_params, rqst_errors):
         service_expertise_rows = []
         for service_expertise in service_expertise_info:
             service_expertise_rows.append(
-                get_provider_location_row_with_given_name_and_state(service_expertise, rqst_errors)
+                get_service_expertise_row_with_given_name(service_expertise, rqst_errors)
             )
         if not rqst_errors:
             check_service_expertises_for_not_given_rows(
@@ -240,16 +289,209 @@ def update_nav_signup_columns_for_row(row, validated_params, rqst_errors):
                 for insurance_carrier in insurance_carrier_rows:
                     row.insurance_carrier_specialties.remove(insurance_carrier)
 
-    modify_row_address()
-    if "phone" in validated_params:
-        row.phone = validated_params['phone']
-    if "reported_region" in validated_params:
-        row.reported_region = validated_params['reported_region']
-    if "video_link" in validated_params:
-        row.video_link = validated_params['video_link']
+    if not rqst_errors:
+        modify_row_address()
+        manage_nav_resume_table_row_for_row(row, validated_params, rqst_errors)
+
+        if "phone" in validated_params:
+            row.phone = validated_params['phone']
+        if "reported_region" in validated_params:
+            row.reported_region = validated_params['reported_region']
+        if "video_link" in validated_params:
+            row.video_link = validated_params['video_link']
+
+        if not rqst_errors:
+            row.save()
+
+
+def manage_nav_resume_table_row_for_row(row, validated_params, rqst_errors):
+    if 'create_resume_row' in validated_params:
+        create_resume_row_params = validated_params['create_resume_row']
+        create_resume_row_w_validated_params(row, create_resume_row_params, rqst_errors)
+    elif 'update_resume_row' in validated_params:
+        update_resume_row_params = validated_params['update_resume_row']
+        update_resume_row_w_validated_params(row, update_resume_row_params, rqst_errors)
+    elif 'delete_resume_row' in validated_params:
+        delete_resume_row_params = validated_params['delete_resume_row']
+        delete_resume_row_w_validated_params(delete_resume_row_params, rqst_errors)
+
+
+def create_resume_row_w_validated_params(nav_row, resume_row_params, rqst_errors):
+    resume_row = picmodels.models.Resume(
+        navigator=nav_row,
+        profile_description=resume_row_params['profile_description']
+    )
+    resume_row.save()
+
+    education_rows = []
+    job_rows = []
+    if "create_education_rows" in resume_row_params:
+        create_education_row_params = resume_row_params["create_education_rows"]
+        for education_row_dict in create_education_row_params:
+            education_rows.append(create_education_row_w_validated_params(resume_row, education_row_dict, rqst_errors))
 
     if not rqst_errors:
-        row.save()
+        if "create_job_rows" in resume_row_params:
+            create_job_row_params = resume_row_params["create_job_rows"]
+            for job_row_dict in create_job_row_params:
+                job_rows.append(create_job_row_w_validated_params(resume_row, job_row_dict))
+
+    if not rqst_errors:
+        resume_row.save()
+        for row in education_rows:
+            row.save()
+        for row in job_rows:
+            row.save()
+    else:
+        resume_row.delete()
+
+
+def update_resume_row_w_validated_params(nav_row, resume_row_params, rqst_errors):
+    try:
+        resume_row = picmodels.models.Resume.objects.get(id=resume_row_params['id'])
+        resume_row.navigator = nav_row
+    except picmodels.models.Resume.DoesNotExist:
+        resume_row = None
+        rqst_errors.append("No Resume row found with id: {}".format(resume_row_params['id']))
+
+    if resume_row:
+        education_rows = []
+        job_rows = []
+
+        if "create_education_rows" in resume_row_params:
+            create_education_row_params = resume_row_params["create_education_rows"]
+            for education_row_dict in create_education_row_params:
+                education_rows.append(create_education_row_w_validated_params(resume_row, education_row_dict, rqst_errors))
+        elif "update_education_rows" in resume_row_params:
+            update_education_row_params = resume_row_params["update_education_rows"]
+            for education_row_dict in update_education_row_params:
+                education_rows.append(update_education_row_w_validated_params(resume_row, education_row_dict, rqst_errors))
+        elif "delete_education_rows" in resume_row_params:
+            delete_education_row_params = resume_row_params["delete_education_rows"]
+            for education_row_dict in delete_education_row_params:
+                delete_education_row_w_validated_params(education_row_dict, rqst_errors)
+
+        if not rqst_errors:
+            if "create_job_rows" in resume_row_params:
+                create_job_row_params = resume_row_params["create_job_rows"]
+                for job_row_dict in create_job_row_params:
+                    job_rows.append(create_job_row_w_validated_params(resume_row, job_row_dict))
+            elif "job_education_rows" in resume_row_params:
+                update_job_row_params = resume_row_params["update_job_rows"]
+                for job_row_dict in update_job_row_params:
+                    job_rows.append(update_job_row_w_validated_params(resume_row, job_row_dict, rqst_errors))
+            elif "delete_job_rows" in resume_row_params:
+                delete_job_row_params = resume_row_params["delete_job_rows"]
+                for job_row_dict in delete_job_row_params:
+                    delete_job_row_w_validated_params(job_row_dict, rqst_errors)
+
+        if not rqst_errors:
+            if "profile_description" in resume_row_params:
+                resume_row.profile_description = resume_row_params['profile_description']
+
+            resume_row.save()
+
+            for row in education_rows:
+                row.save()
+            for row in job_rows:
+                row.save()
+
+
+def delete_resume_row_w_validated_params(resume_row_params, rqst_errors):
+    try:
+        resume_row = picmodels.models.Resume.objects.get(id=resume_row_params['id'])
+    except picmodels.models.Resume.DoesNotExist:
+        resume_row = None
+        rqst_errors.append("No Resume row found with id: {}".format(resume_row_params['id']))
+
+    if resume_row:
+        resume_row.delete()
+
+
+def create_education_row_w_validated_params(resume_row, education_row_dict, rqst_errors):
+    education_row = picmodels.models.Education(resume=resume_row)
+    education_row.school = education_row_dict['school']
+    education_row.major = education_row_dict['major']
+    education_row.degree_type = education_row_dict['degree_type']
+    if not education_row.check_degree_type_choices():
+        rqst_errors.append(
+            "degree_type: {!s} is not a valid choice".format(education_row.degree_type)
+        )
+
+    return education_row
+
+
+def update_education_row_w_validated_params(resume_row, education_row_dict, rqst_errors):
+    try:
+        education_row = picmodels.models.Education.objects.get(id=education_row_dict['id'])
+        education_row.resume = resume_row
+    except picmodels.models.Education.DoesNotExist:
+        education_row = None
+        rqst_errors.append("No Education row found with id: {}".format(education_row_dict['id']))
+
+    if education_row:
+        if 'school' in education_row_dict:
+            education_row.school = education_row_dict['school']
+        if 'major' in education_row_dict:
+            education_row.major = education_row_dict['major']
+        if 'degree_type' in education_row_dict:
+            education_row.degree_type = education_row_dict['degree_type']
+            if not education_row.check_degree_type_choices():
+                rqst_errors.append(
+                    "degree_type: {!s} is not a valid choice".format(education_row.degree_type)
+                )
+
+    return education_row
+
+
+def delete_education_row_w_validated_params(education_row_dict, rqst_errors):
+    try:
+        education_row = picmodels.models.Education.objects.get(id=education_row_dict['id'])
+    except picmodels.models.Education.DoesNotExist:
+        education_row = None
+        rqst_errors.append("No Education row found with id: {}".format(education_row_dict['id']))
+
+    if education_row:
+        education_row.delete()
+
+
+def create_job_row_w_validated_params(resume_row, job_row_dict):
+    job_row = picmodels.models.Job(resume=resume_row)
+    job_row.title = job_row_dict['title']
+    job_row.company = job_row_dict['company']
+    job_row.description = job_row_dict['description']
+
+    return job_row
+
+
+def update_job_row_w_validated_params(resume_row, job_row_dict, rqst_errors):
+    try:
+        job_row = picmodels.models.Job.objects.get(id=job_row_dict['id'])
+        job_row.resume = resume_row
+    except picmodels.models.Job.DoesNotExist:
+        job_row = None
+        rqst_errors.append("No Job row found with id: {}".format(job_row_dict['id']))
+
+    if job_row:
+        if 'title' in job_row_dict:
+            job_row.title = job_row_dict['title']
+        if 'company' in job_row_dict:
+            job_row.company = job_row_dict['company']
+        if 'description' in job_row_dict:
+            job_row.description = job_row_dict['description']
+
+    return job_row
+
+
+def delete_job_row_w_validated_params(job_row_dict, rqst_errors):
+    try:
+        job_row = picmodels.models.Job.objects.get(id=job_row_dict['id'])
+    except picmodels.models.Job.DoesNotExist:
+        job_row = None
+        rqst_errors.append("No Job row found with id: {}".format(job_row_dict['id']))
+
+    if job_row:
+        job_row.delete()
 
 
 def get_service_expertise_row_with_given_name(name, rqst_errors):
@@ -261,6 +503,19 @@ def get_service_expertise_row_with_given_name(name, rqst_errors):
         except picmodels.models.HealthcareServiceExpertise.DoesNotExist:
             row = None
             rqst_errors.append("No HealthcareServiceExpertise row found with name: {}".format(name))
+
+    return row
+
+
+def get_nav_metrics_location_row_with_given_name(name, rqst_errors):
+    row = None
+
+    if name:
+        try:
+            row = picmodels.models.NavMetricsLocation.objects.get(name__iexact=name)
+        except picmodels.models.NavMetricsLocation.DoesNotExist:
+            row = None
+            rqst_errors.append("No NavMetricsLocation row found with name: {}".format(name))
 
     return row
 
@@ -317,7 +572,7 @@ def check_healthcare_locations_worked_for_not_given_rows(cur_locations_used_qset
     for location_used in given_locations_used_list:
         if location_used not in cur_locations_used_qset:
             rqst_errors.append(
-                "Healthcare location with the name: {} and state: {} does not exist in row id {}'s healthcare_locations_used list (Hint - remove from parameter 'add_healthcare_locations_used' list)".format(
+                "Healthcare location with the name: {} and state: {} does not exist in row id {}'s healthcare_locations_used list (Hint - remove from parameter 'remove_healthcare_locations_used' list)".format(
                     location_used.name,
                     location_used.state_province,
                     consumer_row.id,
@@ -340,7 +595,7 @@ def check_service_expertises_for_not_given_rows(cur_service_expertise_qset, give
     for service_expertise in given_service_expertise_list:
         if service_expertise not in cur_service_expertise_qset:
             rqst_errors.append(
-                "service_expertise with the name: {} does not exists in row id {}'s service_expertise list (Hint - remove from parameter 'add_healthcare_service_expertises' list)".format(
+                "service_expertise with the name: {} does not exists in row id {}'s service_expertise list (Hint - remove from parameter 'remove_healthcare_service_expertises' list)".format(
                     service_expertise.name,
                     row.id,
                 )
@@ -363,9 +618,31 @@ def check_insurance_carrier_specialties_for_not_given_rows(cur_insurance_carrier
     for insurance_carrier in given_insurance_carrier_list:
         if insurance_carrier not in cur_insurance_carrier_specialties_qset:
             rqst_errors.append(
-                "insurance_carrier with the name: {} and state: {} does not exists in row id {}'s insurance_carrier_specialties list (Hint - remove from parameter 'add_insurance_carrier_specialties' list)".format(
+                "insurance_carrier with the name: {} and state: {} does not exists in row id {}'s insurance_carrier_specialties list (Hint - remove from parameter 'remove_insurance_carrier_specialties' list)".format(
                     insurance_carrier.name,
                     insurance_carrier.state_province,
+                    row.id,
+                )
+            )
+
+
+def check_base_locations_for_given_rows(cur_base_locations_qset, given_nav_metrics_locations_list, row, rqst_errors):
+    for nav_metrics_location in given_nav_metrics_locations_list:
+        if nav_metrics_location in cur_base_locations_qset:
+            rqst_errors.append(
+                "nav_metrics_location with the name: {} already exists in row id {}'s base_locations list (Hint - remove from parameter 'add_base_locations' list)".format(
+                    nav_metrics_location.name,
+                    row.id,
+                )
+            )
+
+
+def check_base_locations_for_not_given_rows(cur_base_locations_qset, given_nav_metrics_locations_list, row, rqst_errors):
+    for nav_metrics_location in given_nav_metrics_locations_list:
+        if nav_metrics_location not in cur_base_locations_qset:
+            rqst_errors.append(
+                "nav_metrics_location with the name: {} does not exists in row id {}'s base_locations list (Hint - remove from parameter 'remove_base_locations' list)".format(
+                    nav_metrics_location.name,
                     row.id,
                 )
             )
