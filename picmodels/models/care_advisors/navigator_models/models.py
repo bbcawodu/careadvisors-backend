@@ -105,7 +105,7 @@ class Navigators(models.Model):
             "last_name": self.last_name,
             "mpn": self.mpn,
             "email": self.email,
-            "authorized_redentials": False,
+            "authorized_credentials": False,
             "type": self.type,
             "id": self.id,
             "county": self.county,

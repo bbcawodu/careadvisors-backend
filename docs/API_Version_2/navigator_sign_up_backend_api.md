@@ -1,6 +1,6 @@
 ## Navigator Sign Up Backend API README
 
-### Navigator Sign Up Backend API (IN DEVELOPMENT)
+### Navigator Sign Up Backend API
 To create rows in the Navigators table in the database from the navigator sign up page on the Care Advisors site, make a PUT request to: http://picbackend.herokuapp.com/v2/navigator_sign_up/. 
 
 - The headers of the request should include: 

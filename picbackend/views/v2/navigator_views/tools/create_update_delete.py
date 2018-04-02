@@ -79,7 +79,7 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
 
         validated_params['add_base_locations'] = validated_base_location_names
 
-    # validate_nav_signup_params(rqst_body, validated_params, rqst_errors)
+    validate_nav_signup_params(rqst_body, validated_params, rqst_errors)
 
 
 def validate_update_row_params(rqst_body, validated_params, rqst_errors):
@@ -157,7 +157,7 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
 
         validated_params['remove_base_locations'] = validated_base_location_names
 
-    # validate_nav_signup_params(rqst_body, validated_params, rqst_errors)
+    validate_nav_signup_params(rqst_body, validated_params, rqst_errors)
 
 
 def validate_nav_signup_params(rqst_body, validated_params, rqst_errors):

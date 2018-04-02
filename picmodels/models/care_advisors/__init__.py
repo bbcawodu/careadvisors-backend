@@ -6,6 +6,7 @@ from .address_models import *
 from .healthcare_service_expertise_models import *
 from .location_data_point_models import *
 from .navigator_models import *
+from .nav_org_online_form_models import *
 from .consumer_models import *
 from .daily_metrics_models import *
 from .call_to_action_models import *

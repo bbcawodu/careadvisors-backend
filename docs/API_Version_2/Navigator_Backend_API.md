@@ -1,6 +1,6 @@
 ## Navigator Data Backend API
 
-### Navigator Data Submission API (IN DEVELOPMENT)
+### Navigator Data Submission API
 To create, update, or delete rows in the Navigators table in the database, make a PUT request to: http://picbackend.herokuapp.com/v2/navigators/. 
 
 - The headers of the request should include: 
@@ -402,7 +402,7 @@ In response, a JSON document will be displayed with the following format:
     - No changes are made to the database.
     
 ### Navigator Data Retrieval API
-- To retrieve navigator data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/navigators/
+- To read rows from the navigators table of the backend database, make a GET request to http://picbackend.herokuapp.com/v2/navigators/
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"
     

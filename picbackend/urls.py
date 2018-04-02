@@ -60,10 +60,13 @@ urlpatterns = [
     #API Version 2 URLS
     ###################
 
-    # urls for staff views
+    # urls for navigators views
     url(r"^v2/navigators/$", views.NavigatorManagementView.as_view()),
-    # url(r"^v2/navigator_sign_up/$", views.NavigatorSignUpView.as_view()),
+    url(r"^v2/navigator_sign_up/$", views.NavigatorSignUpView.as_view()),
     url(r"^v2/navigator_pic/$", views.upload_navigator_pic),
+
+    # urls for navigator organizations from care advisors form views
+    # url(r"^v2/nav_orgs_from_form/$", views.NavOrgsFromOnlineFormMgmtView.as_view()),
 
     # urls for consumer views
     url(r"^v2/consumers/$", views.ConsumerManagementView.as_view()),
