@@ -299,6 +299,8 @@ def update_nav_signup_columns_for_row(row, validated_params, rqst_errors):
             row.reported_region = validated_params['reported_region']
         if "video_link" in validated_params:
             row.video_link = validated_params['video_link']
+        if "navigator_organization" in validated_params:
+            row.navigator_organization = validated_params['navigator_organization']
 
         if not rqst_errors:
             row.save()

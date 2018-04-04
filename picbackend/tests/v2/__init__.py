@@ -10,3 +10,4 @@ from .consumer_views_tests import *
 from .metrics_views_tests import *
 from .nav_location_views_tests import *
 from .patient_assist_scheduler_views_tests import *
+from .navorgsfromform_views_tests import *

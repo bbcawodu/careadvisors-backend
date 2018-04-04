@@ -148,6 +148,7 @@ The body of the request should be a JSON document using the following template:
     "phone": String,
     "reported_region": String,
     "video_link": String,
+    "navigator_organization", String,
             
     "id": Integer,
     "db_action": String,
@@ -191,6 +192,7 @@ In response, a JSON document will be displayed with the following format:
             - "phone"
             - "reported_region"
             - "video_link"
+            - "navigator_organization"
             
         - Keys that can be empty strings:
             - "add_base_locations"[index]
@@ -284,6 +286,7 @@ In response, a JSON document will be displayed with the following format:
             - "phone"
             - "reported_region"
             - "video_link"
+            - "navigator_organization"
 
     - If there are no errors in the JSON Body document:        
         - The response JSON document will have a dictionary object as the value for the "Data" key.
@@ -381,6 +384,7 @@ In response, a JSON document will be displayed with the following format:
             - "phone"
             - "reported_region"
             - "video_link"
+            - "navigator_organization"
         
     - If there are no errors in the JSON Body document:
         - The response JSON document will have a dictionary object as the value for the "Data" key.
@@ -518,6 +522,7 @@ In response, a JSON document will be displayed with the following format:
                 "phone": String,
                 "reported_region": String,
                 "video_link": String,
+                "navigator_organization", String,
             },
             ...,
             ...,

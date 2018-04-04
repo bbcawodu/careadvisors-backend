@@ -263,6 +263,17 @@ def validate_navigator_nav_sign_up_fields(rqst_body, validated_params, rqst_erro
 
         validated_params["video_link"] = video_link
 
+    if "navigator_organization" in rqst_body:
+        navigator_organization = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "navigator_organization",
+            rqst_errors,
+            none_allowed=True
+        )
+
+        validated_params["navigator_organization"] = navigator_organization
+
     validate_nav_sign_up_navigator_resume_params(rqst_body, validated_params, rqst_errors)
 
 
