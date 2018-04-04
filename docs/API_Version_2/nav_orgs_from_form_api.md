@@ -1,6 +1,6 @@
-## Navigator Organizations From Care Advisors Form Backend README (IN DEVELOPMENT)
+## Navigator Organizations From Care Advisors Form Backend README
 
-### Navigator Organizations From Form Edit API (IN DEVELOPMENT)
+### Navigator Organizations From Form Edit API
 To create, update, or delete rows in the NavOrgsFromOnlineForm table in the database, make a PUT request to: http://picbackend.herokuapp.com/v2/nav_orgs_from_form/. 
 
 - The headers of the request should include: 
@@ -123,7 +123,7 @@ In response, a JSON document will be displayed with the following format:
         -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
     
-### Navigator Organizations From Form Table Read API (IN DEVELOPMENT)
+### Navigator Organizations From Form Table Read API
 - To read rows from the NavOrgsFromOnlineForm table of the backend db, make a GET request to http://picbackend.herokuapp.com/v2/nav_orgs_from_form/
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"

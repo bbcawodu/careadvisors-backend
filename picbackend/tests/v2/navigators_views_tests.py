@@ -1,8 +1,3 @@
-"""
-Defines tests for version 2 of the staff API for the picbackend app
-"""
-
-
 from django.test import TestCase
 from .base_v2_api_tests import BaseConsumerNavigatorsMetricsTests
 from .base_v2_api_tests import BaseV2RqstTests
@@ -76,6 +71,7 @@ class NavigatorAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
             "phone": "2813307004",
             "reported_region": "cook",
             "video_link": "https://www.twitch.tv/videos/239858398",
+            "navigator_organization": "sljidsjflksa",
 
             "db_action": "create",
         }

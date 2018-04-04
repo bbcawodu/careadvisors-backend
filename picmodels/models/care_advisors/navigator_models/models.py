@@ -98,6 +98,7 @@ class Navigators(models.Model):
     phone = models.CharField(max_length=1000, blank=True, null=True)
     reported_region = models.CharField(max_length=1000, blank=True, null=True)
     video_link = models.TextField(blank=True, null=True, validators=[URLValidator()])
+    navigator_organization = models.CharField(max_length=1000, blank=True, null=True)
 
     def return_values_dict(self):
         valuesdict = {
@@ -121,6 +122,7 @@ class Navigators(models.Model):
             "phone": self.phone,
             "reported_region": self.reported_region,
             "video_link": self.video_link,
+            "navigator_organization": self.navigator_organization,
             "address": None,
         }
 
