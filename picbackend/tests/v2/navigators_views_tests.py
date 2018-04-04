@@ -202,6 +202,7 @@ class NavigatorSignUpAPITests(TestCase, BaseV2RqstTests):
             "phone": "2813307004",
             "reported_region": "cook",
             "video_link": "https://www.twitch.tv/videos/239858398",
+            "navigator_organization": "sakfjnlsa",
 
             "db_action": "create",
         }
@@ -241,6 +242,11 @@ class NavigatorSignUpAPITests(TestCase, BaseV2RqstTests):
                 db_row['first_name'],
                 post_data['first_name'],
                 "row name: {}, request name: {}".format(db_row['first_name'], post_data['first_name'])
+            )
+            self.assertEqual(
+                db_row['navigator_organization'],
+                post_data['navigator_organization'],
+                "row name: {}, request name: {}".format(db_row['navigator_organization'], post_data['navigator_organization'])
             )
             self.assertEqual(
                 len(db_row['base_locations']),
