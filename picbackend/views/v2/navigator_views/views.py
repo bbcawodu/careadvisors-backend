@@ -71,6 +71,7 @@ class NavigatorManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
             response_raw_data['Data'] = data_list
             response_raw_data["s3_url"] = settings.AWS_S3_CUSTOM_DOMAIN
+            response_raw_data["url"] = request.build_absolute_uri()
 
         retrieve_data_by_primary_params_and_add_to_response()
 
@@ -131,9 +132,20 @@ def upload_navigator_pic(request):
             rqst_staff_id = search_params['id_list'][0]
             try:
                 staff_object = Navigators.objects.get(pk=rqst_staff_id)
-                form = NavigatorImageUploadForm(initial={'staff_id': staff_object.id,
-                                                     'staff_pic': staff_object.staff_pic})
-                return render(request, 'staff_image_upload_form.html', {'form': form})
+                form = NavigatorImageUploadForm(
+                    initial={
+                        'staff_id': staff_object.id,
+                        'staff_pic': staff_object.staff_pic
+                    }
+                )
+                return render(
+                    request,
+                    'staff_image_upload_form.html',
+                    {
+                        'form': form,
+                        'url': request.build_absolute_uri()
+                    }
+                )
             except Navigators.DoesNotExist:
                 return HttpResponseForbidden("Staff member not found for given id: {!s}".format(str(rqst_staff_id)))
         else:
@@ -162,4 +174,11 @@ def upload_navigator_pic(request):
                 staff_object.save()
                 return HttpResponse('image upload success')
             else:
-                return render(request, 'staff_image_upload_form.html', {'form': form})
+                return render(
+                    request,
+                    'staff_image_upload_form.html',
+                    {
+                        'form': form,
+                        'url': request.build_absolute_uri()
+                    }
+                )
