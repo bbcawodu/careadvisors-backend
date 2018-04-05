@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+<head>
+    <link href="{% static 'css/staff_image_upload_form.css' %}" rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+{% csrf_token %}
+{{ message }}
+</body>
+</html>

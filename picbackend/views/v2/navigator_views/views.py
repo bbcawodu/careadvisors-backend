@@ -140,7 +140,7 @@ def upload_navigator_pic(request):
                 )
                 return render(
                     request,
-                    'staff_image_upload_form.html',
+                    'navigator_image_upload_form.html',
                     {
                         'form': form,
                         'url': request.build_absolute_uri()
@@ -163,7 +163,13 @@ def upload_navigator_pic(request):
                 if staff_object.staff_pic:
                     staff_object.staff_pic.delete()
 
-                return HttpResponse('Current image deleted.')
+                return render(
+                    request,
+                    'navigator_image_upload_success.html',
+                    {
+                        'message': 'Current image deleted.',
+                    }
+                )
             elif form.is_valid():
                 # Delete old pic
                 if staff_object.staff_pic:
@@ -172,11 +178,17 @@ def upload_navigator_pic(request):
                 # Add new pic
                 staff_object.staff_pic = form.cleaned_data['staff_pic']
                 staff_object.save()
-                return HttpResponse('image upload success')
+                return render(
+                    request,
+                    'navigator_image_upload_success.html',
+                    {
+                        'message': 'image upload success',
+                    }
+                )
             else:
                 return render(
                     request,
-                    'staff_image_upload_form.html',
+                    'navigator_image_upload_form.html',
                     {
                         'form': form,
                         'url': request.build_absolute_uri()
