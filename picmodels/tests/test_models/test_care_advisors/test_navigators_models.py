@@ -142,6 +142,51 @@ class NavigatorsTestCase(DBModelsBaseTestCase, TestCase):
                 "row resume count: {}".format(len(db_row.resume_set.all()))
             )
 
+    def test_create_row_w_validated_params_errors(self):
+        test_errors = []
+
+        db_row = self.use_create_row_w_validated_params(
+            self.validated_params,
+            test_errors
+        )
+
+        if db_row:
+            self.assertEqual(
+                db_row.first_name,
+                self.validated_params['first_name'],
+                "row name: {}, request name: {}".format(db_row.first_name, self.validated_params['first_name'])
+            )
+            self.assertEqual(
+                db_row.navigator_organization,
+                self.validated_params['navigator_organization'],
+                "row name: {}, request name: {}".format(db_row.navigator_organization, self.validated_params['navigator_organization'])
+            )
+            self.assertEqual(
+                len(db_row.base_locations.all()),
+                1,
+                "row base locations count: {}".format(len(db_row.base_locations.all()))
+            )
+            self.assertEqual(
+                len(db_row.healthcare_locations_worked.all()),
+                1,
+                "row healthcare_locations_worked count: {}".format(len(db_row.healthcare_locations_worked.all()))
+            )
+            self.assertEqual(
+                len(db_row.insurance_carrier_specialties.all()),
+                1,
+                "row insurance_carrier_specialties count: {}".format(len(db_row.insurance_carrier_specialties.all()))
+            )
+            self.assertEqual(
+                len(db_row.healthcare_service_expertises.all()),
+                1,
+                "row healthcare_service_expertises count: {}".format(len(db_row.healthcare_service_expertises.all()))
+            )
+            self.assertEqual(
+                len(db_row.resume_set.all()),
+                1,
+                "row resume count: {}".format(len(db_row.resume_set.all()))
+            )
+
     def test_update_row_w_validated_params(self):
         self.validated_params["first_name"] = "Hitsugayasdasa"
         self.validated_params["last_name"] = "Toshiro"

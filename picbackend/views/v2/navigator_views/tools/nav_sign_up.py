@@ -366,6 +366,7 @@ def validate_nav_sign_up_create_education_row_params(education_row_dict, educati
             "create_education_row[{}]".format(education_row_index),
             "major",
             rqst_errors,
+            none_allowed=True
         ),
         'degree_type': clean_string_value_from_dict_object(
             education_row_dict,
