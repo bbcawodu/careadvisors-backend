@@ -115,8 +115,6 @@ In response, a JSON document will be displayed with the following format:
             - create_resume_row["create_education_rows"][index]["school"]
             - create_resume_row["create_education_rows"][index]["major"]
             - create_resume_row["create_education_rows"][index]["degree_type"]
-            - create_resume_row["create_job_rows"][index]["title"]
-            - create_resume_row["create_job_rows"][index]["company"]
             - create_resume_row["create_job_rows"][index]["description"]
             - "address_line_1"
             - "address_line_2"
@@ -145,8 +143,6 @@ In response, a JSON document will be displayed with the following format:
             - create_resume_row["create_education_rows"][index]["school"]
             - create_resume_row["create_education_rows"][index]["major"]
             - create_resume_row["create_education_rows"][index]["degree_type"]
-            - create_resume_row["create_job_rows"][index]["title"]
-            - create_resume_row["create_job_rows"][index]["company"]
             - create_resume_row["create_job_rows"][index]["description"]
             - "address_line_1"
             - "address_line_2"
