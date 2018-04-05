@@ -713,6 +713,7 @@ def validate_create_education_row_params(education_row_dict, education_row_index
             "create_education_row[{}]".format(education_row_index),
             "major",
             rqst_errors,
+            none_allowed=True
         ),
         'degree_type': clean_string_value_from_dict_object(
             education_row_dict,
@@ -752,6 +753,7 @@ def validate_update_education_row_params(education_row_dict, education_row_index
             "update_education_row[{}]".format(education_row_index),
             "major",
             rqst_errors,
+            none_allowed=True
         )
     if 'degree_type' in education_row_dict:
         validated_education_row_dict['degree_type'] = clean_string_value_from_dict_object(
