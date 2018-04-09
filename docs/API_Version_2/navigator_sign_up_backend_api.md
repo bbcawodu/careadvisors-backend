@@ -166,3 +166,6 @@ In response, a JSON document will be displayed with the following format:
 
 ### Navigator Sign Up Picture Edit Page
 - To view/change the profile picture for a given Navigators table row, make a GET request to http://picbackend.herokuapp.com/v2/navigator_pic/ with the following Mandatory parameters: "id",
+
+### Navigator Resume File Edit Page
+- To view/change the resume_file column for a given Navigators table row, make a GET request to http://picbackend.herokuapp.com/v2/nav_resume/ with the following Mandatory parameters: "id",

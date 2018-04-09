@@ -19,5 +19,7 @@ Pillow
 django-storages
 boto
 pytest
+jsonpickle
 pytest-django
 python-jwt==1.1.0
+uwsgi

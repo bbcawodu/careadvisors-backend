@@ -30,6 +30,12 @@ def get_staff_pic_file_path(instance, filename):
     return os.path.join('staff_pics', filename)
 
 
+def get_nav_resume_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
+    return os.path.join('navigator_resumes', filename)
+
+
 class Navigators(models.Model):
     # fields for Navigators model
     REGIONS = {"1": ["cook",
@@ -99,6 +105,7 @@ class Navigators(models.Model):
     reported_region = models.CharField(max_length=1000, blank=True, null=True)
     video_link = models.TextField(blank=True, null=True, validators=[URLValidator()])
     navigator_organization = models.CharField(max_length=1000, blank=True, null=True)
+    resume_file = models.FileField(upload_to=get_nav_resume_file_path, blank=True, null=True)
 
     def return_values_dict(self):
         valuesdict = {
@@ -119,6 +126,7 @@ class Navigators(models.Model):
             "healthcare_service_expertises": None,
             "insurance_carrier_specialties": None,
             "resume_info": None,
+            "resume_file": None,
             "phone": self.phone,
             "reported_region": self.reported_region,
             "video_link": self.video_link,
@@ -204,6 +212,9 @@ class Navigators(models.Model):
                 resume_values.append(resume.return_values_dict())
             valuesdict["resume_info"] = resume_values
 
+        if self.resume_file:
+            valuesdict["resume_file"] = self.resume_file.url
+
         return valuesdict
 
     def save(self, *args, **kwargs):
@@ -244,6 +255,9 @@ def remove_file_from_s3(sender, instance, using, **kwargs):
         default_pic_url = "{}{}".format(settings.MEDIA_URL, settings.DEFAULT_STAFF_PIC_URL)
         if instance.staff_pic.url != default_pic_url:
             instance.staff_pic.delete(save=False)
+
+    if instance.resume_file:
+        instance.resume_file.delete(save=False)
 
 
 # Maybe add some sort of authorization to our API? OAuth? OAuth2? Some shit?

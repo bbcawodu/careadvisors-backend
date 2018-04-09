@@ -6,6 +6,7 @@ forms across picbackend app
 
 from django.forms import Form
 from django.forms import ImageField
+from django.forms import FileField
 from django.forms import HiddenInput
 from django.forms import IntegerField
 from django.forms import CharField
@@ -24,6 +25,12 @@ class NavigatorImageUploadForm(Form):
     #     })
     #
     #     super(NavigatorImageUploadForm, self).__init__()
+
+
+class NavResumeUploadForm(Form):
+    """file upload form."""
+    nav_id = IntegerField(widget=HiddenInput())
+    nav_resume_file = FileField()
 
 
 class CTAManagementForm(Form):

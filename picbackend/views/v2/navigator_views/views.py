@@ -10,6 +10,7 @@ from picbackend.views.utils import JSONPUTRspMixin
 from picbackend.views.utils import init_v2_response_data
 from picbackend.views.utils import validate_get_request_parameters
 from picmodels.forms import NavigatorImageUploadForm
+from picmodels.forms import NavResumeUploadForm
 from picmodels.models import Navigators
 
 import json
@@ -189,6 +190,82 @@ def upload_navigator_pic(request):
                 return render(
                     request,
                     'navigator_image_upload_form.html',
+                    {
+                        'form': form,
+                        'url': request.build_absolute_uri()
+                    }
+                )
+
+
+@xframe_options_exempt
+def upload_nav_resume(request):
+    if request.method == 'GET':
+        response_raw_data, rqst_errors = init_v2_response_data()
+        search_params = validate_get_request_parameters(request.GET, ["id"], rqst_errors)
+
+        if rqst_errors:
+            return HttpResponseForbidden(json.dumps(rqst_errors))
+        elif 'id' in search_params:
+            rqst_nav_id = search_params['id_list'][0]
+            try:
+                nav_row = Navigators.objects.get(pk=rqst_nav_id)
+                form = NavResumeUploadForm(
+                    initial={
+                        'nav_id': nav_row.id,
+                        'nav_resume_file': nav_row.resume_file
+                    }
+                )
+                return render(
+                    request,
+                    'nav_resume_file_upload_form.html',
+                    {
+                        'form': form,
+                        'url': request.build_absolute_uri()
+                    }
+                )
+            except Navigators.DoesNotExist:
+                return HttpResponseForbidden("Row in Navigators table not found for given id: {!s}".format(str(rqst_nav_id)))
+        else:
+            return HttpResponseForbidden("'id' must be in search parameters")
+    if request.method == 'POST':
+        form = NavResumeUploadForm(request.POST, request.FILES)
+
+        current_nav_row_id = form.data['nav_id']
+        try:
+            nav_row = Navigators.objects.get(id=current_nav_row_id)
+        except Navigators.DoesNotExist:
+            HttpResponseForbidden("Row in Navigators table not found for given id: {}".format(current_nav_row_id))
+        else:
+            if request.POST.get('delete_current_resume_file_field_value'):
+                if nav_row.resume_file:
+                    nav_row.resume_file.delete()
+
+                return render(
+                    request,
+                    'nav_resume_file_upload_result.html',
+                    {
+                        'message': 'Current resume_file deleted.',
+                    }
+                )
+            elif form.is_valid():
+                # Delete old pic
+                if nav_row.resume_file:
+                    nav_row.resume_file.delete()
+
+                # Add new pic
+                nav_row.resume_file = form.cleaned_data['nav_resume_file']
+                nav_row.save()
+                return render(
+                    request,
+                    'nav_resume_file_upload_result.html',
+                    {
+                        'message': 'resume_file upload success',
+                    }
+                )
+            else:
+                return render(
+                    request,
+                    'nav_resume_file_upload_form.html',
                     {
                         'form': form,
                         'url': request.build_absolute_uri()
