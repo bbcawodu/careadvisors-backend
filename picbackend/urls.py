@@ -64,7 +64,7 @@ urlpatterns = [
     url(r"^v2/navigators/$", views.NavigatorManagementView.as_view()),
     url(r"^v2/navigator_sign_up/$", views.NavigatorSignUpView.as_view()),
     url(r"^v2/navigator_pic/$", views.upload_navigator_pic),
-    # url(r"^v2/nav_resume/$", views.upload_nav_resume),
+    url(r"^v2/nav_resume/$", views.upload_nav_resume),
 
     # urls for navigator organizations from care advisors form views
     url(r"^v2/nav_orgs_from_form/$", views.NavOrgsFromOnlineFormMgmtView.as_view()),

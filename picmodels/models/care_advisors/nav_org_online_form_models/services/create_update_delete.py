@@ -27,6 +27,14 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
     appointment_datetime = validated_params['appointment_datetime']
     row.appointment_datetime = appointment_datetime
 
+    if 'appointment_datetime_2' in validated_params:
+        appointment_datetime_2 = validated_params['appointment_datetime_2']
+        row.appointment_datetime_2 = appointment_datetime_2
+
+    if 'appointment_datetime_3' in validated_params:
+        appointment_datetime_3 = validated_params['appointment_datetime_3']
+        row.appointment_datetime_3 = appointment_datetime_3
+
     if not rqst_errors:
         row.save()
 
@@ -70,6 +78,14 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         if "appointment_datetime" in validated_params:
             appointment_datetime = validated_params['appointment_datetime']
             row.appointment_datetime = appointment_datetime
+
+        if 'appointment_datetime_2' in validated_params:
+            appointment_datetime_2 = validated_params['appointment_datetime_2']
+            row.appointment_datetime_2 = appointment_datetime_2
+
+        if 'appointment_datetime_3' in validated_params:
+            appointment_datetime_3 = validated_params['appointment_datetime_3']
+            row.appointment_datetime_3 = appointment_datetime_3
 
         if not rqst_errors:
             row.save()

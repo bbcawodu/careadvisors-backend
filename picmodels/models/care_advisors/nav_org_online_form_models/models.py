@@ -23,6 +23,8 @@ class NavOrgsFromOnlineForm(models.Model):
     contact_phone = models.CharField(max_length=500, blank=True, null=True)
     date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
     appointment_datetime = models.DateTimeField(blank=True, null=True)
+    appointment_datetime_2 = models.DateTimeField(blank=True, null=True)
+    appointment_datetime_3 = models.DateTimeField(blank=True, null=True)
 
     def return_values_dict(self):
         values_dict = {
@@ -36,6 +38,8 @@ class NavOrgsFromOnlineForm(models.Model):
             "contact_phone": self.contact_phone,
             "date_created": self.date_created.isoformat() if self.date_created else None,
             "appointment_datetime": self.appointment_datetime.isoformat() if self.appointment_datetime else None,
+            "appointment_datetime_2": self.appointment_datetime_2.isoformat() if self.appointment_datetime_2 else None,
+            "appointment_datetime_3": self.appointment_datetime_3.isoformat() if self.appointment_datetime_3 else None,
 
             "id": self.id
         }

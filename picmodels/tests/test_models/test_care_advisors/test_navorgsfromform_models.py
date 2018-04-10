@@ -63,6 +63,10 @@ class NavOrgsFromOnlineFormTestCase(DBModelsBaseTestCase, TestCase):
             "contact_phone": "2813307004",
 
             "appointment_datetime": datetime.datetime.strptime("2018-05-03T17:00:00", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC),
+            "appointment_datetime_2": datetime.datetime.strptime("2018-05-04T17:00:00", "%Y-%m-%dT%H:%M:%S").replace(
+                tzinfo=pytz.UTC),
+            "appointment_datetime_3": datetime.datetime.strptime("2018-05-05T17:00:00", "%Y-%m-%dT%H:%M:%S").replace(
+                tzinfo=pytz.UTC),
 
             "db_action": "update",
             "id": 1,
@@ -79,6 +83,20 @@ class NavOrgsFromOnlineFormTestCase(DBModelsBaseTestCase, TestCase):
                 db_row.company_name,
                 validated_params['company_name'],
                 "row company_name: {}, request company_name: {}".format(db_row.company_name, validated_params['company_name'])
+            )
+
+            self.assertEqual(
+                db_row.appointment_datetime_2,
+                validated_params['appointment_datetime_2'],
+                "row appointment_datetime_2: {}, request appointment_datetime_2: {}".format(db_row.appointment_datetime_2,
+                                                                        validated_params['appointment_datetime_2'])
+            )
+
+            self.assertEqual(
+                db_row.appointment_datetime_3,
+                validated_params['appointment_datetime_3'],
+                "row appointment_datetime_3: {}, request appointment_datetime_3: {}".format(db_row.appointment_datetime_3,
+                                                                        validated_params['appointment_datetime_3'])
             )
 
     def test_delete_row_w_validated_params(self):
