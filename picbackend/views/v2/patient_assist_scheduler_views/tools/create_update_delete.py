@@ -230,6 +230,7 @@ def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime
                                 "start": {"dateTime": rqst_apt_datetime + 'Z'},
                                 "end": {"dateTime": apt_end_timestamp.isoformat() + 'Z'}
                                 }
+
                 try:
                     navigator_appointment_object = service.events().insert(calendarId=navigator_calendar_id, body=nav_apt_args, sendNotifications=True).execute()
 
@@ -239,7 +240,7 @@ def send_add_apt_rqst_to_google_and_email_consumer(credential, rqst_apt_datetime
                     scheduled_appointment["Appointment Title"] = navigator_appointment_object["summary"]
                     scheduled_appointment["Appointment Summary"] = navigator_appointment_object["description"]
 
-                    if "Email" in consumer_info:
+                    if "email" in consumer_info:
                         try:
                             validate_email(consumer_info["email"])
                             send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointment, post_errors)
@@ -272,12 +273,12 @@ def send_apt_info_email_to_consumer(consumer_info, nav_info, scheduled_appointme
 
     try:
         mandrill_client = mandrill.Mandrill('1veuJ5Rt5CtLEDj64ijXIA')
-        message_content = "Hello, you have an appointment scheduled with {!s} {!s} at {!s}. They will be contacting you at {!s}. We look forward to speaking with you!".format(nav_info["First Name"], nav_info["Last Name"], scheduled_appointment["Appointment Date and Time"], consumer_info["phone"])
+        message_content = "Hello, you have an appointment scheduled with {!s} {!s} at {!s}. They will be contacting you at {!s}. We look forward to speaking with you!".format(nav_info["first_name"], nav_info["last_name"], scheduled_appointment["Appointment Date and Time"], consumer_info["phone"])
         message = {'auto_html': None,
                      'auto_text': None,
                      'from_email': 'tech@piccares.org',
                      'from_name': 'Patient Innovation Center',
-                     'headers': {'Reply-To': nav_info["Email"]},
+                     'headers': {'Reply-To': nav_info["email"]},
                      'html': '<p>{!s}</p>'.format(message_content),
                      'important': True,
                      'subject': scheduled_appointment["Appointment Title"],
