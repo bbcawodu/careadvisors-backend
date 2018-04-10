@@ -138,6 +138,32 @@ def validate_params_for_create_row(rqst_body, validated_params, rqst_errors):
             )
     validated_params['appointment_datetime'] = validated_appointment_datetime
 
+    if "appointment_datetime_2" in rqst_body:
+        appointment_datetime_2 = clean_string_value_from_dict_object(rqst_body, "root", "appointment_datetime_2", rqst_errors, none_allowed=True)
+        validated_appointment_datetime_2 = None
+        if appointment_datetime_2:
+            try:
+                validated_appointment_datetime_2 = datetime.datetime.strptime(appointment_datetime_2, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'appointment_datetime_2 must be a properly formatted datetime string in UTC, eg. YYYY-MM-DDTHH:MM:SS. Value is : {}'.format(
+                        appointment_datetime_2)
+                )
+        validated_params['appointment_datetime_2'] = validated_appointment_datetime_2
+
+    if "appointment_datetime_3" in rqst_body:
+        appointment_datetime_3 = clean_string_value_from_dict_object(rqst_body, "root", "appointment_datetime_3", rqst_errors, none_allowed=True)
+        validated_appointment_datetime_3 = None
+        if appointment_datetime_3:
+            try:
+                validated_appointment_datetime_3 = datetime.datetime.strptime(appointment_datetime_3, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'appointment_datetime_3 must be a properly formatted datetime string in UTC, eg. YYYY-MM-DDTHH:MM:SS. Value is : {}'.format(
+                        appointment_datetime_3)
+                )
+        validated_params['appointment_datetime_3'] = validated_appointment_datetime_3
+
 
 def validate_phone_number(phone_number, rqst_errors):
     if not re.findall(r'^1?\d{10}$', phone_number):
@@ -251,7 +277,7 @@ def validate_params_for_update_row(rqst_body, validated_params, rqst_errors):
         validated_params["contact_phone"] = contact_phone
 
     if "appointment_datetime" in rqst_body:
-        appointment_datetime = clean_string_value_from_dict_object(rqst_body, "root", "appointment_datetime", rqst_errors)
+        appointment_datetime = clean_string_value_from_dict_object(rqst_body, "root", "appointment_datetime", rqst_errors, none_allowed=True)
         validated_appointment_datetime = None
         if appointment_datetime:
             try:
@@ -262,3 +288,29 @@ def validate_params_for_update_row(rqst_body, validated_params, rqst_errors):
                         appointment_datetime)
                 )
         validated_params['appointment_datetime'] = validated_appointment_datetime
+
+    if "appointment_datetime_2" in rqst_body:
+        appointment_datetime_2 = clean_string_value_from_dict_object(rqst_body, "root", "appointment_datetime_2", rqst_errors, none_allowed=True)
+        validated_appointment_datetime_2 = None
+        if appointment_datetime_2:
+            try:
+                validated_appointment_datetime_2 = datetime.datetime.strptime(appointment_datetime_2, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'appointment_datetime_2 must be a properly formatted datetime string in UTC, eg. YYYY-MM-DDTHH:MM:SS. Value is : {}'.format(
+                        appointment_datetime_2)
+                )
+        validated_params['appointment_datetime_2'] = validated_appointment_datetime_2
+
+    if "appointment_datetime_3" in rqst_body:
+        appointment_datetime_3 = clean_string_value_from_dict_object(rqst_body, "root", "appointment_datetime_3", rqst_errors, none_allowed=True)
+        validated_appointment_datetime_3 = None
+        if appointment_datetime_3:
+            try:
+                validated_appointment_datetime_3 = datetime.datetime.strptime(appointment_datetime_3, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'appointment_datetime_3 must be a properly formatted datetime string in UTC, eg. YYYY-MM-DDTHH:MM:SS. Value is : {}'.format(
+                        appointment_datetime_3)
+                )
+        validated_params['appointment_datetime_3'] = validated_appointment_datetime_3

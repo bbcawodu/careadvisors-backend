@@ -25,6 +25,8 @@ The body of the request should be a JSON document using the following template:
     "contact_email": String,
     "contact_phone": String,
     "appointment_datetime": String'(Must be a iso formatted date and time in UTC eg. 'YYYY-MM-DDTHH:MM:SS'),
+    "appointment_datetime_2": String'(Must be a iso formatted date and time in UTC eg. 'YYYY-MM-DDTHH:MM:SS'),
+    "appointment_datetime_3": String'(Must be a iso formatted date and time in UTC eg. 'YYYY-MM-DDTHH:MM:SS'),
             
     "id": Integer,
     "db_action": String,
@@ -53,8 +55,8 @@ In response, a JSON document will be displayed with the following format:
             - "city"
             - "state_province"
             - "zipcode"
-            - "appointment_datetime"
-            - "estimated_monthly_caseload"
+            - "appointment_datetime_2"
+            - "appointment_datetime_3"
             
         - Keys that can be empty strings:
             - "address_line_1"
@@ -62,7 +64,6 @@ In response, a JSON document will be displayed with the following format:
             - "city"
             - "state_province"
             - "zipcode"
-            - "appointment_datetime"
             - "estimated_monthly_caseload"
         
         - Keys that can be Null
@@ -71,7 +72,8 @@ In response, a JSON document will be displayed with the following format:
             - "city"
             - "state_province"
             - "zipcode"
-            - "appointment_datetime"
+            - "appointment_datetime_2"
+            - "appointment_datetime_3"
             - "estimated_monthly_caseload"
 
     - If there are no errors in the JSON Body document:        
@@ -92,7 +94,6 @@ In response, a JSON document will be displayed with the following format:
             - "city"
             - "state_province"
             - "zipcode"
-            - "appointment_datetime"
             - "estimated_monthly_caseload"
         
         - Keys that can be Null
@@ -102,6 +103,8 @@ In response, a JSON document will be displayed with the following format:
             - "state_province"
             - "zipcode"
             - "appointment_datetime"
+            - "appointment_datetime_2"
+            - "appointment_datetime_3"
             - "estimated_monthly_caseload"
         
     - If there are no errors in the JSON Body document:
@@ -166,7 +169,9 @@ In response, a JSON document will be displayed with the following format:
                 "contact_last_name": String,
                 "contact_email": String,
                 "contact_phone": String,
-                "appointment_datetime": String'(Must be a iso formatted date and time in UTC eg. 'YYYY-MM-DDTHH:MM:SS'),
+                "appointment_datetime": String',
+                "appointment_datetime_2": String',
+                "appointment_datetime_3": String',
                 "id": Integer,
             },
             ...,
