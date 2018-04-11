@@ -309,11 +309,15 @@ class Education(models.Model):
     GRADUATE = "graduate"
     BACHELORS = "bachelors"
     MASTERS = "masters"
+    HIGH_SCHOOL = "high school"
+    ASSOCIATE = "associate"
     DEGREE_TYPE_CHOICES = (
         (UNDERGRADUATE, "undergraduate"),
         (GRADUATE, "graduate"),
         (BACHELORS, 'bachelors'),
         (MASTERS, 'masters'),
+        (HIGH_SCHOOL, "high school"),
+        (ASSOCIATE, "associate"),
         (N_A, "Not Available")
     )
 
