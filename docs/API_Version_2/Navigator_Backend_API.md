@@ -89,7 +89,9 @@ The body of the request should be a JSON document using the following template:
             {
                 "school": String,
                 "major": String,
-                "degree_type": String ("masters" or "bachelors")
+                "degree_type": String ("masters", "bachelors", "high school", or "associate"),
+                "start_year_datetime": String'(Must be a iso formatted year eg. 'YYYY'),
+                "end_year_datetime": String'(Must be a iso formatted year eg. 'YYYY'),
             },
             ...
         ],
@@ -97,7 +99,9 @@ The body of the request should be a JSON document using the following template:
             {
                 "school": String,
                 "major": String,
-                "degree_type": String ("masters" or "bachelors"),
+                "degree_type": String ("masters", "bachelors", "high school", or "associate"),
+                "start_year_datetime": String'(Must be a iso formatted year eg. 'YYYY'),
+                "end_year_datetime": String'(Must be a iso formatted year eg. 'YYYY'),
                 "id": Integer
             }(id must be present when updating),
             ...
@@ -113,7 +117,9 @@ The body of the request should be a JSON document using the following template:
             {
                 "title": String,
                 "company": String,
-                "description": String
+                "description": String,
+                "start_year_datetime": String'(Must be a iso formatted year eg. 'YYYY'),
+                "end_year_datetime": String'(Must be a iso formatted year eg. 'YYYY'),
             },
             ...
         ],
@@ -122,6 +128,8 @@ The body of the request should be a JSON document using the following template:
                 "title": String,
                 "company": String,
                 "description": String,
+                "start_year_datetime": String'(Must be a iso formatted year eg. 'YYYY'),
+                "end_year_datetime": String'(Must be a iso formatted year eg. 'YYYY'),
                 "id": Integer
             }(id must be present when updating),
         ],
@@ -183,7 +191,11 @@ In response, a JSON document will be displayed with the following format:
             - create_resume_row
             - create_resume_row["profile_description"]
             - create_resume_row["create_education_rows"]
+            - create_resume_row["create_education_rows"][index]["start_year_datetime"]
+            - create_resume_row["create_education_rows"][index]["end_year_datetime"]
             - create_resume_row["create_job_rows"]
+            - create_resume_row["create_job_rows"][index]["start_year_datetime"]
+            - create_resume_row["create_job_rows"][index]["end_year_datetime"]
             - "address_line_1"
             - "address_line_2"
             - "city"
@@ -252,6 +264,8 @@ In response, a JSON document will be displayed with the following format:
             - create_resume_row["profile_description"]
             - create_resume_row["create_education_rows"][index]["major"]
             - create_resume_row["create_education_rows"][index]["degree_type"]
+            - create_resume_row["create_education_rows"][index]["start_year_datetime"]
+            - create_resume_row["create_education_rows"][index]["end_year_datetime"]
             - create_resume_row["create_job_rows"][index]["description"]
             - update_resume_row["profile_description"]
             - update_resume_row["create_education_rows"][index]["major"]
@@ -260,6 +274,8 @@ In response, a JSON document will be displayed with the following format:
             - update_resume_row["update_education_rows"][index]["degree_type"]
             - update_resume_row["create_job_rows"][index]["description"]
             - update_resume_row["update_job_rows"][index]["description"]
+            - create_resume_row["create_job_rows"][index]["start_year_datetime"]
+            - create_resume_row["create_job_rows"][index]["end_year_datetime"]
             - "address_line_1"
             - "address_line_2"
             - "city"
@@ -331,7 +347,9 @@ In response, a JSON document will be displayed with the following format:
             - 'remove_insurance_carrier_specialties'[index]['state_province']
             - create_resume_row["profile_description"]
             - create_resume_row["create_education_rows"][index]["major"]
-            - create_resume_row["create_education_rows"][index]["degree_type"]\
+            - create_resume_row["create_education_rows"][index]["degree_type"]
+            - create_resume_row["create_education_rows"][index]["start_year_datetime"]
+            - create_resume_row["create_education_rows"][index]["end_year_datetime"]
             - create_resume_row["create_job_rows"][index]["description"]
             - update_resume_row["profile_description"]
             - update_resume_row["create_education_rows"][index]["major"]
@@ -340,6 +358,10 @@ In response, a JSON document will be displayed with the following format:
             - update_resume_row["update_education_rows"][index]["degree_type"]
             - update_resume_row["create_job_rows"][index]["description"]
             - update_resume_row["update_job_rows"][index]["description"]
+            - create_resume_row["create_job_rows"][index]["start_year_datetime"]
+            - create_resume_row["create_job_rows"][index]["end_year_datetime"]
+            - create_resume_row["update_job_rows"][index]["start_year_datetime"]
+            - create_resume_row["update_job_rows"][index]["end_year_datetime"]
             - "address_line_1"
             - "address_line_2"
             - "city"

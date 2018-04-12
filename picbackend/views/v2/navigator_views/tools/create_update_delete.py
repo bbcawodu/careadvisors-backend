@@ -2,6 +2,8 @@ from django import forms
 from django.core.validators import validate_email
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+import datetime
+import pytz
 
 from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_list_value_from_dict_object
@@ -727,6 +729,31 @@ def validate_create_education_row_params(education_row_dict, education_row_index
     if not validated_education_row_dict['degree_type']:
         validated_education_row_dict['degree_type'] = "Not Available"
 
+    if "start_year_datetime" in education_row_dict:
+        start_year_datetime = clean_string_value_from_dict_object(education_row_dict, "root", "start_year_datetime", rqst_errors, none_allowed=True)
+        validated_start_year_datetime = None
+        if start_year_datetime:
+            try:
+                validated_start_year_datetime = datetime.datetime.strptime(start_year_datetime, "%Y").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'start_year_datetime must be a properly formatted datetime string in UTC, eg. YYYY. Value is : {}'.format(
+                        start_year_datetime)
+                )
+        validated_education_row_dict['start_year_datetime'] = validated_start_year_datetime
+    if "end_year_datetime" in education_row_dict:
+        end_year_datetime = clean_string_value_from_dict_object(education_row_dict, "root", "end_year_datetime", rqst_errors, none_allowed=True)
+        validated_end_year_datetime = None
+        if end_year_datetime:
+            try:
+                validated_end_year_datetime = datetime.datetime.strptime(end_year_datetime, "%Y").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'end_year_datetime must be a properly formatted datetime string in UTC, eg. YYYY. Value is : {}'.format(
+                        end_year_datetime)
+                )
+        validated_education_row_dict['end_year_datetime'] = validated_end_year_datetime
+
     return validated_education_row_dict
 
 
@@ -765,6 +792,30 @@ def validate_update_education_row_params(education_row_dict, education_row_index
         )
         if not validated_education_row_dict['degree_type']:
             validated_education_row_dict['degree_type'] = "Not Available"
+    if "start_year_datetime" in education_row_dict:
+        start_year_datetime = clean_string_value_from_dict_object(education_row_dict, "root", "start_year_datetime", rqst_errors, none_allowed=True)
+        validated_start_year_datetime = None
+        if start_year_datetime:
+            try:
+                validated_start_year_datetime = datetime.datetime.strptime(start_year_datetime, "%Y").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'start_year_datetime must be a properly formatted datetime string in UTC, eg. YYYY. Value is : {}'.format(
+                        start_year_datetime)
+                )
+        validated_education_row_dict['start_year_datetime'] = validated_start_year_datetime
+    if "end_year_datetime" in education_row_dict:
+        end_year_datetime = clean_string_value_from_dict_object(education_row_dict, "root", "end_year_datetime", rqst_errors, none_allowed=True)
+        validated_end_year_datetime = None
+        if end_year_datetime:
+            try:
+                validated_end_year_datetime = datetime.datetime.strptime(end_year_datetime, "%Y").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'end_year_datetime must be a properly formatted datetime string in UTC, eg. YYYY. Value is : {}'.format(
+                        end_year_datetime)
+                )
+        validated_education_row_dict['end_year_datetime'] = validated_end_year_datetime
 
     return validated_education_row_dict
 
@@ -804,6 +855,30 @@ def validate_create_job_row_params(job_row_dict, job_row_index, rqst_errors):
             none_allowed=True
         ),
     }
+    if "start_year_datetime" in job_row_dict:
+        start_year_datetime = clean_string_value_from_dict_object(job_row_dict, "root", "start_year_datetime", rqst_errors, none_allowed=True)
+        validated_start_year_datetime = None
+        if start_year_datetime:
+            try:
+                validated_start_year_datetime = datetime.datetime.strptime(start_year_datetime, "%Y").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'start_year_datetime must be a properly formatted datetime string in UTC, eg. YYYY. Value is : {}'.format(
+                        start_year_datetime)
+                )
+        validated_job_row_dict['start_year_datetime'] = validated_start_year_datetime
+    if "end_year_datetime" in job_row_dict:
+        end_year_datetime = clean_string_value_from_dict_object(job_row_dict, "root", "end_year_datetime", rqst_errors, none_allowed=True)
+        validated_end_year_datetime = None
+        if end_year_datetime:
+            try:
+                validated_end_year_datetime = datetime.datetime.strptime(end_year_datetime, "%Y").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'end_year_datetime must be a properly formatted datetime string in UTC, eg. YYYY. Value is : {}'.format(
+                        end_year_datetime)
+                )
+        validated_job_row_dict['end_year_datetime'] = validated_end_year_datetime
 
     return validated_job_row_dict
 
@@ -840,6 +915,30 @@ def validate_update_job_row_params(job_row_dict, job_row_index, rqst_errors):
             rqst_errors,
             none_allowed=True
         )
+    if "start_year_datetime" in job_row_dict:
+        start_year_datetime = clean_string_value_from_dict_object(job_row_dict, "root", "start_year_datetime", rqst_errors, none_allowed=True)
+        validated_start_year_datetime = None
+        if start_year_datetime:
+            try:
+                validated_start_year_datetime = datetime.datetime.strptime(start_year_datetime, "%Y").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'start_year_datetime must be a properly formatted datetime string in UTC, eg. YYYY. Value is : {}'.format(
+                        start_year_datetime)
+                )
+        validated_job_row_dict['start_year_datetime'] = validated_start_year_datetime
+    if "end_year_datetime" in job_row_dict:
+        end_year_datetime = clean_string_value_from_dict_object(job_row_dict, "root", "end_year_datetime", rqst_errors, none_allowed=True)
+        validated_end_year_datetime = None
+        if end_year_datetime:
+            try:
+                validated_end_year_datetime = datetime.datetime.strptime(end_year_datetime, "%Y").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'end_year_datetime must be a properly formatted datetime string in UTC, eg. YYYY. Value is : {}'.format(
+                        end_year_datetime)
+                )
+        validated_job_row_dict['end_year_datetime'] = validated_end_year_datetime
 
     return validated_job_row_dict
 

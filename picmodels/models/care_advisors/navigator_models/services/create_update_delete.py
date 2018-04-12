@@ -419,6 +419,10 @@ def create_education_row_w_validated_params(resume_row, education_row_dict, rqst
         rqst_errors.append(
             "degree_type: {!s} is not a valid choice".format(education_row.degree_type)
         )
+    if "start_year_datetime" in education_row_dict:
+        education_row.start_date = education_row_dict['start_year_datetime']
+    if "end_year_datetime" in education_row_dict:
+        education_row.end_date = education_row_dict['end_year_datetime']
 
     return education_row
 
@@ -442,6 +446,10 @@ def update_education_row_w_validated_params(resume_row, education_row_dict, rqst
                 rqst_errors.append(
                     "degree_type: {!s} is not a valid choice".format(education_row.degree_type)
                 )
+        if "start_year_datetime" in education_row_dict:
+            education_row.start_date = education_row_dict['start_year_datetime']
+        if "end_year_datetime" in education_row_dict:
+            education_row.end_date = education_row_dict['end_year_datetime']
 
     return education_row
 
@@ -462,6 +470,10 @@ def create_job_row_w_validated_params(resume_row, job_row_dict):
     job_row.title = job_row_dict['title']
     job_row.company = job_row_dict['company']
     job_row.description = job_row_dict['description']
+    if "start_year_datetime" in job_row_dict:
+        job_row.start_date = job_row_dict['start_year_datetime']
+    if "end_year_datetime" in job_row_dict:
+        job_row.end_date = job_row_dict['end_year_datetime']
 
     return job_row
 
@@ -481,6 +493,10 @@ def update_job_row_w_validated_params(resume_row, job_row_dict, rqst_errors):
             job_row.company = job_row_dict['company']
         if 'description' in job_row_dict:
             job_row.description = job_row_dict['description']
+        if "start_year_datetime" in job_row_dict:
+            job_row.start_date = job_row_dict['start_year_datetime']
+        if "end_year_datetime" in job_row_dict:
+            job_row.end_date = job_row_dict['end_year_datetime']
 
     return job_row
 
