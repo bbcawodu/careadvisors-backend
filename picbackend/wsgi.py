@@ -11,11 +11,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-<<<<<<< HEAD
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "picbackend.settings.demo")
-=======
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "picbackend.settings.development")
->>>>>>> dev-db
 
 application = get_wsgi_application()
 
