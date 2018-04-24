@@ -131,7 +131,7 @@ class PICConsumerBase(models.Model):
             "last_name": self.last_name,
             "email": self.email,
             "phone": self.phone,
-            "preferred_anguage": self.preferred_language,
+            "preferred_language": self.preferred_language,
             "address": None,
             "household size": self.household_size,
             "plan": self.plan,
