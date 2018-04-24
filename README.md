@@ -6,7 +6,7 @@ This is the code for the backend component of our metrics and appointments apps.
 
 ## Installation
 
-This app runs on a django installation hosted on Heroku. To install Heroku for code editing, go to: https://devcenter.heroku.com/articles/getting-started-with-python#introduction and follow the instructions for your particular operating system.
+This is a Django application that is hosted on Heroku. To install Heroku CLI for easier code editing and deployment, go to: [Django Deployment on Heroku](https://devcenter.heroku.com/articles/getting-started-with-python#introduction) and follow the instructions for your particular operating system.
 
 
 
