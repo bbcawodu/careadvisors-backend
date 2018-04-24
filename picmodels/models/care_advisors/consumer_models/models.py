@@ -133,7 +133,7 @@ class PICConsumerBase(models.Model):
             "phone": self.phone,
             "preferred_language": self.preferred_language,
             "address": None,
-            "household size": self.household_size,
+            "household_size": self.household_size,
             "plan": self.plan,
             "met_nav_at": self.met_nav_at,
             "best_contact_time": self.best_contact_time,
