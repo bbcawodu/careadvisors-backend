@@ -1,6 +1,9 @@
 from django.db import models
 from django.conf import settings
 from django.dispatch import receiver
+
+from custom_storages import PublicMediaStorage
+
 import uuid
 import os
 
@@ -14,7 +17,7 @@ def get_cta_image_file_path(instance, filename):
 class CallToAction(models.Model):
     # fields for CallToAction model
     intent = models.CharField(max_length=1000)
-    cta_image = models.ImageField(upload_to=get_cta_image_file_path, blank=True, null=True)
+    cta_image = models.ImageField(upload_to=get_cta_image_file_path, storage=PublicMediaStorage(), blank=True, null=True)
 
     def return_values_dict(self):
         valuesdict = {"Intent": self.intent,

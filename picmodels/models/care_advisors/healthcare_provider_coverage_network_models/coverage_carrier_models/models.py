@@ -5,6 +5,8 @@ import uuid
 import os
 import urllib
 
+from custom_storages import PublicMediaStorage
+
 from .services.create_update_delete import create_row_w_validated_params
 from .services.create_update_delete import update_row_w_validated_params
 from .services.create_update_delete import delete_row_w_validated_params
@@ -127,7 +129,7 @@ class HealthcareCarrier(models.Model):
 
     name = models.CharField(max_length=10000)
     state_province = models.CharField("State/Province", max_length=40, blank=True, null=True, choices=STATE_CHOICES)
-    sample_id_card = models.ImageField(upload_to=get_sample_id_card_file_path, blank=True, null=True)
+    sample_id_card = models.ImageField(upload_to=get_sample_id_card_file_path, storage=PublicMediaStorage(), blank=True, null=True)
 
     def check_state_choices(self,):
         if self.state_province:
