@@ -20,3 +20,4 @@ from .care_advisor_customer_views import *
 from .dashboard_views import *
 from .healthcare_service_expertise_views import *
 from .marketplace_appointment_views import *
+from .case_management_module_views import *
