@@ -82,6 +82,7 @@ CORS_ORIGIN_WHITELIST = (
     "navigatornetwork.org",
     "patient-assist-backend.herokuapp.com",
     "dashboard-console-demo.herokuapp.com",
+    'care-advisors.com',
     "dashboard-console-demo.care-advisors.com",
 )
 

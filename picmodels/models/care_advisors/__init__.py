@@ -16,3 +16,4 @@ from .hospital_web_traffic_models import *
 from .subsidy_eligibility_tool_models import *
 from .website_customer_models import *
 from .marketplace_appointment_models import *
+from .case_management_models import *
