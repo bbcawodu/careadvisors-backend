@@ -53,6 +53,7 @@ class PICConsumerBase(models.Model):
     best_contact_time = models.CharField(max_length=1000, blank=True, null=True)
     navigator = models.ForeignKey(Navigators, on_delete=models.SET_NULL, blank=True, null=True)
     # navigators = models.ManyToManyField(Navigators, blank=True)
+    cm_client_for_routing = models.ForeignKey('CaseManagementClient', on_delete=models.SET_NULL, blank=True, null=True)
 
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, blank=True, null=True)
     household_size = models.IntegerField()
