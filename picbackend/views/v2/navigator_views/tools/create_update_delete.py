@@ -81,6 +81,25 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
 
         validated_params['add_base_locations'] = validated_base_location_names
 
+    if 'add_approved_clients_for_case_management' in rqst_body:
+        add_approved_clients_for_case_management = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "add_approved_clients_for_case_management",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_approved_clients_for_case_management = []
+        for approved_client_for_case_management in add_approved_clients_for_case_management:
+            if not isinstance(approved_client_for_case_management, int):
+                rqst_errors.append('Error: An approved_client_for_case_management in \'add_approved_clients_for_case_management\' is not an integer.')
+                continue
+
+            validated_approved_clients_for_case_management.append(approved_client_for_case_management)
+
+        validated_params['add_approved_clients_for_case_management'] = validated_approved_clients_for_case_management
+
     validate_nav_signup_params(rqst_body, validated_params, rqst_errors)
 
 
@@ -158,6 +177,42 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             validated_base_location_names.append(base_location_name)
 
         validated_params['remove_base_locations'] = validated_base_location_names
+
+    if 'add_approved_clients_for_case_management' in rqst_body:
+        add_approved_clients_for_case_management = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "add_approved_clients_for_case_management",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_approved_clients_for_case_management = []
+        for approved_client_for_case_management in add_approved_clients_for_case_management:
+            if not isinstance(approved_client_for_case_management, int):
+                rqst_errors.append('Error: An approved_client_for_case_management in \'add_approved_clients_for_case_management\' is not an integer.')
+                continue
+
+            validated_approved_clients_for_case_management.append(approved_client_for_case_management)
+
+        validated_params['add_approved_clients_for_case_management'] = validated_approved_clients_for_case_management
+    elif 'remove_approved_clients_for_case_management' in rqst_body:
+        remove_approved_clients_for_case_management = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "remove_approved_clients_for_case_management",
+            rqst_errors
+        )
+
+        validated_approved_clients_for_case_management = []
+        for approved_client_for_case_management in remove_approved_clients_for_case_management:
+            if not isinstance(approved_client_for_case_management, int):
+                rqst_errors.append('Error: An approved_client_for_case_management in \'remove_approved_clients_for_case_management\' is not an integer.')
+                continue
+
+            validated_approved_clients_for_case_management.append(approved_client_for_case_management)
+
+        validated_params['remove_approved_clients_for_case_management'] = validated_approved_clients_for_case_management
 
     validate_nav_signup_params(rqst_body, validated_params, rqst_errors)
 

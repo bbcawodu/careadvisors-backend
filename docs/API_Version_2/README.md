@@ -72,12 +72,12 @@ This file is documentation for the backend API library for Patient Innovation Ce
 
 ### Accepted Plans for PIC Contracted Healthcare Provider Networks API
 
-[Accepted Plans for PIC Contracted Healthcare Provider Networks API README](Providers_Plan_Network_API/Index.md)
+[Accepted Plans for PIC Contracted Healthcare Provider Networks API README](Providers_Plan_Network_API/README.md)
 
 
 ### Patient Story Concerns API
 
-[Patient Story Concerns API README](Patient_Story_Concerns_API/Index.md)
+[Patient Story Concerns API README](Patient_Story_Concerns_API/README.md)
 
 
 ### Hospital Web Traffic Data API
@@ -92,7 +92,7 @@ This file is documentation for the backend API library for Patient Innovation Ce
 
 ### Care Advisor Customer Backend API
 
-[Care Advisor Customer Backend API README](Care_Advisor_Customer_API/index.md)
+[Care Advisor Customer Backend API README](Care_Advisor_Customer_API/README.md)
 
 
 ### Presence Healthcare Appointment Scheduler Backend
