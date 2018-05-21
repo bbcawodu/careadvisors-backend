@@ -12,12 +12,12 @@ This is a Django application that is hosted on Heroku. To install Heroku CLI for
 
 ## Patient Innovation Center Backend Library API Documentation
 
-[API Version 2](docs/API_Version_2/Index.md) (CURRENT VERSION)
+[API Version 2](docs/API_Version_2/README.md) (CURRENT VERSION)
 
 
 ## Chicago Public Schools Backend Documentation
 
-[Chicago Public Schools Backend Documentation](docs/chicago_public_schools/index.md) (CURRENT VERSION)
+[Chicago Public Schools Backend Documentation](docs/chicago_public_schools/README.md) (CURRENT VERSION)
 
 
 ## Writing and Running Tests README

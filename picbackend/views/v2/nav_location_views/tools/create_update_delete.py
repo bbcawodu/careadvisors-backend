@@ -1,8 +1,3 @@
-"""
-Defines utility functions and classes for navigator location views
-"""
-
-
 from picbackend.views.utils import clean_bool_value_from_dict_object
 from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object

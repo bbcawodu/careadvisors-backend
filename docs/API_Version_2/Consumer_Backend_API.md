@@ -26,7 +26,10 @@ The body of the request should be a JSON document using the following template:
     "plan": String,
     "preferred_language": String,
     "best_contact_time": String,
+    
     "navigator_id": Integer,
+    "cm_client_id_for_routing": Integer,
+    # NOTE: A consumer can either have a navigator that its assigned to, or a cm_client_for_routing that its assigned to. Not Both or None Exceptions will be given if you try to assign both or none of them.
     
     Address Keys(Every field within address can be given as an empty string. Address will only be recorded/updated iff a full address is given)
     "address_line_1": String,
@@ -172,6 +175,8 @@ In response, a JSON document will be displayed with the following format:
             - insurance_carrier
             - 'add_healthcare_networks_used'
             - 'remove_healthcare_locations_used'
+            - "cm_client_id_for_routing"
+            - "navigator_id"
             
         - Keys that can be empty strings:
             - "middle_name"
@@ -201,6 +206,8 @@ In response, a JSON document will be displayed with the following format:
             - insurance_carrier
             - add_healthcare_networks_used[index]['state_province']
             - remove_healthcare_locations_used[index]['state_province']
+            - "cm_client_id_for_routing"
+            - "navigator_id"
             
         - Keys that WILL NOT be read
             - "update_case_management_rows"
@@ -246,6 +253,8 @@ In response, a JSON document will be displayed with the following format:
             - insurance_carrier
             - add_healthcare_networks_used[index]['state_province']
             - remove_healthcare_locations_used[index]['state_province']
+            - "cm_client_id_for_routing"
+            - "navigator_id"
         
     - If there are no errors in the JSON Body document:
         - The response JSON document will have a dictionary object as the value for the "Data" key.
@@ -313,6 +322,7 @@ In response, a JSON document will be displayed with the following format:
                 "last_name": String,
                 "date_met_nav": String (Can be Null),
                 "navigator": String,
+                "cm_client_for_routing": String,
                 "consumer_notes": [
                     "These are",
                     "sample notes",

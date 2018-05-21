@@ -21,7 +21,6 @@ from .services.read import get_serialized_rows_by_last_name
 
 
 class PICConsumerBaseQuerySet(models.QuerySet):
-
     def delete(self, *args, **kwargs):
         for obj in self:
             if obj.cps_info:
@@ -53,7 +52,6 @@ class PICConsumerBase(models.Model):
     best_contact_time = models.CharField(max_length=1000, blank=True, null=True)
     navigator = models.ForeignKey(Navigators, on_delete=models.SET_NULL, blank=True, null=True)
     # navigators = models.ManyToManyField(Navigators, blank=True)
-    cm_client_for_routing = models.ForeignKey('CaseManagementClient', on_delete=models.SET_NULL, blank=True, null=True)
 
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, blank=True, null=True)
     household_size = models.IntegerField()
@@ -94,6 +92,205 @@ class PICConsumerBase(models.Model):
         # maps model to the picmodels module
         app_label = 'picmodels'
         abstract = True
+
+
+PICConsumerBase.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
+PICConsumerBase.get_serialized_rows_by_f_and_l_name = classmethod(get_serialized_rows_by_f_and_l_name)
+PICConsumerBase.get_serialized_rows_by_email = classmethod(get_serialized_rows_by_email)
+PICConsumerBase.get_serialized_rows_by_first_name = classmethod(get_serialized_rows_by_first_name)
+PICConsumerBase.get_serialized_rows_by_last_name = classmethod(get_serialized_rows_by_last_name)
+
+
+class PICConsumer(PICConsumerBase):
+    cm_client_for_routing = models.ForeignKey('CaseManagementClient', related_name='consumers_for_routing',
+                                              on_delete=models.SET_NULL, blank=True, null=True)
+    referring_cm_clients = models.ManyToManyField(
+        'CaseManagementClient',
+        related_name='referred_consumers_for_cm',
+        blank=True,
+    )
+
+    class Meta(PICConsumerBase.Meta):
+        unique_together = ()
+
+    def get_primary_guardian_qset(self):
+        primary_guardian_qset = None
+
+        cps_info_qset = self.primary_guardian.all()
+        if len(cps_info_qset):
+            for cps_info_instance in cps_info_qset:
+                primary_guardian_qset_for_this_cps_info = cps_info_instance.picconsumer_set.all()
+
+                if primary_guardian_qset is not None:
+                    primary_guardian_qset = primary_guardian_qset | primary_guardian_qset_for_this_cps_info
+                else:
+                    primary_guardian_qset = primary_guardian_qset_for_this_cps_info
+
+        return primary_guardian_qset
+
+    def get_secondary_guardian_qset(self):
+        secondary_guardian_qset = None
+
+        cps_info_qset = self.secondary_guardians.all()
+        if len(cps_info_qset):
+            for cps_info_instance in cps_info_qset:
+                secondary_guardian_qset_for_this_cps_info = cps_info_instance.picconsumer_set.all()
+
+                if secondary_guardian_qset is not None:
+                    secondary_guardian_qset = secondary_guardian_qset | secondary_guardian_qset_for_this_cps_info
+                else:
+                    secondary_guardian_qset = secondary_guardian_qset_for_this_cps_info
+
+        return secondary_guardian_qset
+
+    def return_values_dict(self):
+        valuesdict = {
+            "first_name": self.first_name,
+            "middle_name": self.middle_name,
+            "last_name": self.last_name,
+            "email": self.email,
+            "phone": self.phone,
+            "preferred_language": self.preferred_language,
+            "address": None,
+            "household_size": self.household_size,
+            "plan": self.plan,
+            "met_nav_at": self.met_nav_at,
+            "best_contact_time": self.best_contact_time,
+            "navigator": None,
+            "cm_client_for_routing": None,
+            "consumer_notes": None,
+            "date_met_nav": None,
+            "cps_info": None,
+            "primary_guardians": None,
+            "secondary_guardians": None,
+            "consumer_hospital_info": None,
+
+            "case_management_rows": None,
+
+            "consumer_need": self.consumer_need,
+            "billing_amount": self.billing_amount,
+            "service_expertise_need": None,
+            "insurance_carrier": None,
+            "healthcare_locations_used": None,
+
+            "id": self.id
+        }
+
+        if self.date_met_nav:
+            valuesdict["date_met_nav"] = self.date_met_nav.isoformat()
+
+        if self.consumernote_set:
+            navigator_note_objects = self.consumernote_set.all()
+            navigator_note_list = []
+
+            if len(navigator_note_objects):
+                for navigator_note in navigator_note_objects:
+                    navigator_note_list.append(navigator_note.navigator_notes)
+
+            valuesdict["consumer_notes"] = navigator_note_list
+
+        if self.casemanagementstatus_set:
+            case_objects = self.casemanagementstatus_set.all()
+            # .order_by() adds significant overhead unless field to be ordered by has been indexed in some way
+            # case_objects = self.casemanagementstatus_set.all().order_by("-date_modified")
+            # case_objects = self.casemanagementstatus_set.all().order_by("management_step")
+
+            case_list = []
+
+            if len(case_objects):
+                for case_note in case_objects:
+                    case_list.append(case_note.return_values_dict())
+
+            valuesdict["case_management_rows"] = case_list
+
+        if self.address:
+            valuesdict["address"] = {}
+            address_values = self.address.return_values_dict()
+            for key in address_values:
+                valuesdict["address"][key] = address_values[key]
+
+        if self.navigator:
+            valuesdict['navigator'] = "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name)
+
+        if self.cm_client_for_routing:
+            valuesdict['cm_client_for_routing'] = self.cm_client_for_routing.name
+
+        if self.cps_info:
+            valuesdict['cps_info'] = self.cps_info.return_values_dict()
+
+        if self.consumer_hospital_info:
+            valuesdict['consumer_hospital_info'] = self.consumer_hospital_info.return_values_dict()
+
+        if self.service_expertise_need:
+            valuesdict['service_expertise_need'] = self.service_expertise_need.return_values_dict()
+
+        if self.insurance_carrier:
+            valuesdict['insurance_carrier'] = self.insurance_carrier.return_values_dict()
+
+        if self.healthcare_locations_used:
+            healthcare_locations_used_objects = self.healthcare_locations_used.all()
+            healthcare_locations_used_list = []
+
+            if len(healthcare_locations_used_objects):
+                for healthcare_location_used in healthcare_locations_used_objects:
+                    healthcare_locations_used_list.append(healthcare_location_used.return_values_dict())
+
+            valuesdict["healthcare_locations_used"] = healthcare_locations_used_list
+
+        # if self.primary_guardian:
+        #     primary_guardian_info = []
+        #
+        #     primary_guardian_qset = self.get_primary_guardian_qset()
+        #     if primary_guardian_qset is not None:
+        #         if len(primary_guardian_qset):
+        #             for primary_guardian_instance in primary_guardian_qset:
+        #                 primary_guardian_info.append(primary_guardian_instance.id)
+        #
+        #     if primary_guardian_info:
+        #         valuesdict["primary_guardians"] = primary_guardian_info
+        #
+        # if self.secondary_guardians:
+        #     secondary_guardian_info = []
+        #
+        #     secondary_guardian_qset = self.get_secondary_guardian_qset()
+        #     if secondary_guardian_qset is not None:
+        #         if len(secondary_guardian_qset):
+        #             for secondary_guardian_instance in secondary_guardian_qset:
+        #                 secondary_guardian_info.append(secondary_guardian_instance.id)
+        #
+        #     if secondary_guardian_info:
+        #         valuesdict["secondary_guardians"] = secondary_guardian_info
+
+        return valuesdict
+
+    def delete(self, *args, **kwargs):
+        if self.cps_info:
+            self.cps_info.delete()
+        super(PICConsumerBase, self).delete(*args, **kwargs)
+
+    def __str__(self):
+        return "Name: {} {}, id: {}".format(self.first_name, self.last_name, self.id)
+
+    def check_consumer_need_choices(self,):
+        for consumer_need_tuple in self.CONSUMER_NEED_CHOICES:
+            if consumer_need_tuple[1].lower() == self.consumer_need.lower():
+                return True
+        return False
+
+
+PICConsumer.create_row_w_validated_params = classmethod(create_row_w_validated_params)
+PICConsumer.update_row_w_validated_params = classmethod(update_row_w_validated_params)
+PICConsumer.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
+
+
+class PICConsumerBackup(PICConsumerBase):
+    cm_client_for_routing = models.ForeignKey('CaseManagementClient', related_name='consumer_backups_for_routing',
+                                              on_delete=models.SET_NULL, blank=True, null=True)
+    referring_cm_clients = models.ManyToManyField(
+        'CaseManagementClient',
+        related_name='referred_consumer_backups_for_cm',
+        blank=True,
+    )
 
     def get_primary_guardian_qset(self):
         primary_guardian_qset = None
@@ -254,28 +451,6 @@ class PICConsumerBase(models.Model):
             if consumer_need_tuple[1].lower() == self.consumer_need.lower():
                 return True
         return False
-
-
-PICConsumerBase.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
-PICConsumerBase.get_serialized_rows_by_f_and_l_name = classmethod(get_serialized_rows_by_f_and_l_name)
-PICConsumerBase.get_serialized_rows_by_email = classmethod(get_serialized_rows_by_email)
-PICConsumerBase.get_serialized_rows_by_first_name = classmethod(get_serialized_rows_by_first_name)
-PICConsumerBase.get_serialized_rows_by_last_name = classmethod(get_serialized_rows_by_last_name)
-
-
-class PICConsumer(PICConsumerBase):
-
-    class Meta(PICConsumerBase.Meta):
-        unique_together = ()
-
-
-PICConsumer.create_row_w_validated_params = classmethod(create_row_w_validated_params)
-PICConsumer.update_row_w_validated_params = classmethod(update_row_w_validated_params)
-PICConsumer.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
-
-
-class PICConsumerBackup(PICConsumerBase):
-    pass
 
 
 class ConsumerNote(models.Model):

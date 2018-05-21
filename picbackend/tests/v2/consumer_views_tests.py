@@ -37,7 +37,8 @@ class ConsumerAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
                 "Month": 10,
                 "Year": 2018,
             },
-            "navigator_id": 1,
+            # "navigator_id": 1,
+            "cm_client_id_for_routing": 1,
             "db_action": "create"
         }
 
@@ -65,6 +66,66 @@ class ConsumerAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
         consumer_data = response_data["Data"]
 
         self.assertIn("row", consumer_data)
+        self.assertEqual(consumer_data['row']['cm_client_for_routing'], "Client One")
+
+    def test_update_consumer_view(self):
+        post_data = {
+            "first_name": "Johnsaeqetsdbnjkfjhgjhgjhgjhgsa",
+            "middle_name": "",
+            "last_name": "Consumerfasfsa",
+            "email": "",
+            "phone": "",
+            "met_nav_at": "Mariano's Bridgeport",
+            "household_size": 3,
+            "plan": "",
+            "preferred_language": "",
+            "consumer_notes": [
+            ],
+
+            "address_line_1": "",
+            "address_line_2": "",
+            "city": "",
+            "state_province": "",
+            "zipcode": "",
+
+            "date_met_nav": {
+                "Day": 31,
+                "Month": 10,
+                "Year": 2018,
+            },
+            "navigator_id": None,
+            "cm_client_id_for_routing": 1,
+
+            "id": 1,
+            "db_action": "update"
+        }
+
+        post_json = json.dumps(post_data)
+        response = self.client_object.put(self.base_url, post_json, content_type="application/json")
+        response_json = response.content.decode('utf-8')
+        response_data = json.loads(response_json)
+
+        # Test for valid decoded json data from response body
+        self.assertIsNotNone(response_data)
+
+        status_data = response_data["Status"]
+
+        # Test decoded JSON data for "Status" key
+        self.assertIsNotNone(status_data)
+        self.assertNotIn("Errors", status_data)
+        self.assertEqual(status_data["Error Code"], 0)
+        self.assertIn("Data", response_data)
+        self.assertNotEqual(len(response_data["Data"]), 0)
+
+        # Test decoded JSON data for correct API version
+        self.assertEqual(status_data["Version"], 2.0)
+
+        # Test decoded JSON data for non empty "Next Available Appointments" data
+        consumer_data = response_data["Data"]
+
+        self.assertIn("row", consumer_data)
+        self.assertEqual(consumer_data['row']['cm_client_for_routing'], "Client One")
+        self.assertEqual(consumer_data['row']['navigator'], None)
 
     def test_add_cps_consumer_view(self):
         post_data = {

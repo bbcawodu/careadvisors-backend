@@ -18,6 +18,7 @@ from picbackend.views.utils import clean_string_value_from_dict_object
 from picmodels.models import PICConsumer
 from picmodels.models import Navigators
 from picmodels.models import CaseManagementStatus
+from picmodels.models import CaseManagementClient
 
 
 def validate_put_rqst_params(rqst_body, rqst_errors):
@@ -202,15 +203,40 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
             date_met_nav = datetime.date(year, month, day)
     validated_params["date_met_nav"] = date_met_nav
 
-    navigator_id = clean_int_value_from_dict_object(rqst_body, "root", "navigator_id", rqst_errors)
     navigator_row = None
-    if navigator_id and not rqst_errors:
-        try:
-            navigator_row = Navigators.objects.get(id=navigator_id)
-        except Navigators.DoesNotExist:
-            rqst_errors.append('Staff database entry does not exist for the navigator id: {}'.format(navigator_id))
-    validated_params["navigator_id"] = navigator_id
-    validated_params["navigator_row"] = navigator_row
+    if "navigator_id" in rqst_body:
+        navigator_id = clean_int_value_from_dict_object(rqst_body, "root", "navigator_id", rqst_errors, none_allowed=True)
+        if navigator_id and not rqst_errors:
+            try:
+                navigator_row = Navigators.objects.get(id=navigator_id)
+            except Navigators.DoesNotExist:
+                rqst_errors.append('Staff database entry does not exist for the navigator id: {}'.format(navigator_id))
+        validated_params["navigator_id"] = navigator_id
+        validated_params["navigator_row"] = navigator_row
+
+    cm_client_row_for_routing = None
+    if "cm_client_id_for_routing" in rqst_body:
+        cm_client_id_for_routing = clean_int_value_from_dict_object(
+            rqst_body,
+            "root",
+            "cm_client_id_for_routing",
+            rqst_errors,
+            none_allowed=True
+        )
+        if cm_client_id_for_routing and not rqst_errors:
+            try:
+                cm_client_row_for_routing = CaseManagementClient.objects.get(id=cm_client_id_for_routing)
+            except CaseManagementClient.DoesNotExist:
+                rqst_errors.append(
+                    'Row does not exist in CaseManagementClient Table for the cm_client_id_for_routing: {}'.format(
+                        cm_client_id_for_routing
+                    )
+                )
+        validated_params["cm_client_id_for_routing"] = cm_client_id_for_routing
+        validated_params["cm_client_row_for_routing"] = cm_client_row_for_routing
+
+    if not ((navigator_row != None) ^ (cm_client_row_for_routing != None)):
+        rqst_errors.append("Valid navigator logical exclusive or case_management_client_for_roouting must be given for consumer assignment.")
 
     cps_info_dict = clean_dict_value_from_dict_object(rqst_body,
                                                            "root",
@@ -219,7 +245,7 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
                                                            no_key_allowed=True,
                                                            none_allowed=True)
     validated_cps_info_dict = None
-    if cps_info_dict:
+    if cps_info_dict and navigator_row:
         validated_cps_info_dict = validate_cps_info_params_for_add_instance_rqst(cps_info_dict, met_nav_at, household_size, navigator_row, rqst_errors)
     validated_params["cps_info_dict"] = cps_info_dict
     validated_params["validated_cps_info_dict"] = validated_cps_info_dict
@@ -439,7 +465,7 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
 
     navigator_row = None
     if "navigator_id" in rqst_body:
-        navigator_id = clean_int_value_from_dict_object(rqst_body, "root", "navigator_id", rqst_errors)
+        navigator_id = clean_int_value_from_dict_object(rqst_body, "root", "navigator_id", rqst_errors, none_allowed=True)
         if navigator_id and not rqst_errors:
             try:
                 navigator_row = Navigators.objects.get(id=navigator_id)
@@ -448,6 +474,30 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
 
         validated_params["navigator_id"] = navigator_id
         validated_params["navigator_row"] = navigator_row
+
+    cm_client_row_for_routing = None
+    if "cm_client_id_for_routing" in rqst_body:
+        cm_client_id_for_routing = clean_int_value_from_dict_object(
+            rqst_body,
+            "root",
+            "cm_client_id_for_routing",
+            rqst_errors,
+            none_allowed=True
+        )
+        if cm_client_id_for_routing and not rqst_errors:
+            try:
+                cm_client_row_for_routing = CaseManagementClient.objects.get(id=cm_client_id_for_routing)
+            except CaseManagementClient.DoesNotExist:
+                rqst_errors.append(
+                    'Row does not exist in CaseManagementClient Table for the cm_client_id_for_routing: {}'.format(
+                        cm_client_id_for_routing
+                    )
+                )
+        validated_params["cm_client_id_for_routing"] = cm_client_id_for_routing
+        validated_params["cm_client_row_for_routing"] = cm_client_row_for_routing
+
+    if navigator_row and cm_client_row_for_routing:
+        rqst_errors.append("Valid navigator and case_management_client_for_roouting can not be given at the same time for consumer assignment.")
 
     date_met_nav = None
     if "date_met_nav" in rqst_body:
