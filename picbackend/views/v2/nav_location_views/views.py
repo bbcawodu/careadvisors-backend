@@ -1,9 +1,3 @@
-"""
-Defines views that handle Patient Innovation Center navigator location based requests
-API Version 2
-"""
-
-
 from django.views.generic import View
 
 from picbackend.views.utils import JSONGETRspMixin

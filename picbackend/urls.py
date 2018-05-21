@@ -60,6 +60,9 @@ urlpatterns = [
     #API Version 2 URLS
     ###################
 
+    # urls for case management module views
+    url(r"^v2/case_management_clients/$", views.CMClientManagementView.as_view()),
+
     # urls for navigators views
     url(r"^v2/navigators/$", views.NavigatorManagementView.as_view()),
     url(r"^v2/navigator_sign_up/$", views.NavigatorSignUpView.as_view()),

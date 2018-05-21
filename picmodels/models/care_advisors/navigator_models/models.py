@@ -109,6 +109,12 @@ class Navigators(models.Model):
     navigator_organization = models.CharField(max_length=1000, blank=True, null=True)
     resume_file = models.FileField(upload_to=get_nav_resume_file_path, storage=PublicMediaStorage(), blank=True, null=True)
 
+    approved_clients_for_case_management = models.ManyToManyField(
+        'CaseManagementClient',
+        related_name='approved_navigators_for_case_management',
+        blank=True,
+    )
+
     def return_values_dict(self):
         valuesdict = {
             "first_name": self.first_name,
@@ -122,6 +128,7 @@ class Navigators(models.Model):
             "region": None,
             "picture": None,
             "base_locations": [],
+            "approved_clients_for_case_management": [],
             "consumers": [],
 
             "healthcare_locations_worked": None,
@@ -156,6 +163,13 @@ class Navigators(models.Model):
             for base_location in base_locations:
                 base_location_values.append(base_location.return_values_dict())
             valuesdict["base_locations"] = base_location_values
+
+        approved_clients_for_case_management = self.approved_clients_for_case_management.all()
+        if len(approved_clients_for_case_management):
+            cm_client_values = []
+            for cm_client in approved_clients_for_case_management:
+                cm_client_values.append(cm_client.return_values_dict())
+            valuesdict["approved_clients_for_case_management"] = cm_client_values
 
         credentials_queryset = self.credentialsmodel_set.all()
         if len(credentials_queryset):

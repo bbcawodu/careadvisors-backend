@@ -4,6 +4,7 @@
 ## Running Tests
 
 ### Running Tests with output to the shell
+pytest
 python manage.py test
 
 ### Running Tests with output to text files

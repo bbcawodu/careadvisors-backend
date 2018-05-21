@@ -165,6 +165,7 @@ def prefetch_related_rows(db_queryset):
         'address',
         'address__country',
         'navigator',
+        'cm_client_for_routing',
         # 'primary_guardian',
         'cps_info',
         'cps_info__cps_location',

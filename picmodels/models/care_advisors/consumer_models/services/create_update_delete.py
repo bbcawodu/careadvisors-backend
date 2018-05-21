@@ -35,9 +35,9 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
                 city=validated_params['city'],
                 state_province=validated_params['state_province'],
                 zipcode=validated_params['zipcode'],
-                country=picmodels.models.Country.objects.all()[0])
+                country=picmodels.models.Country.objects.all()[0]
+            )
 
-        navigator_row = validated_params['navigator_row']
         consumer_instance = cls(
             first_name=validated_params['first_name'],
             middle_name=validated_params['middle_name'],
@@ -52,7 +52,10 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
             met_nav_at=validated_params['met_nav_at'],
             household_size=validated_params['household_size'],
         )
-        consumer_instance.navigator = navigator_row
+        if "navigator_row" in validated_params:
+            consumer_instance.navigator = validated_params['navigator_row']
+        if "cm_client_row_for_routing" in validated_params:
+            consumer_instance.cm_client_for_routing = validated_params['cm_client_row_for_routing']
 
         consumer_instance.save()
 
@@ -173,8 +176,6 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
             consumer_instance.email = validated_params['email']
         if "date_met_nav" in validated_params:
             consumer_instance.date_met_nav = validated_params['date_met_nav']
-        if "navigator_row" in validated_params:
-            consumer_instance.navigator = validated_params['navigator_row']
         if "cps_info_dict" in validated_params:
             if validated_params['cps_info_dict']:
                 modify_consumer_cps_info(consumer_instance, validated_params['validated_cps_info_dict'], rqst_errors)
@@ -182,6 +183,16 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
                 if consumer_instance.cps_info:
                     consumer_instance.cps_info.delete()
         update_indiv_seeking_nav_columns_for_row(consumer_instance, validated_params, rqst_errors)
+
+        if "navigator_row" in validated_params:
+            consumer_instance.navigator = validated_params['navigator_row']
+        navigator_row = consumer_instance.navigator
+        if "cm_client_row_for_routing" in validated_params:
+            consumer_instance.cm_client_for_routing = validated_params['cm_client_row_for_routing']
+        cm_client_row_for_routing = consumer_instance.cm_client_for_routing
+        if not ((navigator_row != None) ^ (cm_client_row_for_routing != None)):
+            rqst_errors.append(
+                "Valid navigator logical exclusive or case_management_client_for_roouting must be given for consumer assignment.")
 
         if not rqst_errors:
             address_instance = consumer_instance.address

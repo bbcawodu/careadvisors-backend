@@ -41,6 +41,24 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
                     for base_location_row in base_location_rows:
                         row.base_locations.add(base_location_row)
 
+        if 'add_approved_clients_for_case_management' in validated_params:
+            approved_clients_for_case_management_ids = validated_params['add_approved_clients_for_case_management']
+            approved_clients_for_case_management_rows = []
+            for case_management_client_id in approved_clients_for_case_management_ids:
+                approved_clients_for_case_management_rows.append(
+                    get_case_management_client_row_with_given_id(case_management_client_id, rqst_errors)
+                )
+            if not rqst_errors:
+                check_approved_clients_for_case_management_for_given_rows(
+                    row.approved_clients_for_case_management.all(),
+                    approved_clients_for_case_management_rows,
+                    row,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for case_management_client_row in approved_clients_for_case_management_rows:
+                        row.approved_clients_for_case_management.add(case_management_client_row)
+
         update_nav_signup_columns_for_row(row, validated_params, rqst_errors)
         if rqst_errors:
             row.delete()
@@ -55,27 +73,6 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
 
     try:
         row = cls.objects.get(id=rqst_id)
-
-        if 'first_name' in validated_params:
-            row.first_name = validated_params['first_name']
-
-        if 'last_name' in validated_params:
-            row.last_name = validated_params['last_name']
-
-        if 'type' in validated_params:
-            row.type = validated_params['type']
-
-        if 'county' in validated_params:
-            row.county = validated_params['county']
-
-        if 'email' in validated_params:
-            email = validated_params['email']
-            row.email = email
-        else:
-            email = row.email
-
-        if 'mpn' in validated_params:
-            row.mpn = validated_params['mpn']
 
         if 'add_base_locations' in validated_params:
             base_location_names = validated_params['add_base_locations']
@@ -112,10 +109,68 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
                     for base_location_row in base_location_rows:
                         row.base_locations.remove(base_location_row)
 
+        if 'add_approved_clients_for_case_management' in validated_params:
+            approved_clients_for_case_management_ids = validated_params['add_approved_clients_for_case_management']
+            approved_clients_for_case_management_rows = []
+            for case_management_client_id in approved_clients_for_case_management_ids:
+                approved_clients_for_case_management_rows.append(
+                    get_case_management_client_row_with_given_id(case_management_client_id, rqst_errors)
+                )
+            if not rqst_errors:
+                check_approved_clients_for_case_management_for_given_rows(
+                    row.approved_clients_for_case_management.all(),
+                    approved_clients_for_case_management_rows,
+                    row,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for case_management_client_row in approved_clients_for_case_management_rows:
+                        row.approved_clients_for_case_management.add(case_management_client_row)
+        elif 'remove_approved_clients_for_case_management' in validated_params:
+            approved_clients_for_case_management_ids = validated_params['remove_approved_clients_for_case_management']
+            approved_clients_for_case_management_rows = []
+            for case_management_client_id in approved_clients_for_case_management_ids:
+                approved_clients_for_case_management_rows.append(
+                    get_case_management_client_row_with_given_id(case_management_client_id, rqst_errors)
+                )
+            if not rqst_errors:
+                check_approved_clients_for_case_management_for_not_given_rows(
+                    row.approved_clients_for_case_management.all(),
+                    approved_clients_for_case_management_rows,
+                    row,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for case_management_client_row in approved_clients_for_case_management_rows:
+                        row.approved_clients_for_case_management.remove(case_management_client_row)
+
         if not rqst_errors:
             update_nav_signup_columns_for_row(row, validated_params, rqst_errors)
 
-        row.save()
+        if not rqst_errors:
+            if 'first_name' in validated_params:
+                row.first_name = validated_params['first_name']
+
+            if 'last_name' in validated_params:
+                row.last_name = validated_params['last_name']
+
+            if 'type' in validated_params:
+                row.type = validated_params['type']
+
+            if 'county' in validated_params:
+                row.county = validated_params['county']
+
+            if 'email' in validated_params:
+                email = validated_params['email']
+                row.email = email
+            else:
+                email = row.email
+
+            if 'mpn' in validated_params:
+                row.mpn = validated_params['mpn']
+
+            row.save()
+
     except cls.DoesNotExist:
         rqst_errors.append('Navigator database row does not exist for the id: {!s}'.format(str(rqst_id)))
         row = None
@@ -124,6 +179,9 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         row = None
     except IntegrityError:
         rqst_errors.append('Database row already exists for the email: {!s}'.format(email))
+        row = None
+
+    if rqst_errors:
         row = None
 
     return row
@@ -574,6 +632,19 @@ def get_provider_location_row_with_given_name_and_state(location_dict, rqst_erro
     return row
 
 
+def get_case_management_client_row_with_given_id(client_id, rqst_errors):
+    row = None
+
+    if client_id:
+        try:
+            row = picmodels.models.CaseManagementClient.objects.get(id=client_id)
+        except picmodels.models.CaseManagementClient.DoesNotExist:
+            row = None
+            rqst_errors.append("No CaseManagementClient row found with id: {}".format(client_id))
+
+    return row
+
+
 def check_healthcare_locations_worked_for_given_rows(cur_locations_used_qset, given_locations_used_list, consumer_row, rqst_errors):
     for location_used in given_locations_used_list:
         if location_used in cur_locations_used_qset:
@@ -661,6 +732,28 @@ def check_base_locations_for_not_given_rows(cur_base_locations_qset, given_nav_m
             rqst_errors.append(
                 "nav_metrics_location with the name: {} does not exists in row id {}'s base_locations list (Hint - remove from parameter 'remove_base_locations' list)".format(
                     nav_metrics_location.name,
+                    row.id,
+                )
+            )
+
+
+def check_approved_clients_for_case_management_for_given_rows(cur_approved_clients_qset, given_cm_clients_list, row, rqst_errors):
+    for cm_client in given_cm_clients_list:
+        if cm_client in cur_approved_clients_qset:
+            rqst_errors.append(
+                "cm_client with id: {} already exists in row id {}'s approved_clients_for_case_management list (Hint - remove from parameter 'add_approved_clients_for_case_management' list)".format(
+                    cm_client.id,
+                    row.id,
+                )
+            )
+
+
+def check_approved_clients_for_case_management_for_not_given_rows(cur_approved_clients_qset, given_cm_clients_list, row, rqst_errors):
+    for cm_client in given_cm_clients_list:
+        if cm_client not in cur_approved_clients_qset:
+            rqst_errors.append(
+                "cm_client with id: {} does not exists in row id {}'s approved_clients_for_case_management list (Hint - remove from parameter 'remove_approved_clients_for_case_management' list)".format(
+                    cm_client.id,
                     row.id,
                 )
             )
