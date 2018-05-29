@@ -52,6 +52,13 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
             met_nav_at=validated_params['met_nav_at'],
             household_size=validated_params['household_size'],
         )
+        if 'gender' in validated_params:
+            consumer_instance.gender = validated_params['gender']
+            if not consumer_instance.check_gender_choices():
+                rqst_errors.append(
+                    "gender: {!s} is not a valid choice".format(consumer_instance.gender)
+                )
+
         if "navigator_row" in validated_params:
             consumer_instance.navigator = validated_params['navigator_row']
         if "cm_client_row_for_routing" in validated_params:
@@ -74,6 +81,24 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
                 validated_create_c_m_params,
                 rqst_errors
             )
+
+        if 'add_referring_cm_clients' in validated_params:
+            referring_cm_clients_ids = validated_params['add_referring_cm_clients']
+            referring_cm_clients_rows = []
+            for referring_cm_client_id in referring_cm_clients_ids:
+                referring_cm_clients_rows.append(
+                    get_case_management_client_row_with_given_id(referring_cm_client_id, rqst_errors)
+                )
+            if not rqst_errors:
+                check_referring_cm_clients_for_given_rows(
+                    consumer_instance.referring_cm_clients.all(),
+                    referring_cm_clients_rows,
+                    consumer_instance,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for case_management_client_row in referring_cm_clients_rows:
+                        consumer_instance.referring_cm_clients.add(case_management_client_row)
 
         update_indiv_seeking_nav_columns_for_row(consumer_instance, validated_params, rqst_errors)
         if rqst_errors:
@@ -154,47 +179,90 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
             'Database entry already exists for the id: {!s}'.format(str(validated_params['id'])))
     else:
         modify_consumers_address()
-        if "first_name" in validated_params:
-            consumer_instance.first_name = validated_params['first_name']
-        if "middle_name" in validated_params:
-            consumer_instance.middle_name = validated_params['middle_name']
-        if "last_name" in validated_params:
-            consumer_instance.last_name = validated_params['last_name']
-        if "phone" in validated_params:
-            consumer_instance.phone = validated_params['phone']
-        if "plan" in validated_params:
-            consumer_instance.plan = validated_params['plan']
-        if "met_nav_at" in validated_params:
-            consumer_instance.met_nav_at = validated_params['met_nav_at']
-        if "household_size" in validated_params:
-            consumer_instance.household_size = validated_params['household_size']
-        if "preferred_lang" in validated_params:
-            consumer_instance.preferred_language = validated_params['preferred_lang']
-        if "best_contact_time" in validated_params:
-            consumer_instance.best_contact_time = validated_params['best_contact_time']
-        if "email" in validated_params:
-            consumer_instance.email = validated_params['email']
-        if "date_met_nav" in validated_params:
-            consumer_instance.date_met_nav = validated_params['date_met_nav']
-        if "cps_info_dict" in validated_params:
-            if validated_params['cps_info_dict']:
-                modify_consumer_cps_info(consumer_instance, validated_params['validated_cps_info_dict'], rqst_errors)
-            else:
-                if consumer_instance.cps_info:
-                    consumer_instance.cps_info.delete()
-        update_indiv_seeking_nav_columns_for_row(consumer_instance, validated_params, rqst_errors)
 
-        if "navigator_row" in validated_params:
-            consumer_instance.navigator = validated_params['navigator_row']
-        navigator_row = consumer_instance.navigator
-        if "cm_client_row_for_routing" in validated_params:
-            consumer_instance.cm_client_for_routing = validated_params['cm_client_row_for_routing']
-        cm_client_row_for_routing = consumer_instance.cm_client_for_routing
-        if not ((navigator_row != None) ^ (cm_client_row_for_routing != None)):
-            rqst_errors.append(
-                "Valid navigator logical exclusive or case_management_client_for_roouting must be given for consumer assignment.")
+        if 'add_referring_cm_clients' in validated_params:
+            referring_cm_clients_ids = validated_params['add_referring_cm_clients']
+            referring_cm_clients_rows = []
+            for referring_cm_client_id in referring_cm_clients_ids:
+                referring_cm_clients_rows.append(
+                    get_case_management_client_row_with_given_id(referring_cm_client_id, rqst_errors)
+                )
+            if not rqst_errors:
+                check_referring_cm_clients_for_given_rows(
+                    consumer_instance.referring_cm_clients.all(),
+                    referring_cm_clients_rows,
+                    consumer_instance,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for case_management_client_row in referring_cm_clients_rows:
+                        consumer_instance.referring_cm_clients.add(case_management_client_row)
+        elif 'remove_referring_cm_clients' in validated_params:
+            referring_cm_clients_ids = validated_params['remove_referring_cm_clients']
+            referring_cm_clients_rows = []
+            for referring_cm_client_id in referring_cm_clients_ids:
+                referring_cm_clients_rows.append(
+                    get_case_management_client_row_with_given_id(referring_cm_client_id, rqst_errors)
+                )
+            if not rqst_errors:
+                check_referring_cm_clients_for_not_given_rows(
+                    consumer_instance.referring_cm_clients.all(),
+                    referring_cm_clients_rows,
+                    consumer_instance,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for case_management_client_row in referring_cm_clients_rows:
+                        consumer_instance.referring_cm_clients.remove(case_management_client_row)
 
         if not rqst_errors:
+            if "first_name" in validated_params:
+                consumer_instance.first_name = validated_params['first_name']
+            if "middle_name" in validated_params:
+                consumer_instance.middle_name = validated_params['middle_name']
+            if "last_name" in validated_params:
+                consumer_instance.last_name = validated_params['last_name']
+            if 'gender' in validated_params:
+                consumer_instance.gender = validated_params['gender']
+                if not consumer_instance.check_gender_choices():
+                    rqst_errors.append(
+                        "gender: {!s} is not a valid choice".format(consumer_instance.gender)
+                    )
+            if "phone" in validated_params:
+                consumer_instance.phone = validated_params['phone']
+            if "plan" in validated_params:
+                consumer_instance.plan = validated_params['plan']
+            if "met_nav_at" in validated_params:
+                consumer_instance.met_nav_at = validated_params['met_nav_at']
+            if "household_size" in validated_params:
+                consumer_instance.household_size = validated_params['household_size']
+            if "preferred_lang" in validated_params:
+                consumer_instance.preferred_language = validated_params['preferred_lang']
+            if "best_contact_time" in validated_params:
+                consumer_instance.best_contact_time = validated_params['best_contact_time']
+            if "email" in validated_params:
+                consumer_instance.email = validated_params['email']
+            if "date_met_nav" in validated_params:
+                consumer_instance.date_met_nav = validated_params['date_met_nav']
+            if "cps_info_dict" in validated_params:
+                if validated_params['cps_info_dict']:
+                    modify_consumer_cps_info(consumer_instance, validated_params['validated_cps_info_dict'], rqst_errors)
+                else:
+                    if consumer_instance.cps_info:
+                        consumer_instance.cps_info.delete()
+
+            if "navigator_row" in validated_params:
+                consumer_instance.navigator = validated_params['navigator_row']
+            navigator_row = consumer_instance.navigator
+            if "cm_client_row_for_routing" in validated_params:
+                consumer_instance.cm_client_for_routing = validated_params['cm_client_row_for_routing']
+            cm_client_row_for_routing = consumer_instance.cm_client_for_routing
+            if not ((navigator_row != None) ^ (cm_client_row_for_routing != None)):
+                rqst_errors.append(
+                    "Valid navigator logical exclusive or case_management_client_for_roouting must be given for consumer assignment.")
+
+        if not rqst_errors:
+            update_indiv_seeking_nav_columns_for_row(consumer_instance, validated_params, rqst_errors)
             address_instance = consumer_instance.address
             if address_instance:
                 address_instance.save()
@@ -680,6 +748,19 @@ def get_provider_location_row_with_given_name_and_state(location_dict, rqst_erro
     return row
 
 
+def get_case_management_client_row_with_given_id(client_id, rqst_errors):
+    row = None
+
+    if client_id:
+        try:
+            row = picmodels.models.CaseManagementClient.objects.get(id=client_id)
+        except picmodels.models.CaseManagementClient.DoesNotExist:
+            row = None
+            rqst_errors.append("No CaseManagementClient row found with id: {}".format(client_id))
+
+    return row
+
+
 def check_healthcare_locations_used_for_given_rows(cur_locations_used_qset, given_locations_used_list, row, rqst_errors):
     for location_used in given_locations_used_list:
         if location_used in cur_locations_used_qset:
@@ -699,6 +780,28 @@ def check_healthcare_locations_used_for_not_given_rows(cur_locations_used_qset, 
                 "Healthcare location with the name: {} and state: {} does not exist in row id {}'s healthcare_locations_used list (Hint - remove from parameter 'add_healthcare_locations_used' list)".format(
                     location_used.name,
                     location_used.state_province,
+                    row.id,
+                )
+            )
+
+
+def check_referring_cm_clients_for_given_rows(cur_referring_cm_clients_qset, given_cm_clients_list, row, rqst_errors):
+    for cm_client in given_cm_clients_list:
+        if cm_client in cur_referring_cm_clients_qset:
+            rqst_errors.append(
+                "cm_client with id: {} already exists in row id {}'s referring_cm_clients list (Hint - remove from parameter 'add_referring_cm_clients' list)".format(
+                    cm_client.id,
+                    row.id,
+                )
+            )
+
+
+def check_referring_cm_clients_for_not_given_rows(cur_referring_cm_clients_qset, given_cm_clients_list, row, rqst_errors):
+    for cm_client in given_cm_clients_list:
+        if cm_client not in cur_referring_cm_clients_qset:
+            rqst_errors.append(
+                "cm_client with id: {} does not exists in row id {}'s referring_cm_clients list (Hint - remove from parameter 'remove_referring_cm_clients' list)".format(
+                    cm_client.id,
                     row.id,
                 )
             )

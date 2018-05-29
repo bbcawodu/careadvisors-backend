@@ -40,6 +40,16 @@ class PICConsumerBase(models.Model):
         (N_A, "Not Available")
     )
 
+    MALE = "Male"
+    FEMALE = "Female"
+    TRANSGENDER = "Traansgender"
+    GENDER_CHOICES = (
+        (MALE, "Male"),
+        (FEMALE, "Female"),
+        (TRANSGENDER, "Traansgender"),
+        (N_A, "Not Available")
+    )
+
     objects = PICConsumerBaseQuerySet.as_manager()
 
     # fields for PICConsumer model
@@ -50,6 +60,7 @@ class PICConsumerBase(models.Model):
     phone = models.CharField(max_length=1000, blank=True, null=True)
     preferred_language = models.CharField(max_length=1000, blank=True, null=True)
     best_contact_time = models.CharField(max_length=1000, blank=True, null=True)
+    gender = models.CharField(blank=True, null=True, max_length=1000, choices=GENDER_CHOICES, default=N_A)
     navigator = models.ForeignKey(Navigators, on_delete=models.SET_NULL, blank=True, null=True)
     # navigators = models.ManyToManyField(Navigators, blank=True)
 
@@ -87,6 +98,26 @@ class PICConsumerBase(models.Model):
         'ProviderLocation',
         blank=True,
     )
+
+    def delete(self, *args, **kwargs):
+        if self.cps_info:
+            self.cps_info.delete()
+        super(PICConsumerBase, self).delete(*args, **kwargs)
+
+    def __str__(self):
+        return "Name: {} {}, id: {}".format(self.first_name, self.last_name, self.id)
+
+    def check_consumer_need_choices(self,):
+        for consumer_need_tuple in self.CONSUMER_NEED_CHOICES:
+            if consumer_need_tuple[1].lower() == self.consumer_need.lower():
+                return True
+        return False
+
+    def check_gender_choices(self,):
+        for gender_tuple in self.GENDER_CHOICES:
+            if gender_tuple[1].lower() == self.gender.lower():
+                return True
+        return False
 
     class Meta:
         # maps model to the picmodels module
@@ -151,6 +182,7 @@ class PICConsumer(PICConsumerBase):
             "email": self.email,
             "phone": self.phone,
             "preferred_language": self.preferred_language,
+            "gender": self.gender,
             "address": None,
             "household_size": self.household_size,
             "plan": self.plan,
@@ -158,6 +190,7 @@ class PICConsumer(PICConsumerBase):
             "best_contact_time": self.best_contact_time,
             "navigator": None,
             "cm_client_for_routing": None,
+            "referring_cm_clients": None,
             "consumer_notes": None,
             "date_met_nav": None,
             "cps_info": None,
@@ -215,6 +248,13 @@ class PICConsumer(PICConsumerBase):
         if self.cm_client_for_routing:
             valuesdict['cm_client_for_routing'] = self.cm_client_for_routing.name
 
+        referring_cm_clients = self.referring_cm_clients.all()
+        if len(referring_cm_clients):
+            cm_client_values = []
+            for cm_client in referring_cm_clients:
+                cm_client_values.append(cm_client.return_values_dict())
+            valuesdict["referring_cm_clients"] = cm_client_values
+
         if self.cps_info:
             valuesdict['cps_info'] = self.cps_info.return_values_dict()
 
@@ -262,20 +302,6 @@ class PICConsumer(PICConsumerBase):
         #         valuesdict["secondary_guardians"] = secondary_guardian_info
 
         return valuesdict
-
-    def delete(self, *args, **kwargs):
-        if self.cps_info:
-            self.cps_info.delete()
-        super(PICConsumerBase, self).delete(*args, **kwargs)
-
-    def __str__(self):
-        return "Name: {} {}, id: {}".format(self.first_name, self.last_name, self.id)
-
-    def check_consumer_need_choices(self,):
-        for consumer_need_tuple in self.CONSUMER_NEED_CHOICES:
-            if consumer_need_tuple[1].lower() == self.consumer_need.lower():
-                return True
-        return False
 
 
 PICConsumer.create_row_w_validated_params = classmethod(create_row_w_validated_params)
@@ -330,6 +356,7 @@ class PICConsumerBackup(PICConsumerBase):
             "email": self.email,
             "phone": self.phone,
             "preferred_language": self.preferred_language,
+            "gender": self.gender,
             "address": None,
             "household_size": self.household_size,
             "plan": self.plan,
@@ -437,20 +464,6 @@ class PICConsumerBackup(PICConsumerBase):
         #         valuesdict["secondary_guardians"] = secondary_guardian_info
 
         return valuesdict
-
-    def delete(self, *args, **kwargs):
-        if self.cps_info:
-            self.cps_info.delete()
-        super(PICConsumerBase, self).delete(*args, **kwargs)
-
-    def __str__(self):
-        return "Name: {} {}, id: {}".format(self.first_name, self.last_name, self.id)
-
-    def check_consumer_need_choices(self,):
-        for consumer_need_tuple in self.CONSUMER_NEED_CHOICES:
-            if consumer_need_tuple[1].lower() == self.consumer_need.lower():
-                return True
-        return False
 
 
 class ConsumerNote(models.Model):

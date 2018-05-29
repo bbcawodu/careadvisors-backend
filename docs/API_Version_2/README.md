@@ -10,6 +10,11 @@ This file is documentation for the backend API library for Patient Innovation Ce
 [Backend Server Request Instructions README](making_requests_to_backend.md)
 
 
+### Case Management Module Endpoints API
+
+[Case Management Module Endpoints API README](case_management_API/README.md)
+
+
 ### Dashboard Endpoints API
 
 [Dashboard Endpoints API README](dashboard_API.md)

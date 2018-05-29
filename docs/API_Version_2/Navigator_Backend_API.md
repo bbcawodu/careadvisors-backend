@@ -49,6 +49,15 @@ The body of the request should be a JSON document using the following template:
         ...
     ],
     
+    'add_approved_clients_for_case_management': [
+        Integer,
+        ...
+    ],
+    'remove_approved_clients_for_case_management': [
+        Integer,
+        ...
+    ],
+    
     'add_insurance_carrier_specialties': [
         {
             'name': String,
@@ -188,6 +197,8 @@ In response, a JSON document will be displayed with the following format:
             - 'remove_healthcare_service_expertises'
             - 'add_insurance_carrier_specialties'
             - 'remove_insurance_carrier_specialties'
+            - 'add_approved_clients_for_case_management'
+            - 'remove_approved_clients_for_case_management'
             - create_resume_row
             - create_resume_row["profile_description"]
             - create_resume_row["create_education_rows"]
@@ -245,6 +256,7 @@ In response, a JSON document will be displayed with the following format:
             - 'add_healthcare_locations_worked'
             - 'add_healthcare_service_expertises'
             - 'add_insurance_carrier_specialties'
+            - 'add_approved_clients_for_case_management'
             - create_resume_row["profile_description"]
             - create_resume_row["create_education_rows"]
             - create_resume_row["create_job_rows"]
@@ -334,6 +346,7 @@ In response, a JSON document will be displayed with the following format:
          
          - Keys that can be empty arrays
             - "add_base_locations"
+            - 'add_approved_clients_for_case_management'
         
         - Keys that can be Null
             - "mpn"

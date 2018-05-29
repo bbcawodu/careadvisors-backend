@@ -47,7 +47,7 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         if 'name' in validated_params:
             row.name = validated_params['name']
 
-            modify_row_address(row, validated_params)
+        modify_row_address(row, validated_params)
 
         try:
             if not cls.check_for_rows_with_given_name_and_address(row.name, row.address, rqst_errors, rqst_id):
@@ -55,13 +55,16 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
             else:
                 row = None
         except IntegrityError:
-            address_instance = row.address
+            params_copy = copy.deepcopy(validated_params)
+            del (params_copy['name'])
+            del (params_copy['rqst_action'])
+            validated_address_params = params_copy
 
             row = None
             rqst_errors.append(
                 'Row already exists for the name: {} and address: {}'.format(
                     validated_params['name'],
-                    address_instance.return_values_dict()
+                    validated_address_params
                 )
             )
 
