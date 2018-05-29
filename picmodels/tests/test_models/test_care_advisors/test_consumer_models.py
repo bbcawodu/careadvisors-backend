@@ -6,6 +6,7 @@ from picmodels.tests.test_models.base import DBModelsBaseTestCase
 
 from picmodels.models import PICConsumer
 from picmodels.models import Navigators
+from picmodels.models import CaseManagementClient
 
 
 class PICConsumerTestCase(DBModelsBaseTestCase, TestCase):
@@ -35,7 +36,9 @@ class PICConsumerTestCase(DBModelsBaseTestCase, TestCase):
 
             "date_met_nav": datetime.date(2018, 5, 3),
 
-            "navigator_row": Navigators.objects.get(id=1),
+            # "navigator_row": Navigators.objects.get(id=1),
+            "cm_client_row_for_routing": CaseManagementClient.objects.get(id=1),
+            'add_referring_cm_clients': [1],
 
             "validated_cps_info_dict": None,
             "validated_hospital_info_dict": None,
@@ -95,7 +98,10 @@ class PICConsumerTestCase(DBModelsBaseTestCase, TestCase):
 
             "date_met_nav": datetime.date(2018, 5, 3),
 
-            "navigator_row": Navigators.objects.get(id=1),
+            # "navigator_row": Navigators.objects.get(id=1),
+            "navigator_row": None,
+            "cm_client_row_for_routing": CaseManagementClient.objects.get(id=1),
+            'add_referring_cm_clients': [1],
 
             'billing_amount': 1000.0,
             'consumer_need': 'choose a doctor',

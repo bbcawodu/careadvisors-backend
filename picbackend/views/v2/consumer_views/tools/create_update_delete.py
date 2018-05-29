@@ -76,6 +76,17 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
     last_name = clean_string_value_from_dict_object(rqst_body, "root", "last_name", rqst_errors)
     validated_params["last_name"] = last_name
 
+    if 'gender' in rqst_body:
+        validated_params['gender'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            'gender',
+            rqst_errors,
+            empty_string_allowed=True
+        )
+        if validated_params['gender'] == '':
+            validated_params['gender'] = 'not available'
+
     plan = clean_string_value_from_dict_object(
         rqst_body,
         "root",
@@ -88,7 +99,7 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
     met_nav_at = clean_string_value_from_dict_object(rqst_body, "root", "met_nav_at", rqst_errors)
     validated_params["met_nav_at"] = met_nav_at
 
-    household_size = clean_int_value_from_dict_object(rqst_body, "root", "household_size", rqst_errors)
+    household_size = clean_int_value_from_dict_object(rqst_body, "root", "household_size", rqst_errors, none_allowed=True)
     validated_params["household_size"] = household_size
 
     phone = clean_string_value_from_dict_object(
@@ -238,6 +249,25 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
     if not ((navigator_row != None) ^ (cm_client_row_for_routing != None)):
         rqst_errors.append("Valid navigator logical exclusive or case_management_client_for_roouting must be given for consumer assignment.")
 
+    if 'add_referring_cm_clients' in rqst_body:
+        add_referring_cm_clients = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "add_referring_cm_clients",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_referring_cm_clients = []
+        for referring_cm_client in add_referring_cm_clients:
+            if not isinstance(referring_cm_client, int):
+                rqst_errors.append('Error: A referring_cm_client in \'add_referring_cm_clients\' is not an integer.')
+                continue
+
+            validated_referring_cm_clients.append(referring_cm_client)
+
+        validated_params['add_referring_cm_clients'] = validated_referring_cm_clients
+
     cps_info_dict = clean_dict_value_from_dict_object(rqst_body,
                                                            "root",
                                                            "cps_info",
@@ -340,6 +370,17 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
 
         validated_params["last_name"] = last_name
 
+    if 'gender' in rqst_body:
+        validated_params['gender'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            'gender',
+            rqst_errors,
+            empty_string_allowed=True
+        )
+        if validated_params['gender'] == '':
+            validated_params['gender'] = 'not available'
+
     if "plan" in rqst_body:
         plan = clean_string_value_from_dict_object(
             rqst_body,
@@ -359,7 +400,7 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
 
     household_size = None
     if "household_size" in rqst_body:
-        household_size = clean_int_value_from_dict_object(rqst_body, "root", "household_size", rqst_errors)
+        household_size = clean_int_value_from_dict_object(rqst_body, "root", "household_size", rqst_errors, none_allowed=True)
 
         validated_params["household_size"] = household_size
 
@@ -498,6 +539,41 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
 
     if navigator_row and cm_client_row_for_routing:
         rqst_errors.append("Valid navigator and case_management_client_for_roouting can not be given at the same time for consumer assignment.")
+
+    if 'add_referring_cm_clients' in rqst_body:
+        add_referring_cm_clients = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "add_referring_cm_clients",
+            rqst_errors
+        )
+
+        validated_referring_cm_clients = []
+        for referring_cm_client in add_referring_cm_clients:
+            if not isinstance(referring_cm_client, int):
+                rqst_errors.append('Error: A referring_cm_client in \'add_referring_cm_clients\' is not an integer.')
+                continue
+
+            validated_referring_cm_clients.append(referring_cm_client)
+
+        validated_params['add_referring_cm_clients'] = validated_referring_cm_clients
+    elif 'remove_referring_cm_clients' in rqst_body:
+        remove_referring_cm_clients = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "remove_referring_cm_clients",
+            rqst_errors
+        )
+
+        validated_referring_cm_clients = []
+        for referring_cm_client in remove_referring_cm_clients:
+            if not isinstance(referring_cm_client, int):
+                rqst_errors.append('Error: A referring_cm_client in \'remove_referring_cm_clients\' is not an integer.')
+                continue
+
+            validated_referring_cm_clients.append(referring_cm_client)
+
+        validated_params['remove_referring_cm_clients'] = validated_referring_cm_clients
 
     date_met_nav = None
     if "date_met_nav" in rqst_body:
