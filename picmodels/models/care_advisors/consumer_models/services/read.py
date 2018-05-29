@@ -184,7 +184,8 @@ def prefetch_related_rows(db_queryset):
         # 'secondary_guardians__picconsumer_set',
         'cps_info__secondary_dependents',
         "casemanagementstatus_set",
-        'healthcare_locations_used'
+        'healthcare_locations_used',
+        'referring_cm_clients'
     )
 
     return db_queryset

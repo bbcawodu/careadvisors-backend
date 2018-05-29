@@ -17,6 +17,7 @@ class ConsumerAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
             "first_name": "Johnsafsa",
             "middle_name": "",
             "last_name": "Consumerfasfsa",
+            "gender": "female",
             "email": "",
             "phone": "",
             "met_nav_at": "Mariano's Bridgeport",
@@ -39,6 +40,11 @@ class ConsumerAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
             },
             # "navigator_id": 1,
             "cm_client_id_for_routing": 1,
+
+            'add_referring_cm_clients': [
+                1
+            ],
+
             "db_action": "create"
         }
 
@@ -66,13 +72,16 @@ class ConsumerAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
         consumer_data = response_data["Data"]
 
         self.assertIn("row", consumer_data)
+        self.assertEqual(consumer_data['row']['gender'], "female")
         self.assertEqual(consumer_data['row']['cm_client_for_routing'], "Client One")
+        self.assertEqual(len(consumer_data['row']["referring_cm_clients"]), 1)
 
     def test_update_consumer_view(self):
         post_data = {
             "first_name": "Johnsaeqetsdbnjkfjhgjhgjhgjhgsa",
             "middle_name": "",
             "last_name": "Consumerfasfsa",
+            "gender": "male",
             "email": "",
             "phone": "",
             "met_nav_at": "Mariano's Bridgeport",
@@ -95,6 +104,10 @@ class ConsumerAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
             },
             "navigator_id": None,
             "cm_client_id_for_routing": 1,
+
+            'add_referring_cm_clients': [
+                1
+            ],
 
             "id": 1,
             "db_action": "update"
@@ -124,8 +137,10 @@ class ConsumerAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
         consumer_data = response_data["Data"]
 
         self.assertIn("row", consumer_data)
+        self.assertEqual(consumer_data['row']['gender'], "male")
         self.assertEqual(consumer_data['row']['cm_client_for_routing'], "Client One")
         self.assertEqual(consumer_data['row']['navigator'], None)
+        self.assertEqual(len(consumer_data['row']["referring_cm_clients"]), 1)
 
     def test_add_cps_consumer_view(self):
         post_data = {

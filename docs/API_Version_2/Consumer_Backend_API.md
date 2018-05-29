@@ -31,6 +31,15 @@ The body of the request should be a JSON document using the following template:
     "cm_client_id_for_routing": Integer,
     # NOTE: A consumer can either have a navigator that its assigned to, or a cm_client_for_routing that its assigned to. Not Both or None Exceptions will be given if you try to assign both or none of them.
     
+    'add_referring_cm_clients': [
+        Integer,
+        ...
+    ],
+    'remove_referring_cm_clients': [
+        Integer,
+        ...
+    ],
+    
     Address Keys(Every field within address can be given as an empty string. Address will only be recorded/updated iff a full address is given)
     "address_line_1": String,
     "address_line_2": String,
@@ -177,6 +186,8 @@ In response, a JSON document will be displayed with the following format:
             - 'remove_healthcare_locations_used'
             - "cm_client_id_for_routing"
             - "navigator_id"
+            - 'add_referring_cm_clients'
+            - 'remove_referring_cm_clients'
             
         - Keys that can be empty strings:
             - "middle_name"
@@ -199,6 +210,7 @@ In response, a JSON document will be displayed with the following format:
             - "consumer_notes"
             - cps_info["secondary_dependents"]
             - 'add_healthcare_networks_used'
+            - 'add_referring_cm_clients'
         
         - Keys that can be Null
             - "date_met_nav"
@@ -212,6 +224,7 @@ In response, a JSON document will be displayed with the following format:
         - Keys that WILL NOT be read
             - "update_case_management_rows"
             - "delete_case_management_rows"
+            - 'remove_referring_cm_clients'
 
     - If there are no errors in the JSON Body document:        
         - The response JSON document will have a dictionary object as the value for the "Data" key.
@@ -246,6 +259,7 @@ In response, a JSON document will be displayed with the following format:
             - "consumer_notes"
             - cps_info["secondary_dependents"]
             - 'add_healthcare_networks_used'
+            - 'add_referring_cm_clients'
         
         - Keys that can be Null
             - "date_met_nav"
