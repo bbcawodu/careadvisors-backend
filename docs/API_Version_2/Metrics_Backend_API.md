@@ -289,7 +289,7 @@ In response, a JSON document will be displayed with the following format:
         - "mpn" corresponds to staff member mpn.
             - Must be a String
             - Can be multiple values separated by commas.
-        - "id" corresponds to staff member class database id.
+        - "id" corresponds to the Navigators table database id.
             - Must be an integer
             - Can be multiple values separated by commas.
             - passing "all" as the value will return all staff members.

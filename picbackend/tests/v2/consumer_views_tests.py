@@ -68,7 +68,6 @@ class ConsumerAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
         # Test decoded JSON data for correct API version
         self.assertEqual(status_data["Version"], 2.0)
 
-        # Test decoded JSON data for non empty "Next Available Appointments" data
         consumer_data = response_data["Data"]
 
         self.assertIn("row", consumer_data)
@@ -133,7 +132,6 @@ class ConsumerAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
         # Test decoded JSON data for correct API version
         self.assertEqual(status_data["Version"], 2.0)
 
-        # Test decoded JSON data for non empty "Next Available Appointments" data
         consumer_data = response_data["Data"]
 
         self.assertIn("row", consumer_data)

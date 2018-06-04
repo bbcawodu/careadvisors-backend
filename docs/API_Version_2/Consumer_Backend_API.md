@@ -470,7 +470,12 @@ In response, a JSON document will be displayed with the following format:
             - must be of type boolean (true or false)
         - "page" corresponds to the current page of consumer instances to be displayed with full fields.
             - if this parameter is missing, the first 20 consumer instances will be displayed with full fields.
-        
+        - "cm_client_id" corresponds to the CaseManagementClient table database id of the cm_client_for_routing column.
+            - Must be an integer
+            - Can be multiple values separated by commas.
+        - "referring_cm_client_id" corresponds to the CaseManagementClient table database id of the referring_cm_clients.
+            - Must be an integer
+            - Can be multiple values separated by commas.
 - The response will be a JSON document with the following format:
     ```
     {

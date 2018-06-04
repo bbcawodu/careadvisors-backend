@@ -85,6 +85,43 @@ def validate_get_rqst_parameter_nav_id(get_rqst_params, validated_params, rqst_e
         validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
+def validate_get_rqst_parameter_consumer_id(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'consumer_id'
+
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_get_rqst_parameter_cm_client_id(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'cm_client_id'
+
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        if get_rqst_params[param_name] != "all":
+            validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_get_rqst_parameter_referring_cm_client_id(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'referring_cm_client_id'
+
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_get_rqst_parameter_approved_cm_client_id(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'approved_cm_client_id'
+
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
 def validate_get_rqst_parameter_staff_id(get_rqst_params, validated_params, rqst_errors):
     param_name = 'staff_id'
 
@@ -132,6 +169,60 @@ def validate_get_rqst_parameter_end_date(get_rqst_params, validated_params, rqst
 
     if param_name in get_rqst_params:
         validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        if validated_params[param_name]:
+            validated_params[param_name] = validated_params[param_name].replace(hour=23, minute=59, second=59, microsecond=0)
+
+
+def validate_get_rqst_parameter_date_created_start(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'date_created_start'
+
+    if param_name in get_rqst_params:
+        validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_get_rqst_parameter_date_created_end(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'date_created_end'
+
+    if param_name in get_rqst_params:
+        validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        if validated_params[param_name]:
+            validated_params[param_name] = validated_params[param_name].replace(hour=23, minute=59, second=59, microsecond=0)
+
+
+def validate_get_rqst_parameter_date_modified_start(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'date_modified_start'
+
+    if param_name in get_rqst_params:
+        validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_get_rqst_parameter_date_modified_end(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'date_modified_end'
+
+    if param_name in get_rqst_params:
+        validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        if validated_params[param_name]:
+            validated_params[param_name] = validated_params[param_name].replace(hour=23, minute=59, second=59, microsecond=0)
+
+
+def validate_get_rqst_parameter_datetime_contacted_start_date(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'datetime_contacted_start_date'
+
+    if param_name in get_rqst_params:
+        validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_get_rqst_parameter_datetime_contacted_end_date(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'datetime_contacted_end_date'
+
+    if param_name in get_rqst_params:
+        validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        if validated_params[param_name]:
+            validated_params[param_name] = validated_params[param_name].replace(hour=23, minute=59, second=59, microsecond=0)
 
 
 def validate_get_rqst_parameter_is_cps_consumer(get_rqst_params, validated_params, rqst_errors):
@@ -207,6 +298,27 @@ def validate_get_rqst_parameter_name(get_rqst_params, validated_params, rqst_err
 
 def validate_get_rqst_parameter_intent(get_rqst_params, validated_params, rqst_errors):
     param_name = 'intent'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_get_rqst_parameter_status(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'status'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_get_rqst_parameter_contact_type(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'contact_type'
+
+    if param_name in get_rqst_params:
+        validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_get_rqst_parameter_severity(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'severity'
 
     if param_name in get_rqst_params:
         validate_url_encoded_string_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
@@ -555,6 +667,10 @@ GET_PARAMETER_VALIDATION_FUNCTIONS = {
     "name": validate_get_rqst_parameter_name,
     "nav_id": validate_get_rqst_parameter_nav_id,
     "staff_id": validate_get_rqst_parameter_staff_id,
+    "consumer_id": validate_get_rqst_parameter_consumer_id,
+    "cm_client_id": validate_get_rqst_parameter_cm_client_id,
+    "referring_cm_client_id": validate_get_rqst_parameter_referring_cm_client_id,
+    "approved_cm_client_id": validate_get_rqst_parameter_approved_cm_client_id,
 
     "mpn": validate_get_rqst_parameter_mpn,
     "region": validate_get_rqst_parameter_region,
@@ -571,8 +687,18 @@ GET_PARAMETER_VALIDATION_FUNCTIONS = {
     "is_cps_consumer": validate_get_rqst_parameter_is_cps_consumer,
     "has_hospital_info": validate_get_rqst_parameter_has_hospital_info,
 
+    "date_created_start": validate_get_rqst_parameter_date_created_start,
+    "date_created_end": validate_get_rqst_parameter_date_created_end,
+    "date_modified_start": validate_get_rqst_parameter_date_modified_start,
+    "date_modified_end": validate_get_rqst_parameter_date_modified_end,
+    "datetime_contacted_start_date": validate_get_rqst_parameter_datetime_contacted_start_date,
+    "datetime_contacted_end_date": validate_get_rqst_parameter_datetime_contacted_end_date,
+
     "partner_id": validate_get_rqst_parameter_partner_id,
     "intent": validate_get_rqst_parameter_intent,
+    "status": validate_get_rqst_parameter_status,
+    "contact_type": validate_get_rqst_parameter_contact_type,
+    "severity": validate_get_rqst_parameter_severity,
 
     "state": validate_get_rqst_parameter_state,
     "has_sample_id_card": validate_get_rqst_parameter_has_sample_id_card,

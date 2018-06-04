@@ -79,6 +79,7 @@ class NavigatorManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
     accepted_GET_request_parameters = [
         "id",
+        "approved_cm_client_id",
         "first_name",
         "last_name",
         "email",

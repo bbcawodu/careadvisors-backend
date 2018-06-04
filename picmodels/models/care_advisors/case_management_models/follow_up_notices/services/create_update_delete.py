@@ -7,9 +7,6 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
     consumer_row = get_consumer_row_with_given_id(validated_params["consumer_id"], rqst_errors)
     navigator_row = get_navigator_row_with_given_id(validated_params["navigator_id"], rqst_errors)
 
-    if "cm_client_id" in validated_params:
-        cm_client_row = get_cm_client_row_with_given_id(validated_params["cm_client_id"], rqst_errors)
-
     row.status = validated_params['status']
     if not row.check_status_choices():
         rqst_errors.append(
@@ -26,17 +23,8 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
         row.consumer = consumer_row
         row.navigator = navigator_row
 
-        if 'cm_client_row' in locals():
-            row.cm_client = cm_client_row
-
         if 'notes' in validated_params:
             row.notes = validated_params['notes']
-
-        if 'outcome' in validated_params:
-            row.outcome = validated_params['outcome']
-
-        if 'datetime_contacted' in validated_params:
-            row.datetime_contacted = validated_params['datetime_contacted']
 
         row.save()
     else:
@@ -60,9 +48,6 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         if "navigator_id" in validated_params:
             navigator_row = get_navigator_row_with_given_id(validated_params["navigator_id"], rqst_errors)
 
-        if "cm_client_id" in validated_params:
-            cm_client_row = get_cm_client_row_with_given_id(validated_params["cm_client_id"], rqst_errors)
-
         if "status" in validated_params:
             row.status = validated_params['status']
             if not row.check_status_choices():
@@ -84,17 +69,8 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
             if 'navigator_row' in locals():
                 row.navigator = navigator_row
 
-            if 'cm_client_row' in locals():
-                row.cm_client = cm_client_row
-
             if 'notes' in validated_params:
                 row.notes = validated_params['notes']
-
-            if 'outcome' in validated_params:
-                row.outcome = validated_params['outcome']
-
-            if 'datetime_contacted' in validated_params:
-                row.datetime_contacted = validated_params['datetime_contacted']
 
             row.save()
         else:
@@ -113,40 +89,27 @@ def delete_row_w_validated_params(cls, validated_params, rqst_errors):
         rqst_errors.append('Row does not exist for the id: {!s}'.format(str(rqst_id)))
 
 
-def get_consumer_row_with_given_id(id, rqst_errors):
+def get_consumer_row_with_given_id(rqst_id, rqst_errors):
     row = None
 
-    if id:
+    if rqst_id:
         try:
-            row = picmodels.models.PICConsumer.objects.get(id=id)
+            row = picmodels.models.PICConsumer.objects.get(id=rqst_id)
         except picmodels.models.PICConsumer.DoesNotExist:
             row = None
-            rqst_errors.append("No PICConsumer row found with id: {}".format(id))
+            rqst_errors.append("No PICConsumer row found with id: {}".format(rqst_id))
 
     return row
 
 
-def get_navigator_row_with_given_id(id, rqst_errors):
+def get_navigator_row_with_given_id(rqst_id, rqst_errors):
     row = None
 
-    if id:
+    if rqst_id:
         try:
-            row = picmodels.models.Navigators.objects.get(id=id)
+            row = picmodels.models.Navigators.objects.get(id=rqst_id)
         except picmodels.models.Navigators.DoesNotExist:
             row = None
-            rqst_errors.append("No Navigators row found with id: {}".format(id))
-
-    return row
-
-
-def get_cm_client_row_with_given_id(id, rqst_errors):
-    row = None
-
-    if id:
-        try:
-            row = picmodels.models.CaseManagementClient.objects.get(id=id)
-        except picmodels.models.CaseManagementClient.DoesNotExist:
-            row = None
-            rqst_errors.append("No CaseManagementClient row found with id: {}".format(id))
+            rqst_errors.append("No Navigators row found with id: {}".format(rqst_id))
 
     return row

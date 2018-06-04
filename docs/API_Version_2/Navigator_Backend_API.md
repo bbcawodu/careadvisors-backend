@@ -435,7 +435,9 @@ In response, a JSON document will be displayed with the following format:
             - When "first_name" and "last_name" are given at the same time, only one value of each permitted.
             
     - "Secondary" parameters - Any number of these parameters can be added to a request.
-        - None
+        - "approved_cm_client_id" corresponds to the CaseManagementClient table database id of approved clients.
+            - Must be an integer
+            - Can be multiple values separated by commas.
     
 - The response will be a JSON document with the following format:
     ```
