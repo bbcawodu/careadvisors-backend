@@ -6,6 +6,7 @@ def get_serialized_rows_by_id(cls, validated_params, rqst_errors):
         list_of_ids = None
 
     navigator_qset = filter_navigator_qset_by_id(cls.objects.all(), rqst_staff_id, list_of_ids)
+    navigator_qset = filter_db_objects_by_secondary_params(navigator_qset, validated_params)
 
     response_list = create_response_list_from_db_objects(navigator_qset)
 
@@ -29,6 +30,7 @@ def get_serialized_rows_by_f_and_l_name(cls, validated_params, rqst_errors):
     rqst_last_name = validated_params['last_name']
 
     navigator_qset = filter_navigator_objs_by_f_and_l_name(cls.objects.all(), rqst_first_name, rqst_last_name)
+    navigator_qset = filter_db_objects_by_secondary_params(navigator_qset, validated_params)
 
     response_list = create_response_list_from_db_objects(navigator_qset)
 
@@ -50,6 +52,7 @@ def get_serialized_rows_by_email(cls, validated_params, rqst_errors):
 
     for email in list_of_emails:
         filtered_navigator_qset = filter_navigator_objs_by_email(cls.objects.all(), email)
+        filtered_navigator_qset = filter_db_objects_by_secondary_params(filtered_navigator_qset, validated_params)
 
         response_list_component = create_response_list_from_db_objects(filtered_navigator_qset)
 
@@ -75,6 +78,7 @@ def get_serialized_rows_by_first_name(cls, validated_params, rqst_errors):
 
     for first_name in list_of_first_names:
         filtered_navigator_qset = filter_navigator_objs_by_first_name(cls.objects.all(), first_name)
+        filtered_navigator_qset = filter_db_objects_by_secondary_params(filtered_navigator_qset, validated_params)
 
         response_list_component = create_response_list_from_db_objects(filtered_navigator_qset)
 
@@ -100,6 +104,7 @@ def get_serialized_rows_by_last_name(cls, validated_params, rqst_errors):
 
     for last_name in list_of_last_names:
         filtered_navigator_qset = filter_navigator_objs_by_last_name(cls.objects.all(), last_name)
+        filtered_navigator_qset = filter_db_objects_by_secondary_params(filtered_navigator_qset, validated_params)
 
         response_list_component = create_response_list_from_db_objects(filtered_navigator_qset)
 
@@ -125,6 +130,7 @@ def get_serialized_rows_by_county(cls, validated_params, rqst_errors):
 
     for county in list_of_counties:
         filtered_navigator_qset = filter_navigator_objs_by_county(cls.objects.all(), county)
+        filtered_navigator_qset = filter_db_objects_by_secondary_params(filtered_navigator_qset, validated_params)
 
         response_list_component = create_response_list_from_db_objects(filtered_navigator_qset)
 
@@ -159,6 +165,7 @@ def get_serialized_rows_by_region(cls, validated_params, rqst_errors):
             for county in counties_in_this_region:
                 def add_staff_data_from_county_to_response_component():
                     filtered_navigator_qset = filter_navigator_objs_by_county(cls.objects.all(), county)
+                    filtered_navigator_qset = filter_db_objects_by_secondary_params(filtered_navigator_qset, validated_params)
 
                     staff_data_for_this_county = create_response_list_from_db_objects(filtered_navigator_qset)
                     for staff_data in staff_data_for_this_county:
@@ -188,6 +195,7 @@ def get_serialized_rows_by_mpn(cls, validated_params, rqst_errors):
 
     for mpn in list_of_mpns:
         filtered_navigator_qset = filter_navigator_objs_by_mpn(cls.objects.all(), mpn)
+        filtered_navigator_qset = filter_db_objects_by_secondary_params(filtered_navigator_qset, validated_params)
 
         response_list_component = create_response_list_from_db_objects(filtered_navigator_qset)
 
@@ -215,6 +223,14 @@ def create_response_list_from_db_objects(db_objects):
     return return_list
 
 
+def filter_db_objects_by_secondary_params(db_objects, validated_get_params):
+    if 'approved_cm_client_id_list' in validated_get_params:
+        list_of_cm_client_ids = validated_get_params['approved_cm_client_id_list']
+        db_objects = db_objects.filter(approved_cm_clients__in=list_of_cm_client_ids)
+
+    return db_objects
+
+
 def prefetch_related_rows(db_queryset):
     db_queryset = db_queryset.select_related(
         'address',
@@ -222,6 +238,7 @@ def prefetch_related_rows(db_queryset):
     )
 
     db_queryset = db_queryset.prefetch_related(
+        "approved_clients_for_case_management",
         'picconsumer_set',
         'base_locations',
         'base_locations__address',

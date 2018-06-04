@@ -146,15 +146,21 @@ def create_response_list_from_db_objects(db_objects):
     return return_list
 
 
-def filter_db_objects_by_secondary_params(db_objects, validated_GET_rqst_params):
-    if 'nav_id_list' in validated_GET_rqst_params:
-        list_of_nav_ids = validated_GET_rqst_params['nav_id_list']
+def filter_db_objects_by_secondary_params(db_objects, validated_get_params):
+    if 'nav_id_list' in validated_get_params:
+        list_of_nav_ids = validated_get_params['nav_id_list']
         db_objects = db_objects.filter(navigator__in=list_of_nav_ids)
-    if 'is_cps_consumer' in validated_GET_rqst_params:
-        is_cps_consumer = validated_GET_rqst_params['is_cps_consumer']
+    if 'cm_client_id_list' in validated_get_params:
+        list_of_cm_client_ids = validated_get_params['cm_client_id_list']
+        db_objects = db_objects.filter(cm_client_for_routing__in=list_of_cm_client_ids)
+    if 'referring_cm_client_id_list' in validated_get_params:
+        list_of_referring_cm_client_ids = validated_get_params['referring_cm_client_id_list']
+        db_objects = db_objects.filter(referring_cm_clients__in=list_of_referring_cm_client_ids)
+    if 'is_cps_consumer' in validated_get_params:
+        is_cps_consumer = validated_get_params['is_cps_consumer']
         db_objects = db_objects.filter(cps_info__isnull=not is_cps_consumer)
-    if 'has_hospital_info' in validated_GET_rqst_params:
-        has_hospital_info = validated_GET_rqst_params['has_hospital_info']
+    if 'has_hospital_info' in validated_get_params:
+        has_hospital_info = validated_get_params['has_hospital_info']
         db_objects = db_objects.filter(consumer_hospital_info__isnull=not has_hospital_info)
 
     return db_objects

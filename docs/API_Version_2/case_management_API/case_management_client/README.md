@@ -1,7 +1,7 @@
 # Case Management Client Backend API README
 
 
-## Entity Relationship Diagram for Case Management Module related data models
+## Entity Relationship Diagram for Case Management Client related data models
 
 ![Case Management Client Entity Relationship Diagram](case_management_client_erd.jpg)
 
@@ -105,7 +105,7 @@ In response, a JSON document will be displayed with the following format:
             - It contains the key "row", the value for which is "Deleted".
     
     
-### Navigator Location Data Retrieval API
+### Case Management Client Data Retrieval API
 - To read rows from the CaseManagementClient table of the backend, make a GET request to http://picbackend.herokuapp.com/v2/case_management_clients/
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"

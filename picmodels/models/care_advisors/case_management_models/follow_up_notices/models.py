@@ -7,37 +7,34 @@ from .services.create_update_delete import delete_row_w_validated_params
 from .services.read import get_serialized_rows_by_id
 
 
-class ContactLog(models.Model):
+class FollowUpNotices(models.Model):
     N_A = "not available"
-    VOICE_MESSAGE = "Voice Message"
+    OPEN = "Open"
     COMPLETED = "Completed"
     STATUS_CHOICES = (
-        (VOICE_MESSAGE, "Voice Message"),
+        (OPEN, "Open"),
         (COMPLETED, "Completed"),
         (N_A, "not available")
     )
 
-    EMAIL = "Email"
-    TEXT = "Text"
-    PHONE = "Phone"
-    IN_PERSON = "In-Person"
-    CONTACT_TYPE_CHOICES = (
-        (EMAIL, "Email"),
-        (TEXT, "Text"),
-        (PHONE, "Phone"),
-        (IN_PERSON, "In-Person"),
+    LOW = "Low"
+    NORMAL = "Normal"
+    HIGH = "HIGH"
+    URGENT = "Urgent"
+    SEVERITY_CHOICES = (
+        (LOW, "Low"),
+        (NORMAL, "Normal"),
+        (HIGH, "HIGH"),
+        (URGENT, "Urgent"),
         (N_A, "not available")
     )
 
     consumer = models.ForeignKey('PICConsumer', on_delete=models.CASCADE)
     navigator = models.ForeignKey('Navigators', on_delete=models.CASCADE)
-    cm_client = models.ForeignKey('CaseManagementClient', on_delete=models.CASCADE, blank=True, null=True)
 
     notes = models.TextField(blank=True, null=True)
-    outcome = models.CharField(max_length=5000, blank=True, null=True)
     status = models.CharField(max_length=1000, blank=True, null=True, choices=STATUS_CHOICES, default=N_A)
-    datetime_contacted = models.DateTimeField(blank=True, null=True)
-    contact_type = models.CharField(max_length=1000, blank=True, null=True, choices=CONTACT_TYPE_CHOICES, default=N_A)
+    severity = models.CharField(max_length=1000, blank=True, null=True, choices=SEVERITY_CHOICES, default=N_A)
 
     date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
     date_modified = models.DateTimeField(auto_now=True)
@@ -48,9 +45,9 @@ class ContactLog(models.Model):
                 return True
         return False
 
-    def check_contact_type_choices(self,):
-        for contact_type_tuple in self.CONTACT_TYPE_CHOICES:
-            if contact_type_tuple[1].lower() == self.contact_type.lower():
+    def check_severity_choices(self,):
+        for severity_tuple in self.SEVERITY_CHOICES:
+            if severity_tuple[1].lower() == self.severity.lower():
                 return True
         return False
 
@@ -62,13 +59,10 @@ class ContactLog(models.Model):
         values_dict = {
             "consumer": self.consumer.id if self.consumer else None,
             "navigator": self.navigator.id if self.navigator else None,
-            "cm_client": self.cm_client.id if self.cm_client else None,
 
             "notes": self.notes,
-            "outcome": self.outcome,
             "status": self.status,
-            "datetime_contacted": self.datetime_contacted.isoformat() if self.datetime_contacted else None,
-            "contact_type": self.contact_type,
+            "severity": self.severity,
 
             "date_created": self.date_created.isoformat() if self.date_created else None,
             "date_modified": self.date_modified.isoformat() if self.date_modified else None,
@@ -77,7 +71,7 @@ class ContactLog(models.Model):
         }
 
         return values_dict
-ContactLog.create_row_w_validated_params = classmethod(create_row_w_validated_params)
-ContactLog.update_row_w_validated_params = classmethod(update_row_w_validated_params)
-ContactLog.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
-ContactLog.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
+FollowUpNotices.create_row_w_validated_params = classmethod(create_row_w_validated_params)
+FollowUpNotices.update_row_w_validated_params = classmethod(update_row_w_validated_params)
+FollowUpNotices.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
+FollowUpNotices.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
