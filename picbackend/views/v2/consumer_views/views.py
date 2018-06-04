@@ -77,6 +77,8 @@ class ConsumerManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
     accepted_GET_request_parameters = [
         "nav_id",
+        "cm_client_id",
+        "referring_cm_client_id",
         "is_cps_consumer",
         "has_hospital_info",
         "first_name",
@@ -105,6 +107,8 @@ class ConsumerBackupManagementView(JSONPUTRspMixin, JSONGETRspMixin, View):
 
     accepted_GET_request_parameters = [
         "nav_id",
+        "cm_client_id",
+        "referring_cm_client_id",
         "is_cps_consumer",
         "has_hospital_info",
         "first_name",

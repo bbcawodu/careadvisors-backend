@@ -168,7 +168,7 @@ class Navigators(models.Model):
         if len(approved_clients_for_case_management):
             cm_client_values = []
             for cm_client in approved_clients_for_case_management:
-                cm_client_values.append(cm_client.return_values_dict())
+                cm_client_values.append(cm_client.id)
             valuesdict["approved_clients_for_case_management"] = cm_client_values
 
         credentials_queryset = self.credentialsmodel_set.all()

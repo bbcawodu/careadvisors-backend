@@ -4,36 +4,41 @@
 ## Running Tests
 
 ### Running Tests with output to the shell
-pytest
-python manage.py test
+- pytest
+- python manage.py test
 
 ### Running Tests with output to text files
 - stdout is the file into which the kernel writes its output and the process requesting it accesses the information from and stderr is the file into which all the exceptions are entered
-python manage.py test > stdout.txt 2> stderr.txt
+- python manage.py test > stdout.txt 2> stderr.txt
 
 -command to print terminal history to text file
-history > history_for_print.txt
+- history > cmd_history.txt
 
 
 ### Loading test database data from migration
 this command will create a test fixture that can be loaded within each test case and with setUpTestData(cls) but doesnt work with initial_data load
+```
 python3 manage.py dumpdata --exclude contenttypes.ContentType > 12-21-2016.json
-
+```
 
 this command will create a fixture with current data from the database which can be used to load data from migration
+```
 python3 manage.py dumpdata --exclude sessions.Session > 01-23-2017.json
-
+```
 this command will create a fixture with current data from the database which can be loaded from the command line
+```
 python3 manage.py dumpdata --exclude contenttypes.ContentType --exclude sessions.Session --exclude auth.Permission > 01-24-2017.json
-
+```
 this command will create a ficture with current data from db that can be loaded by test fixture
-
+```
 python3 manage.py dumpdata --exclude contenttypes.ContentType --exclude sessions.Session --exclude auth.Permission --exclude admin.LogEntry > test_fixture.json
-
+```
 
 -creating an empty migration
+```
 python manage.py makemigrations --empty <yourapp> --name load_intial_data
 
+```
 - fill empty migration file with the following
 ```
 # -*- coding: utf-8 -*-
@@ -65,7 +70,7 @@ class Migration(migrations.Migration):
 
 # Command to load data to database from json file
 
-python manage.py loaddata [file]
+- python manage.py loaddata [file]
 
 
 git update-index --assume-unchanged picbackend/wsgi.py

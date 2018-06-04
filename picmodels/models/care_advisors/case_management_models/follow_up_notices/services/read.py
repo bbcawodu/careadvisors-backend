@@ -47,18 +47,12 @@ def filter_db_objects_by_secondary_params(db_objects, validated_get_params):
     if 'nav_id_list' in validated_get_params:
         list_of_nav_ids = validated_get_params['nav_id_list']
         db_objects = db_objects.filter(navigator__in=list_of_nav_ids)
-    if 'cm_client_id_list' in validated_get_params:
-        if validated_get_params['cm_client_id'] == 'all':
-            db_objects = db_objects.filter(cm_client__isnull=False)
-        else:
-            list_of_cm_client_ids = validated_get_params['cm_client_id_list']
-            db_objects = db_objects.filter(cm_client__in=list_of_cm_client_ids)
     if 'status' in validated_get_params:
         status = validated_get_params['status']
         db_objects = db_objects.filter(status__iexact=status)
-    if 'contact_type' in validated_get_params:
-        contact_type = validated_get_params['contact_type']
-        db_objects = db_objects.filter(contact_type__iexact=contact_type)
+    if 'severity' in validated_get_params:
+        severity = validated_get_params['severity']
+        db_objects = db_objects.filter(severity__iexact=severity)
 
     if 'date_created_start' in validated_get_params:
         date_created_start = validated_get_params['date_created_start']
@@ -74,20 +68,12 @@ def filter_db_objects_by_secondary_params(db_objects, validated_get_params):
         date_modified_end = validated_get_params['date_modified_end']
         db_objects = db_objects.filter(date_modified__lte=date_modified_end)
 
-    if 'datetime_contacted_start_date' in validated_get_params:
-        datetime_contacted_start_date = validated_get_params['datetime_contacted_start_date']
-        db_objects = db_objects.filter(datetime_contacted__gte=datetime_contacted_start_date)
-    if 'datetime_contacted_end_date' in validated_get_params:
-        datetime_contacted_end_date = validated_get_params['datetime_contacted_end_date']
-        db_objects = db_objects.filter(datetime_contacted__lte=datetime_contacted_end_date)
-
     return db_objects
 
 
 def prefetch_related_rows(db_queryset):
     db_queryset = db_queryset.select_related(
         'consumer',
-        'cm_client',
         'navigator',
     )
 
