@@ -243,16 +243,16 @@ class PICConsumer(PICConsumerBase):
                 valuesdict["address"][key] = address_values[key]
 
         if self.navigator:
-            valuesdict['navigator'] = "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name)
+            valuesdict['navigator'] = self.navigator.id
 
         if self.cm_client_for_routing:
-            valuesdict['cm_client_for_routing'] = self.cm_client_for_routing.name
+            valuesdict['cm_client_for_routing'] = self.cm_client_for_routing.id
 
         referring_cm_clients = self.referring_cm_clients.all()
         if len(referring_cm_clients):
             cm_client_values = []
             for cm_client in referring_cm_clients:
-                cm_client_values.append(cm_client.return_values_dict())
+                cm_client_values.append(cm_client.id)
             valuesdict["referring_cm_clients"] = cm_client_values
 
         if self.cps_info:
@@ -415,7 +415,7 @@ class PICConsumerBackup(PICConsumerBase):
                 valuesdict["address"][key] = address_values[key]
 
         if self.navigator:
-            valuesdict['navigator'] = "{!s} {!s}".format(self.navigator.first_name, self.navigator.last_name)
+            valuesdict['navigator'] = self.navigator.id
 
         if self.cps_info:
             valuesdict['cps_info'] = self.cps_info.return_values_dict()
