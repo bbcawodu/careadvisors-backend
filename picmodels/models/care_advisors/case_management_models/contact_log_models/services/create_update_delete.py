@@ -2,25 +2,35 @@ import picmodels
 
 
 def create_row_w_validated_params(cls, validated_params, rqst_errors):
+    if "consumer_id" not in validated_params:
+        rqst_errors.append("'consumer_id' is a required key in the validated_params argument")
+    if "navigator_id" not in validated_params:
+        rqst_errors.append("'navigator_id' is a required key in the validated_params argument")
+    if "status" not in validated_params:
+        rqst_errors.append("status' is a required key in the validated_params argument")
+    if "contact_type" not in validated_params:
+        rqst_errors.append("'contact_type' is a required key in the validated_params argument")
+
     row = cls()
 
-    consumer_row = get_consumer_row_with_given_id(validated_params["consumer_id"], rqst_errors)
-    navigator_row = get_navigator_row_with_given_id(validated_params["navigator_id"], rqst_errors)
+    if not rqst_errors:
+        consumer_row = get_consumer_row_with_given_id(validated_params["consumer_id"], rqst_errors)
+        navigator_row = get_navigator_row_with_given_id(validated_params["navigator_id"], rqst_errors)
 
-    if "cm_client_id" in validated_params:
-        cm_client_row = get_cm_client_row_with_given_id(validated_params["cm_client_id"], rqst_errors)
+        if "cm_client_id" in validated_params:
+            cm_client_row = get_cm_client_row_with_given_id(validated_params["cm_client_id"], rqst_errors)
 
-    row.status = validated_params['status']
-    if not row.check_status_choices():
-        rqst_errors.append(
-            "status: {!s} is not a valid choice".format(row.status)
-        )
+        row.status = validated_params['status']
+        if not row.check_status_choices():
+            rqst_errors.append(
+                "status: {!s} is not a valid choice".format(row.status)
+            )
 
-    row.contact_type = validated_params['contact_type']
-    if not row.check_contact_type_choices():
-        rqst_errors.append(
-            "contact_type: {!s} is not a valid choice".format(row.status)
-        )
+        row.contact_type = validated_params['contact_type']
+        if not row.check_contact_type_choices():
+            rqst_errors.append(
+                "contact_type: {!s} is not a valid choice".format(row.contact_type)
+            )
 
     if not rqst_errors:
         row.consumer = consumer_row
@@ -63,19 +73,20 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         if "cm_client_id" in validated_params:
             cm_client_row = get_cm_client_row_with_given_id(validated_params["cm_client_id"], rqst_errors)
 
-        if "status" in validated_params:
-            row.status = validated_params['status']
-            if not row.check_status_choices():
-                rqst_errors.append(
-                    "status: {!s} is not a valid choice".format(row.status)
-                )
+        if not rqst_errors:
+            if "status" in validated_params:
+                row.status = validated_params['status']
+                if not row.check_status_choices():
+                    rqst_errors.append(
+                        "status: {!s} is not a valid choice".format(row.status)
+                    )
 
-        if "contact_type" in validated_params:
-            row.contact_type = validated_params['contact_type']
-            if not row.check_contact_type_choices():
-                rqst_errors.append(
-                    "contact_type: {!s} is not a valid choice".format(row.status)
-                )
+            if "contact_type" in validated_params:
+                row.contact_type = validated_params['contact_type']
+                if not row.check_contact_type_choices():
+                    rqst_errors.append(
+                        "contact_type: {!s} is not a valid choice".format(row.contact_type)
+                    )
 
         if not rqst_errors:
             if 'consumer_row' in locals():
