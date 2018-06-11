@@ -39,6 +39,17 @@ class DBModelsBaseTestCase(object):
 
         return db_row
 
+    def use_update_row_w_validated_params_w_errors(self, validated_params, rqst_errors):
+        db_row = self.db_model.update_row_w_validated_params(
+            validated_params,
+            rqst_errors
+        )
+
+        self.assertNotEqual(len(rqst_errors), 0, "{}".format(rqst_errors))
+        self.assertEqual(db_row, None, "{}".format(db_row))
+
+        return db_row
+
     def use_delete_row_w_validated_params(self, validated_params, rqst_errors):
         self.db_model.delete_row_w_validated_params(
             validated_params,
@@ -46,6 +57,14 @@ class DBModelsBaseTestCase(object):
         )
 
         self.assertEqual(len(rqst_errors), 0, "{}".format(rqst_errors))
+
+    def use_delete_row_w_validated_params_w_errors(self, validated_params, rqst_errors):
+        self.db_model.delete_row_w_validated_params(
+            validated_params,
+            rqst_errors
+        )
+
+        self.assertNotEqual(len(rqst_errors), 0, "{}".format(rqst_errors))
 
     def use_get_serialized_rows_by_id(self, validated_params, test_errors):
         serialized_table_data = self.db_model.get_serialized_rows_by_id(

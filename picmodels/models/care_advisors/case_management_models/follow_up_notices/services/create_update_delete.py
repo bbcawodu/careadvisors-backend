@@ -44,54 +44,61 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
 
 
 def update_row_w_validated_params(cls, validated_params, rqst_errors):
-    rqst_id = validated_params['id']
+    if "id" in validated_params:
+        rqst_id = validated_params['id']
+    else:
+        rqst_errors.append("'id' is a required key in the validated_params argument")
+        return None
 
     try:
         row = cls.objects.get(id=rqst_id)
     except cls.DoesNotExist:
-        row = None
         rqst_errors.append('Row does not exist for the id: {}'.format(rqst_id))
+        return None
 
-    if row:
-        if "consumer_id"  in validated_params:
-            consumer_row = get_consumer_row_with_given_id(validated_params["consumer_id"], rqst_errors)
-        if "navigator_id" in validated_params:
-            navigator_row = get_navigator_row_with_given_id(validated_params["navigator_id"], rqst_errors)
+    if "consumer_id"  in validated_params:
+        consumer_row = get_consumer_row_with_given_id(validated_params["consumer_id"], rqst_errors)
+    if "navigator_id" in validated_params:
+        navigator_row = get_navigator_row_with_given_id(validated_params["navigator_id"], rqst_errors)
 
-        if not rqst_errors:
-            if "status" in validated_params:
-                row.status = validated_params['status']
-                if not row.check_status_choices():
-                    rqst_errors.append(
-                        "status: {!s} is not a valid choice".format(row.status)
-                    )
+    if not rqst_errors:
+        if "status" in validated_params:
+            row.status = validated_params['status']
+            if not row.check_status_choices():
+                rqst_errors.append(
+                    "status: {!s} is not a valid choice".format(row.status)
+                )
 
-            if "severity" in validated_params:
-                row.severity = validated_params['severity']
-                if not row.check_severity_choices():
-                    rqst_errors.append(
-                        "severity: {!s} is not a valid choice".format(row.severity)
-                    )
+        if "severity" in validated_params:
+            row.severity = validated_params['severity']
+            if not row.check_severity_choices():
+                rqst_errors.append(
+                    "severity: {!s} is not a valid choice".format(row.severity)
+                )
 
-        if not rqst_errors:
-            if 'consumer_row' in locals():
-                row.consumer = consumer_row
+    if not rqst_errors:
+        if 'consumer_row' in locals():
+            row.consumer = consumer_row
 
-            if 'navigator_row' in locals():
-                row.navigator = navigator_row
+        if 'navigator_row' in locals():
+            row.navigator = navigator_row
 
-            if 'notes' in validated_params:
-                row.notes = validated_params['notes']
+        if 'notes' in validated_params:
+            row.notes = validated_params['notes']
 
-            row.save()
-        else:
-            row = None
+        row.save()
+    else:
+        row = None
 
     return row
 
 
 def delete_row_w_validated_params(cls, validated_params, rqst_errors):
-    rqst_id = validated_params['id']
+    if "id" in validated_params:
+        rqst_id = validated_params['id']
+    else:
+        rqst_errors.append("'id' is a required key in the validated_params argument")
+        return None
 
     try:
         row = cls.objects.get(id=rqst_id)

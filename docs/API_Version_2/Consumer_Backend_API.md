@@ -461,7 +461,7 @@ In response, a JSON document will be displayed with the following format:
             - Can be multiple values separated by commas.
         - "id" corresponds to consumer class database id.
             - Can be multiple values separated by commas.
-            - passing "all" as the value will return all consumer enteties
+            - passing "all" as the value will return all consumer rows.
             
     - "Secondary" parameters - Any number of these parameters can be added to a request.
         - "nav_id" corresponds to staff member class database id.
@@ -473,6 +473,7 @@ In response, a JSON document will be displayed with the following format:
         - "cm_client_id" corresponds to the CaseManagementClient table database id of the cm_client_for_routing column.
             - Must be an integer
             - Can be multiple values separated by commas.
+            - passing "all" as the value will return all consumer rows with a non null value for cm_client_for_routing.
         - "referring_cm_client_id" corresponds to the CaseManagementClient table database id of the referring_cm_clients.
             - Must be an integer
             - Can be multiple values separated by commas.

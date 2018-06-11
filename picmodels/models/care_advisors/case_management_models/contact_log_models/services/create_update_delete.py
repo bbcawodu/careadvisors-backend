@@ -56,66 +56,73 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
 
 
 def update_row_w_validated_params(cls, validated_params, rqst_errors):
-    rqst_id = validated_params['id']
+    if "id" in validated_params:
+        rqst_id = validated_params['id']
+    else:
+        rqst_errors.append("'id' is a required key in the validated_params argument")
+        return None
 
     try:
         row = cls.objects.get(id=rqst_id)
     except cls.DoesNotExist:
-        row = None
         rqst_errors.append('Row does not exist for the id: {}'.format(rqst_id))
+        return None
 
-    if row:
-        if "consumer_id"  in validated_params:
-            consumer_row = get_consumer_row_with_given_id(validated_params["consumer_id"], rqst_errors)
-        if "navigator_id" in validated_params:
-            navigator_row = get_navigator_row_with_given_id(validated_params["navigator_id"], rqst_errors)
+    if "consumer_id"  in validated_params:
+        consumer_row = get_consumer_row_with_given_id(validated_params["consumer_id"], rqst_errors)
+    if "navigator_id" in validated_params:
+        navigator_row = get_navigator_row_with_given_id(validated_params["navigator_id"], rqst_errors)
 
-        if "cm_client_id" in validated_params:
-            cm_client_row = get_cm_client_row_with_given_id(validated_params["cm_client_id"], rqst_errors)
+    if "cm_client_id" in validated_params:
+        cm_client_row = get_cm_client_row_with_given_id(validated_params["cm_client_id"], rqst_errors)
 
-        if not rqst_errors:
-            if "status" in validated_params:
-                row.status = validated_params['status']
-                if not row.check_status_choices():
-                    rqst_errors.append(
-                        "status: {!s} is not a valid choice".format(row.status)
-                    )
+    if not rqst_errors:
+        if "status" in validated_params:
+            row.status = validated_params['status']
+            if not row.check_status_choices():
+                rqst_errors.append(
+                    "status: {!s} is not a valid choice".format(row.status)
+                )
 
-            if "contact_type" in validated_params:
-                row.contact_type = validated_params['contact_type']
-                if not row.check_contact_type_choices():
-                    rqst_errors.append(
-                        "contact_type: {!s} is not a valid choice".format(row.contact_type)
-                    )
+        if "contact_type" in validated_params:
+            row.contact_type = validated_params['contact_type']
+            if not row.check_contact_type_choices():
+                rqst_errors.append(
+                    "contact_type: {!s} is not a valid choice".format(row.contact_type)
+                )
 
-        if not rqst_errors:
-            if 'consumer_row' in locals():
-                row.consumer = consumer_row
+    if not rqst_errors:
+        if 'consumer_row' in locals():
+            row.consumer = consumer_row
 
-            if 'navigator_row' in locals():
-                row.navigator = navigator_row
+        if 'navigator_row' in locals():
+            row.navigator = navigator_row
 
-            if 'cm_client_row' in locals():
-                row.cm_client = cm_client_row
+        if 'cm_client_row' in locals():
+            row.cm_client = cm_client_row
 
-            if 'notes' in validated_params:
-                row.notes = validated_params['notes']
+        if 'notes' in validated_params:
+            row.notes = validated_params['notes']
 
-            if 'outcome' in validated_params:
-                row.outcome = validated_params['outcome']
+        if 'outcome' in validated_params:
+            row.outcome = validated_params['outcome']
 
-            if 'datetime_contacted' in validated_params:
-                row.datetime_contacted = validated_params['datetime_contacted']
+        if 'datetime_contacted' in validated_params:
+            row.datetime_contacted = validated_params['datetime_contacted']
 
-            row.save()
-        else:
-            row = None
+        row.save()
+    else:
+        row = None
 
     return row
 
 
 def delete_row_w_validated_params(cls, validated_params, rqst_errors):
-    rqst_id = validated_params['id']
+    if "id" in validated_params:
+        rqst_id = validated_params['id']
+    else:
+        rqst_errors.append("'id' is a required key in the validated_params argument")
+        return None
 
     try:
         row = cls.objects.get(id=rqst_id)
