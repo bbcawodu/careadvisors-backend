@@ -11,7 +11,7 @@ from .services.read import get_serialized_rows_by_name
 
 
 class CaseManagementClient(models.Model):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200)
     address = models.ForeignKey(Address, blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:

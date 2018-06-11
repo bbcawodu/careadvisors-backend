@@ -72,7 +72,7 @@ class ConsumerAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
 
         self.assertIn("row", consumer_data)
         self.assertEqual(consumer_data['row']['gender'], "female")
-        self.assertEqual(consumer_data['row']['cm_client_for_routing'], "Client One")
+        self.assertEqual(consumer_data['row']['cm_client_for_routing'], 1)
         self.assertEqual(len(consumer_data['row']["referring_cm_clients"]), 1)
 
     def test_update_consumer_view(self):
@@ -136,7 +136,7 @@ class ConsumerAPITests(TestCase, BaseConsumerNavigatorsMetricsTests):
 
         self.assertIn("row", consumer_data)
         self.assertEqual(consumer_data['row']['gender'], "male")
-        self.assertEqual(consumer_data['row']['cm_client_for_routing'], "Client One")
+        self.assertEqual(consumer_data['row']['cm_client_for_routing'], 1)
         self.assertEqual(consumer_data['row']['navigator'], None)
         self.assertEqual(len(consumer_data['row']["referring_cm_clients"]), 1)
 
