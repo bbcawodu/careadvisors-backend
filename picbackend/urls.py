@@ -64,6 +64,7 @@ urlpatterns = [
     url(r"^v2/case_management_clients/$", views.CMClientManagementView.as_view()),
     url(r"^v2/cm_contact_logs/$", views.CMContactLogManagementView.as_view()),
     url(r"^v2/cm_follow_up_notices/$", views.CMFollowUpNoticesManagementView.as_view()),
+    # url(r"^v2/cm_sequences/$", views.CMSequencesManagementView.as_view()),
 
     # urls for navigators views
     url(r"^v2/navigators/$", views.NavigatorManagementView.as_view()),

@@ -4,19 +4,15 @@ import picmodels
 
 
 def create_row_w_validated_params(cls, validated_params, rqst_errors):
-    try:
-        row = cls(
-            name=validated_params['name'],
-        )
-        # row.save()
+    row = cls()
+    # row.save()
 
-        modify_row_address(row, validated_params)
+    modify_row_address(row, validated_params)
+    row.name = validated_params['name']
 
-        if not cls.check_for_rows_with_given_name_and_address(row.name, row.address, rqst_errors):
-            row.save()
-        else:
-            row = None
-    except IntegrityError:
+    if not cls.check_for_rows_with_given_name_and_address(row.name, row.address, rqst_errors):
+        row.save()
+    else:
         params_copy = copy.deepcopy(validated_params)
         del(params_copy['name'])
         del(params_copy['rqst_action'])
@@ -49,12 +45,9 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
 
         modify_row_address(row, validated_params)
 
-        try:
-            if not cls.check_for_rows_with_given_name_and_address(row.name, row.address, rqst_errors, rqst_id):
-                row.save()
-            else:
-                row = None
-        except IntegrityError:
+        if not cls.check_for_rows_with_given_name_and_address(row.name, row.address, rqst_errors, rqst_id):
+            row.save()
+        else:
             params_copy = copy.deepcopy(validated_params)
             del (params_copy['name'])
             del (params_copy['rqst_action'])

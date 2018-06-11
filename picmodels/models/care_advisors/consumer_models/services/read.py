@@ -151,8 +151,11 @@ def filter_db_objects_by_secondary_params(db_objects, validated_get_params):
         list_of_nav_ids = validated_get_params['nav_id_list']
         db_objects = db_objects.filter(navigator__in=list_of_nav_ids)
     if 'cm_client_id_list' in validated_get_params:
-        list_of_cm_client_ids = validated_get_params['cm_client_id_list']
-        db_objects = db_objects.filter(cm_client_for_routing__in=list_of_cm_client_ids)
+        if validated_get_params['cm_client_id'] == 'all':
+            db_objects = db_objects.filter(cm_client_for_routing__isnull=False)
+        else:
+            list_of_cm_client_ids = validated_get_params['cm_client_id_list']
+            db_objects = db_objects.filter(cm_client_for_routing__in=list_of_cm_client_ids)
     if 'referring_cm_client_id_list' in validated_get_params:
         list_of_referring_cm_client_ids = validated_get_params['referring_cm_client_id_list']
         db_objects = db_objects.filter(referring_cm_clients__in=list_of_referring_cm_client_ids)
