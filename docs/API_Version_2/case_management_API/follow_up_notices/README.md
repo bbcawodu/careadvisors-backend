@@ -1,4 +1,4 @@
-# Follow Up Notices Backend API README (IN DEVELOPMENT)
+# Follow Up Notices Backend API README
 
 
 ## Entity Relationship Diagram for Follow Up Notices related data models
@@ -6,7 +6,7 @@
 ![Follow Up Notices Entity Relationship Diagram](follow_up_notices_erd.jpg)
 
 
-### Modify Follow Up Notices Table Rows (IN DEVELOPMENT)
+### Modify Follow Up Notices Table Rows
 To create, update, or delete a row in the FollowUpNotices table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/cm_follow_up_notices/.
 
 - The headers of the request MUST include: 
@@ -116,7 +116,7 @@ In response, a JSON document will be displayed with the following format:
             - It contains the key "row", the value for which is "Deleted".
     
     
-### Follow Up Notices Data Retrieval API (IN DEVELOPMENT)
+### Follow Up Notices Data Retrieval API
 - To read rows from the FollowUpNotices table of the backend, make a GET request to http://picbackend.herokuapp.com/v2/cm_follow_up_notices/
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"

@@ -1,70 +1,112 @@
-from django.db import IntegrityError
-import copy
 import picmodels
 
 
 def create_row_w_validated_params(cls, validated_params, rqst_errors):
+    if 'name' not in validated_params:
+        rqst_errors.append("'name' is a required key in the validated_params argument")
+        return None
+
     row = cls()
-    # row.save()
 
     modify_row_address(row, validated_params)
     row.name = validated_params['name']
 
     if not cls.check_for_rows_with_given_name_and_address(row.name, row.address, rqst_errors):
-        row.save()
-    else:
-        params_copy = copy.deepcopy(validated_params)
-        del(params_copy['name'])
-        del(params_copy['rqst_action'])
-        validated_address_params = params_copy
+        if not rqst_errors:
+            row.save()
 
-        # row.delete()
-        row = None
-        rqst_errors.append(
-            'Row already exists for the name: {} and address: {}'.format(
-                validated_params['name'],
-                validated_address_params
-            )
-        )
+        if 'add_cm_sequences' in validated_params:
+            cm_sequence_ids = validated_params['add_cm_sequences']
+            cm_sequence_rows = []
+            for cm_sequence_id in cm_sequence_ids:
+                cm_sequence_rows.append(
+                    get_case_management_sequences_row_with_given_id(cm_sequence_id, rqst_errors)
+                )
+            if not rqst_errors:
+                check_cm_sequences_for_given_rows(
+                    row.cm_sequences.all(),
+                    cm_sequence_rows,
+                    row,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for cm_sequence_row in cm_sequence_rows:
+                        row.cm_sequences.add(cm_sequence_row)
+
+        if not rqst_errors:
+            row.save()
+        else:
+            row.delete()
+            row = None
 
     return row
 
 
 def update_row_w_validated_params(cls, validated_params, rqst_errors):
+    if 'id' not in validated_params:
+        rqst_errors.append("'id' is a required key in the validated_params argument")
+        return None
+
     rqst_id = validated_params['id']
 
     try:
         row = cls.objects.get(id=rqst_id)
     except cls.DoesNotExist:
-        row = None
         rqst_errors.append('Row does not exist for the id: {}'.format(rqst_id))
+        return None
 
-    if row:
-        if 'name' in validated_params:
-            row.name = validated_params['name']
+    if 'name' in validated_params:
+        row.name = validated_params['name']
 
-        modify_row_address(row, validated_params)
+    modify_row_address(row, validated_params)
 
-        if not cls.check_for_rows_with_given_name_and_address(row.name, row.address, rqst_errors, rqst_id):
-            row.save()
-        else:
-            params_copy = copy.deepcopy(validated_params)
-            del (params_copy['name'])
-            del (params_copy['rqst_action'])
-            validated_address_params = params_copy
-
-            row = None
-            rqst_errors.append(
-                'Row already exists for the name: {} and address: {}'.format(
-                    validated_params['name'],
-                    validated_address_params
+    if not cls.check_for_rows_with_given_name_and_address(row.name, row.address, rqst_errors, rqst_id):
+        if 'add_cm_sequences' in validated_params:
+            cm_sequence_ids = validated_params['add_cm_sequences']
+            cm_sequence_rows = []
+            for cm_sequence_id in cm_sequence_ids:
+                cm_sequence_rows.append(
+                    get_case_management_sequences_row_with_given_id(cm_sequence_id, rqst_errors)
                 )
-            )
+            if not rqst_errors:
+                check_cm_sequences_for_given_rows(
+                    row.cm_sequences.all(),
+                    cm_sequence_rows,
+                    row,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for cm_sequence_row in cm_sequence_rows:
+                        row.cm_sequences.add(cm_sequence_row)
+        elif 'remove_cm_sequences' in validated_params:
+            cm_sequence_ids = validated_params['remove_cm_sequences']
+            cm_sequence_rows = []
+            for cm_sequence_id in cm_sequence_ids:
+                cm_sequence_rows.append(
+                    get_case_management_sequences_row_with_given_id(cm_sequence_id, rqst_errors)
+                )
+            if not rqst_errors:
+                check_cm_sequences_for_not_given_rows(
+                    row.cm_sequences.all(),
+                    cm_sequence_rows,
+                    row,
+                    rqst_errors
+                )
+                if not rqst_errors:
+                    for cm_sequence_row in cm_sequence_rows:
+                        row.cm_sequences.remove(cm_sequence_row)
+
+        if not rqst_errors:
+            row.save()
 
     return row
 
 
 def delete_row_w_validated_params(cls, validated_params, rqst_errors):
+    if 'id' not in validated_params:
+        rqst_errors.append("'id' is a required key in the validated_params argument")
+        return
+
     rqst_id = validated_params['id']
 
     try:
@@ -147,3 +189,38 @@ def check_for_rows_with_given_name_and_address(cls, name, address_row, rqst_erro
                 found_matching_rows = False
 
     return found_matching_rows
+
+
+def get_case_management_sequences_row_with_given_id(sequence_id, rqst_errors):
+    row = None
+
+    if sequence_id:
+        try:
+            row = picmodels.models.CMSequences.objects.get(id=sequence_id)
+        except picmodels.models.CMSequences.DoesNotExist:
+            row = None
+            rqst_errors.append("No CMSequences row found with id: {}".format(sequence_id))
+
+    return row
+
+
+def check_cm_sequences_for_given_rows(cur_cm_sequences, given_cm_sequences, row, rqst_errors):
+    for cm_sequence in given_cm_sequences:
+        if cm_sequence in cur_cm_sequences:
+            rqst_errors.append(
+                "cm_sequence with id: {} already exists in row id {}'s cm_sequences list (Hint - remove from parameter 'add_cm_sequences' list)".format(
+                    cm_sequence.id,
+                    row.id,
+                )
+            )
+
+
+def check_cm_sequences_for_not_given_rows(cur_cm_sequences, given_cm_sequences, row, rqst_errors):
+    for cm_sequence in given_cm_sequences:
+        if cm_sequence not in cur_cm_sequences:
+            rqst_errors.append(
+                "cm_sequence with id: {} already exists in row id {}'s cm_sequences list (Hint - remove from parameter 'remove_cm_sequences' list)".format(
+                    cm_sequence.id,
+                    row.id,
+                )
+            )
