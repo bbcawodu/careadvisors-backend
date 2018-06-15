@@ -13,6 +13,11 @@ from .services.read import get_serialized_rows_by_name
 class CaseManagementClient(models.Model):
     name = models.CharField(max_length=200)
     address = models.ForeignKey(Address, blank=True, null=True, on_delete=models.SET_NULL)
+    cm_sequences = models.ManyToManyField(
+        'CMSequences',
+        related_name='cm_clients_that_use_this_sequence',
+        blank=True,
+    )
 
     class Meta:
         app_label = 'picmodels'
@@ -22,12 +27,20 @@ class CaseManagementClient(models.Model):
         values_dict = {
             "name": self.name,
             "id": self.id,
-            "address": None
+            "address": None,
+            "cm_sequences": None
         }
 
         if self.address:
             address_values = self.address.return_values_dict()
             values_dict['address'] = address_values
+
+        cm_sequences = self.cm_sequences.all()
+        if len(cm_sequences):
+            cm_sequence_values = []
+            for cm_sequence in cm_sequences:
+                cm_sequence_values.append(cm_sequence.id)
+            values_dict["cm_sequences"] = cm_sequence_values
 
         return values_dict
 

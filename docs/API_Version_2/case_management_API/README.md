@@ -14,5 +14,9 @@
 [Contact Log Endpoints API README](contact_log/README.md)
 
 
-## Follow Up Notices Backend API README (IN DEVELOPMENT)
+## Follow Up Notices Backend API README
 [Follow Up Notices Endpoints API README](follow_up_notices/README.md)
+
+
+## Case Management Sequences Backend API README (IN DEVELOPMENT)
+[Case Management Sequences Endpoints API README](sequences/README.md)
