@@ -4,7 +4,7 @@ from picmodels.models import PICConsumer, Navigators, MetricsSubmission, PlanSta
     HealthcareServiceCostEntry, HospitalWebTrafficData, ConsumerHospitalInfo, CaseManagementStatus,\
     CareAdvisorCustomer, ConsumerNote, ProviderLocation, ProviderNetwork, ConsumerSpecificConcern,\
     ConsumerGeneralConcern, HealthcareSubsidyEligibilityByFamSize, HealthcareServiceExpertise, MarketplaceAppointments,\
-    Resume, Job, Education
+    Resume, Job, Education, StepsForCMSequences
 from presencescheduler.models import PICUser, Appointment, Location
 
 # Register your models here.
@@ -40,3 +40,4 @@ admin.site.register(MarketplaceAppointments)
 admin.site.register(Resume)
 admin.site.register(Job)
 admin.site.register(Education)
+admin.site.register(StepsForCMSequences)

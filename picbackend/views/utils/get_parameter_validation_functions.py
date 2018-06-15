@@ -113,6 +113,15 @@ def validate_get_rqst_parameter_referring_cm_client_id(get_rqst_params, validate
         validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
 
 
+def validate_get_rqst_parameter_cm_sequence_id(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'cm_sequence_id'
+
+    if param_name in get_rqst_params:
+        validate_int_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        validate_int_list_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
 def validate_get_rqst_parameter_approved_cm_client_id(get_rqst_params, validated_params, rqst_errors):
     param_name = 'approved_cm_client_id'
 
@@ -671,6 +680,7 @@ GET_PARAMETER_VALIDATION_FUNCTIONS = {
     "cm_client_id": validate_get_rqst_parameter_cm_client_id,
     "referring_cm_client_id": validate_get_rqst_parameter_referring_cm_client_id,
     "approved_cm_client_id": validate_get_rqst_parameter_approved_cm_client_id,
+    "cm_sequence_id": validate_get_rqst_parameter_cm_sequence_id,
 
     "mpn": validate_get_rqst_parameter_mpn,
     "region": validate_get_rqst_parameter_region,

@@ -1,5 +1,6 @@
 from picbackend.views.utils import clean_int_value_from_dict_object
 from picbackend.views.utils import clean_string_value_from_dict_object
+from picbackend.views.utils import clean_list_value_from_dict_object
 
 
 def validate_put_rqst_params(rqst_body, rqst_errors):
@@ -70,6 +71,25 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
         )
         validated_params["zipcode"] = zipcode
 
+    if 'add_cm_sequences' in rqst_body:
+        add_cm_sequences = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "add_cm_sequences",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_cm_sequence_ids = []
+        for cm_sequence_id in add_cm_sequences:
+            if not isinstance(cm_sequence_id, int):
+                rqst_errors.append('Error: A cm_sequence_id in \'add_cm_sequences\' is not an integer.')
+                continue
+
+            validated_cm_sequence_ids.append(cm_sequence_id)
+
+        validated_params['add_cm_sequences'] = validated_cm_sequence_ids
+
 
 def validate_update_row_params(rqst_body, validated_params, rqst_errors):
     if "name" in rqst_body:
@@ -121,3 +141,39 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
             empty_string_allowed=True
         )
         validated_params["zipcode"] = zipcode
+
+    if 'add_cm_sequences' in rqst_body:
+        add_cm_sequences = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "add_cm_sequences",
+            rqst_errors,
+            empty_list_allowed=True
+        )
+
+        validated_cm_sequence_ids = []
+        for cm_sequence_id in add_cm_sequences:
+            if not isinstance(cm_sequence_id, int):
+                rqst_errors.append('Error: A cm_sequence_id in \'add_cm_sequences\' is not an integer.')
+                continue
+
+            validated_cm_sequence_ids.append(cm_sequence_id)
+
+        validated_params['add_cm_sequences'] = validated_cm_sequence_ids
+    elif 'remove_base_locations' in rqst_body:
+        remove_cm_sequences = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "remove_cm_sequences",
+            rqst_errors
+        )
+
+        validated_cm_sequence_ids = []
+        for cm_sequence_id in remove_cm_sequences:
+            if not isinstance(cm_sequence_id, int):
+                rqst_errors.append('Error: A cm_sequence_id in \'remove_cm_sequences\' is not an integer.')
+                continue
+
+            validated_cm_sequence_ids.append(cm_sequence_id)
+
+        validated_params['remove_cm_sequences'] = validated_cm_sequence_ids

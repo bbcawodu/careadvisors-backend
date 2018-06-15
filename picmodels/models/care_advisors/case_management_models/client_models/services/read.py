@@ -10,6 +10,7 @@ def get_serialized_rows_by_id(cls, validated_params,  rqst_errors):
 
     db_qset = prefetch_related_rows(cls.objects.all())
     db_qset = filter_db_queryset_by_id(db_qset, rqst_id, list_of_ids)
+    db_qset = filter_db_objects_by_secondary_params(db_qset, validated_params)
 
     response_list = create_response_list_from_db_objects(db_qset)
 
@@ -33,6 +34,7 @@ def get_serialized_rows_by_name(cls, validated_params, rqst_errors):
 
     db_qset = filter_rows_by_name(cls.objects.all(), rqst_name)
     db_qset = prefetch_related_rows(db_qset)
+    db_qset = filter_db_objects_by_secondary_params(db_qset, validated_params)
 
     response_list = create_response_list_from_db_objects(db_qset)
 
@@ -52,6 +54,14 @@ def create_response_list_from_db_objects(db_objects):
         return_list.append(db_instance.return_values_dict())
 
     return return_list
+
+
+def filter_db_objects_by_secondary_params(db_objects, validated_get_params):
+    if 'cm_sequence_id_list' in validated_get_params:
+        list_of_cm_sequence_ids = validated_get_params['cm_sequence_id_list']
+        db_objects = db_objects.filter(cm_sequences__in=list_of_cm_sequence_ids)
+
+    return db_objects
 
 
 def prefetch_related_rows(qset):
