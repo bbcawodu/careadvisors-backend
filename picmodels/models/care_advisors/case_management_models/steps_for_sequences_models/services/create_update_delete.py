@@ -1,4 +1,3 @@
-import picmodels
 from django.db import IntegrityError
 from django.apps import apps
 
@@ -20,23 +19,28 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
     if rqst_errors:
         return None
 
-    if not rqst_errors:
-        row.step_class_name = step_table_class.__name__
-        row.step_table_name = step_table_class._meta.db_table
-        row.step_name = validated_params['step_name']
-        row.step_number = validated_params['step_number']
+    if 'step_table_name' in validated_params:
+        step_table_name_found = check_db_schema_for_table_name(validated_params['step_table_name'], rqst_errors)
+        if not step_table_name_found:
+            return None
 
-        if 'step_table_name' in validated_params:
-            row.step_table_name = validated_params['step_table_name']
+    if rqst_errors:
+        return None
 
-        try:
-            row.save()
-        except IntegrityError:
-            rqst_errors.append(
-                "'step_name', 'step_table_name', and 'step_class_name' must be unique for row to be saved. A row already with the same values for those columns."
-            )
-    else:
-        row = None
+    row.step_class_name = step_table_class.__name__
+    row.step_table_name = step_table_class._meta.db_table
+    row.step_name = validated_params['step_name']
+    row.step_number = validated_params['step_number']
+
+    if 'step_table_name' in validated_params:
+        row.step_table_name = validated_params['step_table_name']
+
+    try:
+        row.save()
+    except IntegrityError:
+        rqst_errors.append(
+            "'step_name', 'step_table_name', and 'step_class_name' must be unique for row to be saved. A row already with the same values for those columns."
+        )
 
     return row
 
@@ -61,6 +65,10 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         row.step_class_name = step_table_class.__name_
 
     if "step_table_name" in validated_params:
+        step_table_name_found = check_db_schema_for_table_name(validated_params['step_table_name'], rqst_errors)
+        if not step_table_name_found:
+            return None
+
         row.step_table_name = validated_params["step_table_name"]
     if "step_name" in validated_params:
         row.step_name = validated_params["step_name"]
@@ -110,3 +118,20 @@ def get_step_table_class_with_given_class_name(step_class_name, rqst_errors):
             rqst_errors.append("No class found in app for given step_class_name")
 
     return step_table_class
+
+
+def check_db_schema_for_table_name(table_name, rqst_errors):
+    table_name_found = False
+
+    if table_name:
+        app_models = apps.get_app_config('picmodels').get_models()
+
+        for model in app_models:
+            if model._meta.db_table_ == table_name:
+                table_name_found = True
+                break
+
+        if not table_name_found:
+            rqst_errors.append("No table in db found for given table_name")
+
+    return table_name_found
