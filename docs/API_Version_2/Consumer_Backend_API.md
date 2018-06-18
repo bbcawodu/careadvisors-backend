@@ -319,6 +319,13 @@ In response, a JSON document will be displayed with the following format:
             - Can be multiple values separated by commas.
         - "is_cps_consumer" corresponds to whether consumer is a Chicago Public Schools consumer.
             - must be of type boolean (true or false)
+        - "cm_client_id" corresponds to the cm_client_for_routing field database id.
+            - Must be an integer
+            - Can be multiple values separated by commas.
+            - passing "all" as the value will return all rows with a non null value for cm_client.
+        - "referring_cm_client_id" corresponds to the referring_cm_client_id field database id.
+            - Must be an integer
+            - Can be multiple values separated by commas.
         - "page" corresponds to the current page of consumer instances to be displayed with full fields.
             - if this parameter is missing, the first 20 consumer instances will be displayed with full fields.
         
