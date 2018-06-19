@@ -11,6 +11,7 @@ from .services.read import get_serialized_rows_by_name
 
 class CMSequences(models.Model):
     name = models.CharField(max_length=200, unique=True)
+    steps = models.ManyToManyField("StepsForCMSequences", blank=True, null=True)
 
     class Meta:
         app_label = 'picmodels'
@@ -19,8 +20,16 @@ class CMSequences(models.Model):
     def return_values_dict(self):
         values_dict = {
             "name": self.name,
+            "steps": None,
             "id": self.id,
         }
+
+        sequence_steps = self.steps.all()
+        if len(sequence_steps):
+            sequence_step_values = []
+            for step in sequence_steps:
+                sequence_step_values.append(step.return_values_dict())
+            values_dict["steps"] = sequence_step_values
 
         return values_dict
 CMSequences.create_row_w_validated_params = classmethod(create_row_w_validated_params)
