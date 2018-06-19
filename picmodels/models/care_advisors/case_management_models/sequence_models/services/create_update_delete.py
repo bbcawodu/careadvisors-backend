@@ -1,19 +1,40 @@
+import picmodels
+
+
 def create_row_w_validated_params(cls, validated_params, rqst_errors):
     if 'name' not in validated_params:
         rqst_errors.append("'name' is a required key in the validated_params argument")
         return None
 
-    if not cls.check_for_rows_with_given_name(validated_params['name'], rqst_errors):
-        row = cls()
-        row.name = validated_params['name']
-        row.save()
-    else:
-        row = None
-        rqst_errors.append(
-            'Row already exists for the name: {}'.format(
-                validated_params['name']
+    if cls.check_for_rows_with_given_name(validated_params['name'], rqst_errors):
+        return None
+
+    row = cls()
+    row.name = validated_params['name']
+    row.save()
+
+    if 'add_steps' in validated_params:
+        steps_info = validated_params['add_steps']
+        cmstepsforsequences_rows = []
+        for step_id in steps_info:
+            cmstepsforsequences_rows.append(
+                get_stepsforcmsequences_row_with_given_id(step_id, rqst_errors)
             )
-        )
+        if not rqst_errors:
+            check_steps_for_given_rows(
+                row.steps.all(),
+                cmstepsforsequences_rows,
+                row,
+                rqst_errors
+            )
+            if not rqst_errors:
+                for step_row in cmstepsforsequences_rows:
+                    row.steps.add(step_row)
+    if rqst_errors:
+        row.delete()
+        return None
+
+    row.save()
 
     return row
 
@@ -31,18 +52,50 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         rqst_errors.append('Row does not exist for the id: {}'.format(rqst_id))
         return None
 
+    if 'add_steps' in validated_params:
+        steps_info = validated_params['add_steps']
+        cmstepsforsequences_rows = []
+        for step_id in steps_info:
+            cmstepsforsequences_rows.append(
+                get_stepsforcmsequences_row_with_given_id(step_id, rqst_errors)
+            )
+        if not rqst_errors:
+            check_steps_for_given_rows(
+                row.steps.all(),
+                cmstepsforsequences_rows,
+                row,
+                rqst_errors
+            )
+            if not rqst_errors:
+                for step_row in cmstepsforsequences_rows:
+                    row.steps.add(step_row)
+    elif 'remove_steps' in validated_params:
+        steps_info = validated_params['remove_steps']
+        cmstepsforsequences_rows = []
+        for step_id in steps_info:
+            cmstepsforsequences_rows.append(
+                get_stepsforcmsequences_row_with_given_id(step_id, rqst_errors)
+            )
+        if not rqst_errors:
+            check_steps_for_not_given_rows(
+                row.steps.all(),
+                cmstepsforsequences_rows,
+                row,
+                rqst_errors
+            )
+            if not rqst_errors:
+                for step_row in cmstepsforsequences_rows:
+                    row.steps.remove(step_row)
+    if rqst_errors:
+        return None
+
     if 'name' in validated_params:
         row.name = validated_params['name']
 
-    if not cls.check_for_rows_with_given_name(row.name, rqst_errors, rqst_id):
-        row.save()
-    else:
-        row = None
-        rqst_errors.append(
-            'Row already exists for the name: {}'.format(
-                validated_params['name']
-            )
-        )
+    if cls.check_for_rows_with_given_name(row.name, rqst_errors, rqst_id):
+        return None
+
+    row.save()
 
     return row
 
@@ -89,3 +142,38 @@ def check_for_rows_with_given_name(cls, name, rqst_errors, current_id=None):
                 found_matching_rows = False
 
     return found_matching_rows
+
+
+def get_stepsforcmsequences_row_with_given_id(row_id, rqst_errors):
+    row = None
+
+    if row_id:
+        try:
+            row = picmodels.models.StepsForCMSequences.objects.get(id=row_id)
+        except picmodels.models.StepsForCMSequences.DoesNotExist:
+            row = None
+            rqst_errors.append("No StepsForCMSequences row found with id: {}".format(row_id))
+
+    return row
+
+
+def check_steps_for_given_rows(cur_steps_qset, given_steps_list, row, rqst_errors):
+    for cm_step in given_steps_list:
+        if cm_step in cur_steps_qset:
+            rqst_errors.append(
+                "cm_step with id: {} already exists in row id {}'s steps list (Hint - remove from parameter 'add_steps' list)".format(
+                    cm_step.id,
+                    row.id,
+                )
+            )
+
+
+def check_steps_for_not_given_rows(cur_steps_qset, given_steps_list, row, rqst_errors):
+    for cm_step in given_steps_list:
+        if cm_step not in cur_steps_qset:
+            rqst_errors.append(
+                "cm_step with id: {} does not exists in row id {}'s steps list (Hint - remove from parameter 'remove_stepst' list)".format(
+                    cm_step.id,
+                    row.id,
+                )
+            )

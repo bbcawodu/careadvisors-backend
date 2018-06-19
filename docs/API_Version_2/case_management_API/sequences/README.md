@@ -18,6 +18,14 @@ The body of the request must be a JSON document using the following template:
 ```
 {
     "name": String,
+    "add_steps": [
+        Integer,
+        ...
+    ](Rows with id's must exist in StepsForCMSequences table and not in given CMSequences row's steps column),
+    "remove_steps": [
+        Integer,
+        ...
+    ](Rows with id's must exist in StepsForCMSequences table and in given CMSequences row's steps column),
     
     "db_action": String,
     "id": Integer,
@@ -42,12 +50,19 @@ In response, a JSON document will be displayed with the following format:
     
         - Keys that can be omitted:
             - "id"
+            - "add_steps"
             
         - Keys that can be empty strings:
             - "name"
+            
+        - Keys that can be empty arrays:
+            - "add_steps"
         
         - Keys that can be Null
             - None
+            
+        - Keys that will NOT be read:
+            - "remove_steps"
 
     - If there are no errors in the JSON Body document:        
         - The response JSON document will have a dictionary object as the value for the "Data" key.
@@ -63,6 +78,9 @@ In response, a JSON document will be displayed with the following format:
         
         - Keys that can be empty strings:
             - "name"
+            
+        - Keys that can be empty arrays:
+            - "add_steps"
         
         - Keys that can be Null
             - None
@@ -104,6 +122,17 @@ In response, a JSON document will be displayed with the following format:
         "Data": [
             {
                  "name": String,
+                 "steps": [
+                    {
+                        "step_name": String,
+                        "step_table_name": String,
+                        "step_class_name": String,
+                        "step_number": Integer,
+                        "id": Integer,
+                    },
+                    ...
+                 ],
+                 "id": Integer,
             },
             ...,
             ...,

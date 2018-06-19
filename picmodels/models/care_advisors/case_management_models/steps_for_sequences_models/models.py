@@ -5,8 +5,8 @@ from .services.create_update_delete import create_row_w_validated_params
 from .services.create_update_delete import update_row_w_validated_params
 from .services.create_update_delete import delete_row_w_validated_params
 
-# from .services.read import get_serialized_rows_by_id
-# from .services.read import get_serialized_rows_by_name
+from .services.read import get_serialized_rows_by_id
+from .services.read import get_serialized_rows_by_name
 
 
 class StepsForCMSequences(models.Model):
@@ -33,5 +33,5 @@ class StepsForCMSequences(models.Model):
 StepsForCMSequences.create_row_w_validated_params = classmethod(create_row_w_validated_params)
 StepsForCMSequences.update_row_w_validated_params = classmethod(update_row_w_validated_params)
 StepsForCMSequences.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
-# StepsForCMSequences.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
-# StepsForCMSequences.get_serialized_rows_by_name = classmethod(get_serialized_rows_by_name)
+StepsForCMSequences.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
+StepsForCMSequences.get_serialized_rows_by_name = classmethod(get_serialized_rows_by_name)
