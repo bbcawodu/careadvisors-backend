@@ -17,6 +17,7 @@ class CMSequencesTestCase(DBModelsBaseTestCase, TestCase):
 
     def test_create_row_w_validated_params(self):
         validated_params = copy.deepcopy(self.validated_params)
+        validated_params["add_steps"] = [3]
         test_errors = []
 
         db_row = self.use_create_row_w_validated_params(
@@ -44,7 +45,28 @@ class CMSequencesTestCase(DBModelsBaseTestCase, TestCase):
     def test_update_row_w_validated_params(self):
         validated_params = copy.deepcopy(self.validated_params)
         validated_params["db_action"] = "update"
+        validated_params["add_steps"] = [3]
         validated_params["id"] = 3
+
+        test_errors = []
+
+        db_row = self.use_update_row_w_validated_params(
+            validated_params,
+            test_errors
+        )
+
+        if db_row:
+            self.assertEqual(
+                db_row.name,
+                validated_params['name'],
+                "row name: {}, request name: {}".format(db_row.name, validated_params['name'])
+            )
+
+        validated_params = copy.deepcopy(self.validated_params)
+        validated_params["db_action"] = "update"
+        validated_params["name"] = "update"
+        validated_params["remove_steps"] = [3]
+        validated_params["id"] = 4
 
         test_errors = []
 

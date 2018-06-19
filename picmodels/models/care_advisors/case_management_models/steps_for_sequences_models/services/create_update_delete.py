@@ -62,7 +62,7 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         step_table_class = get_step_table_class_with_given_class_name(validated_params["step_class_name"], rqst_errors)
         if rqst_errors:
             return None
-        row.step_class_name = step_table_class.__name_
+        row.step_class_name = step_table_class.__name__
 
     if "step_table_name" in validated_params:
         step_table_name_found = check_db_schema_for_table_name(validated_params['step_table_name'], rqst_errors)

@@ -27,6 +27,15 @@ The body of the request must be a JSON document using the following template:
     "zipcode": String,
     "country": String,
     
+    "add_cm_sequences": [
+        Integer,
+        ...
+    ](Rows with id's must exist in CMSequences table and not in given CMSequences row's cm_sequences column),
+    "remove_cm_sequences": [
+        Integer,
+        ...
+    ](Rows with id's must exist in CMSequences table and in given CMSequences row's cm_sequences column),
+    
     "db_action": String,
     "id": Integer,
 }
@@ -55,6 +64,10 @@ In response, a JSON document will be displayed with the following format:
             - "city"
             - "state_province"
             - "zipcode"
+            - "add_cm_sequences"
+            
+        - Keys that can be empty arrays:
+            - "add_cm_sequences"
             
         - Keys that can be empty strings:
             - "name"
@@ -66,6 +79,9 @@ In response, a JSON document will be displayed with the following format:
         
         - Keys that can be Null
             - None
+            
+        - Keys that will NOT be read:
+            - "remove_cm_sequences"
 
     - If there are no errors in the JSON Body document:        
         - The response JSON document will have a dictionary object as the value for the "Data" key.
@@ -78,6 +94,9 @@ In response, a JSON document will be displayed with the following format:
     
         - Keys that can be omitted:
             - all except "id" and "db_action"
+            
+        - Keys that can be empty arrays:
+            - "add_cm_sequences"
         
         - Keys that can be empty strings:
             - "name"
@@ -135,6 +154,9 @@ In response, a JSON document will be displayed with the following format:
                      "country": "United States of America",
                      "city": "Chicago",
                  },
+                 "cm_sequences": [
+                    1
+                 ],
             },
             ...,
             ...,
