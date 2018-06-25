@@ -58,6 +58,16 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
             )
         )
 
+    if 'rest_url' in rqst_body:
+        validated_params['rest_url'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "rest_url",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
 
 def validate_update_row_params(rqst_body, validated_params, rqst_errors):
     if 'step_name' in rqst_body:
@@ -99,3 +109,13 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
                     validated_params['step_number']
                 )
             )
+
+    if 'rest_url' in rqst_body:
+        validated_params['rest_url'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "rest_url",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )

@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from picmodels.tests.test_models.base import DBModelsBaseTestCase
+from picmodels.tests.models.base import DBModelsBaseTestCase
 
 from picmodels.models import MarketplaceAppointments
 

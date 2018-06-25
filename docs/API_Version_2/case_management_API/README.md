@@ -22,5 +22,5 @@
 [Case Management Sequences Endpoints API README](sequences/README.md)
 
 
-## Steps for CM Sequences Backend API README (IN DEVELOPMENT)
+## Steps for CM Sequences Backend API README
 [Steps for CM Sequences Endpoints API README](steps_for_cm_sequences/README.md)
