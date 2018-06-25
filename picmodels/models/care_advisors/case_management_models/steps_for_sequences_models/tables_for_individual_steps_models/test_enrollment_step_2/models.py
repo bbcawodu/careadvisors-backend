@@ -7,7 +7,7 @@ from django.db import models
 # from .services.read import get_serialized_rows_by_id
 
 
-class TestEnrollmentStep(models.Model):
+class TestEnrollmentStep2(models.Model):
     consumer = models.ForeignKey('PICConsumer', on_delete=models.CASCADE)
     navigator = models.ForeignKey('Navigators', on_delete=models.CASCADE)
     cm_client = models.ForeignKey('CaseManagementClient', on_delete=models.CASCADE)
@@ -24,7 +24,7 @@ class TestEnrollmentStep(models.Model):
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
-        rest_url = 'test_enrollment_step'
+        rest_url = 'test_enrollment_step_2'
 
     def return_values_dict(self):
         values_dict = {

@@ -67,6 +67,8 @@ urlpatterns = [
     url(r"^v2/cm_sequences/$", views.CMSequencesManagementView.as_view()),
     url(r"^v2/steps_for_cm_sequences/$", views.StepsForCMSequencesManagementView.as_view()),
 
+    url(r"v2/default_enrollment_step_1/$", views.DefaultEnrollmentStep1ManagementView.as_view()),
+
     # urls for navigators views
     url(r"^v2/navigators/$", views.NavigatorManagementView.as_view()),
     url(r"^v2/navigator_sign_up/$", views.NavigatorSignUpView.as_view()),

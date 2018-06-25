@@ -4,13 +4,13 @@ import copy
 
 from django.test import TestCase
 
-from picmodels.tests.test_models.base import DBModelsBaseTestCase
+from picmodels.tests.models.base import DBModelsBaseTestCase
 
-from picmodels.models import ContactLog
+from picmodels.models import DefaultEnrollmentStep1
 
 
-class ContactLogTestCase(DBModelsBaseTestCase, TestCase):
-    db_model = ContactLog
+class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
+    db_model = DefaultEnrollmentStep1
     validated_params = {
         "consumer_id": 1,
         "navigator_id": 1,

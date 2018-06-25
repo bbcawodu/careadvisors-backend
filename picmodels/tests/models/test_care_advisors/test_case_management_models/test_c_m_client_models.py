@@ -1,7 +1,7 @@
 import copy
 from django.test import TestCase
 
-from picmodels.tests.test_models.base import DBModelsBaseTestCase
+from picmodels.tests.models.base import DBModelsBaseTestCase
 
 from picmodels.models import CaseManagementClient
 
@@ -9,7 +9,7 @@ from picmodels.models import CaseManagementClient
 class CaseManagementClientTestCase(DBModelsBaseTestCase, TestCase):
     db_model = CaseManagementClient
     validated_params = {
-        "name": "Neonatal",
+        "name": "Going Merry",
         "address_line_1": "6541 N. Glenwood",
         "address_line_2": "Apt. 104",
         "city": "Chicago",

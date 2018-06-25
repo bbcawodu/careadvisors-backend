@@ -21,7 +21,7 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
                 get_stepsforcmsequences_row_with_given_id(step_id, rqst_errors)
             )
         if not rqst_errors:
-            check_steps_for_given_rows(
+            check_steps_for_given_rows_or_matching_step_number(
                 row.steps.all(),
                 cmstepsforsequences_rows,
                 row,
@@ -60,7 +60,7 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
                 get_stepsforcmsequences_row_with_given_id(step_id, rqst_errors)
             )
         if not rqst_errors:
-            check_steps_for_given_rows(
+            check_steps_for_given_rows_or_matching_step_number(
                 row.steps.all(),
                 cmstepsforsequences_rows,
                 row,
@@ -157,8 +157,11 @@ def get_stepsforcmsequences_row_with_given_id(row_id, rqst_errors):
     return row
 
 
-def check_steps_for_given_rows(cur_steps_qset, given_steps_list, row, rqst_errors):
+def check_steps_for_given_rows_or_matching_step_number(cur_steps_qset, given_steps_list, row, rqst_errors):
     for cm_step in given_steps_list:
+        if rqst_errors:
+            break
+
         if cm_step in cur_steps_qset:
             rqst_errors.append(
                 "cm_step with id: {} already exists in row id {}'s steps list (Hint - remove from parameter 'add_steps' list)".format(
@@ -166,6 +169,8 @@ def check_steps_for_given_rows(cur_steps_qset, given_steps_list, row, rqst_error
                     row.id,
                 )
             )
+        else:
+            check_steps_for_row_with_given_step_number(cur_steps_qset, cm_step, row, rqst_errors)
 
 
 def check_steps_for_not_given_rows(cur_steps_qset, given_steps_list, row, rqst_errors):
@@ -177,3 +182,16 @@ def check_steps_for_not_given_rows(cur_steps_qset, given_steps_list, row, rqst_e
                     row.id,
                 )
             )
+
+
+def check_steps_for_row_with_given_step_number(cur_steps_qset, given_step_row, row, rqst_errors):
+    for cm_step in cur_steps_qset:
+        if cm_step.step_number == given_step_row.step_number:
+            rqst_errors.append(
+                "cm_step with id: {} has a step_number of: {}, which already exists in row id {}'s steps list (Hint - remove from parameter 'add_steps' list)".format(
+                    given_step_row.id,
+                    given_step_row.step_number,
+                    row.id,
+                )
+            )
+            break

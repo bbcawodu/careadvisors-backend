@@ -1,10 +1,10 @@
 from django.db import models
 
-# from .services.create_update_delete import create_row_w_validated_params
-# from .services.create_update_delete import update_row_w_validated_params
-# from .services.create_update_delete import delete_row_w_validated_params
-#
-# from .services.read import get_serialized_rows_by_id
+from .services.create_update_delete import create_row_w_validated_params
+from .services.create_update_delete import update_row_w_validated_params
+from .services.create_update_delete import delete_row_w_validated_params
+
+from .services.read import get_serialized_rows_by_id
 
 
 class DefaultEnrollmentStep1(models.Model):
@@ -24,6 +24,7 @@ class DefaultEnrollmentStep1(models.Model):
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
+        rest_url = 'default_enrollment_step_1'
 
     def return_values_dict(self):
         values_dict = {
@@ -44,7 +45,7 @@ class DefaultEnrollmentStep1(models.Model):
         }
 
         return values_dict
-# DefaultEnrollmentStep1.create_row_w_validated_params = classmethod(create_row_w_validated_params)
-# DefaultEnrollmentStep1.update_row_w_validated_params = classmethod(update_row_w_validated_params)
-# DefaultEnrollmentStep1.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
-# DefaultEnrollmentStep1.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
+DefaultEnrollmentStep1.create_row_w_validated_params = classmethod(create_row_w_validated_params)
+DefaultEnrollmentStep1.update_row_w_validated_params = classmethod(update_row_w_validated_params)
+DefaultEnrollmentStep1.delete_row_w_validated_params = classmethod(delete_row_w_validated_params)
+DefaultEnrollmentStep1.get_serialized_rows_by_id = classmethod(get_serialized_rows_by_id)
