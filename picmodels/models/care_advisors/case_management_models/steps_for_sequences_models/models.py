@@ -14,6 +14,7 @@ class StepsForCMSequences(models.Model):
     step_table_name = models.CharField(max_length=500, unique=True)
     step_class_name = models.CharField(max_length=500, unique=True)
     step_number = models.IntegerField(validators=[MinValueValidator(0), ])
+    rest_url = models.CharField(max_length=500, unique=True, blank=True, null=True)
 
     class Meta:
         app_label = 'picmodels'
@@ -25,6 +26,7 @@ class StepsForCMSequences(models.Model):
             "step_table_name": self.step_table_name,
             "step_class_name": self.step_class_name,
             "step_number": self.step_number,
+            "rest_url": self.rest_url,
 
             "id": self.id,
         }

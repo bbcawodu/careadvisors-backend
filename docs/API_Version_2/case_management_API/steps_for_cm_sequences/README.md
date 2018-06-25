@@ -1,4 +1,4 @@
-# Steps for CM Sequences Backend API README (IN DEVELOPMENT)
+# Steps for CM Sequences Backend API README
 
 
 ## Entity Relationship Diagram for "Steps for CM Sequences" related data models
@@ -6,7 +6,7 @@
 ![Steps for CM Sequences Entity Relationship Diagram](steps_for_cm_sequences_erd.jpg)
 
 
-### Modify Steps for CM Sequences Table Rows (IN DEVELOPMENT)
+### Modify Steps for CM Sequences Table Rows
 To create, update, or delete a row in the StepsForCMSequences table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/steps_for_cm_sequences/.
 
 - The headers of the request MUST include: 
@@ -18,9 +18,10 @@ The body of the request must be a JSON document using the following template:
 ```
 {
     "step_name": String,
-    "step_table_name": String (Table MUST be present in db schema.),
+    "step_table_name": String (Table MUST be present in db schema. When creating a new row, will be set to the _meta.db_table value of the associated class if it is present in class meta values and key is not present in request.),
     "step_class_name": String (Class model for Table MUST be present in db schema.),
     "step_number": Integer (Must be > than 0),
+    "rest_url": String (url for REST API. When creating a new row, will be set to the _meta.rest_url value of the associated class if it is present in class meta values and key is not present in request.),
     
     "db_action": String,
     "id": Integer,
@@ -86,7 +87,7 @@ In response, a JSON document will be displayed with the following format:
             - It contains the key "row", the value for which is "Deleted".
     
     
-### Steps for CM Sequences Data Retrieval API (IN DEVELOPMENT)
+### Steps for CM Sequences Data Retrieval API
 - To read rows from the StepsForCMSequences table of the backend, make a GET request to http://picbackend.herokuapp.com/v2/steps_for_cm_sequences/
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"
@@ -111,6 +112,7 @@ In response, a JSON document will be displayed with the following format:
                 "step_table_name": String,
                 "step_class_name": String,
                 "step_number": Integer,
+                "rest_url": String,
             },
             ...,
             ...,

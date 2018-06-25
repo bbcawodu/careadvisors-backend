@@ -29,11 +29,15 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
 
     row.step_class_name = step_table_class.__name__
     row.step_table_name = step_table_class._meta.db_table
+    if hasattr(step_table_class._meta, "rest_url") and step_table_class._meta.rest_url:
+        row.rest_url = step_table_class._meta.rest_url
     row.step_name = validated_params['step_name']
     row.step_number = validated_params['step_number']
 
     if 'step_table_name' in validated_params:
         row.step_table_name = validated_params['step_table_name']
+    if 'rest_url' in validated_params:
+        row.rest_url = validated_params['rest_url']
 
     try:
         row.save()
@@ -41,6 +45,7 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
         rqst_errors.append(
             "'step_name', 'step_table_name', and 'step_class_name' must be unique for row to be saved. A row already with the same values for those columns."
         )
+        return None
 
     return row
 
@@ -74,6 +79,8 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         row.step_name = validated_params["step_name"]
     if "step_number" in validated_params:
         row.step_number = validated_params["step_number"]
+    if 'rest_url' in validated_params:
+        row.rest_url = validated_params['rest_url']
 
     if not rqst_errors:
         try:
@@ -82,6 +89,7 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
             rqst_errors.append(
                 "'step_name', 'step_table_name', and 'step_class_name' must be unique for row to be saved. A row already with the same values for those columns."
             )
+            return None
     else:
         return None
 
