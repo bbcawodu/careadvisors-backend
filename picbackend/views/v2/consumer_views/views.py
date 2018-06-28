@@ -148,10 +148,10 @@ def get_and_add_consumer_data_to_response(request, db_model, validated_GET_rqst_
         print('Retrieved and parsed consumer table data.')
         sys.stdout.flush()
 
-        paginate_results()
-
-        print('Paginated Results.')
-        sys.stdout.flush()
+        # paginate_results()
+        #
+        # print('Paginated Results.')
+        # sys.stdout.flush()
 
         response_raw_data['Data'] = data_list
 
