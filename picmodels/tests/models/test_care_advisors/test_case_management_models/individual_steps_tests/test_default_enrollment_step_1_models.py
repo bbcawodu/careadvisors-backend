@@ -15,12 +15,12 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
         "consumer_id": 1,
         "navigator_id": 1,
         "cm_client_id": 1,
+        "cm_sequence_id": 2,
 
-        "status": "completed",
-        "contact_type": "email",
         "notes": "asihfiasuhw",
-        "datetime_contacted": datetime.datetime.strptime("2018-06-22T17:00:00", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC),
-        "outcome": "wqoisaajfisajk",
+        "tracking_no": "apple",
+        "user_name": "sauce",
+        "datetime_completed": datetime.datetime.strptime("2018-06-22T17:00:00", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC),
 
         "db_action": "create",
     }
@@ -43,15 +43,6 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
 
     def test_create_row_w_validated_params_errors(self):
         validated_params = copy.deepcopy(self.validated_params)
-        validated_params['status'] = 'shit_myself'
-        test_errors = []
-
-        db_row = self.use_create_row_w_validated_params_w_errors(
-            validated_params,
-            test_errors
-        )
-
-        validated_params = copy.deepcopy(self.validated_params)
         del validated_params['consumer_id']
         test_errors = []
 
@@ -61,16 +52,7 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
         )
 
         validated_params = copy.deepcopy(self.validated_params)
-        del validated_params['status']
-        test_errors = []
-
-        db_row = self.use_create_row_w_validated_params_w_errors(
-            validated_params,
-            test_errors
-        )
-
-        validated_params = copy.deepcopy(self.validated_params)
-        del validated_params['contact_type']
+        validated_params['cm_sequence_id'] = 1
         test_errors = []
 
         db_row = self.use_create_row_w_validated_params_w_errors(
@@ -81,7 +63,7 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
     def test_update_row_w_validated_params(self):
         validated_params = copy.deepcopy(self.validated_params)
         validated_params["db_action"] = "update"
-        validated_params["id"] = 9
+        validated_params["id"] = 1
 
         test_errors = []
 
@@ -101,6 +83,17 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
         validated_params = {
             "db_action":  "update",
         }
+        test_errors = []
+
+        db_row = self.use_update_row_w_validated_params_w_errors(
+            validated_params,
+            test_errors
+        )
+
+        validated_params = copy.deepcopy(self.validated_params)
+        validated_params["db_action"] = "update"
+        validated_params["consumer_id"] = 2
+        validated_params["id"] = 1
         test_errors = []
 
         db_row = self.use_update_row_w_validated_params_w_errors(
@@ -147,20 +140,9 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
         validated_params = {
             "id": u"all",
             "consumer_id_list": [
-                4
+                10
             ],
         }
-        test_errors = []
-
-        serialized_table_data = self.use_get_serialized_rows_by_id(
-            validated_params,
-            test_errors
-        )
-        self.assertEqual(len(serialized_table_data), 7, "{}".format(serialized_table_data))
-
-        validated_params["consumer_id_list"] = [
-            2
-        ]
         test_errors = []
 
         serialized_table_data = self.use_get_serialized_rows_by_id(
@@ -178,12 +160,10 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 4, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 1, "{}".format(serialized_table_data))
 
         validated_params["consumer_id_list"] = [
-            1,
-            2,
-            4
+            2
         ]
         test_errors = []
 
@@ -191,7 +171,20 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 12, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 3, "{}".format(serialized_table_data))
+
+        validated_params["consumer_id_list"] = [
+            1,
+            2,
+            10
+        ]
+        test_errors = []
+
+        serialized_table_data = self.use_get_serialized_rows_by_id(
+            validated_params,
+            test_errors
+        )
+        self.assertEqual(len(serialized_table_data), 5, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
@@ -205,7 +198,7 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 10, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 2, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
@@ -220,11 +213,14 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 4, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 5, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
-            "status": "completed",
+            "cm_sequence_id": "1",
+            "cm_sequence_id_list": [
+                1
+            ],
         }
         test_errors = []
 
@@ -232,11 +228,11 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 10, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 3, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
-            "contact_type": "email",
+            "user_name": "sauce",
         }
         test_errors = []
 
@@ -244,11 +240,11 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 7, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 5, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
-            "date_created_start": datetime.datetime.strptime("2018-05-30", "%Y-%m-%d").replace(tzinfo=pytz.UTC),
+            "tracking_no": "apple",
         }
         test_errors = []
 
@@ -256,11 +252,11 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 11, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 5, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
-            "date_created_end": datetime.datetime.strptime("2018-5-29T23:59:59", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC),
+            "date_created_start": datetime.datetime.strptime("2018-06-20", "%Y-%m-%d").replace(tzinfo=pytz.UTC),
         }
         test_errors = []
 
@@ -268,7 +264,19 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 1, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 5, "{}".format(serialized_table_data))
+
+        validated_params = {
+            "id": u"all",
+            "date_created_end": datetime.datetime.strptime("2018-06-26T23:59:59", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC),
+        }
+        test_errors = []
+
+        serialized_table_data = self.use_get_serialized_rows_by_id(
+            validated_params,
+            test_errors
+        )
+        self.assertEqual(len(serialized_table_data), 5, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
@@ -280,11 +288,23 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 11, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 5, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
-            "date_modified_end": datetime.datetime.strptime("2018-5-29T23:59:59", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC),
+            "date_modified_end": datetime.datetime.strptime("2018-06-26T23:59:59", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC),
+        }
+        test_errors = []
+
+        serialized_table_data = self.use_get_serialized_rows_by_id(
+            validated_params,
+            test_errors
+        )
+        self.assertEqual(len(serialized_table_data), 5, "{}".format(serialized_table_data))
+
+        validated_params = {
+            "id": u"all",
+            "datetime_completed_start_date": datetime.datetime.strptime("2018-06-27", "%Y-%m-%d").replace(tzinfo=pytz.UTC),
         }
         test_errors = []
 
@@ -296,7 +316,7 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
 
         validated_params = {
             "id": u"all",
-            "datetime_contacted_start_date": datetime.datetime.strptime("2018-5-30", "%Y-%m-%d").replace(tzinfo=pytz.UTC),
+            "datetime_completed_end_date": datetime.datetime.strptime("2018-06-25T23:59:59", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC),
         }
         test_errors = []
 
@@ -304,16 +324,4 @@ class DefaultEnrollmentStep1TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 11, "{}".format(serialized_table_data))
-
-        validated_params = {
-            "id": u"all",
-            "datetime_contacted_end_date": datetime.datetime.strptime("2018-5-29T23:59:59", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC),
-        }
-        test_errors = []
-
-        serialized_table_data = self.use_get_serialized_rows_by_id(
-            validated_params,
-            test_errors
-        )
-        self.assertEqual(len(serialized_table_data), 1, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 3, "{}".format(serialized_table_data))

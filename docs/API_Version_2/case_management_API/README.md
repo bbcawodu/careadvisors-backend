@@ -24,3 +24,6 @@
 
 ## Steps for CM Sequences Backend API README
 [Steps for CM Sequences Endpoints API README](steps_for_cm_sequences/README.md)
+
+    ### Individual Steps for Case Management Sequences Endpoints README
+    [Individual Steps for Case Management Sequences Endpoints Endpoints README](steps_for_cm_sequences/individual_sequence_steps/README.md)

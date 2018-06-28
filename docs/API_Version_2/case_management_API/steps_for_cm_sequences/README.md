@@ -134,3 +134,13 @@ In response, a JSON document will be displayed with the following format:
     - An array of length > 0 will be the value for the "Errors" key in the "Status" dictionary.
         -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - Array corresponding to the "Data" key will be empty.
+    
+    
+## Individual Steps for Case Management Sequences Endpoints
+- There are HTTP REST endpoints for each row in the StepsForCMSequences table, stored in the 'rest_url' column.
+They correspond to the endpoints used to modify and read case management sequence steps for consumers and consequently,
+manage case management sequences from the perspective of navigators and consumers. Below is the documentation for those
+endpoints. 
+
+### Individual Steps for Case Management Sequences Endpoints README
+[Individual Steps for Case Management Sequences Endpoints Endpoints README](individual_sequence_steps/README.md)
