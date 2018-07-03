@@ -46,7 +46,7 @@ class CMSequencesTestCase(DBModelsBaseTestCase, TestCase):
         validated_params = copy.deepcopy(self.validated_params)
         validated_params["db_action"] = "update"
         validated_params["add_steps"] = [3]
-        validated_params["id"] = 3
+        validated_params["id"] = 4
 
         test_errors = []
 
@@ -66,7 +66,7 @@ class CMSequencesTestCase(DBModelsBaseTestCase, TestCase):
         validated_params["db_action"] = "update"
         validated_params["name"] = "update"
         validated_params["remove_steps"] = [3]
-        validated_params["id"] = 4
+        validated_params["id"] = 1
 
         test_errors = []
 
@@ -95,8 +95,20 @@ class CMSequencesTestCase(DBModelsBaseTestCase, TestCase):
 
         validated_params = {
             "db_action": "update",
-            "id": 4,
+            "id": 1,
             "add_steps": [4]
+        }
+        test_errors = []
+
+        db_row = self.use_update_row_w_validated_params_w_errors(
+            validated_params,
+            test_errors
+        )
+
+        validated_params = {
+            "db_action": "update",
+            "id": 4,
+            "add_steps": [9]
         }
         test_errors = []
 

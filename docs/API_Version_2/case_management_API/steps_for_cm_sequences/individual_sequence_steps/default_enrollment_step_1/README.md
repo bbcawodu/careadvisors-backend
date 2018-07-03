@@ -1,4 +1,4 @@
-# Default Enrollment Step 1 Backend API README (IN DEVELOPMENT)
+# Default Enrollment Step 1 Backend API README
 - Note: Row id 1 of the StepsForCMSequences table corresponds to this table, DefaultEnrollmentStep1. The step_class_name
 of row id 1 of the StepsForCMSequences table is DefaultEnrollmentStep1.
 
@@ -7,7 +7,7 @@ of row id 1 of the StepsForCMSequences table is DefaultEnrollmentStep1.
 ![Default Enrollment Step 1 Entity Relationship Diagram](default_enrollment_step_1_erd.jpg)
 
 
-### Modify Default Enrollment Step 1 Table Rows (IN DEVELOPMENT)
+### Modify Default Enrollment Step 1 Table Rows
 To create, update, or delete a row in the DefaultEnrollmentStep1 table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/default_enrollment_step_1/.
 
 - The headers of the request MUST include: 
@@ -106,7 +106,7 @@ In response, a JSON document will be displayed with the following format:
             - It contains the key "row", the value for which is "Deleted".
     
     
-### Default Enrollment Step 1 Data Retrieval API (IN DEVELOPMENT)
+### Default Enrollment Step 1 Data Retrieval API
 - To read rows from the DefaultEnrollmentStep1 table of the backend, make a GET request to http://picbackend.herokuapp.com/v2/default_enrollment_step_1/
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"
@@ -128,6 +128,7 @@ In response, a JSON document will be displayed with the following format:
             - Must be an integer
             - Can be multiple values separated by commas.
             - passing "all" as the value will return all rows with a non null value for cm_client.
+            - passing "none" as the value will return all consumer rows with a null value for cm_client_for_routing.
         - "cm_sequence_id" corresponds to the CaseManagementSequences table database id of the 'cm_sequence' column.
             - Must be an integer
             - Can be multiple values separated by commas.

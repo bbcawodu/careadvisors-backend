@@ -9,3 +9,8 @@
 ## Default Enrollment Step 1 API README (IN DEVELOPMENT)
 - StepsForCMSequences table row id: 1
 [Default Enrollment Step 1 Endpoints README](default_enrollment_step_1/README.md)
+
+
+## Default Enrollment Step 2 API README (IN DEVELOPMENT)
+- StepsForCMSequences table row id: 2
+[Default Enrollment Step 2 Endpoints README](default_enrollment_step_2/README.md)

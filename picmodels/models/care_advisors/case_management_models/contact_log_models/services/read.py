@@ -50,6 +50,8 @@ def filter_db_objects_by_secondary_params(db_objects, validated_get_params):
     if 'cm_client_id_list' in validated_get_params:
         if validated_get_params['cm_client_id'] == 'all':
             db_objects = db_objects.filter(cm_client__isnull=False)
+        elif validated_get_params['cm_client_id'] == 'none':
+            db_objects = db_objects.filter(cm_client__isnull=True)
         else:
             list_of_cm_client_ids = validated_get_params['cm_client_id_list']
             db_objects = db_objects.filter(cm_client__in=list_of_cm_client_ids)
