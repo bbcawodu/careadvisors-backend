@@ -52,6 +52,8 @@ class PICConsumerBase(models.Model):
 
     objects = PICConsumerBaseQuerySet.as_manager()
 
+    date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
+    date_modified = models.DateTimeField(auto_now=True, blank=True, null=True)
     # fields for PICConsumer model
     first_name = models.CharField(max_length=1000)
     middle_name = models.CharField(max_length=1000, blank=True, null=True)
@@ -198,10 +200,13 @@ class PICConsumer(PICConsumerBase):
             "secondary_guardians": None,
             "consumer_hospital_info": None,
 
+            "date_created": self.date_created.isoformat() if self.date_created else None,
+            "date_modified": self.date_modified.isoformat() if self.date_modified else None,
+
             "case_management_rows": None,
 
             "consumer_need": self.consumer_need,
-            "billing_amount": self.billing_amount,
+            "billing_amount": float(self.billing_amount) if self.billing_amount else self.billing_amount,
             "service_expertise_need": None,
             "insurance_carrier": None,
             "healthcare_locations_used": None,
@@ -369,11 +374,13 @@ class PICConsumerBackup(PICConsumerBase):
             "primary_guardians": None,
             "secondary_guardians": None,
             "consumer_hospital_info": None,
+            "date_created": self.date_created.isoformat() if self.date_created else None,
+            "date_modified": self.date_modified.isoformat() if self.date_modified else None,
 
             "case_management_rows": None,
 
             "consumer_need": self.consumer_need,
-            "billing_amount": self.billing_amount,
+            "billing_amount": float(self.billing_amount) if self.billing_amount else self.billing_amount,
             "service_expertise_need": None,
             "insurance_carrier": None,
             "healthcare_locations_used": None,

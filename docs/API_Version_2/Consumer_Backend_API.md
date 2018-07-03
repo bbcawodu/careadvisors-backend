@@ -323,6 +323,7 @@ In response, a JSON document will be displayed with the following format:
             - Must be an integer
             - Can be multiple values separated by commas.
             - passing "all" as the value will return all rows with a non null value for cm_client.
+            - passing "none" as the value will return all consumer rows with a null value for cm_client_for_routing.
         - "referring_cm_client_id" corresponds to the referring_cm_client_id field database id.
             - Must be an integer
             - Can be multiple values separated by commas.
@@ -481,6 +482,7 @@ In response, a JSON document will be displayed with the following format:
             - Must be an integer
             - Can be multiple values separated by commas.
             - passing "all" as the value will return all consumer rows with a non null value for cm_client_for_routing.
+            - passing "none" as the value will return all consumer rows with a null value for cm_client_for_routing.
         - "referring_cm_client_id" corresponds to the CaseManagementClient table database id of the referring_cm_clients.
             - Must be an integer
             - Can be multiple values separated by commas.
