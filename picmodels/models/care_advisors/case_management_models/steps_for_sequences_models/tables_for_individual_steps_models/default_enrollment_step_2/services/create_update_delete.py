@@ -55,12 +55,6 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
     if 'notes' in validated_params:
         row.notes = validated_params['notes']
 
-    if 'tracking_no' in validated_params:
-        row.tracking_no = validated_params['tracking_no']
-
-    if 'user_name' in validated_params:
-        row.user_name = validated_params['user_name']
-
     if 'datetime_completed' in validated_params:
         row.datetime_completed = validated_params['datetime_completed']
 
@@ -133,12 +127,6 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
 
     if 'notes' in validated_params:
         row.notes = validated_params['notes']
-
-    if 'tracking_no' in validated_params:
-        row.tracking_no = validated_params['tracking_no']
-
-    if 'user_name' in validated_params:
-        row.user_name = validated_params['user_name']
 
     if 'datetime_completed' in validated_params:
         row.datetime_completed = validated_params['datetime_completed']

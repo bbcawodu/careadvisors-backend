@@ -62,13 +62,6 @@ def filter_db_objects_by_secondary_params(db_objects, validated_get_params):
             list_of_cm_sequence_ids = validated_get_params['cm_sequence_id_list']
             db_objects = db_objects.filter(cm_sequence__in=list_of_cm_sequence_ids)
 
-    if 'user_name' in validated_get_params:
-        user_name = validated_get_params['user_name']
-        db_objects = db_objects.filter(user_name__iexact=user_name)
-    if 'tracking_no' in validated_get_params:
-        tracking_no = validated_get_params['tracking_no']
-        db_objects = db_objects.filter(tracking_no__iexact=tracking_no)
-
     if 'date_created_start' in validated_get_params:
         date_created_start = validated_get_params['date_created_start']
         db_objects = db_objects.filter(date_created__gte=date_created_start)

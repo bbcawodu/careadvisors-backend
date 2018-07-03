@@ -28,7 +28,12 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
                 rqst_errors
             )
             if not rqst_errors:
+                cmstepsforsequences_rows = sorted(cmstepsforsequences_rows, key=lambda k: k.step_number)
                 for step_row in cmstepsforsequences_rows:
+                    check_steps_for_row_with_previous_step_number(row, step_row, rqst_errors)
+                    if rqst_errors:
+                        break
+
                     row.steps.add(step_row)
     if rqst_errors:
         row.delete()
@@ -67,7 +72,12 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
                 rqst_errors
             )
             if not rqst_errors:
+                cmstepsforsequences_rows = sorted(cmstepsforsequences_rows, key=lambda k: k.step_number)
                 for step_row in cmstepsforsequences_rows:
+                    check_steps_for_row_with_previous_step_number(row, step_row, rqst_errors)
+                    if rqst_errors:
+                        break
+
                     row.steps.add(step_row)
     elif 'remove_steps' in validated_params:
         steps_info = validated_params['remove_steps']
@@ -84,6 +94,7 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
                 rqst_errors
             )
             if not rqst_errors:
+                cmstepsforsequences_rows = sorted(cmstepsforsequences_rows, key=lambda k: k.step_number)
                 for step_row in cmstepsforsequences_rows:
                     row.steps.remove(step_row)
     if rqst_errors:
@@ -195,3 +206,25 @@ def check_steps_for_row_with_given_step_number(cur_steps_qset, given_step_row, r
                 )
             )
             break
+
+
+def check_steps_for_row_with_previous_step_number(sequence_row, given_step_row, rqst_errors):
+    previous_step_found = False
+    current_step_number = given_step_row.step_number
+    if current_step_number <= 1:
+        return None
+
+    previous_step_number = current_step_number - 1
+
+    for cm_step in sequence_row.steps.all():
+        if cm_step.step_number == previous_step_number:
+            previous_step_found = True
+            break
+
+    if not previous_step_found:
+        rqst_errors.append(
+            "Sequence with id: {} does not have a step with 1 less than step row: {}'s step_number (Hint - remove from parameter 'add_steps' list)".format(
+                sequence_row.id,
+                given_step_row.return_values_dict(),
+            )
+        )
