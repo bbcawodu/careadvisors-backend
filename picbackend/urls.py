@@ -65,11 +65,11 @@ urlpatterns = [
     url(r"^v2/cm_contact_logs/$", views.CMContactLogManagementView.as_view()),
     url(r"^v2/cm_follow_up_notices/$", views.CMFollowUpNoticesManagementView.as_view()),
     url(r"^v2/cm_sequences/$", views.CMSequencesManagementView.as_view()),
-    # url(r"^v2/steps_for_cm_sequences/$", views.StepsForCMSequencesManagementView.as_view()),
+    url(r"^v2/steps_for_cm_sequences/$", views.StepsForCMSequencesManagementView.as_view()),
 
     url(r"v2/default_enrollment_step_1/$", views.DefaultEnrollmentStep1ManagementView.as_view()),
     url(r"v2/default_enrollment_step_2/$", views.DefaultEnrollmentStep2ManagementView.as_view()),
-    url(r"v2/default_enrollment_step_complete/$", views.DefaultEnrollmentStepCompleteManagementView.as_view()),
+    # url(r"v2/default_enrollment_step_complete/$", views.DefaultEnrollmentStepCompleteManagementView.as_view()),
 
     # urls for navigators views
     url(r"^v2/navigators/$", views.NavigatorManagementView.as_view()),
