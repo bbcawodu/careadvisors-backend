@@ -1,7 +1,7 @@
-# Patient Innovation Center Backend Library API Documentation
+# Community Connect Backend Server API Documentation
 # VERSION 2
 
-This file is documentation for the backend API library for Patient Innovation Center Apps.
+This file is documentation for the backend server API of Community Connect Related Apps.
 
 
 ## Making requests to the backend server endpoints.

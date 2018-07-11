@@ -1,6 +1,6 @@
-# Consumer Metrics and Appointments Backend
+# Community Connect Backend Server
 
-This is the code for the backend component of our metrics and appointments apps. It enables the API that transmits data between the frontend and the backend.
+This is the code for the backend server for Community Connect related apps. It enables the API that transmits data between the frontend and the backend servers of community connect related applications.
 
 
 
@@ -10,7 +10,7 @@ This is a Django application that is hosted on Heroku. To install Heroku CLI for
 
 
 
-## Patient Innovation Center Backend Library API Documentation
+## Community Connect Backend Library API Documentation
 
 [API Version 2](docs/API_Version_2/README.md) (CURRENT VERSION)
 
