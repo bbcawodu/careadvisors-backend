@@ -1,4 +1,5 @@
 # Steps for CM Sequences Backend API README
+- The StepsForCMSequences table is responsible for recording which tables in the database correspond to a given sequence step and mapping those steps to sequences.
 
 
 ## Entity Relationship Diagram for "Steps for CM Sequences" related data models

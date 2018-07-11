@@ -119,7 +119,7 @@ class StepsForCMSequencesTestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 4)
+        self.assertEqual(len(serialized_table_data), 5)
 
         validated_params = {
             "id_list": [3],
