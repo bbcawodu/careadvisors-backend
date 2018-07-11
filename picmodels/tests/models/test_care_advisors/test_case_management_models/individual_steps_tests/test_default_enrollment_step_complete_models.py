@@ -6,13 +6,13 @@ from django.test import TestCase
 
 from picmodels.tests.models.base import DBModelsBaseTestCase
 
-from picmodels.models import DefaultEnrollmentStep2
+from picmodels.models import DefaultEnrollmentStepComplete
 
 
-class DefaultEnrollmentStep2TestCase(DBModelsBaseTestCase, TestCase):
-    db_model = DefaultEnrollmentStep2
+class DefaultEnrollmentStepCompleteTestCase(DBModelsBaseTestCase, TestCase):
+    db_model = DefaultEnrollmentStepComplete
     validated_params = {
-        "consumer_id": 10,
+        "consumer_id": 42,
         "navigator_id": 1,
         "cm_client_id": 1,
         "cm_sequence_id": 1,
@@ -184,7 +184,7 @@ class DefaultEnrollmentStep2TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 3, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 2, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
@@ -199,7 +199,7 @@ class DefaultEnrollmentStep2TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 3, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 2, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
@@ -214,7 +214,7 @@ class DefaultEnrollmentStep2TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 3, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 2, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
@@ -226,7 +226,7 @@ class DefaultEnrollmentStep2TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 3, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 2, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
@@ -238,7 +238,7 @@ class DefaultEnrollmentStep2TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 3, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 2, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
@@ -250,7 +250,7 @@ class DefaultEnrollmentStep2TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 3, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 2, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
@@ -262,7 +262,7 @@ class DefaultEnrollmentStep2TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 3, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 2, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",
@@ -274,7 +274,7 @@ class DefaultEnrollmentStep2TestCase(DBModelsBaseTestCase, TestCase):
             validated_params,
             test_errors
         )
-        self.assertEqual(len(serialized_table_data), 3, "{}".format(serialized_table_data))
+        self.assertEqual(len(serialized_table_data), 2, "{}".format(serialized_table_data))
 
         validated_params = {
             "id": u"all",

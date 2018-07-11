@@ -21,7 +21,7 @@ The body of the request must be a JSON document using the following template:
     "add_steps": [
         Integer,
         ...
-    ](Rows with id's must exist in StepsForCMSequences table and not in given CMSequences row's steps column),
+    ](Rows with id's must exist in StepsForCMSequences table and not in given CMSequences row's steps column. Sequence must also have a row with a preceding step_number in order to add a row. Eg. in order to ad a row with step_number 2, there must exist a step row with step_number 1 in the sequence's steps column.),
     "remove_steps": [
         Integer,
         ...

@@ -234,6 +234,23 @@ def validate_get_rqst_parameter_datetime_contacted_end_date(get_rqst_params, val
             validated_params[param_name] = validated_params[param_name].replace(hour=23, minute=59, second=59, microsecond=0)
 
 
+def validate_get_rqst_parameter_client_appointment_datetime_start_date(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'client_appointment_datetime_start_date'
+
+    if param_name in get_rqst_params:
+        validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+
+def validate_get_rqst_parameter_client_appointment_datetime_end_date(get_rqst_params, validated_params, rqst_errors):
+    param_name = 'client_appointment_datetime_end_date'
+
+    if param_name in get_rqst_params:
+        validate_yyyy_mm_dd_timestamp_get_rqst_param(get_rqst_params, validated_params, param_name, rqst_errors)
+
+        if validated_params[param_name]:
+            validated_params[param_name] = validated_params[param_name].replace(hour=23, minute=59, second=59, microsecond=0)
+
+
 def validate_get_rqst_parameter_datetime_completed_start_date(get_rqst_params, validated_params, rqst_errors):
     param_name = 'datetime_completed_start_date'
 
@@ -935,6 +952,14 @@ GET_PARAMETER_VALIDATION_FUNCTIONS = {
     },
     "datetime_completed_end_date": {
         'function': validate_get_rqst_parameter_datetime_completed_end_date,
+        'type': 'date_string'
+    },
+    "client_appointment_datetime_start_date": {
+        'function': validate_get_rqst_parameter_client_appointment_datetime_start_date,
+        'type': 'date_string'
+    },
+    "client_appointment_datetime_end_date": {
+        'function': validate_get_rqst_parameter_client_appointment_datetime_end_date,
         'type': 'date_string'
     },
 
