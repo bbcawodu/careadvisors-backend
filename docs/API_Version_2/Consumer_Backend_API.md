@@ -17,6 +17,10 @@ The body of the request should be a JSON document using the following template:
     "phone": String,
     "met_bav_at": String,
     "household_size": Integer,
+    'gender': String,
+    "dob": String (Must be a iso formatted date 'YYYY-MM-DD'),
+    'referral_channel': String,
+    'referral_type': String  (A row in the HealthcareServiceExpertise table with a name equal to the value of this key must exist in the db),
     "consumer_notes": [
         "These are",
         "sample notes",
@@ -27,7 +31,7 @@ The body of the request should be a JSON document using the following template:
     "preferred_language": String,
     "best_contact_time": String,
     
-    "navigator_id": Integer,
+    "navigator_id": Integer (A row in the Navigators table with an id equal to the value of this key must exist in the db),
     "cm_client_id_for_routing": Integer,
     # NOTE: A consumer can either have a navigator that its assigned to, or a cm_client_for_routing that its assigned to. Not Both or None Exceptions will be given if you try to assign both or none of them.
     
@@ -52,6 +56,7 @@ The body of the request should be a JSON document using the following template:
         "Month": Integer,
         "Year": Integer
     },
+    "datetime_received_by_client": String (Must be a iso formatted date and time in UTC eg. 'YYYY-MM-DDTHH:MM:SS'),
     
     "create_case_management_rows": [
         {
@@ -146,6 +151,28 @@ The Following is a list of possible consumer_need values with corresponding mode
 ```
 
 
+The Following is a list of possible gender values with corresponding model constant names:
+```
+[
+    MALE = "Male"
+    FEMALE = "Female"
+    TRANSGENDER = "Traansgender"
+    N_A = "Not Available"
+]
+```
+
+
+The Following is a list of possible referral_channel values with corresponding model constant names:
+```
+[
+    PHONE = "Phone"
+    EMAIL = "Email"
+    DATA = "Data"
+    N_A = "Not Available"
+]
+```
+
+
 In response, a JSON document will be displayed with the following format:
 ```
 {
@@ -180,6 +207,10 @@ In response, a JSON document will be displayed with the following format:
             - "create_case_management_rows"
             - 'billing_amount'
             - 'consumer_need'
+            - 'gender'
+            - 'referral_channel'
+            - "referral_type"
+            - 'dob'
             - 'service_expertise_need'
             - insurance_carrier
             - 'add_healthcare_networks_used'
@@ -188,6 +219,7 @@ In response, a JSON document will be displayed with the following format:
             - "navigator_id"
             - 'add_referring_cm_clients'
             - 'remove_referring_cm_clients'
+            - "datetime_received_by_client"
             
         - Keys that can be empty strings:
             - "middle_name"
@@ -202,6 +234,8 @@ In response, a JSON document will be displayed with the following format:
             - "state_province"
             - "zipcode"
             - 'consumer_need'
+            - 'gender'
+            - 'referral_channel'
             - 'service_expertise_need'
             - add_healthcare_networks_used[index]['state_province']
             - remove_healthcare_locations_used[index]['state_province']
@@ -220,6 +254,9 @@ In response, a JSON document will be displayed with the following format:
             - remove_healthcare_locations_used[index]['state_province']
             - "cm_client_id_for_routing"
             - "navigator_id"
+            - "datetime_received_by_client"
+            - "referral_type"
+            - 'dob'
             
         - Keys that WILL NOT be read
             - "update_case_management_rows"
@@ -251,6 +288,8 @@ In response, a JSON document will be displayed with the following format:
             - "state_province"
             - "zipcode"
             - 'consumer_need'
+            - 'gender'
+            - 'referral_channel'
             - 'service_expertise_need'
             - add_healthcare_networks_used[index]['state_province']
             - remove_healthcare_locations_used[index]['state_province']
@@ -269,6 +308,9 @@ In response, a JSON document will be displayed with the following format:
             - remove_healthcare_locations_used[index]['state_province']
             - "cm_client_id_for_routing"
             - "navigator_id"
+            - "datetime_received_by_client"
+            - "referral_type"
+            - 'dob'
         
     - If there are no errors in the JSON Body document:
         - The response JSON document will have a dictionary object as the value for the "Data" key.
@@ -335,6 +377,9 @@ In response, a JSON document will be displayed with the following format:
     {
         "Data": [
             {
+                "date_created": String (Can be Null),
+                "date_modified": String (Can be Null),
+                
                 "email": String,
                 "phone": String,
                 "id": Integer,
@@ -368,6 +413,12 @@ In response, a JSON document will be displayed with the following format:
                 "best_contact_time": String,
                 'billing_amount': Float,
                 'consumer_need': String,
+                'gender': String,
+                'referral_channel': String,
+                "datetime_received_by_client": String (Can be Null),
+                'gender': String,
+                'referral_channel': String,
+                'referral_type': String,
                 'service_expertise_need': String,
                 'insurance_carrier': {
                     'name': String,
@@ -499,6 +550,12 @@ In response, a JSON document will be displayed with the following format:
                 "middle_name": String,
                 "last_name": String,
                 "date_met_nav": String (Can be Null),
+                "date_created": String (Can be Null),
+                "date_modified": String (Can be Null),
+                "datetime_received_by_client": String (Can be Null),
+                'gender': String,
+                'referral_channel': String,
+                'referral_type': String,
                 "navigator": String,
                 "consumer_notes": [
                     "These are",
@@ -559,11 +616,7 @@ In response, a JSON document will be displayed with the following format:
             },
             ...,
             ...,
-            ...,
-            up to 20 full record consumer record objects,
-            {"Database ID": 2}(Incomplete consumer record with "Database ID" as its only key),
-            {"Database ID": 6}(Incomplete consumer record with "Database ID" as its only key),
-            {"Database ID": 9}(Incomplete consumer record with "Database ID" as its only key)
+            ...
         ],
         "Status": {
             "Version": 2.0,

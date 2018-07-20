@@ -50,10 +50,22 @@ class PICConsumerBase(models.Model):
         (N_A, "Not Available")
     )
 
+    PHONE = "Phone"
+    EMAIL = "Email"
+    DATA = "Data"
+    REFERRAL_CHANNEL_CHOICES = (
+        (PHONE, "Phone"),
+        (EMAIL, "Email"),
+        (DATA, "Data"),
+        (N_A, "Not Available")
+    )
+
     objects = PICConsumerBaseQuerySet.as_manager()
 
     date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
     date_modified = models.DateTimeField(auto_now=True, blank=True, null=True)
+    datetime_received_by_client = models.DateTimeField(blank=True, null=True)
+
     # fields for PICConsumer model
     first_name = models.CharField(max_length=1000)
     middle_name = models.CharField(max_length=1000, blank=True, null=True)
@@ -63,6 +75,8 @@ class PICConsumerBase(models.Model):
     preferred_language = models.CharField(max_length=1000, blank=True, null=True)
     best_contact_time = models.CharField(max_length=1000, blank=True, null=True)
     gender = models.CharField(blank=True, null=True, max_length=1000, choices=GENDER_CHOICES, default=N_A)
+    dob = models.DateField(blank=True, null=True)
+    referral_channel = models.CharField(blank=True, null=True, max_length=1000, choices=REFERRAL_CHANNEL_CHOICES, default=N_A)
     navigator = models.ForeignKey(Navigators, on_delete=models.SET_NULL, blank=True, null=True)
     # navigators = models.ManyToManyField(Navigators, blank=True)
 
@@ -121,6 +135,12 @@ class PICConsumerBase(models.Model):
                 return True
         return False
 
+    def check_referral_channel_choices(self,):
+        for referral_channel_tuple in self.REFERRAL_CHANNEL_CHOICES:
+            if referral_channel_tuple[1].lower() == self.referral_channel.lower():
+                return True
+        return False
+
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
@@ -141,6 +161,13 @@ class PICConsumer(PICConsumerBase):
         'CaseManagementClient',
         related_name='referred_consumers_for_cm',
         blank=True,
+    )
+    referral_type = models.ForeignKey(
+        'HealthcareServiceExpertise',
+        related_name='consumers_referred_by_this_type',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
     )
 
     class Meta(PICConsumerBase.Meta):
@@ -185,11 +212,14 @@ class PICConsumer(PICConsumerBase):
             "phone": self.phone,
             "preferred_language": self.preferred_language,
             "gender": self.gender,
+            "dob": self.dob.isoformat() if self.dob else None,
             "address": None,
             "household_size": self.household_size,
             "plan": self.plan,
             "met_nav_at": self.met_nav_at,
             "best_contact_time": self.best_contact_time,
+            "referral_channel": self.referral_channel,
+            "referral_type": None,
             "navigator": None,
             "cm_client_for_routing": None,
             "referring_cm_clients": None,
@@ -202,6 +232,7 @@ class PICConsumer(PICConsumerBase):
 
             "date_created": self.date_created.isoformat() if self.date_created else None,
             "date_modified": self.date_modified.isoformat() if self.date_modified else None,
+            "datetime_received_by_client": self.datetime_received_by_client.isoformat() if self.datetime_received_by_client else None,
 
             "case_management_rows": None,
 
@@ -249,6 +280,9 @@ class PICConsumer(PICConsumerBase):
 
         if self.navigator:
             valuesdict['navigator'] = self.navigator.id
+
+        if self.referral_type:
+            valuesdict['referral_type'] = self.referral_type.name
 
         if self.cm_client_for_routing:
             valuesdict['cm_client_for_routing'] = self.cm_client_for_routing.id
@@ -322,6 +356,13 @@ class PICConsumerBackup(PICConsumerBase):
         related_name='referred_consumer_backups_for_cm',
         blank=True,
     )
+    referral_type = models.ForeignKey(
+        'HealthcareServiceExpertise',
+        related_name='backup_consumers_referred_by_this_type',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
 
     def get_primary_guardian_qset(self):
         primary_guardian_qset = None
@@ -362,11 +403,14 @@ class PICConsumerBackup(PICConsumerBase):
             "phone": self.phone,
             "preferred_language": self.preferred_language,
             "gender": self.gender,
+            "dob": self.dob.isoformat() if self.dob else None,
             "address": None,
             "household_size": self.household_size,
             "plan": self.plan,
             "met_nav_at": self.met_nav_at,
             "best_contact_time": self.best_contact_time,
+            "referral_channel": self.referral_channel,
+            'referral_type': None,
             "navigator": None,
             "consumer_notes": None,
             "date_met_nav": None,
@@ -374,8 +418,10 @@ class PICConsumerBackup(PICConsumerBase):
             "primary_guardians": None,
             "secondary_guardians": None,
             "consumer_hospital_info": None,
+
             "date_created": self.date_created.isoformat() if self.date_created else None,
             "date_modified": self.date_modified.isoformat() if self.date_modified else None,
+            "datetime_received_by_client": self.datetime_received_by_client.isoformat() if self.datetime_received_by_client else None,
 
             "case_management_rows": None,
 
@@ -423,6 +469,9 @@ class PICConsumerBackup(PICConsumerBase):
 
         if self.navigator:
             valuesdict['navigator'] = self.navigator.id
+
+        if self.referral_type:
+            valuesdict['referral_type'] = self.referral_type.name
 
         if self.cps_info:
             valuesdict['cps_info'] = self.cps_info.return_values_dict()

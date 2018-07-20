@@ -3,6 +3,7 @@ Defines utility functions and classes for consumer views
 """
 
 import datetime
+import pytz
 import json
 
 from django import forms
@@ -86,6 +87,45 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
         )
         if validated_params['gender'] == '':
             validated_params['gender'] = 'not available'
+
+    if "dob" in rqst_body:
+        dob = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "dob",
+            rqst_errors,
+            none_allowed=True
+        )
+        validated_dob = None
+        if dob:
+            try:
+                validated_dob = datetime.datetime.strptime(dob, "%Y-%m-%d").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'dob must be a properly formatted date string, eg. YYYY-MM-DD. Value is : {}'.format(
+                        dob
+                    )
+                )
+        validated_params['dob'] = validated_dob
+
+    if 'referral_channel' in rqst_body:
+        validated_params['referral_channel'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            'referral_channel',
+            rqst_errors,
+            empty_string_allowed=True
+        )
+        if validated_params['referral_channel'] == '':
+            validated_params['referral_channel'] = 'not available'
+    if 'referral_type' in rqst_body:
+        validated_params['referral_type'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            'referral_type',
+            rqst_errors,
+            none_allowed=True
+        )
 
     plan = clean_string_value_from_dict_object(
         rqst_body,
@@ -213,6 +253,25 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
         if not rqst_errors:
             date_met_nav = datetime.date(year, month, day)
     validated_params["date_met_nav"] = date_met_nav
+
+    if "datetime_received_by_client" in rqst_body:
+        datetime_received_by_client = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "datetime_received_by_client",
+            rqst_errors,
+            none_allowed=True
+        )
+        validated_datetime_received_by_client = None
+        if datetime_received_by_client:
+            try:
+                validated_datetime_received_by_client = datetime.datetime.strptime(datetime_received_by_client, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'datetime_received_by_client must be a properly formatted datetime string in UTC, eg. YYYY-MM-DDTHH:MM:SS. Value is : {}'.format(
+                        datetime_received_by_client)
+                )
+        validated_params['datetime_received_by_client'] = validated_datetime_received_by_client
 
     navigator_row = None
     if "navigator_id" in rqst_body:
@@ -380,6 +439,46 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
         )
         if validated_params['gender'] == '':
             validated_params['gender'] = 'not available'
+
+    if "dob" in rqst_body:
+        dob = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "dob",
+            rqst_errors,
+            none_allowed=True
+        )
+        validated_dob = None
+        if dob:
+            try:
+                validated_dob = datetime.datetime.strptime(dob, "%Y-%m-%d").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'dob must be a properly formatted date string, eg. YYYY-MM-DD. Value is : {}'.format(
+                        dob
+                    )
+                )
+        validated_params['dob'] = validated_dob
+
+    if 'referral_channel' in rqst_body:
+        validated_params['referral_channel'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            'referral_channel',
+            rqst_errors,
+            empty_string_allowed=True
+        )
+        if validated_params['referral_channel'] == '':
+            validated_params['referral_channel'] = 'not available'
+
+    if 'referral_type' in rqst_body:
+        validated_params['referral_type'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            'referral_type',
+            rqst_errors,
+            none_allowed=True
+        )
 
     if "plan" in rqst_body:
         plan = clean_string_value_from_dict_object(
@@ -599,6 +698,25 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
                 date_met_nav = datetime.date(year, month, day)
 
         validated_params["date_met_nav"] = date_met_nav
+
+    if "datetime_received_by_client" in rqst_body:
+        datetime_received_by_client = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "datetime_received_by_client",
+            rqst_errors,
+            none_allowed=True
+        )
+        validated_datetime_received_by_client = None
+        if datetime_received_by_client:
+            try:
+                validated_datetime_received_by_client = datetime.datetime.strptime(datetime_received_by_client, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'datetime_received_by_client must be a properly formatted datetime string in UTC, eg. YYYY-MM-DDTHH:MM:SS. Value is : {}'.format(
+                        datetime_received_by_client)
+                )
+        validated_params['datetime_received_by_client'] = validated_datetime_received_by_client
 
     if "cps_info" in rqst_body:
         cps_info_dict = clean_dict_value_from_dict_object(rqst_body,
