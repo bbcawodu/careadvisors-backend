@@ -1,4 +1,4 @@
-# Default Enrollment Step Complete Backend API README (IN DEVELOPMENT)
+# Default Enrollment Step Complete Backend API README
 - Note: Row id 3 of the StepsForCMSequences table corresponds to this table, DefaultEnrollmentStepComplete. The step_class_name
 of row id 3 of the StepsForCMSequences table is DefaultEnrollmentStepComplete.
 
@@ -7,7 +7,7 @@ of row id 3 of the StepsForCMSequences table is DefaultEnrollmentStepComplete.
 ![Default Enrollment Step Complete Entity Relationship Diagram](default_enrollment_step_complete_erd.jpg)
 
 
-### Modify Default Enrollment Step Complete Table Rows (IN DEVELOPMENT)
+### Modify Default Enrollment Step Complete Table Rows
 To create, update, or delete a row in the DefaultEnrollmentStepComplete table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/default_enrollment_step_complete/.
 
 - The headers of the request MUST include: 
@@ -99,7 +99,7 @@ In response, a JSON document will be displayed with the following format:
             - It contains the key "row", the value for which is "Deleted".
     
     
-### Default Enrollment Step Complete Data Retrieval API (IN DEVELOPMENT)
+### Default Enrollment Step Complete Data Retrieval API
 - To read rows from the DefaultEnrollmentStepComplete table of the backend, make a GET request to http://picbackend.herokuapp.com/v2/default_enrollment_step_complete/
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"

@@ -59,10 +59,29 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
                     "gender: {!s} is not a valid choice".format(consumer_instance.gender)
                 )
 
+        if 'referral_channel' in validated_params:
+            consumer_instance.referral_channel = validated_params['referral_channel']
+            if not consumer_instance.check_referral_channel_choices():
+                rqst_errors.append(
+                    "referral_channel: {!s} is not a valid choice".format(consumer_instance.referral_channel)
+                )
+
         if "navigator_row" in validated_params:
             consumer_instance.navigator = validated_params['navigator_row']
+        if 'referral_type' in validated_params:
+            referral_type_row = get_service_expertise_row_with_given_name(
+                validated_params['referral_type'],
+                rqst_errors
+            )
+            if referral_type_row:
+                consumer_instance.referral_type = referral_type_row
         if "cm_client_row_for_routing" in validated_params:
             consumer_instance.cm_client_for_routing = validated_params['cm_client_row_for_routing']
+
+        if 'datetime_received_by_client' in validated_params:
+            consumer_instance.datetime_received_by_client = validated_params['datetime_received_by_client']
+        if 'dob' in validated_params:
+            consumer_instance.dob = validated_params['dob']
 
         consumer_instance.save()
 
@@ -228,6 +247,12 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
                     rqst_errors.append(
                         "gender: {!s} is not a valid choice".format(consumer_instance.gender)
                     )
+            if 'referral_channel' in validated_params:
+                consumer_instance.referral_channel = validated_params['referral_channel']
+                if not consumer_instance.check_referral_channel_choices():
+                    rqst_errors.append(
+                        "referral_channel: {!s} is not a valid choice".format(consumer_instance.referral_channel)
+                    )
             if "phone" in validated_params:
                 consumer_instance.phone = validated_params['phone']
             if "plan" in validated_params:
@@ -244,12 +269,24 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
                 consumer_instance.email = validated_params['email']
             if "date_met_nav" in validated_params:
                 consumer_instance.date_met_nav = validated_params['date_met_nav']
+            if 'datetime_received_by_client' in validated_params:
+                consumer_instance.datetime_received_by_client = validated_params['datetime_received_by_client']
+            if 'dob' in validated_params:
+                consumer_instance.dob = validated_params['dob']
             if "cps_info_dict" in validated_params:
                 if validated_params['cps_info_dict']:
                     modify_consumer_cps_info(consumer_instance, validated_params['validated_cps_info_dict'], rqst_errors)
                 else:
                     if consumer_instance.cps_info:
                         consumer_instance.cps_info.delete()
+
+            if 'referral_type' in validated_params:
+                referral_type_row = get_service_expertise_row_with_given_name(
+                    validated_params['referral_type'],
+                    rqst_errors
+                )
+                if referral_type_row:
+                    consumer_instance.referral_type = referral_type_row
 
             if "navigator_row" in validated_params:
                 consumer_instance.navigator = validated_params['navigator_row']
