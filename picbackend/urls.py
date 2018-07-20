@@ -69,7 +69,7 @@ urlpatterns = [
 
     url(r"v2/default_enrollment_step_1/$", views.DefaultEnrollmentStep1ManagementView.as_view()),
     url(r"v2/default_enrollment_step_2/$", views.DefaultEnrollmentStep2ManagementView.as_view()),
-    # url(r"v2/default_enrollment_step_complete/$", views.DefaultEnrollmentStepCompleteManagementView.as_view()),
+    url(r"v2/default_enrollment_step_complete/$", views.DefaultEnrollmentStepCompleteManagementView.as_view()),
 
     # urls for navigators views
     url(r"^v2/navigators/$", views.NavigatorManagementView.as_view()),

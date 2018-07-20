@@ -16,6 +16,6 @@
 [Default Enrollment Step 2 Endpoints README](default_enrollment_step_2/README.md)
 
 
-## Default Enrollment Step Complete API README (IN DEVELOPMENT)
+## Default Enrollment Step Complete API README
 - StepsForCMSequences table row id: 3
 [Default Enrollment Step Complete Endpoints README](default_enrollment_step_complete/README.md)
