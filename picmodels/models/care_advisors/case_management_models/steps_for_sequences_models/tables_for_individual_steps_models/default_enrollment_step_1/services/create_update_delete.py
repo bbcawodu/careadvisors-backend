@@ -26,6 +26,11 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
     cm_sequence_row = get_cm_sequence_row_with_given_id(validated_params["cm_sequence_id"], rqst_errors)
     sequence_has_this_step = check_sequence_for_current_step(cm_sequence_row, cls, rqst_errors)
 
+    if 'case_status' in validated_params:
+        row.case_status = validated_params['case_status']
+        if not row.check_case_status_choices():
+            rqst_errors.append('case_status is not a valid choice.')
+
     if rqst_errors:
         return None
 
@@ -64,6 +69,27 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
     if 'datetime_completed' in validated_params:
         row.datetime_completed = validated_params['datetime_completed']
 
+    if 'primary_care_physician' in validated_params:
+        row.primary_care_physician = validated_params['primary_care_physician']
+
+    if 'appointment_datetime' in validated_params:
+        row.appointment_datetime = validated_params['appointment_datetime']
+
+    if 'policy_number' in validated_params:
+        row.policy_number = validated_params['policy_number']
+
+    if 'resource_case_number' in validated_params:
+        row.resource_case_number = validated_params['resource_case_number']
+
+    if 'expedite_benefits_organization_contact_name' in validated_params:
+        row.expedite_benefits_organization_contact_name = validated_params['expedite_benefits_organization_contact_name']
+
+    if 'expedite_benefits_organization_contact_phone' in validated_params:
+        row.expedite_benefits_organization_contact_phone = validated_params['expedite_benefits_organization_contact_phone']
+
+    if 'customer_service_success' in validated_params:
+        row.customer_service_success = validated_params['customer_service_success']
+
     row.save()
 
     return row
@@ -97,6 +123,12 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
         sequence_has_this_step = check_sequence_for_current_step(cm_sequence_row, cls, rqst_errors)
     else:
         cm_sequence_row = row.cm_sequence
+
+    if 'case_status' in validated_params:
+        row.case_status = validated_params['case_status']
+        if not row.check_case_status_choices():
+            rqst_errors.append('case_status is not a valid choice.')
+
     if rqst_errors:
         return None
 
@@ -142,6 +174,27 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
 
     if 'datetime_completed' in validated_params:
         row.datetime_completed = validated_params['datetime_completed']
+
+    if 'primary_care_physician' in validated_params:
+        row.primary_care_physician = validated_params['primary_care_physician']
+
+    if 'appointment_datetime' in validated_params:
+        row.appointment_datetime = validated_params['appointment_datetime']
+
+    if 'policy_number' in validated_params:
+        row.policy_number = validated_params['policy_number']
+
+    if 'resource_case_number' in validated_params:
+        row.resource_case_number = validated_params['resource_case_number']
+
+    if 'expedite_benefits_organization_contact_name' in validated_params:
+        row.expedite_benefits_organization_contact_name = validated_params['expedite_benefits_organization_contact_name']
+
+    if 'expedite_benefits_organization_contact_phone' in validated_params:
+        row.expedite_benefits_organization_contact_phone = validated_params['expedite_benefits_organization_contact_phone']
+
+    if 'customer_service_success' in validated_params:
+        row.customer_service_success = validated_params['customer_service_success']
 
     row.save()
 

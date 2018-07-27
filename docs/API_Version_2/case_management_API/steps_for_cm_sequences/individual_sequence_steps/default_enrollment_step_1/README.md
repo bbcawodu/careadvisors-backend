@@ -1,4 +1,4 @@
-# Default Enrollment Step 1 Backend API README
+# Default Enrollment Step 1 Backend API README (IN DEVELOPMENT)
 - Note: Row id 1 of the StepsForCMSequences table corresponds to this table, DefaultEnrollmentStep1. The step_class_name
 of row id 1 of the StepsForCMSequences table is DefaultEnrollmentStep1.
 
@@ -7,7 +7,7 @@ of row id 1 of the StepsForCMSequences table is DefaultEnrollmentStep1.
 ![Default Enrollment Step 1 Entity Relationship Diagram](default_enrollment_step_1_erd.jpg)
 
 
-### Modify Default Enrollment Step 1 Table Rows
+### Modify Default Enrollment Step 1 Table Rows (IN DEVELOPMENT)
 To create, update, or delete a row in the DefaultEnrollmentStep1 table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/default_enrollment_step_1/.
 
 - The headers of the request MUST include: 
@@ -28,6 +28,15 @@ The body of the request must be a JSON document using the following template:
     "tracking_no": String,
     "notes": String,
     "datetime_completed": String (Must be a iso formatted date and time in UTC eg. 'YYYY-MM-DDTHH:MM:SS'),
+    
+    "primary_care_physician": String,
+    "appointment_datetime": String (Must be a iso formatted date and time in UTC eg. 'YYYY-MM-DDTHH:MM:SS'),
+    "policy_number": String,
+    "resource_case_number": String,
+    "expedite_benefits_organization_contact_name": String,
+    "expedite_benefits_organization_contact_phone": String,
+    "customer_service_success": String,
+    "case_status": String,
     
     "db_action": String,
     "id": Integer,
@@ -56,17 +65,40 @@ In response, a JSON document will be displayed with the following format:
             - "datetime_completed"
             - "user_name"
             - "tracking_no"
+            - "primary_care_physician"
+            - "appointment_datetime"
+            - "policy_number"
+            - "resource_case_number"
+            - "expedite_benefits_organization_contact_name"
+            - "expedite_benefits_organization_contact_phone"
+            - "customer_service_success"
+            - "case_status"
             
         - Keys that can be empty strings:
             - "notes"
             - "user_name"
             - "tracking_no"
+            - "primary_care_physician"
+            - "policy_number"
+            - "resource_case_number"
+            - "expedite_benefits_organization_contact_name"
+            - "expedite_benefits_organization_contact_phone"
+            - "customer_service_success"
+            - "case_status"
         
         - Keys that can be Null
             - "notes"
             - "datetime_completed"
             - "user_name"
             - "tracking_no"
+            - "primary_care_physician"
+            - "appointment_datetime"
+            - "policy_number"
+            - "resource_case_number"
+            - "expedite_benefits_organization_contact_name"
+            - "expedite_benefits_organization_contact_phone"
+            - "customer_service_success"
+            - "case_status"
 
     - If there are no errors in the JSON Body document:        
         - The response JSON document will have a dictionary object as the value for the "Data" key.
@@ -84,12 +116,27 @@ In response, a JSON document will be displayed with the following format:
             - "notes"
             - "user_name"
             - "tracking_no"
+            - "primary_care_physician"
+            - "policy_number"
+            - "resource_case_number"
+            - "expedite_benefits_organization_contact_name"
+            - "expedite_benefits_organization_contact_phone"
+            - "customer_service_success"
+            - "case_status"
         
         - Keys that can be Null
             - "notes"
             - "datetime_completed"
             - "user_name"
             - "tracking_no"
+            - "primary_care_physician"
+            - "appointment_datetime"
+            - "policy_number"
+            - "resource_case_number"
+            - "expedite_benefits_organization_contact_name"
+            - "expedite_benefits_organization_contact_phone"
+            - "customer_service_success"
+            - "case_status"
         
     - If there are no errors in the JSON Body document:
         - The response JSON document will have a dictionary object as the value for the "Data" key.
@@ -106,7 +153,7 @@ In response, a JSON document will be displayed with the following format:
             - It contains the key "row", the value for which is "Deleted".
     
     
-### Default Enrollment Step 1 Data Retrieval API
+### Default Enrollment Step 1 Data Retrieval API (IN DEVELOPMENT)
 - To read rows from the DefaultEnrollmentStep1 table of the backend, make a GET request to http://picbackend.herokuapp.com/v2/default_enrollment_step_1/
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"
@@ -166,6 +213,15 @@ In response, a JSON document will be displayed with the following format:
                 "datetime_completed": String,
                 "date_created": String,
                 "date_modified": String,
+                
+                "primary_care_physician": String,
+                "appointment_datetime": String,
+                "policy_number": String,
+                "resource_case_number": String,
+                "expedite_benefits_organization_contact_name": String,
+                "expedite_benefits_organization_contact_phone": String,
+                "customer_service_success": String,
+                "case_status": String,
                 
                 "id": Integer,
             },

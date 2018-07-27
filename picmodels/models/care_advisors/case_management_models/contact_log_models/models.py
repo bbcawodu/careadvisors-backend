@@ -9,11 +9,23 @@ from .services.read import get_serialized_rows_by_id
 
 class ContactLog(models.Model):
     N_A = "not available"
+    OPEN = "Open"
     VOICE_MESSAGE = "Voice Message"
     COMPLETED = "Completed"
+    PENDING = "Pending"
+    WCB = "WCB"
+    BT = "BT"
+    NS = "NS"
+    WN = "WN"
     STATUS_CHOICES = (
+        (OPEN, "Open"),
         (VOICE_MESSAGE, "Voice Message"),
         (COMPLETED, "Completed"),
+        (PENDING, "Pending"),
+        (WCB, "WCB"),
+        (BT, "BT"),
+        (NS, "NS"),
+        (WN, "WN"),
         (N_A, "not available")
     )
 
@@ -21,11 +33,17 @@ class ContactLog(models.Model):
     TEXT = "Text"
     PHONE = "Phone"
     IN_PERSON = "In-Person"
+    MAIL = "Mail"
+    HOME_VISIT = "Home Visit"
+    ON_SITE = "On Site"
     CONTACT_TYPE_CHOICES = (
         (EMAIL, "Email"),
         (TEXT, "Text"),
         (PHONE, "Phone"),
         (IN_PERSON, "In-Person"),
+        (MAIL, "Mail"),
+        (HOME_VISIT, "Home Visit"),
+        (ON_SITE, "On Site"),
         (N_A, "not available")
     )
 

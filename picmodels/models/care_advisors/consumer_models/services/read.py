@@ -183,13 +183,15 @@ def prefetch_related_rows(db_queryset):
         'cps_info__cps_location__address',
         'cps_info__cps_location__address__country',
         'cps_info__primary_dependent',
-        "consumer_hospital_info",
         'service_expertise_need',
-        'insurance_carrier'
+        'insurance_carrier',
     )
 
     db_queryset = db_queryset.prefetch_related(
         'consumernote_set',
+        'consumerhospitaldata_set',
+        'consumerpayerdata_set',
+        'consumerpayerdata_set__case_type',
         # 'primary_guardian__picconsumer_set',
         # 'secondary_guardians',
         # 'secondary_guardians__picconsumer_set',
