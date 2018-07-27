@@ -35,9 +35,15 @@ The body of the request must be a JSON document using the following template:
 The Following is a list of possible "status" values with corresponding model constant names:
 ```
 [
-    N_A = "not available",
-    VOICE_MESSAGE = "Voice Message",
-    COMPLETED = "Completed",
+    N_A = "not available"
+    OPEN = "Open"
+    VOICE_MESSAGE = "Voice Message"
+    COMPLETED = "Completed"
+    PENDING = "Pending"
+    WCB = "WCB"
+    BT = "BT"
+    NS = "NS"
+    WN = "WN"
 ]
 ```
 
@@ -45,10 +51,13 @@ The Following is a list of possible "contact_type" values with corresponding mod
 ```
 [
     N_A = "not available",
-    EMAIL = "Email",
-    TEXT = "Text",
-    PHONE = "Phone",
-    IN_PERSON = "In-Person",
+    EMAIL = "Email"
+    TEXT = "Text"
+    PHONE = "Phone"
+    IN_PERSON = "In-Person"
+    MAIL = "Mail"
+    HOME_VISIT = "Home Visit"
+    ON_SITE = "On Site"
 ]
 ```
 

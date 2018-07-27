@@ -1,7 +1,7 @@
 from django.contrib import admin
 from picmodels.models import PICConsumer, Navigators, MetricsSubmission, PlanStat, Country, NavMetricsLocation, Address,\
     CredentialsModel, PICConsumerBackup, ConsumerCPSInfoEntry, CallToAction, HealthcareCarrier, HealthcarePlan,\
-    HealthcareServiceCostEntry, HospitalWebTrafficData, ConsumerHospitalInfo, CaseManagementStatus,\
+    HealthcareServiceCostEntry, HospitalWebTrafficData, ConsumerHospitalData, CaseManagementStatus,\
     CareAdvisorCustomer, ConsumerNote, ProviderLocation, ProviderNetwork, ConsumerSpecificConcern,\
     ConsumerGeneralConcern, HealthcareSubsidyEligibilityByFamSize, HealthcareServiceExpertise, MarketplaceAppointments,\
     Resume, Job, Education, StepsForCMSequences
@@ -26,7 +26,7 @@ admin.site.register(HealthcareCarrier)
 admin.site.register(HealthcarePlan)
 admin.site.register(HealthcareServiceCostEntry)
 admin.site.register(HospitalWebTrafficData)
-admin.site.register(ConsumerHospitalInfo)
+admin.site.register(ConsumerHospitalData)
 admin.site.register(CaseManagementStatus)
 admin.site.register(CareAdvisorCustomer)
 admin.site.register(ConsumerNote)

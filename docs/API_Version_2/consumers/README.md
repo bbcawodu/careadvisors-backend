@@ -1,7 +1,13 @@
-## Consumer Account Backend API
+## Consumer Tables Endpoints README (IN DEVELOPMENT)
 
-### Consumer Data Submission API (IN DEVELOPMENT)
-To create, update, or delete rows in the PICConsumer table in the database, make a PUT request to: http://picbackend.herokuapp.com/v2/consumers/.
+
+## Entity Relationship Diagram for Consumer related data models
+
+![Consumer Entity Relationship Diagram](consumer_erd.jpg)
+
+
+### Modify Consumer Table Rows (IN DEVELOPMENT)
+To create, update, or delete rows in the PICConsumer table of the database, make a PUT request to: http://picbackend.herokuapp.com/v2/consumers/.
 
 - The headers of the request should include: 
     - "Content-Type: "application/json""
@@ -32,7 +38,7 @@ The body of the request should be a JSON document using the following template:
     "best_contact_time": String,
     
     "navigator_id": Integer (A row in the Navigators table with an id equal to the value of this key must exist in the db),
-    "cm_client_id_for_routing": Integer,
+    "cm_client_id_for_routing": Integer (A row in the CMClients table with an id equal to the value of this key must exist in the db),
     # NOTE: A consumer can either have a navigator that its assigned to, or a cm_client_for_routing that its assigned to. Not Both or None Exceptions will be given if you try to assign both or none of them.
     
     'add_referring_cm_clients': [
@@ -57,6 +63,62 @@ The body of the request should be a JSON document using the following template:
         "Year": Integer
     },
     "datetime_received_by_client": String (Must be a iso formatted date and time in UTC eg. 'YYYY-MM-DDTHH:MM:SS'),
+    
+    "create_consumer_hospital_data_rows": [
+        {
+            'medical_record_number': String,
+            'billing_amount': Float,
+            "discharge_date": String (Must be a iso formatted date 'YYYY-MM-DD'),
+            "hospital_name": String,
+        },
+        ...
+    ],
+    "update_consumer_hospital_data_rows": [
+        {
+            'medical_record_number': String,
+            'billing_amount': Float,
+            "discharge_date": String (Must be a iso formatted date 'YYYY-MM-DD'),
+            "hospital_name": String,
+            
+            "id": Integer
+        },
+        ...
+    ],
+    "delete_consumer_hospital_data_rows": [
+        Integer,
+        Integer,
+        Integer
+        ...
+    ],(Only one of the above 3 keys will be read in a single request. The read order is the same as the order that the keys are given)
+    
+    "create_consumer_payer_data_rows": [
+        {
+            'member_id_number': String,
+            'risk': String,
+            'coverage_type': String,
+            'case_type_id': Integer (A row in the CMSequences table with an id equal to the value of this key must exist in the db),
+            "effective_date": String (Must be a iso formatted date 'YYYY-MM-DD'),
+        },
+        ...
+    ],
+    "update_consumer_payer_data_rows": [
+        {
+            'member_id_number': String,
+            'risk': String,
+            'coverage_type': String,
+            'case_type_id': Integer (A row in the CMSequences table with an id equal to the value of this key must exist in the db),
+            "effective_date": String (Must be a iso formatted date 'YYYY-MM-DD'),
+            
+            "id": Integer
+        },
+        ...
+    ],
+    "delete_consumer_payer_data_rows": [
+        Integer,
+        Integer,
+        Integer
+        ...
+    ],(Only one of the above 3 keys will be read in a single request. The read order is the same as the order that the keys are given)
     
     "create_case_management_rows": [
         {
@@ -173,6 +235,19 @@ The Following is a list of possible referral_channel values with corresponding m
 ```
 
 
+The Following is a list of possible consumer_payer_data['coverage_type'] values with corresponding model constant names:
+```
+[
+    PRIVATE = "Private"
+    ACA = "ACA"
+    FHP = "FHP"
+    MEDICARE = "Medicare"
+    DUAL_ELIGIBLE = "Dual Eligible"
+    N_A = "Not Available"
+]
+```
+
+
 In response, a JSON document will be displayed with the following format:
 ```
 {
@@ -194,6 +269,12 @@ In response, a JSON document will be displayed with the following format:
             - "create_backup"
             - "force_create_consumer"
             - "cps_info"
+            - 'create_consumer_hospital_data_rows'
+            - 'update_consumer_hospital_data_rows'
+            - 'delete_consumer_hospital_data_rows'
+            - 'create_consumer_payer_data_rows'
+            - 'update_consumer_payer_data_rows'
+            - 'delete_consumer_payer_data_rows'
             - cps_info["primary_dependent"]["first_name"]
             - cps_info["primary_dependent"]["last_name"]
             - cps_info["primary_dependent"]["Consumer Database ID"]
@@ -332,8 +413,9 @@ In response, a JSON document will be displayed with the following format:
         -Each item in the array is a string corresponding to an error in the JSON Body doc.
     - No changes are made to the database.
     
-### Consumer Data Retrieval API
-- To retrieve consumer data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/consumers/ with the following parameters(at least one required)
+    
+### Read Consumer Table Rows (IN DEVELOPMENT)
+- To read rows in the PICConsumer table of the backend, submit a GET request to http://picbackend.herokuapp.com/v2/consumers/ with the following parameters(at least one required)
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"
     - A maximum of 20 consumer record objects with all of the keys will be returned in order to limit the size of the response BODY.
@@ -390,6 +472,30 @@ In response, a JSON document will be displayed with the following format:
                 "date_met_nav": String (Can be Null),
                 "navigator": String,
                 "cm_client_for_routing": String,
+                "consumer_hospital_data": [
+                    {
+                        "medical_record_number": String,
+                        "discharge_date": String,
+                        "billing_amount": Float,
+                        "hospital_name": String,
+                        "id": Integer
+                    },
+                    ...,
+                    ...
+                ],
+                "consumer_payer_data": [
+                    {
+                        "member_id_number": String,
+                        "effective_date": String,
+                        "risk": String,
+                        "coverage_type": String,
+                        "case_type": String,
+                        "id": Integer
+                    },
+                    ...,
+                    ...
+                ],
+
                 "consumer_notes": [
                     "These are",
                     "sample notes",
@@ -424,12 +530,8 @@ In response, a JSON document will be displayed with the following format:
                     'name': String,
                     'state_province': String(2 letter code),
                 },
-                'add_healthcare_networks_used': [
-                    String,
-                    ...
-                ],
-                'remove_healthcare_networks_used': [
-                    String,
+                'healthcare_networks_used': [
+                    Integer,
                     ...
                 ],
                 "address": Will either be None or a dictionary of the following form:
@@ -498,8 +600,8 @@ In response, a JSON document will be displayed with the following format:
     URLs" key will be present in the root response dictionary.
     
     
-### Consumer Backup Data Retrieval API
-- To retrieve backup consumer data stored in the backend, submit a GET request to http://picbackend.herokuapp.com/v2/backup_consumers/ with the following parameters(at least one required)
+### Read Backup Consumer Table Rows (IN DEVELOPMENT)
+- To read rows in the PICConsumerBackup table of the backend, submit a GET request to http://picbackend.herokuapp.com/v2/backup_consumers/ with the following parameters(at least one required)
     - Results will be filtered by the given parameters.
     - Parameters are divided into 2 categories: "primary" and "secondary"
     - A maximum of 20 consumer record objects with all of the keys will be returned in order to limit the size of the response BODY.
@@ -557,6 +659,31 @@ In response, a JSON document will be displayed with the following format:
                 'referral_channel': String,
                 'referral_type': String,
                 "navigator": String,
+                
+                "consumer_hospital_data": [
+                    {
+                        "medical_record_number": String,
+                        "discharge_date": String,
+                        "billing_amount": Float,
+                        "hospital_name": String,
+                        "id": Integer
+                    },
+                    ...,
+                    ...
+                ],
+                "consumer_payer_data": [
+                    {
+                        "member_id_number": String,
+                        "effective_date": String,
+                        "risk": String,
+                        "coverage_type": String,
+                        "case_type": String,
+                        "id": Integer
+                    },
+                    ...,
+                    ...
+                ],
+                
                 "consumer_notes": [
                     "These are",
                     "sample notes",

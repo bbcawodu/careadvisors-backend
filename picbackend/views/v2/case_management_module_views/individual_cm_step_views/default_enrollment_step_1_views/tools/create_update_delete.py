@@ -102,6 +102,98 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
                 )
         validated_params['datetime_completed'] = validated_datetime_completed
 
+    if 'primary_care_physician' in rqst_body:
+        validated_params['primary_care_physician'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "primary_care_physician",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if "appointment_datetime" in rqst_body:
+        appointment_datetime = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "appointment_datetime",
+            rqst_errors,
+            none_allowed=True
+        )
+        validated_appointment_datetime = None
+        if appointment_datetime:
+            try:
+                validated_appointment_datetime = datetime.datetime.strptime(appointment_datetime, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'appointment_datetime must be a properly formatted datetime string in UTC, eg. YYYY-MM-DDTHH:MM:SS. Value is : {}'.format(
+                        appointment_datetime
+                    )
+                )
+        validated_params['appointment_datetime'] = validated_appointment_datetime
+
+    if 'policy_number' in rqst_body:
+        validated_params['policy_number'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "policy_number",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if 'resource_case_number' in rqst_body:
+        validated_params['resource_case_number'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "resource_case_number",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if 'expedite_benefits_organization_contact_name' in rqst_body:
+        validated_params['expedite_benefits_organization_contact_name'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "expedite_benefits_organization_contact_name",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if 'expedite_benefits_organization_contact_phone' in rqst_body:
+        validated_params['expedite_benefits_organization_contact_phone'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "expedite_benefits_organization_contact_phone",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if 'customer_service_success' in rqst_body:
+        validated_params['customer_service_success'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "customer_service_success",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if 'case_status' in rqst_body:
+        validated_params['case_status'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "case_status",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+        if not rqst_errors and not validated_params['case_status']:
+            validated_params['case_status'] = 'Not Available'
+
 
 def validate_update_row_params(rqst_body, validated_params, rqst_errors):
     if 'consumer_id' in rqst_body:
@@ -186,3 +278,95 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
                         datetime_completed)
                 )
         validated_params['datetime_completed'] = validated_datetime_completed
+
+    if 'primary_care_physician' in rqst_body:
+        validated_params['primary_care_physician'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "primary_care_physician",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if "appointment_datetime" in rqst_body:
+        appointment_datetime = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "appointment_datetime",
+            rqst_errors,
+            none_allowed=True
+        )
+        validated_appointment_datetime = None
+        if appointment_datetime:
+            try:
+                validated_appointment_datetime = datetime.datetime.strptime(appointment_datetime, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'appointment_datetime must be a properly formatted datetime string in UTC, eg. YYYY-MM-DDTHH:MM:SS. Value is : {}'.format(
+                        appointment_datetime
+                    )
+                )
+        validated_params['appointment_datetime'] = validated_appointment_datetime
+
+    if 'policy_number' in rqst_body:
+        validated_params['policy_number'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "policy_number",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if 'resource_case_number' in rqst_body:
+        validated_params['resource_case_number'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "resource_case_number",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if 'expedite_benefits_organization_contact_name' in rqst_body:
+        validated_params['expedite_benefits_organization_contact_name'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "expedite_benefits_organization_contact_name",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if 'expedite_benefits_organization_contact_phone' in rqst_body:
+        validated_params['expedite_benefits_organization_contact_phone'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "expedite_benefits_organization_contact_phone",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if 'customer_service_success' in rqst_body:
+        validated_params['customer_service_success'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "customer_service_success",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+
+    if 'case_status' in rqst_body:
+        validated_params['case_status'] = clean_string_value_from_dict_object(
+            rqst_body,
+            "root",
+            "case_status",
+            rqst_errors,
+            empty_string_allowed=True,
+            none_allowed=True
+        )
+        if not rqst_errors and not validated_params['case_status']:
+            validated_params['case_status'] = 'Not Available'
