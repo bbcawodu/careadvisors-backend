@@ -166,7 +166,7 @@ def filter_db_objects_by_secondary_params(db_objects, validated_get_params):
         db_objects = db_objects.filter(cps_info__isnull=not is_cps_consumer)
     if 'has_hospital_info' in validated_get_params:
         has_hospital_info = validated_get_params['has_hospital_info']
-        db_objects = db_objects.filter(consumer_hospital_info__isnull=not has_hospital_info)
+        db_objects = db_objects.filter(consumerhospitaldata_set__isnull=not has_hospital_info)
 
     return db_objects
 
