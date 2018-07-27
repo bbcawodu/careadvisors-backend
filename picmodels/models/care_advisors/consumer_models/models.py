@@ -25,8 +25,11 @@ class PICConsumerBaseQuerySet(models.QuerySet):
         for obj in self:
             if obj.cps_info:
                 obj.cps_info.delete()
-            if obj.consumer_hospital_info:
-                obj.consumer_hospital_info.delete()
+            if obj.consumerhospitaldata_set:
+                hospital_data_objs = obj.consumerhospitaldata_set.all()
+                if len(hospital_data_objs):
+                    for hospital_obj in hospital_data_objs:
+                        hospital_obj.delete()
         super(PICConsumerBaseQuerySet, self).delete(*args, **kwargs)
 
 
@@ -87,7 +90,6 @@ class PICConsumerBase(models.Model):
     date_met_nav = models.DateField(blank=True, null=True)
 
     cps_info = models.ForeignKey('ConsumerCPSInfoEntry', on_delete=models.SET_NULL, blank=True, null=True)
-    consumer_hospital_info = models.ForeignKey('ConsumerHospitalInfo', on_delete=models.SET_NULL, blank=True, null=True)
 
     # Individual Seeking Navigator fields/columns
     consumer_need = models.CharField(blank=True, null=True, max_length=1000, choices=CONSUMER_NEED_CHOICES, default=N_A)
@@ -228,7 +230,8 @@ class PICConsumer(PICConsumerBase):
             "cps_info": None,
             "primary_guardians": None,
             "secondary_guardians": None,
-            "consumer_hospital_info": None,
+            "consumer_hospital_data": None,
+            "consumer_payer_data": None,
 
             "date_created": self.date_created.isoformat() if self.date_created else None,
             "date_modified": self.date_modified.isoformat() if self.date_modified else None,
@@ -297,8 +300,25 @@ class PICConsumer(PICConsumerBase):
         if self.cps_info:
             valuesdict['cps_info'] = self.cps_info.return_values_dict()
 
-        if self.consumer_hospital_info:
-            valuesdict['consumer_hospital_info'] = self.consumer_hospital_info.return_values_dict()
+        if self.consumerhospitaldata_set:
+            consumer_hospital_data_objects = self.consumerhospitaldata_set.all()
+            consumer_hospital_data_list = []
+
+            if len(consumer_hospital_data_objects):
+                for consumer_hospital_data in consumer_hospital_data_objects:
+                    consumer_hospital_data_list.append(consumer_hospital_data.return_values_dict())
+
+            valuesdict["consumer_hospital_data"] = consumer_hospital_data_list
+
+        if self.consumerpayerdata_set:
+            consumer_payer_data_objects = self.consumerpayerdata_set.all()
+            consumer_payer_data_list = []
+
+            if len(consumer_payer_data_objects):
+                for consumer_payer_data in consumer_payer_data_objects:
+                    consumer_payer_data_list.append(consumer_payer_data.return_values_dict())
+
+            valuesdict["consumer_payer_data"] = consumer_payer_data_list
 
         if self.service_expertise_need:
             valuesdict['service_expertise_need'] = self.service_expertise_need.return_values_dict()
@@ -417,7 +437,8 @@ class PICConsumerBackup(PICConsumerBase):
             "cps_info": None,
             "primary_guardians": None,
             "secondary_guardians": None,
-            "consumer_hospital_info": None,
+            "consumer_hospital_data": None,
+            "consumer_payer_data": None,
 
             "date_created": self.date_created.isoformat() if self.date_created else None,
             "date_modified": self.date_modified.isoformat() if self.date_modified else None,
@@ -476,8 +497,25 @@ class PICConsumerBackup(PICConsumerBase):
         if self.cps_info:
             valuesdict['cps_info'] = self.cps_info.return_values_dict()
 
-        if self.consumer_hospital_info:
-            valuesdict['consumer_hospital_info'] = self.consumer_hospital_info.return_values_dict()
+        if self.consumerhospitaldata_set:
+            consumer_hospital_data_objects = self.consumerhospitaldata_set.all()
+            consumer_hospital_data_list = []
+
+            if len(consumer_hospital_data_objects):
+                for consumer_hospital_data in consumer_hospital_data_objects:
+                    consumer_hospital_data_list.append(consumer_hospital_data.return_values_dict())
+
+            valuesdict["consumer_hospital_data"] = consumer_hospital_data_list
+
+        if self.consumerpayerdata_set:
+            consumer_payer_data_objects = self.consumerpayerdata_set.all()
+            consumer_payer_data_list = []
+
+            if len(consumer_payer_data_objects):
+                for consumer_payer_data in consumer_payer_data_objects:
+                    consumer_payer_data_list.append(consumer_payer_data.return_values_dict())
+
+            valuesdict["consumer_payer_data"] = consumer_payer_data_list
 
         if self.service_expertise_need:
             valuesdict['service_expertise_need'] = self.service_expertise_need.return_values_dict()
@@ -530,6 +568,121 @@ class ConsumerNote(models.Model):
     class Meta:
         # maps model to the picmodels module
         app_label = 'picmodels'
+
+
+class ConsumerHospitalData(models.Model):
+    medical_record_number = models.CharField(max_length=5000, blank=True, null=True)
+    discharge_date = models.DateField(blank=True, null=True)
+    billing_amount = models.DecimalField(
+        blank=True,
+        null=True,
+        decimal_places=2,
+        max_digits=14,
+        validators=[MinValueValidator(Decimal('0.01'))]
+    )
+
+    hospital_name = models.CharField(max_length=5000, blank=True, null=True)
+
+    consumer = models.ForeignKey(
+        'PICConsumer',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
+    consumer_backup = models.ForeignKey(
+        'PICConsumerBackup',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        # maps model to the picmodels module
+        app_label = 'picmodels'
+
+    def return_values_dict(self):
+        valuesdict = {
+            "medical_record_number": self.medical_record_number,
+            "discharge_date": self.discharge_date.isoformat() if self.discharge_date else None,
+            "billing_amount": float(self.billing_amount) if self.billing_amount else self.billing_amount,
+
+            'hospital_name': self.hospital_name,
+
+            "id": self.id
+        }
+
+        return valuesdict
+
+
+class ConsumerPayerData(models.Model):
+    N_A = "Not Available"
+    PRIVATE = "Private"
+    ACA = "ACA"
+    FHP = "FHP"
+    MEDICARE = "Medicare"
+    DUAL_ELIGIBLE = "Dual Eligible"
+    COVERAGE_TYPE_CHOICES = (
+        (PRIVATE, "Private"),
+        (ACA, "ACA"),
+        (FHP, "FHP"),
+        (MEDICARE, "Medicare"),
+        (DUAL_ELIGIBLE, "Dual Eligible"),
+        (N_A, "Not Available")
+    )
+
+    member_id_number = models.CharField(max_length=5000, blank=True, null=True)
+    effective_date = models.DateField(blank=True, null=True)
+    risk = models.CharField(max_length=5000, blank=True, null=True)
+    coverage_type = models.CharField(
+        blank=True,
+        null=True,
+        max_length=1000,
+        choices=COVERAGE_TYPE_CHOICES,
+        default=N_A
+    )
+    case_type = models.ForeignKey(
+        'CMSequences',
+        related_name='payer_data_for_cases_of_this_type',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+
+    consumer = models.ForeignKey(
+        'PICConsumer',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
+    consumer_backup = models.ForeignKey(
+        'PICConsumerBackup',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
+
+    def check_coverage_type_choices(self,):
+        for coverage_type_tuple in self.COVERAGE_TYPE_CHOICES:
+            if coverage_type_tuple[1].lower() == self.coverage_type.lower():
+                return True
+        return False
+
+    class Meta:
+        # maps model to the picmodels module
+        app_label = 'picmodels'
+
+    def return_values_dict(self):
+        valuesdict = {
+            "member_id_number": self.member_id_number,
+            "effective_date": self.effective_date.isoformat() if self.effective_date else None,
+            "risk": self.risk,
+            "coverage_type": self.coverage_type,
+            'case_type': self.case_type.name if self.case_type else None,
+
+            "id": self.id
+        }
+
+        return valuesdict
 
 
 class ConsumerCPSInfoEntry(models.Model):
@@ -664,70 +817,6 @@ class ConsumerCPSInfoEntry(models.Model):
                                        "Database ID": secondary_dependent.id}
                     secondary_dependent_list.append(dependent_entry)
                 valuesdict["secondary_dependents"] = secondary_dependent_list
-
-        return valuesdict
-
-
-class ConsumerHospitalInfo(models.Model):
-    """
-    Need to validate ALL field/column data before creating PICConsumerBase entries/rows and by extention,
-    ConsumerHospitalInfo entries/rows
-    """
-
-    N_A = "Not Available"
-    OPEN = "Open"
-    CLOSED = "Closed"
-    CASE_STATUS_CHOICES = ((OPEN, "Open"),
-                           (CLOSED, "Closed"),
-                           (N_A, "Not Available"))
-
-    treatment_site = models.CharField(max_length=1000, blank=True, null=True)
-    account_number = models.CharField(max_length=1000, blank=True, null=True)
-    mrn = models.CharField(max_length=1000, blank=True, null=True)
-    date_of_birth = models.DateField(blank=True, null=True)
-    ssn = models.CharField(max_length=10, blank=True, null=True)
-    state = models.CharField(max_length=5, blank=True, null=True)
-    p_class = models.CharField(max_length=100, blank=True, null=True)
-    admit_date = models.DateField(blank=True, null=True)
-    discharge_date = models.DateField(blank=True, null=True)
-    medical_charges = models.FloatField(blank=True, null=True)
-    referred_date = models.DateField(blank=True, null=True)
-    no_date = models.DateField(blank=True, null=True)
-    type = models.CharField(max_length=1000, blank=True, null=True)
-    no_reason = models.CharField(max_length=1000, blank=True, null=True)
-
-    case_status = models.CharField(max_length=1000, blank=True, null=True, choices=CASE_STATUS_CHOICES, default=N_A)
-
-    class Meta:
-        # maps model to the picmodels module
-        app_label = 'picmodels'
-
-    def check_case_status_choices(self,):
-        for case_status_tuple in self.CASE_STATUS_CHOICES:
-            if case_status_tuple[1].lower() == self.case_status.lower():
-                return True
-        return False
-
-    def return_values_dict(self):
-        valuesdict = {
-            "treatment_site": self.treatment_site,
-            "account_number": self.account_number,
-            "mrn": self.mrn,
-            "date_of_birth": self.date_of_birth.isoformat() if self.date_of_birth else None,
-            "ssn": self.ssn,
-            "state": self.state,
-            "p_class": self.p_class,
-            "admit_date": self.admit_date.isoformat() if self.admit_date else None,
-            "discharge_date": self.discharge_date.isoformat() if self.discharge_date else None,
-            "medical_charges": self.medical_charges,
-            "referred_date": self.referred_date.isoformat() if self.referred_date else None,
-            "no_date": self.no_date.isoformat() if self.no_date else None,
-            "type": self.type,
-            "no_reason": self.no_reason,
-            "case_status": self.case_status,
-
-            "id": self.id
-        }
 
         return valuesdict
 

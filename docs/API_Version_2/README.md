@@ -10,6 +10,11 @@ This file is documentation for the backend server API of Community Connect Relat
 [Backend Server Request Instructions README](making_requests_to_backend.md)
 
 
+### Consumer Tables Backend Endpoints (IN DEVELOPMENT)
+
+[Consumer Tables Backend Endpoints README](consumers/README.md)
+
+
 ### Case Management Module Endpoints API
 
 [Case Management Module Endpoints API README](case_management_API/README.md)
@@ -43,11 +48,6 @@ This file is documentation for the backend server API of Community Connect Relat
 ### Navigator Organizations From Care Advisors Form Backend API
 
 [Navigator Organizations From Care Advisors Form Backend API README](nav_orgs_from_form_api.md)
-
-
-### Consumer Account Backend API (IN DEVELOPMENT)
-
-[Consumer Account Backend API README](Consumer_Backend_API.md)
     
 
 ### Consumer Metrics Backend API

@@ -346,16 +346,8 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
                                                            no_key_allowed=True)
     validated_params["create_backup"] = create_backup
 
-    rqst_hospital_info_dict = clean_dict_value_from_dict_object(rqst_body,
-                                                                "root",
-                                                                "consumer_hospital_info",
-                                                                rqst_errors,
-                                                                no_key_allowed=True,
-                                                                none_allowed=True)
-    validated_hospital_info_dict = None
-    if rqst_hospital_info_dict:
-        validated_hospital_info_dict = validate_hospital_info_params(rqst_hospital_info_dict, rqst_errors)
-    validated_params["validated_hospital_info_dict"] = validated_hospital_info_dict
+    validate_consumer_hospital_data_params(rqst_body, validated_params, rqst_errors)
+    validate_consumer_payer_data_params(rqst_body, validated_params, rqst_errors)
 
     if "create_case_management_rows" in rqst_body:
         rqst_case_management_row_data = clean_list_value_from_dict_object(
@@ -545,6 +537,9 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
         )
 
         validated_params["consumer_notes"] = consumer_notes
+
+    validate_consumer_hospital_data_params(rqst_body, validated_params, rqst_errors)
+    validate_consumer_payer_data_params(rqst_body, validated_params, rqst_errors)
 
     if "address_line_1" in rqst_body:
         address_line_1 = clean_string_value_from_dict_object(
@@ -810,6 +805,422 @@ def validate_update_row_params(rqst_body, validated_params, rqst_errors):
         rqst_errors.append("No parameters to modify are given.")
 
 
+def validate_consumer_hospital_data_params(rqst_body, validated_params, rqst_errors):
+    if "create_consumer_hospital_data_rows" in rqst_body:
+        rqst_consumer_hospital_data_row_data = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "create_consumer_hospital_data_rows",
+            rqst_errors
+        )
+
+        validated_create_consumer_hospital_data_params = []
+        if rqst_consumer_hospital_data_row_data:
+            for rqst_consumer_hospital_data_row_index, rqst_consumer_hospital_data_dict in enumerate(rqst_consumer_hospital_data_row_data):
+                validated_consumer_hospital_data_row_params = validate_create_consumer_hospital_data_params(
+                    rqst_consumer_hospital_data_dict,
+                    rqst_consumer_hospital_data_row_index,
+                    rqst_errors
+                )
+                validated_create_consumer_hospital_data_params.append(validated_consumer_hospital_data_row_params)
+
+        validated_params['create_consumer_hospital_data_rows'] = validated_create_consumer_hospital_data_params
+    elif "update_consumer_hospital_data_rows" in rqst_body:
+        rqst_consumer_hospital_data_row_data = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "update_consumer_hospital_data_rows",
+            rqst_errors
+        )
+
+        validated_update_consumer_hospital_data_params = []
+        if rqst_consumer_hospital_data_row_data:
+            for rqst_consumer_hospital_data_row_index, rqst_consumer_hospital_data_dict in enumerate(rqst_consumer_hospital_data_row_data):
+                validated_consumer_hospital_data_row_params = validate_update_consumer_hospital_data_params(
+                    rqst_consumer_hospital_data_dict,
+                    rqst_consumer_hospital_data_row_index,
+                    rqst_errors
+                )
+                validated_update_consumer_hospital_data_params.append(validated_consumer_hospital_data_row_params)
+
+        validated_params['update_consumer_hospital_data_rows'] = validated_update_consumer_hospital_data_params
+    elif "delete_consumer_hospital_data_rows" in rqst_body:
+        rqst_consumer_hospital_data_row_data = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "delete_consumer_hospital_data_rows",
+            rqst_errors
+        )
+
+        validated_delete_consumer_hospital_data_params = []
+        if rqst_consumer_hospital_data_row_data:
+            for rqst_consumer_hospital_data_row_index, rqst_consumer_hospital_data_id in enumerate(rqst_consumer_hospital_data_row_data):
+                validated_consumer_hospital_data_row_params = validate_delete_consumer_hospital_data_params(
+                    rqst_consumer_hospital_data_id,
+                    rqst_consumer_hospital_data_row_index,
+                    rqst_errors
+                )
+                validated_delete_consumer_hospital_data_params.append(validated_consumer_hospital_data_row_params)
+
+        validated_params['delete_consumer_hospital_data_rows'] = validated_delete_consumer_hospital_data_params
+
+
+def validate_create_consumer_hospital_data_params(consumer_hospital_data_dict, consumer_hospital_data_row_index, rqst_errors):
+    validated_params = {}
+
+    if 'hospital_name' in consumer_hospital_data_dict:
+        validated_params['hospital_name'] = clean_string_value_from_dict_object(
+            consumer_hospital_data_dict,
+            "create_consumer_hospital_data_rows[{!s}]".format(consumer_hospital_data_row_index),
+            "hospital_name",
+            rqst_errors
+        )
+
+    if 'medical_record_number' in consumer_hospital_data_dict:
+        validated_params['medical_record_number'] = clean_string_value_from_dict_object(
+            consumer_hospital_data_dict,
+            "create_consumer_hospital_data_rows[{!s}]".format(consumer_hospital_data_row_index),
+            "medical_record_number",
+            rqst_errors
+        )
+
+    if 'billing_amount' in consumer_hospital_data_dict:
+        validated_params['billing_amount'] = clean_float_value_from_dict_object(
+            consumer_hospital_data_dict,
+            "create_consumer_hospital_data_rows[{!s}]".format(consumer_hospital_data_row_index),
+            'billing_amount',
+            rqst_errors,
+            none_allowed=True,
+        )
+        if validated_params['billing_amount'] and validated_params['billing_amount'] < 0:
+            rqst_errors.append(
+                "Value for 'billing_amount' must be greater than 0. Given value is: {}. create_consumer_hospital_data_row index: {}".format(
+                    validated_params['billing_amount'],
+                    consumer_hospital_data_row_index
+                )
+            )
+
+    if "discharge_date" in consumer_hospital_data_dict:
+        discharge_date = clean_string_value_from_dict_object(
+            consumer_hospital_data_dict,
+            "create_consumer_hospital_data_rows[{!s}]".format(consumer_hospital_data_row_index),
+            "discharge_date",
+            rqst_errors,
+            none_allowed=True
+        )
+        validated_discharge_date = None
+        if discharge_date:
+            try:
+                validated_discharge_date = datetime.datetime.strptime(discharge_date, "%Y-%m-%d").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'discharge_date must be a properly formatted date string, eg. YYYY-MM-DD. Value is : {}. create_consumer_hospital_data index is: {}'.format(
+                        discharge_date,
+                        consumer_hospital_data_row_index
+                    )
+                )
+        validated_params['discharge_date'] = validated_discharge_date
+
+    return validated_params
+
+
+def validate_update_consumer_hospital_data_params(consumer_hospital_data_dict, consumer_hospital_data_row_index, rqst_errors):
+    validated_params = {}
+
+    validated_params['id'] = clean_int_value_from_dict_object(
+        consumer_hospital_data_dict,
+        "update_consumer_hospital_data_rows[{!s}]".format(consumer_hospital_data_row_index),
+        "id",
+        rqst_errors
+    )
+
+    if 'hospital_name' in consumer_hospital_data_dict:
+        validated_params['hospital_name'] = clean_string_value_from_dict_object(
+            consumer_hospital_data_dict,
+            "update_consumer_hospital_data_rows[{!s}]".format(consumer_hospital_data_row_index),
+            "hospital_name",
+            rqst_errors
+        )
+
+    if 'medical_record_number' in consumer_hospital_data_dict:
+        validated_params['medical_record_number'] = clean_string_value_from_dict_object(
+            consumer_hospital_data_dict,
+            "update_consumer_hospital_data_rows[{!s}]".format(consumer_hospital_data_row_index),
+            "medical_record_number",
+            rqst_errors
+        )
+
+    if 'billing_amount' in consumer_hospital_data_dict:
+        validated_params['billing_amount'] = clean_float_value_from_dict_object(
+            consumer_hospital_data_dict,
+            "update_consumer_hospital_data_rows[{!s}]".format(consumer_hospital_data_row_index),
+            'billing_amount',
+            rqst_errors,
+            none_allowed=True,
+        )
+        if validated_params['billing_amount'] and validated_params['billing_amount'] < 0:
+            rqst_errors.append(
+                "Value for 'billing_amount' must be greater than 0. Given value is: {}. update_consumer_hospital_data_row index: {}".format(
+                    validated_params['billing_amount'],
+                    consumer_hospital_data_row_index
+                )
+            )
+
+    if "discharge_date" in consumer_hospital_data_dict:
+        discharge_date = clean_string_value_from_dict_object(
+            consumer_hospital_data_dict,
+            "update_consumer_hospital_data_rows[{!s}]".format(consumer_hospital_data_row_index),
+            "discharge_date",
+            rqst_errors,
+            none_allowed=True
+        )
+        validated_discharge_date = None
+        if discharge_date:
+            try:
+                validated_discharge_date = datetime.datetime.strptime(discharge_date, "%Y-%m-%d").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'discharge_date must be a properly formatted date string, eg. YYYY-MM-DD. Value is : {}. update_consumer_hospital_data index is: {}'.format(
+                        discharge_date,
+                        consumer_hospital_data_row_index
+                    )
+                )
+        validated_params['discharge_date'] = validated_discharge_date
+
+    return validated_params
+
+
+def validate_delete_consumer_hospital_data_params(consumer_hospital_data_id, consumer_hospital_data_row_index, rqst_errors):
+    validated_params = {}
+
+    if not isinstance(consumer_hospital_data_id, int):
+        rqst_errors.append(
+            "id in delete_consumer_hospital_data_row is not an integer at index: {}".format(
+                consumer_hospital_data_row_index
+            )
+        )
+
+        return None
+
+    validated_params['id'] = consumer_hospital_data_id
+
+    return validated_params
+
+
+def validate_consumer_payer_data_params(rqst_body, validated_params, rqst_errors):
+    if "create_consumer_payer_data_rows" in rqst_body:
+        rqst_consumer_payer_data_row_data = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "create_consumer_payer_data_rows",
+            rqst_errors
+        )
+
+        validated_create_consumer_payer_data_params = []
+        if rqst_consumer_payer_data_row_data:
+            for rqst_consumer_payer_data_row_index, rqst_consumer_payer_data_dict in enumerate(rqst_consumer_payer_data_row_data):
+                validated_consumer_payer_data_row_params = validate_create_consumer_payer_data_params(
+                    rqst_consumer_payer_data_dict,
+                    rqst_consumer_payer_data_row_index,
+                    rqst_errors
+                )
+                validated_create_consumer_payer_data_params.append(validated_consumer_payer_data_row_params)
+
+        validated_params['create_consumer_payer_data_rows'] = validated_create_consumer_payer_data_params
+    elif "update_consumer_payer_data_rows" in rqst_body:
+        rqst_consumer_payer_data_row_data = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "update_consumer_payer_data_rows",
+            rqst_errors
+        )
+
+        validated_update_consumer_payer_data_params = []
+        if rqst_consumer_payer_data_row_data:
+            for rqst_consumer_payer_data_row_index, rqst_consumer_payer_data_dict in enumerate(rqst_consumer_payer_data_row_data):
+                validated_consumer_payer_data_row_params = validate_update_consumer_payer_data_params(
+                    rqst_consumer_payer_data_dict,
+                    rqst_consumer_payer_data_row_index,
+                    rqst_errors
+                )
+                validated_update_consumer_payer_data_params.append(validated_consumer_payer_data_row_params)
+
+        validated_params['update_consumer_payer_data_rows'] = validated_update_consumer_payer_data_params
+    elif "delete_consumer_payer_data_rows" in rqst_body:
+        rqst_consumer_payer_data_row_data = clean_list_value_from_dict_object(
+            rqst_body,
+            "root",
+            "delete_consumer_payer_data_rows",
+            rqst_errors
+        )
+
+        validated_delete_consumer_payer_data_params = []
+        if rqst_consumer_payer_data_row_data:
+            for rqst_consumer_payer_data_row_index, rqst_consumer_payer_data_id in enumerate(rqst_consumer_payer_data_row_data):
+                validated_consumer_payer_data_row_params = validate_delete_consumer_payer_data_params(
+                    rqst_consumer_payer_data_id,
+                    rqst_consumer_payer_data_row_index,
+                    rqst_errors
+                )
+                validated_delete_consumer_payer_data_params.append(validated_consumer_payer_data_row_params)
+
+        validated_params['delete_consumer_payer_data_rows'] = validated_delete_consumer_payer_data_params
+
+
+def validate_create_consumer_payer_data_params(consumer_payer_data_dict, consumer_payer_data_row_index, rqst_errors):
+    validated_params = {}
+
+    if 'risk' in consumer_payer_data_dict:
+        validated_params['risk'] = clean_string_value_from_dict_object(
+            consumer_payer_data_dict,
+            "create_consumer_payer_data_rows[{!s}]".format(consumer_payer_data_row_index),
+            "risk",
+            rqst_errors,
+            none_allowed=True
+        )
+
+    if 'member_id_number' in consumer_payer_data_dict:
+        validated_params['member_id_number'] = clean_string_value_from_dict_object(
+            consumer_payer_data_dict,
+            "create_consumer_payer_data_rows[{!s}]".format(consumer_payer_data_row_index),
+            "member_id_number",
+            rqst_errors,
+            none_allowed=True
+        )
+
+    if "effective_date" in consumer_payer_data_dict:
+        effective_date = clean_string_value_from_dict_object(
+            consumer_payer_data_dict,
+            "create_consumer_payer_data_rows[{!s}]".format(consumer_payer_data_row_index),
+            "effective_date",
+            rqst_errors,
+            none_allowed=True
+        )
+        validated_effective_date = None
+        if effective_date:
+            try:
+                validated_effective_date = datetime.datetime.strptime(effective_date, "%Y-%m-%d").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'effective_date must be a properly formatted date string, eg. YYYY-MM-DD. Value is : {}. create_consumer_payer_data index is: {}'.format(
+                        effective_date,
+                        consumer_payer_data_row_index
+                    )
+                )
+        validated_params['effective_date'] = validated_effective_date
+
+    if 'coverage_type' in consumer_payer_data_dict:
+        validated_params['coverage_type'] = clean_string_value_from_dict_object(
+            consumer_payer_data_dict,
+            "create_consumer_payer_data_rows[{!s}]".format(consumer_payer_data_row_index),
+            "coverage_type",
+            rqst_errors,
+            empty_string_allowed=True
+        )
+        if not rqst_errors and not validated_params['coverage_type']:
+            validated_params['coverage_type'] = 'Not Available'
+
+    if 'case_type_id' in consumer_payer_data_dict:
+        validated_params['case_type_id'] = clean_int_value_from_dict_object(
+            consumer_payer_data_dict,
+            "create_consumer_payer_data_rows[{!s}]".format(consumer_payer_data_row_index),
+            "case_type_id",
+            rqst_errors,
+            none_allowed=True
+        )
+
+    return validated_params
+
+
+def validate_update_consumer_payer_data_params(consumer_payer_data_dict, consumer_payer_data_row_index, rqst_errors):
+    validated_params = {}
+
+    validated_params['id'] = clean_int_value_from_dict_object(
+        consumer_payer_data_dict,
+        "update_consumer_payer_data_rows[{!s}]".format(consumer_payer_data_row_index),
+        "id",
+        rqst_errors
+    )
+
+    if 'risk' in consumer_payer_data_dict:
+        validated_params['risk'] = clean_string_value_from_dict_object(
+            consumer_payer_data_dict,
+            "update_consumer_payer_data_rows[{!s}]".format(consumer_payer_data_row_index),
+            "risk",
+            rqst_errors,
+            none_allowed=True
+        )
+
+    if 'member_id_number' in consumer_payer_data_dict:
+        validated_params['member_id_number'] = clean_string_value_from_dict_object(
+            consumer_payer_data_dict,
+            "update_consumer_payer_data_rows[{!s}]".format(consumer_payer_data_row_index),
+            "member_id_number",
+            rqst_errors,
+            none_allowed=True
+        )
+
+    if "effective_date" in consumer_payer_data_dict:
+        effective_date = clean_string_value_from_dict_object(
+            consumer_payer_data_dict,
+            "update_consumer_payer_data_rows[{!s}]".format(consumer_payer_data_row_index),
+            "effective_date",
+            rqst_errors,
+            none_allowed=True
+        )
+        validated_effective_date = None
+        if effective_date:
+            try:
+                validated_effective_date = datetime.datetime.strptime(effective_date, "%Y-%m-%d").replace(tzinfo=pytz.UTC)
+            except ValueError:
+                rqst_errors.append(
+                    'effective_date must be a properly formatted date string, eg. YYYY-MM-DD. Value is : {}. update_consumer_payer_data index is: {}'.format(
+                        effective_date,
+                        consumer_payer_data_row_index
+                    )
+                )
+        validated_params['effective_date'] = validated_effective_date
+
+    if 'coverage_type' in consumer_payer_data_dict:
+        validated_params['coverage_type'] = clean_string_value_from_dict_object(
+            consumer_payer_data_dict,
+            "update_consumer_payer_data_rows[{!s}]".format(consumer_payer_data_row_index),
+            "coverage_type",
+            rqst_errors,
+            empty_string_allowed=True
+        )
+        if not rqst_errors and not validated_params['coverage_type']:
+            validated_params['coverage_type'] = 'Not Available'
+
+    if 'case_type_id' in consumer_payer_data_dict:
+        validated_params['case_type_id'] = clean_int_value_from_dict_object(
+            consumer_payer_data_dict,
+            "update_consumer_payer_data_rows[{!s}]".format(consumer_payer_data_row_index),
+            "case_type_id",
+            rqst_errors,
+            none_allowed=True
+        )
+
+    return validated_params
+
+
+def validate_delete_consumer_payer_data_params(consumer_payer_data_id, consumer_payer_data_row_index, rqst_errors):
+    validated_params = {}
+
+    if not isinstance(consumer_payer_data_id, int):
+        rqst_errors.append(
+            "id in delete_consumer_payer_data_row is not an integer at index: {}".format(
+                consumer_payer_data_row_index
+            )
+        )
+
+        return None
+
+    validated_params['id'] = consumer_payer_data_id
+
+    return validated_params
+
+
 def validate_create_c_m_status_data(rqst_case_management_dict, rqst_case_row_index, validated_params, rqst_errors):
     validated_c_m_row_params = {
 
@@ -920,101 +1331,6 @@ def validate_delete_c_m_status_data(rqst_management_status_id, rqst_errors):
                     str(rqst_management_status_id)))
 
     return validated_c_m_row_params
-
-
-def validate_hospital_info_params(rqst_hospital_info_dict, rqst_errors):
-    validated_hospital_info_params = {}
-
-    if "treatment_site" in rqst_hospital_info_dict:
-        treatment_site = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "treatment_site", rqst_errors)
-        validated_hospital_info_params['treatment_site'] = treatment_site
-
-    if "account_number" in rqst_hospital_info_dict:
-        account_number = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "account_number", rqst_errors)
-        validated_hospital_info_params['account_number'] = account_number
-
-    if "mrn" in rqst_hospital_info_dict:
-        mrn = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "mrn", rqst_errors)
-        validated_hospital_info_params['mrn'] = mrn
-
-    if "date_of_birth" in rqst_hospital_info_dict:
-        date_of_birth = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "date_of_birth", rqst_errors)
-
-        validated_date_of_birth = validate_string_date_input(date_of_birth, "date_of_birth", rqst_errors)
-        if validated_date_of_birth:
-            validated_hospital_info_params['date_of_birth'] = validated_date_of_birth
-
-    if "ssn" in rqst_hospital_info_dict:
-        ssn = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "ssn", rqst_errors)
-
-        if len(ssn) > 10:
-            rqst_errors.append('ssn must be less than 10 digits')
-        else:
-            validated_hospital_info_params['ssn'] = ssn
-
-    if "state" in rqst_hospital_info_dict:
-        state = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "state", rqst_errors)
-        validated_hospital_info_params['state'] = state
-
-    if "p_class" in rqst_hospital_info_dict:
-        p_class = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "p_class", rqst_errors)
-        validated_hospital_info_params['p_class'] = p_class
-
-    if "admit_date" in rqst_hospital_info_dict:
-        admit_date = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "admit_date", rqst_errors)
-
-        validated_admit_date = validate_string_date_input(admit_date, "admit_date", rqst_errors)
-        if validated_admit_date:
-            validated_hospital_info_params['admit_date'] = validated_admit_date
-
-    if "discharge_date" in rqst_hospital_info_dict:
-        discharge_date = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "discharge_date", rqst_errors)
-
-        validated_discharge_date = validate_string_date_input(discharge_date, "discharge_date", rqst_errors)
-        if validated_discharge_date:
-            validated_hospital_info_params['discharge_date'] = validated_discharge_date
-
-    if "medical_charges" in rqst_hospital_info_dict:
-        medical_charges = clean_float_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "medical_charges", rqst_errors)
-        validated_hospital_info_params['medical_charges'] = medical_charges
-
-    if "referred_date" in rqst_hospital_info_dict:
-        referred_date = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "referred_date", rqst_errors)
-
-        validated_referred_date = validate_string_date_input(referred_date, "referred_date", rqst_errors)
-        if validated_referred_date:
-            validated_hospital_info_params['referred_date'] = validated_referred_date
-
-    if "no_date" in rqst_hospital_info_dict:
-        no_date = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "no_date", rqst_errors)
-
-        validated_no_date = validate_string_date_input(no_date, "no_date", rqst_errors)
-        if validated_no_date:
-            validated_hospital_info_params['no_date'] = validated_no_date
-
-    if "type" in rqst_hospital_info_dict:
-        type = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "type", rqst_errors)
-        validated_hospital_info_params['type'] = type
-
-    if "no_reason" in rqst_hospital_info_dict:
-        no_reason = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "no_reason", rqst_errors)
-        validated_hospital_info_params['no_reason'] = no_reason
-
-    if "case_status" in rqst_hospital_info_dict:
-        case_status = clean_string_value_from_dict_object(rqst_hospital_info_dict, "consumer_hospital_info", "case_status", rqst_errors)
-        validated_hospital_info_params['case_status'] = case_status
-
-    return validated_hospital_info_params
-
-
-def validate_string_date_input(string_date, param_name, rqst_errors):
-    try:
-        validated_date = datetime.datetime.strptime(string_date, '%m/%d/%Y')
-    except ValueError:
-        rqst_errors.append('{} parameter value must be a valid date formatted like: MM/DD/YYYY.'.format(param_name))
-        validated_date = None
-
-    return validated_date
 
 
 def validate_cps_info_params_for_add_instance_rqst(rqst_cps_info_params, rqst_consumer_met_nav_at, consumer_household_size, nav_instance, rqst_errors):

@@ -120,15 +120,19 @@ def create_row_w_validated_params(cls, validated_params, rqst_errors):
                         consumer_instance.referring_cm_clients.add(case_management_client_row)
 
         update_indiv_seeking_nav_columns_for_row(consumer_instance, validated_params, rqst_errors)
-        if rqst_errors:
-            consumer_instance.delete()
-            consumer_instance = None
 
         if validated_params['validated_cps_info_dict'] and consumer_instance:
             add_cps_info_to_consumer_instance(consumer_instance, validated_params['validated_cps_info_dict'], rqst_errors)
 
-        if validated_params['validated_hospital_info_dict'] and consumer_instance:
-            add_hospital_info_to_consumer_instance(consumer_instance, validated_params['validated_hospital_info_dict'], rqst_errors)
+        if not rqst_errors and consumer_instance:
+            manage_consumer_hospital_data_for_consumer_row(consumer_instance, validated_params, rqst_errors)
+
+        if not rqst_errors and consumer_instance:
+            manage_consumer_payer_data_for_consumer_row(consumer_instance, validated_params, rqst_errors)
+
+        if rqst_errors:
+            consumer_instance.delete()
+            consumer_instance = None
 
         if not rqst_errors and validated_params['create_backup'] and consumer_instance:
             backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
@@ -300,6 +304,7 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
 
         if not rqst_errors:
             update_indiv_seeking_nav_columns_for_row(consumer_instance, validated_params, rqst_errors)
+
             address_instance = consumer_instance.address
             if address_instance:
                 address_instance.save()
@@ -339,9 +344,18 @@ def update_row_w_validated_params(cls, validated_params, rqst_errors):
                     rqst_errors
                 )
 
+            if not rqst_errors:
+                manage_consumer_hospital_data_for_consumer_row(consumer_instance, validated_params, rqst_errors)
+
+            if not rqst_errors:
+                manage_consumer_payer_data_for_consumer_row(consumer_instance, validated_params, rqst_errors)
+
             if 'create_backup' in validated_params:
                 if validated_params['create_backup']:
                     backup_consumer_obj = create_backup_consumer_obj(consumer_instance)
+
+        if not rqst_errors:
+            consumer_instance.save()
 
     return consumer_instance, backup_consumer_obj
 
@@ -432,49 +446,163 @@ def delete_c_m_rows_w_validated_params(cls, validated_delete_c_m_params, rqst_er
                         c_m_param_index, json.dumps(c_m_params)))
 
 
-def add_hospital_info_to_consumer_instance(consumer_instance, validated_hospital_info_params, post_errors):
-    consumer_hospital_info_row = picmodels.models.ConsumerHospitalInfo()
+def manage_consumer_hospital_data_for_consumer_row(consumer_instance, validated_params, rqst_errors):
+    if "create_consumer_hospital_data_rows" in validated_params:
+        validated_create_consumer_hospital_data_params = validated_params['create_consumer_hospital_data_rows']
 
-    if 'treatment_site' in validated_hospital_info_params:
-        consumer_hospital_info_row.treatment_site = validated_hospital_info_params['treatment_site']
-    if 'account_number' in validated_hospital_info_params:
-        consumer_hospital_info_row.account_number = validated_hospital_info_params['account_number']
-    if 'mrn' in validated_hospital_info_params:
-        consumer_hospital_info_row.mrn = validated_hospital_info_params['mrn']
-    if 'date_of_birth' in validated_hospital_info_params:
-        consumer_hospital_info_row.date_of_birth = validated_hospital_info_params['date_of_birth']
-    if 'ssn' in validated_hospital_info_params:
-        consumer_hospital_info_row.ssn = validated_hospital_info_params['ssn']
-    if 'state' in validated_hospital_info_params:
-        consumer_hospital_info_row.state = validated_hospital_info_params['state']
-    if 'p_class' in validated_hospital_info_params:
-        consumer_hospital_info_row.p_class = validated_hospital_info_params['p_class']
-    if 'admit_date' in validated_hospital_info_params:
-        consumer_hospital_info_row.admit_date = validated_hospital_info_params['admit_date']
-    if 'discharge_date' in validated_hospital_info_params:
-        consumer_hospital_info_row.discharge_date = validated_hospital_info_params['discharge_date']
-    if 'medical_charges' in validated_hospital_info_params:
-        consumer_hospital_info_row.medical_charges = validated_hospital_info_params['medical_charges']
-    if 'referred_date' in validated_hospital_info_params:
-        consumer_hospital_info_row.referred_date = validated_hospital_info_params['referred_date']
-    if 'no_date' in validated_hospital_info_params:
-        consumer_hospital_info_row.no_date = validated_hospital_info_params['no_date']
-    if 'type' in validated_hospital_info_params:
-        consumer_hospital_info_row.type = validated_hospital_info_params['type']
-    if 'no_reason' in validated_hospital_info_params:
-        consumer_hospital_info_row.no_reason = validated_hospital_info_params['no_reason']
-    if 'case_status' in validated_hospital_info_params:
-        consumer_hospital_info_row.case_status = validated_hospital_info_params["case_status"]
-        if not consumer_hospital_info_row.check_case_status_choices():
-            post_errors.append("case_status: {!s} is not a valid choice".format(consumer_hospital_info_row.case_status))
+        unsaved_consumer_hospital_data_rows = []
+        for consumer_hospital_data_dict in validated_create_consumer_hospital_data_params:
+            consumer_hospital_data_row = picmodels.models.ConsumerHospitalData()
+            populate_consumer_hospital_data_row(consumer_hospital_data_row, consumer_hospital_data_dict, consumer_instance, rqst_errors)
+            unsaved_consumer_hospital_data_rows.append(consumer_hospital_data_row)
 
-    if not post_errors:
-        consumer_hospital_info_row.save()
-        consumer_instance.consumer_hospital_info = consumer_hospital_info_row
+        if not rqst_errors:
+            for unsaved_row in unsaved_consumer_hospital_data_rows:
+                unsaved_row.save()
+    elif "update_consumer_hospital_data_rows" in validated_params:
+        validated_update_consumer_hospital_data_params = validated_params['update_consumer_hospital_data_rows']
 
-        consumer_instance.save()
-    else:
-        consumer_instance.delete()
+        unsaved_consumer_hospital_data_rows = []
+        for consumer_hospital_data_dict in validated_update_consumer_hospital_data_params:
+            try:
+                consumer_hospital_data_row = picmodels.models.ConsumerHospitalData.objects.get(
+                    id=consumer_hospital_data_dict['id'],
+                    consumer=consumer_instance
+                )
+            except picmodels.models.ConsumerHospitalData.DoesNotExist:
+                rqst_errors.append(
+                    'ConsumerHospitalData row does not exist for ConsumerHospitalData id: {} and PICConsumer id: {}'.format(
+                        consumer_hospital_data_dict['id'],
+                        consumer_instance.id
+                    )
+                )
+                break
+
+            populate_consumer_hospital_data_row(consumer_hospital_data_row, consumer_hospital_data_dict, consumer_instance, rqst_errors)
+            unsaved_consumer_hospital_data_rows.append(consumer_hospital_data_row)
+
+        if not rqst_errors:
+            for unsaved_row in unsaved_consumer_hospital_data_rows:
+                unsaved_row.save()
+    elif "delete_consumer_hospital_data_rows" in validated_params:
+        validated_delete_consumer_hospital_data_params = validated_params['delete_consumer_hospital_data_rows']
+
+        unsaved_consumer_hospital_data_rows = []
+        for consumer_hospital_data_dict in validated_delete_consumer_hospital_data_params:
+            try:
+                consumer_hospital_data_row = picmodels.models.ConsumerHospitalData.objects.get(
+                    id=consumer_hospital_data_dict['id'])
+            except picmodels.models.ConsumerHospitalData.DoesNotExist:
+                rqst_errors.append('ConsumerHospitalData row does not exist for id: {}'.format(consumer_hospital_data_dict['id']))
+                break
+            unsaved_consumer_hospital_data_rows.append(consumer_hospital_data_row)
+
+        if not rqst_errors:
+            for unsaved_row in unsaved_consumer_hospital_data_rows:
+                unsaved_row.delete()
+
+
+def populate_consumer_hospital_data_row(consumer_hospital_data_row, consumer_hospital_data_dict, consumer_instance, rqst_errors):
+    consumer_hospital_data_row.consumer = consumer_instance
+
+    if 'hospital_name' in consumer_hospital_data_dict:
+        consumer_hospital_data_row.hospital_name = consumer_hospital_data_dict['hospital_name']
+    if 'medical_record_number' in consumer_hospital_data_dict:
+        consumer_hospital_data_row.medical_record_number = consumer_hospital_data_dict['medical_record_number']
+    if 'billing_amount' in consumer_hospital_data_dict:
+        consumer_hospital_data_row.billing_amount = consumer_hospital_data_dict['billing_amount']
+    if 'discharge_date' in consumer_hospital_data_dict:
+        consumer_hospital_data_row.discharge_date = consumer_hospital_data_dict['discharge_date']
+
+
+def manage_consumer_payer_data_for_consumer_row(consumer_instance, validated_params, rqst_errors):
+    if "create_consumer_payer_data_rows" in validated_params:
+        validated_create_consumer_payer_data_params = validated_params['create_consumer_payer_data_rows']
+
+        unsaved_consumer_payer_data_rows = []
+        for consumer_payer_data_dict in validated_create_consumer_payer_data_params:
+            consumer_payer_data_row = picmodels.models.ConsumerPayerData()
+            populate_consumer_payer_data_row(consumer_payer_data_row, consumer_payer_data_dict, consumer_instance, rqst_errors)
+            unsaved_consumer_payer_data_rows.append(consumer_payer_data_row)
+
+        if not rqst_errors:
+            for unsaved_row in unsaved_consumer_payer_data_rows:
+                unsaved_row.save()
+    elif "update_consumer_payer_data_rows" in validated_params:
+        validated_update_consumer_payer_data_params = validated_params['update_consumer_payer_data_rows']
+
+        unsaved_consumer_payer_data_rows = []
+        for consumer_payer_data_dict in validated_update_consumer_payer_data_params:
+            try:
+                consumer_payer_data_row = picmodels.models.ConsumerPayerData.objects.get(
+                    id=consumer_payer_data_dict['id'],
+                    consumer=consumer_instance
+                )
+            except picmodels.models.ConsumerPayerData.DoesNotExist:
+                rqst_errors.append(
+                    'ConsumerPayerData row does not exist for ConsumerPayerData id: {} and PICConsumer id: {}'.format(
+                        consumer_payer_data_dict['id'],
+                        consumer_instance.id
+                    )
+                )
+                break
+
+            populate_consumer_payer_data_row(consumer_payer_data_row, consumer_payer_data_dict, consumer_instance, rqst_errors)
+            unsaved_consumer_payer_data_rows.append(consumer_payer_data_row)
+
+        if not rqst_errors:
+            for unsaved_row in unsaved_consumer_payer_data_rows:
+                unsaved_row.save()
+    elif "delete_consumer_payer_data_rows" in validated_params:
+        validated_delete_consumer_payer_data_params = validated_params['delete_consumer_payer_data_rows']
+
+        unsaved_consumer_payer_data_rows = []
+        for consumer_payer_data_dict in validated_delete_consumer_payer_data_params:
+            try:
+                consumer_payer_data_row = picmodels.models.ConsumerPayerData.objects.get(
+                    id=consumer_payer_data_dict['id'])
+            except picmodels.models.ConsumerPayerData.DoesNotExist:
+                rqst_errors.append('ConsumerPayerData row does not exist for id: {}'.format(consumer_payer_data_dict['id']))
+                break
+            unsaved_consumer_payer_data_rows.append(consumer_payer_data_row)
+
+        if not rqst_errors:
+            for unsaved_row in unsaved_consumer_payer_data_rows:
+                unsaved_row.delete()
+
+
+def populate_consumer_payer_data_row(consumer_payer_data_row, consumer_payer_data_dict, consumer_instance, rqst_errors):
+    if 'case_type_id' in consumer_payer_data_dict:
+        cm_sequence_row = get_case_management_sequences_row_with_given_id(consumer_payer_data_dict['case_type_id'], rqst_errors)
+        if rqst_errors:
+            return None
+
+        consumer_payer_data_row.case_type = cm_sequence_row
+    if 'coverage_type' in consumer_payer_data_dict:
+        consumer_payer_data_row.coverage_type = consumer_payer_data_dict['coverage_type']
+        if not consumer_payer_data_row.check_coverage_type_choices():
+            rqst_errors.append("coverage_type: {!s} is not a valid choice".format(consumer_payer_data_row.coverage_type))
+            return None
+    consumer_payer_data_row.consumer = consumer_instance
+    if 'risk' in consumer_payer_data_dict:
+        consumer_payer_data_row.risk = consumer_payer_data_dict['risk']
+    if 'member_id_number' in consumer_payer_data_dict:
+        consumer_payer_data_row.member_id_number = consumer_payer_data_dict['member_id_number']
+    if 'effective_date' in consumer_payer_data_dict:
+        consumer_payer_data_row.effective_date = consumer_payer_data_dict['effective_date']
+
+
+def get_case_management_sequences_row_with_given_id(sequence_id, rqst_errors):
+    row = None
+
+    if sequence_id:
+        try:
+            row = picmodels.models.CMSequences.objects.get(id=sequence_id)
+        except picmodels.models.CMSequences.DoesNotExist:
+            row = None
+            rqst_errors.append("No CMSequences row found with id: {}".format(sequence_id))
+
+    return row
 
 
 def add_cps_info_to_consumer_instance(consumer_instance, validated_cps_info_params, post_errors):
