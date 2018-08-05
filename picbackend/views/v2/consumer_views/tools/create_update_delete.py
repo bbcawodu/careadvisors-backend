@@ -132,7 +132,8 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
         "root",
         "plan",
         rqst_errors,
-        empty_string_allowed=True
+        empty_string_allowed=True,
+        none_allowed=True
     )
     validated_params["plan"] = plan
 
@@ -276,7 +277,7 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
     navigator_row = None
     if "navigator_id" in rqst_body:
         navigator_id = clean_int_value_from_dict_object(rqst_body, "root", "navigator_id", rqst_errors, none_allowed=True)
-        if navigator_id and not rqst_errors:
+        if navigator_id:
             try:
                 navigator_row = Navigators.objects.get(id=navigator_id)
             except Navigators.DoesNotExist:
@@ -293,7 +294,7 @@ def validate_create_row_params(rqst_body, validated_params, rqst_errors):
             rqst_errors,
             none_allowed=True
         )
-        if cm_client_id_for_routing and not rqst_errors:
+        if cm_client_id_for_routing:
             try:
                 cm_client_row_for_routing = CaseManagementClient.objects.get(id=cm_client_id_for_routing)
             except CaseManagementClient.DoesNotExist:

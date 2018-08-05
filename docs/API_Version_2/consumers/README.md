@@ -218,7 +218,7 @@ The Following is a list of possible gender values with corresponding model const
 [
     MALE = "Male"
     FEMALE = "Female"
-    TRANSGENDER = "Traansgender"
+    TRANSGENDER = "Transgender"
     N_A = "Not Available"
 ]
 ```
