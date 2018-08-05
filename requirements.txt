@@ -23,3 +23,4 @@ jsonpickle
 pytest-django
 python-jwt==1.1.0
 uwsgi
+oauth2client
