@@ -45,11 +45,11 @@ class PICConsumerBase(models.Model):
 
     MALE = "Male"
     FEMALE = "Female"
-    TRANSGENDER = "Traansgender"
+    TRANSGENDER = "Transgender"
     GENDER_CHOICES = (
         (MALE, "Male"),
         (FEMALE, "Female"),
-        (TRANSGENDER, "Traansgender"),
+        (TRANSGENDER, "Transgender"),
         (N_A, "Not Available")
     )
 

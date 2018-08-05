@@ -43,6 +43,19 @@ The body of the request must be a JSON document using the following template:
 }
 ```
 
+
+The Following is a list of possible "case_status" values with corresponding model constant names:
+```
+[
+    N_A = "Not Available"
+    ACTIVE = "Active"
+    IN_PROGRESS_WITH_BENEFITS_ORG = "In progress with benefits org"
+    ON_HOLD = "On hold"
+    CLOSED = "Closed"
+]
+```
+
+
 In response, a JSON document will be displayed with the following format:
 ```
 {
