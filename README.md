@@ -43,7 +43,7 @@ TODO: Write credits
 
 ## License
 
-TODO: Write license
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 
 ## CODING NOTES
